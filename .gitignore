@@ -4,6 +4,16 @@
 /configure
 /include/pilgrim_config.h.in
 
+.libs/
+Makefile
+config.log
+config.status
+include/pilgrim_config.h
+include/stamp-h1
+libtool
+src/.deps/
+src/.dirstamp
+
 /m4/ar-lib
 /m4/compile
 /m4/config.guess

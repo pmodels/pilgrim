@@ -19,3 +19,5 @@
 /m4/missing
 
 /maint/Version
+/include/pilgrim_config.h.in~
+/install

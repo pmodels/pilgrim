@@ -76,3 +76,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+
+# For logs
+logs
+*.itf
+*.mt

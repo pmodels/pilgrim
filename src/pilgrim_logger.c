@@ -83,6 +83,7 @@ static inline Record get_diff_record(Record old_record, Record new_record) {
     Record diff_record;
     diff_record.status = 0b10000000;
     diff_record.arg_count = 999;    // initialize an impossible large value at first
+    diff_record.arg_sizes = new_record.arg_sizes;
 
     // Same function should normally have the same number of arguments
     if (old_record.arg_count != new_record.arg_count)
@@ -92,7 +93,7 @@ static inline Record get_diff_record(Record old_record, Record new_record) {
     int count = 0;
     int i;
     for(i = 0; i < old_record.arg_count; i++)
-        if(strcmp(old_record.args[i], new_record.args[i]) !=0)
+        if(memcmp(old_record.args[i], new_record.args[i], new_record.arg_sizes[i]) !=0)
             count++;
 
     // record.args store only the different arguments
@@ -103,7 +104,7 @@ static inline Record get_diff_record(Record old_record, Record new_record) {
     static char diff_bits[] = {0b10000001, 0b10000010, 0b10000100, 0b10001000,
                                 0b10010000, 0b10100000, 0b11000000};
     for(i = 0; i < old_record.arg_count; i++) {
-        if(strcmp(old_record.args[i], new_record.args[i]) !=0) {
+        if(memcmp(old_record.args[i], new_record.args[i], new_record.arg_sizes[i]) !=0) {
             diff_record.args[idx++] = new_record.args[i];
             if(i < 7) {
                 diff_record.status = diff_record.status | diff_bits[i];
@@ -116,31 +117,25 @@ static inline Record get_diff_record(Record old_record, Record new_record) {
 // 0. Helper function, write all function arguments
 static inline void writeArguments(FILE* f, Record record) {
     int arg_count = record.arg_count;
-    char **args = record.args;
+    void **args = record.args;
+    int *sizes = record.arg_sizes;
 
-    char invalid_str[] = "???";
     int i, j;
     for(i = 0; i < arg_count; i++) {
         __membuf.append(&__membuf, " ", 1);
-        if(args[i]) {
-            for(j = 0; j < strlen(args[i]); j++)
-                if(args[i][j] == ' ') args[i][j] = '_';
-            __membuf.append(&__membuf, args[i], strlen(args[i]));
-        } else
-            __membuf.append(&__membuf, invalid_str, strlen(invalid_str));
+        __membuf.append(&__membuf, args[i], sizes[i]);
     }
-    __membuf.append(&__membuf, "\n", 1);
 }
 
 // Mode 2. Write in binary format, no compression
 static inline void writeInBinary(FILE *f, Record record) {
     int tstart = (record.tstart - __logger.local_metadata.tstart) / TIME_RESOLUTION;
     int tend   = (record.tend - __logger.local_metadata.tstart) / TIME_RESOLUTION;
-    __membuf.append(&__membuf, &(record.status), sizeof(char));
-    __membuf.append(&__membuf, &tstart, sizeof(int));
-    __membuf.append(&__membuf, &tend, sizeof(int));
-    __membuf.append(&__membuf, &(record.res), sizeof(int));
-    __membuf.append(&__membuf, &(record.func_id), sizeof(unsigned char));
+    __membuf.append(&__membuf, &(record.status), sizeof(record.status));
+    __membuf.append(&__membuf, &tstart, sizeof(tstart));
+    __membuf.append(&__membuf, &tend, sizeof(tend));
+    __membuf.append(&__membuf, &(record.res), sizeof(record.res));
+    __membuf.append(&__membuf, &(record.func_id), sizeof(record.func_id));
     writeArguments(f, record);
 }
 

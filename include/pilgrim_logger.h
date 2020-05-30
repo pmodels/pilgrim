@@ -6,7 +6,8 @@ typedef struct _Record {
     double tstart, tend;
     short func_id;              // 2 bytes function id or ref id
     int arg_count;
-    char **args;                // Store all arguments in array
+    int *arg_sizes;                 // size of each argument
+    void **args;                // Store all arguments in array
     int res;                    // result returned from the original function call
 } Record;
 

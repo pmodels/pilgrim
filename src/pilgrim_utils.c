@@ -12,16 +12,18 @@ inline double pilgrim_wtime()
 }
 
 /* Put many arguments (char *) in a list (char**) */
-inline char** assemble_args_list(int arg_count, ...) {
-    char** args = malloc(sizeof(char*) * arg_count);
+inline void** assemble_args_list(int arg_count, ...) {
+    void** args = malloc(sizeof(void*) * arg_count);
+
     int i;
     va_list valist;
     va_start(valist, arg_count);
     for(i = 0; i < arg_count; i++)
-        args[i] = va_arg(valist, char*);
+        args[i] = va_arg(valist, void*);
     va_end(valist);
     return args;
 }
+
 
 
 /* Integer to stirng */

@@ -5,7 +5,7 @@
 double pilgrim_wtime();
 
 /* Put many arguments (char *) in a list (char**) */
-char** assemble_args_list(int arg_count, ...);
+void** assemble_args_list(int arg_count, ...);
 
 
 char* itoa(int val);

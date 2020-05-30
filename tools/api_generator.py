@@ -51,17 +51,10 @@ def generate_api_signatures(MPI_STANDARD_DIR):
     f.close()
     os.rename('1.c.tmp', '1.c')
 
-def arg_to_string(arg_type, arg_name):
-    if(arg_type == 'int'):
-        return ('itoa(%s)' %arg_name)
-    elif ('[]' in arg_type) or ('*' in arg_type):
-        return ('ptoa(%s)' %arg_name)
-    else:
-        return ('ptoa(&%s)' %arg_name)
-
 unique_types = set()
 def assemble_arg_list(args):
-    output_args = []
+    assemble_args = []
+    sizeof_args = []
 
     arg_count = 0;
     for arg in args:
@@ -80,13 +73,23 @@ def assemble_arg_list(args):
             arg_name = arg_name.split('[')[0]
             arg_type = arg_type + '[]'  # TODO: 2d array [][]
 
-        output_args.append( arg_to_string(arg_type, arg_name) )
+        assemble_args.append( "&"+arg_name )
         unique_types.add(arg_type)
 
-    line = 'char **args = NULL;\n';
+        if '[' in arg_type:
+            sizeof_args.append("sizeof(%s)" %(arg_type.split('[')[0]))
+        else:
+            sizeof_args.append("sizeof(%s)" %arg_name)  # TODO: arrays
+
+
+    line = '\tvoid **args = NULL;\n\tint* sizes = NULL;\n';
     if(arg_count > 0):
-        output_args_str = ', '.join(output_args)
-        line = 'char **args = assemble_args_list(%d, %s);\n' %(arg_count, output_args_str)
+        assemble_args_str = ', '.join(assemble_args)
+        sizeof_args_str = ', '.join(sizeof_args)
+
+        line = '\tvoid **args = assemble_args_list(%d, %s);\n' %(arg_count, assemble_args_str)
+        line += '\tint sizes[] = { %s };\n' %sizeof_args_str
+
     return arg_count, line
 
 
@@ -128,8 +131,8 @@ def tracing_instrumentation(vendor_funcs):
             if func not in IGNORED_FUNCS:
                 f.write(signature)
                 f.write('\n{\n')
-                f.write('\t'+ass_str)
-                f.write('\tPILGRIM_TRACING(%s, %s, P%s, %d, args);\n}\n' %(ret_type, func, func+args_str, arg_count))
+                f.write(ass_str)
+                f.write('\tPILGRIM_TRACING(%s, %s, P%s, %d, sizes, args);\n}\n' %(ret_type, func, func+args_str, arg_count))
 
     func_list_file.write('#endif')
     f.close()
@@ -140,7 +143,7 @@ def tracing_instrumentation(vendor_funcs):
 # Get the function list of local mpi implementation
 def get_vendor_funcs():
     funcs = set()
-    os.system('grep -E "PMPI" /usr/include/mpi/mpi.h > funcs.tmp')
+    os.system('grep -E "PMPI" /usr/include/mpi/*.h > funcs.tmp')
     f = open('funcs.tmp', 'r')
     for line in f.readlines():
         func = line.strip().split('(')[0].split(' ')[1]
@@ -160,6 +163,6 @@ if __name__ == "__main__":
     vendor_funcs = get_vendor_funcs()
 
     tracing_instrumentation(vendor_funcs)
-    print('\n'.join(unique_types))
+    #print('\n'.join(unique_types))
 
 

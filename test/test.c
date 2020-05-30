@@ -15,6 +15,7 @@ int main(int argc, char** argv) {
                          disp,
                          type,
                          &myNewType);
+
     //printf("myNewType: %x\n", myNewType);
     //printf("MPI_CHAR: %x\n", MPI_CHAR);
 

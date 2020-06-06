@@ -35,7 +35,9 @@ def codegen_assemble_args(func):
 
     assemble_args = []
     for arg in func.arguments:
-        if '*' in arg.type or '[' in arg.type:
+        if 'void' in arg.type:
+            assemble_args.append("&"+arg.name)
+        elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
         else:
             assemble_args.append( "&"+arg.name)
@@ -50,7 +52,9 @@ def codegen_sizeof_args(func):
     sizeof_args = []
     #sizeof_args = special_sizeof_args(func, args)
     for arg in func.arguments:
-        if '*' in arg.type or '[' in arg.type:
+        if 'void' in arg.type:
+            sizeof_args.append('sizeof(void*)')
+        elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
             fixed_type = arg.type.split('[')[0].replace('*', '')
             sizeof_args.append("%s * sizeof(%s)" %(n, fixed_type))

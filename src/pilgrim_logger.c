@@ -120,10 +120,18 @@ static inline void writeArguments(FILE* f, Record record) {
     void **args = record.args;
     int *sizes = record.arg_sizes;
 
+    void *null_ptr;
+
     int i, j;
     for(i = 0; i < arg_count; i++) {
-        __membuf.append(&__membuf, " ", 1);
-        __membuf.append(&__membuf, args[i], sizes[i]);
+        if(args[i] == NULL) {
+            null_ptr = malloc(sizes[i]);
+            memset(null_ptr, 0, sizes[i]);
+            __membuf.append(&__membuf, null_ptr, sizes[i]);
+            free(null_ptr);
+        } else {
+            __membuf.append(&__membuf, args[i], sizes[i]);
+        }
     }
 }
 
@@ -193,10 +201,10 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
 
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
-    writeInRecorder(__logger.trace_file, record);
     printf("[Pilgrim (rank=%d)] tstart:%.6lf, tend:%.6f, func id:%d\n", __logger.rank,
             record.tstart-__logger.local_metadata.tstart,
             record.tend-__logger.local_metadata.tstart, record.func_id);
+    writeInRecorder(__logger.trace_file, record);
 }
 
 void logger_init(int rank, int nprocs) {

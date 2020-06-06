@@ -21,7 +21,8 @@ struct Logger {
     LocalMetadata local_metadata;   // Local metadata information
 
     // For Recorder Compression Mode
-    Record recordWindow[RECORD_WINDOW_SIZE];
+    int window_size;
+    Record *records_window;
 };
 // Global object to access the Logger fileds
 struct Logger __logger;
@@ -157,7 +158,7 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
     short ref_window_id;
     short i;
     for(i = 0; i < RECORD_WINDOW_SIZE; i++) {
-        Record record = __logger.recordWindow[i];
+        Record record = __logger.records_window[i];
         // Only meets the following conditions that we consider to compress it:
         // 1. same function as the one in sliding window
         // 2. has at least 1 arguments
@@ -181,7 +182,7 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
         }
     }
 
-    compress = false;
+    //compress = false;
     if (compress) {
         diff_record.tstart = new_record.tstart;
         diff_record.tend = new_record.tend;
@@ -193,10 +194,11 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
         writeInBinary(__logger.trace_file, new_record);
     }
 
-    __logger.recordWindow[2] = __logger.recordWindow[1];
-    __logger.recordWindow[1] = __logger.recordWindow[0];
-    __logger.recordWindow[0] = new_record;
 
+    // Update the most recent records window
+    for(i = __logger.window_size-1; i > 0; i--)
+        __logger.records_window[i] = __logger.records_window[i-1];
+    __logger.records_window[0] = new_record;
 }
 
 void write_record(Record record) {
@@ -224,6 +226,13 @@ void logger_init(int rank, int nprocs) {
     sprintf(metafile_name, "logs/%d.mt", rank);
     __logger.trace_file = fopen(logfile_name, "wb");
     __logger.metadata_file = fopen(metafile_name, "wb");
+
+
+    __logger.window_size = 3;
+    const char* window_size_str = getenv("PILGRIM_WINDOW_SIZE");
+    if(window_size_str)
+        __logger.window_size = atoi(window_size_str);
+    __logger.records_window = (Record*) malloc(sizeof(Record) * __logger.window_size);
 
 
     // Global metadata, include compression mode, time resolution
@@ -264,6 +273,7 @@ void logger_init(int rank, int nprocs) {
 
 void logger_exit() {
     __logger.recording = false;
+    free(__logger.records_window);
 
     /* Write out local metadata information */
     __logger.local_metadata.tend = pilgrim_wtime(),

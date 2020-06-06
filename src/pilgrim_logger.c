@@ -10,7 +10,6 @@
 #include "pilgrim.h"
 
 #define TIME_RESOLUTION 0.000001
-#define RECORD_WINDOW_SIZE 3        // A sliding window for peephole compression
 
 
 struct Logger {
@@ -157,7 +156,7 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
     int min_diff_count = 999;
     short ref_window_id;
     short i;
-    for(i = 0; i < RECORD_WINDOW_SIZE; i++) {
+    for(i = 0; i < __logger.window_size; i++) {
         Record record = __logger.records_window[i];
         // Only meets the following conditions that we consider to compress it:
         // 1. same function as the one in sliding window

@@ -7,14 +7,15 @@
 #include "pilgrim_utils.h"
 
 
-#define PILGRIM_TRACING(ret_type, func, func_call, record_arg_count, record_arg_sizes, record_args) \
+#define PILGRIM_TRACING(ret_type, func, func_args, record_arg_count, record_arg_sizes, record_args) \
     short func_id = ID_##func;                                                          \
     double tstart = pilgrim_wtime();                                                    \
-    ret_type res = func_call;                                                           \
+    ret_type res = P##func func_args;                                                   \
     double tend = pilgrim_wtime();                                                      \
     Record record = {                                                                   \
         .tstart = tstart,                                                               \
         .tend = tend,                                                                   \
+        .res = res,                                                                     \
         .func_id = func_id,                                                             \
         .arg_count = record_arg_count,                                                  \
         .arg_sizes = record_arg_sizes,                                                  \

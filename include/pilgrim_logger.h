@@ -15,6 +15,7 @@ typedef struct _Record {
 typedef struct _LocalMetadata {
     double tstart;
     double tend;
+    int records_count;
 } LocalMetadata;
 
 typedef struct _GlobalMetadata {

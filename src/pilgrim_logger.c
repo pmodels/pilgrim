@@ -201,9 +201,12 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
 
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
+    /*
     printf("[Pilgrim (rank=%d)] tstart:%.6lf, tend:%.6f, func id:%d\n", __logger.rank,
             record.tstart-__logger.local_metadata.tstart,
             record.tend-__logger.local_metadata.tstart, record.func_id);
+    */
+    __logger.local_metadata.records_count++;
     writeInRecorder(__logger.trace_file, record);
 }
 
@@ -211,6 +214,7 @@ void logger_init(int rank, int nprocs) {
 
     __logger.rank = rank;
     __logger.local_metadata.tstart = pilgrim_wtime();
+    __logger.local_metadata.records_count = 0;
 
     mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
@@ -264,6 +268,7 @@ void logger_exit() {
     /* Write out local metadata information */
     __logger.local_metadata.tend = pilgrim_wtime(),
     fwrite(&__logger.local_metadata, sizeof(__logger.local_metadata), 1, __logger.metadata_file);
+    printf("[Pilgrim] Rank: %d, Number of records: %d\n", __logger.rank, __logger.local_metadata.records_count);
 
 
     __membuf.dump(&__membuf);

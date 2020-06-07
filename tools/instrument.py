@@ -31,12 +31,16 @@ def generate_function_id_file(funcs):
     function_id_file.close()
 
 def codegen_assemble_args(func):
-    line = '\tvoid **args = NULL;\n'
-
+    line = ""
     assemble_args = []
     for arg in func.arguments:
         if 'void' in arg.type:
             assemble_args.append("&"+arg.name)
+        elif 'MPI_Status*' in arg.type and 'const' not in arg.type:
+            line += "\tvoid* tmp = status;\n"
+            line += "\tif(status == MPI_STATUS_IGNORE) {\n"
+            line += "\t\ttmp = malloc(sizeof(MPI_Status)); \n\t\tmemset(tmp, 0, sizeof(MPI_Status));\n\t}\n"
+            assemble_args.append("tmp")
         elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
         else:
@@ -44,7 +48,9 @@ def codegen_assemble_args(func):
 
     if len(assemble_args) > 0:
         assemble_args_str = ', '.join(assemble_args)
-        line = '\tvoid **args = assemble_args_list(%d, %s);\n' %(len(assemble_args), assemble_args_str)
+        line += '\tvoid **args = assemble_args_list(%d, %s);\n' %(len(assemble_args), assemble_args_str)
+    else:
+        line = '\tvoid **args = NULL;\n'
 
     return line
 
@@ -54,8 +60,6 @@ def codegen_sizeof_args(func):
     for arg in func.arguments:
         if 'void' in arg.type:
             sizeof_args.append('sizeof(void*)')
-        elif 'MPI_Status' in arg.type:  # TODO MPI_Status[]
-            sizeof_args.append(arg.name + ' == MPI_STATUS_IGNORE ? sizeof(MPI_STATUS_IGNORE) : sizeof(MPI_Status)')
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
             fixed_type = arg.type.split('[')[0].replace('*', '')
@@ -92,6 +96,8 @@ def generate_wrapper_file(funcs):
     f = open('../src/pilgrim_wrappers.c', 'w')
     f.write('#include <mpi.h>\n')
     f.write('#include <stdarg.h>\n')
+    f.write('#include <stdlib.h>\n')
+    f.write('#include <string.h>\n')
     f.write('#include "pilgrim.h"\n')
 
     for name in funcs:

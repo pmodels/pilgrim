@@ -54,6 +54,8 @@ def codegen_sizeof_args(func):
     for arg in func.arguments:
         if 'void' in arg.type:
             sizeof_args.append('sizeof(void*)')
+        elif 'MPI_Status' in arg.type:  # TODO MPI_Status[]
+            sizeof_args.append(arg.name + ' == MPI_STATUS_IGNORE ? sizeof(MPI_STATUS_IGNORE) : sizeof(MPI_Status)')
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
             fixed_type = arg.type.split('[')[0].replace('*', '')

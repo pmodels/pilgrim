@@ -181,7 +181,6 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
         }
     }
 
-    //compress = false;
     if (compress) {
         diff_record.tstart = new_record.tstart;
         diff_record.tend = new_record.tend;
@@ -195,6 +194,7 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
 
 
     // Update the most recent records window
+    if(_logger.window_size < 1) return;
     for(i = __logger.window_size-1; i > 0; i--)
         __logger.records_window[i] = __logger.records_window[i-1];
     __logger.records_window[0] = new_record;

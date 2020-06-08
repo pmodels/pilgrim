@@ -80,6 +80,11 @@ def handle_special_apis(wrapper_file, func):
     if func.name == "MPI_Init" or func.name == "MPI_Init_thread" or func.name == "MPI_Finalize":
         return True
 
+    ignored = ["MPI_Waitsome", "MPI_Waitall", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
+    if func.name in ignored:
+        return True
+
+    '''
     if func.name == "MPI_Pcontrol":
         wrapper_file.write('int MPI_Pcontrol(const int level, ...)\n{\n')
         wrapper_file.write('\tvoid **args = assemble_args_list(1, &level);\n');
@@ -89,6 +94,7 @@ def handle_special_apis(wrapper_file, func):
         wrapper_file.write('\tPILGRIM_TRACING(int, MPI_Pcontrol, (level, pcontrol_args), 1, sizes, args);\n')
         wrapper_file.write('\tva_end(pcontrol_args);\n}\n')
         return True
+    '''
 
     return False
 

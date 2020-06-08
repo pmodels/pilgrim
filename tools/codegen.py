@@ -39,6 +39,9 @@ class MPIFunction:
                     arg.length = '*'.join( length.split(',') ).replace('\"', '')
                 elif 'length=' in parameter:
                     length = parameter.split('length=\"')[1].split('\"')[0]
+                    if length == '*':
+                        print(self.name, arg.name)
+
                     arg.length = '' if length == '*' else length
                 # TODO for OUT only array arguments, we can not infer the length from MPI standard.
                 # Need to do it manually.

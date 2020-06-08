@@ -67,6 +67,9 @@ int main(int argc, char *argv[]) {
 
     TEST_MPI_CALL(MPI_Barrier, (MPI_COMM_WORLD))
 
+    int flag;
+    MPI_Finalized(&flag);
+
     TEST_MPI_CALL(MPI_Finalize, ())
 
     return 0;

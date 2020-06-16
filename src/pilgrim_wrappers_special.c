@@ -15,7 +15,7 @@ int MPI_Pcontrol(const int level, ...)
 }
 int MPI_Waitsome(int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[])
 {
-    // This runs the original function, so we know the correct value for output arguments
+    // Run the original function first, so we know the correct value for output arguments
 	PILGRIM_TRACING_1(int, MPI_Waitsome, (incount, array_of_requests, outcount, array_of_indices, array_of_statuses))
     if(array_of_statuses == MPI_STATUSES_IGNORE) {
         void **args = assemble_args_list(4, &incount, array_of_requests, outcount, array_of_indices);

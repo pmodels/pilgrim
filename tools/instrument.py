@@ -56,16 +56,18 @@ def codegen_assemble_args(func):
 
 def codegen_sizeof_args(func):
     sizeof_args = []
-    #sizeof_args = special_sizeof_args(func, args)
     for arg in func.arguments:
         if 'void' in arg.type:
             sizeof_args.append('sizeof(void*)')
+        elif 'char*' in arg.type:
+            if '**' not in arg.type and '[' not in arg.type:    # only consider one single string
+                sizeof_args.append('strlen(%s)+1' %arg.name)
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
             fixed_type = arg.type.split('[')[0].replace('*', '')
             sizeof_args.append("%s * sizeof(%s)" %(n, fixed_type))
         else:
-            sizeof_args.append("sizeof(%s)" %arg.name)
+            sizeof_args.append("sizeof(%s)" %arg.type)
 
     line = '\tint* sizes = NULL;\n';
     if len(sizeof_args) > 0:
@@ -75,7 +77,7 @@ def codegen_sizeof_args(func):
     return line
 
 
-def handle_special_apis(wrapper_file, func):
+def handle_special_apis(func):
     # Ignore
     if func.name == "MPI_Init" or func.name == "MPI_Init_thread" or func.name == "MPI_Finalize":
         return True
@@ -83,18 +85,6 @@ def handle_special_apis(wrapper_file, func):
     ignored = ["MPI_Waitsome", "MPI_Waitall", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
     if func.name in ignored:
         return True
-
-    '''
-    if func.name == "MPI_Pcontrol":
-        wrapper_file.write('int MPI_Pcontrol(const int level, ...)\n{\n')
-        wrapper_file.write('\tvoid **args = assemble_args_list(1, &level);\n');
-        wrapper_file.write('\tint sizes[] = { sizeof(level) };\n')
-        wrapper_file.write('\tva_list pcontrol_args;\n')
-        wrapper_file.write('\tva_start(pcontrol_args, level);\n')
-        wrapper_file.write('\tPILGRIM_TRACING(int, MPI_Pcontrol, (level, pcontrol_args), 1, sizes, args);\n')
-        wrapper_file.write('\tva_end(pcontrol_args);\n}\n')
-        return True
-    '''
 
     return False
 
@@ -109,26 +99,100 @@ def generate_wrapper_file(funcs):
     for name in funcs:
         func = funcs[name]
 
-        if handle_special_apis(f, func):
+        if handle_special_apis(func):
             continue
 
         # Signature
         line = func.ret_type + " " + func.name + func.signature + "\n"
         f.write(line + '{\n')
 
-        # Real thing
-        f.write(codegen_assemble_args(func))
-        f.write(codegen_sizeof_args(func))
-
         arg_names = []
         for arg in func.arguments:
             arg_names.append(arg.name)
-        f.write('\tPILGRIM_TRACING(%s, %s, (%s), %d, sizes, args);\n' %(func.ret_type, func.name, ', '.join(arg_names), len(arg_names)))
-        f.write('}\n')
+        f.write('\tPILGRIM_TRACING_1(%s, %s, (%s));\n' %(func.ret_type, func.name, ', '.join(arg_names)))
 
+        # Real thing
+        f.write(codegen_assemble_args(func))
+        f.write(codegen_sizeof_args(func))
+        f.write('\tPILGRIM_TRACING_2(%d, sizes, args);\n' %len(arg_names))
+
+        f.write('}\n')
 
     f.close()
 
+
+def codegen_read_one_arg(func, i):
+
+    def find_arg_idx(func, arg_name):
+        for idx, arg in enumerate(func.arguments):
+            if arg.name == arg_name:
+                return idx
+        return -1
+
+    arg = func.arguments[i]
+
+    lines = []
+    if 'void' in arg.type:
+        lines.append('size = sizeof(void*);')
+    elif 'char*' in arg.type:
+        if '**' not in arg.type and '[' not in arg.type:    # only consider one single string
+            lines = ['getdelim(((char**)&args[%d]), &n, 0, f);' %i]
+            return lines
+    elif '*' in arg.type or '[' in arg.type:
+        fixed_type = arg.type.split('[')[0].replace('*', '')
+        if arg.length:
+            if '*' in arg.length:   # n*3
+                pass
+            else:
+                idx = find_arg_idx(func, arg.length)
+                lines.append( 'length = *((int*) (args[%d]));' %idx )
+                lines.append( "size = length * sizeof(%s);" %fixed_type )
+        else:
+            lines.append( "size = sizeof(%s);" %fixed_type )
+    else:
+        lines.append( "size = sizeof(%s);" %arg.type )
+
+    lines.append('args[%d] = malloc(size);' %i)
+    lines.append('fread(args[%d], size, 1, f);' %i)
+
+    return lines
+
+
+def generate_reader_file(funcs):
+    f = open('../src/pilgrim_read_args.c', 'w')
+    block = \
+'''/* This file is generated automatically. Do not change. */
+#include <stdlib.h>
+#include <string.h>
+#include <mpi.h>
+#include "pilgrim.h"
+void** read_record_args(FILE* f, int func_id) {
+    void **args;
+    int size;
+    int length;
+    size_t n;
+    switch(func_id) {
+'''
+    f.write(block)
+
+    for name in funcs:
+        func = funcs[name]
+
+        f.write('\t\tcase ID_%s:\n\t\t{\n' %name)
+
+        if handle_special_apis(func):
+            f.write('\t\t\tread_record_args_special(f, func_id);')
+        else:
+            f.write('\t\t\targs = malloc(%d * sizeof(void*));' %len(func.arguments))
+            for i in range(len(func.arguments)):
+                f.write('\n\t\t\t');
+                lines = codegen_read_one_arg(func, i)
+                f.write('\n\t\t\t'.join(lines))
+
+        f.write('\n\t\t\tbreak;\n\t\t}\n')
+
+    f.write('\t}\n\treturn args;\n}\n')
+    f.close()
 
 if __name__ == "__main__":
     f = open("./mpi_functions.pickle", 'r')
@@ -141,3 +205,4 @@ if __name__ == "__main__":
     generate_function_id_file(funcs)
     generate_wrapper_file(funcs)
 
+    generate_reader_file(funcs)

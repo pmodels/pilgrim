@@ -181,6 +181,7 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
         }
     }
 
+    compress = false;
     if (compress) {
         diff_record.tstart = new_record.tstart;
         diff_record.tend = new_record.tend;
@@ -212,10 +213,10 @@ void write_record(Record record) {
 }
 
 void logger_init(int rank, int nprocs) {
-
     __logger.rank = rank;
     __logger.local_metadata.tstart = pilgrim_wtime();
     __logger.local_metadata.records_count = 0;
+    __logger.local_metadata.rank = rank;
 
     mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
@@ -235,35 +236,15 @@ void logger_init(int rank, int nprocs) {
 
 
     // Global metadata, include compression mode, time resolution
-    /*
     if (rank == 0) {
-        FILE* global_metafh = fopen("logs/recorder.mt", "wb");
-        RecorderGlobalDef global_def = {
+        FILE* global_metafh = fopen("logs/pilgrim.mt", "wb");
+        GlobalMetadata global_metadata= {
             .time_resolution = TIME_RESOLUTION,
-            .total_ranks = nprocs,
-            .compression_mode = __logger.compMode,
-            .peephole_window_size = RECORD_WINDOW_SIZE
+            .ranks = nprocs,
         };
-        fwrite(&global_def, sizeof(RecorderGlobalDef), 1, global_metafh);
-
-        unsigned int i;
-        for(i = 0; i < 256; i++) {
-            const char *funcname = get_function_name_by_id(i);
-            if(funcname) {
-                fwrite(funcname, strlen(funcname), 1, global_metafh);
-                fwrite("\n", sizeof(char), 1, global_metafh);
-            } else {
-                break;
-            }
-        }
+        fwrite(&global_metadata, sizeof(GlobalMetadata), 1, global_metafh);
         fclose(global_metafh);
-
-
-        FILE* version_file = fopen("logs/VERSION", "w");
-        fwrite("2.1", 3, 1, version_file);
-        fclose(version_file);
     }
-    */
 
     membufInit(&__membuf);
     __logger.recording = true;

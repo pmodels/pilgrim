@@ -42,7 +42,7 @@ void read_trace_file(char* path, GlobalMetadata gm, LocalMetadata lm) {
         fread(&tend, sizeof(tend), 1, fh);
         fread(&record.res, sizeof(record.res), 1, fh);
         fread(&record.func_id, sizeof(record.func_id), 1, fh);
-        printf("%d %d %d %d\n", tstart, tend, record.res, record.func_id);
+        printf("tstart:%d tend:%d res:%d func_id:%d\n", tstart, tend, record.res, record.func_id);
 
         record.tstart = lm.tstart + gm.time_resolution * tstart;
         record.tend = lm.tstart + gm.time_resolution * tend;

@@ -5,7 +5,8 @@
 
 int rank;
 int nprocs;
-double elapsed_time;
+static int func_counter[400];
+
 
 void read_global_metadata(char* path, GlobalMetadata *gm) {
     char global_metadata_path[256];
@@ -43,6 +44,7 @@ void read_trace_file(char* path, GlobalMetadata gm, LocalMetadata lm) {
         fread(&record.res, sizeof(record.res), 1, fh);
         fread(&record.func_id, sizeof(record.func_id), 1, fh);
         printf("tstart:%d tend:%d res:%d func:%s\n", tstart, tend, record.res, func_names[record.func_id]);
+        func_counter[record.func_id]++;
 
         record.tstart = lm.tstart + gm.time_resolution * tstart;
         record.tend = lm.tstart + gm.time_resolution * tend;
@@ -64,6 +66,12 @@ int main(int argc, char** argv) {
         LocalMetadata lm;
         read_local_metadata(path, i, &lm);
         read_trace_file(path, gm, lm);
+    }
+
+    printf("Function Counter\n");
+    for(int i = 0; i < 400; i++) {
+        if(func_counter[i] > 0)
+            printf("%s: %d\n", func_names[i], func_counter[i]);
     }
 
     return 0;

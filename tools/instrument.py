@@ -27,6 +27,12 @@ def generate_function_id_file(funcs):
     for name in funcs:
         function_id_file.write('#define ID_'+name+' '+str(idx)+'\n')
         idx += 1
+
+    function_id_file.write('static char *func_names[] = {\n')
+    for name in funcs:
+        function_id_file.write('"%s", \n' %name)
+    function_id_file.write('};\n\n')
+
     function_id_file.write('#endif')
     function_id_file.close()
 

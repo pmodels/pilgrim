@@ -181,8 +181,10 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
         }
     }
 
-    compress = false;
     if (compress) {
+        if (diff_record.arg_count==0)
+            __logger.local_metadata.records_count++;
+
         diff_record.tstart = new_record.tstart;
         diff_record.tend = new_record.tend;
         diff_record.func_id = ref_window_id;
@@ -216,6 +218,7 @@ void logger_init(int rank, int nprocs) {
     __logger.rank = rank;
     __logger.local_metadata.tstart = pilgrim_wtime();
     __logger.local_metadata.records_count = 0;
+    __logger.local_metadata.compressed_records = 0;
     __logger.local_metadata.rank = rank;
 
     mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -258,7 +261,7 @@ void logger_exit() {
     /* Write out local metadata information */
     __logger.local_metadata.tend = pilgrim_wtime(),
     fwrite(&__logger.local_metadata, sizeof(__logger.local_metadata), 1, __logger.metadata_file);
-    printf("[Pilgrim] Rank: %d, Number of records: %d\n", __logger.rank, __logger.local_metadata.records_count);
+    printf("[Pilgrim] Rank: %d, Compressed (exact match): %d, Number of records: %d\n", __logger.rank, __logger.local_metadata.compressed_records, __logger.local_metadata.records_count);
 
 
     __membuf.dump(&__membuf);

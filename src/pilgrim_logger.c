@@ -221,7 +221,6 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
     }
     total_ids[new_record.func_id]++;
 
-    compress = false;
     if (compress) {
         diff_record.tstart = new_record.tstart;
         diff_record.tend = new_record.tend;
@@ -310,12 +309,11 @@ void logger_exit() {
         __logger.trace_file = NULL;
     }
 
-
-
+    /*
     int i;
     for(i = 0; i < 400; i++) {
         if( uncompressed_ids[i] > 0)
             printf("[Pilgrim] Rank: %d, Unmatched/Total : %s %d/%d\n", __logger.rank, func_names[i], uncompressed_ids[i], total_ids[i]);
     }
-
+    */
 }

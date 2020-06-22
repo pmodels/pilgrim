@@ -29,6 +29,9 @@ int MPI_Waitsome(int incount, MPI_Request array_of_requests[], int *outcount, in
 }
 int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_statuses[])
 {
+    // TODO: Without the next non-op line, Chombo will crash, no idea why.
+    MPI_Request todo[count];
+
     void *tmp = array_of_statuses;
     if(array_of_statuses == MPI_STATUSES_IGNORE) {
         tmp = malloc( count * sizeof(MPI_Status) );

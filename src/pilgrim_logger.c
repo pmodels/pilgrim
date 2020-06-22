@@ -11,6 +11,9 @@
 
 #define TIME_RESOLUTION 0.000001
 
+static int uncompressed_ids[400];
+static int total_ids[400];
+
 
 struct Logger {
     int rank;
@@ -147,10 +150,40 @@ static inline void writeInBinary(FILE *f, Record record) {
     writeArguments(f, record);
 }
 
+static inline bool exist_exact_match(Record new_record) {
+    int i, j;
+    for(i = 0; i < __logger.window_size; i++) {
+        Record record = __logger.records_window[i];
+
+        if(new_record.func_id != record.func_id || new_record.arg_count != record.arg_count)
+            continue;
+
+        bool match = true;
+        for(j = 0; j < new_record.arg_count; j++) {
+            if(record.args[j] == NULL || new_record.args[j]==NULL) {
+                if(record.args[j] == NULL && new_record.args[j]==NULL)
+                    continue;
+                else {
+                    match = false;
+                    break;
+                }
+            }
+
+            if(memcmp(record.args[j], new_record.args[j], new_record.arg_sizes[j]) !=0) {
+                match = false;
+                break;
+            }
+        }
+
+        if(match) return true;
+    }
+
+    return false;
+}
+
 
 // Mode 3. Write in Recorder format (binary + peephole compression)
 static inline void writeInRecorder(FILE* f, Record new_record) {
-
     bool compress = false;
     Record diff_record;
     int min_diff_count = 999;
@@ -181,10 +214,15 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
         }
     }
 
-    if (compress) {
-        if (diff_record.arg_count==0)
-            __logger.local_metadata.records_count++;
+    if (exist_exact_match(new_record)) {
+        __logger.local_metadata.compressed_records++;
+    } else {
+        uncompressed_ids[new_record.func_id]++;
+    }
+    total_ids[new_record.func_id]++;
 
+    compress = false;
+    if (compress) {
         diff_record.tstart = new_record.tstart;
         diff_record.tend = new_record.tend;
         diff_record.func_id = ref_window_id;
@@ -271,4 +309,13 @@ void logger_exit() {
         fclose(__logger.trace_file);
         __logger.trace_file = NULL;
     }
+
+
+
+    int i;
+    for(i = 0; i < 400; i++) {
+        if( uncompressed_ids[i] > 0)
+            printf("[Pilgrim] Rank: %d, Unmatched/Total : %s %d/%d\n", __logger.rank, func_names[i], uncompressed_ids[i], total_ids[i]);
+    }
+
 }

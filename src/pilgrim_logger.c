@@ -88,32 +88,29 @@ static inline Record get_diff_record(Record old_record, Record new_record) {
     diff_record.arg_count = 999;    // initialize an impossible large value at first
     diff_record.arg_sizes = new_record.arg_sizes;
 
-    // Same function should normally have the same number of arguments
-    if (old_record.arg_count != new_record.arg_count)
-        return diff_record;
-
     // Get the number of different arguments
     int count = 0;
     int i;
-    for(i = 0; i < old_record.arg_count; i++)
+    for(i = 0; i < old_record.arg_count; i++) {
         if(memcmp(old_record.args[i], new_record.args[i], new_record.arg_sizes[i]) !=0)
             count++;
+    }
 
     // record.args store only the different arguments
     // record.status keeps track the position of different arguments
     diff_record.arg_count = count;
     int idx = 0;
-    diff_record.args = malloc(sizeof(char *) * count);
+    diff_record.args = malloc(sizeof(void *) * count);
     static char diff_bits[] = {0b10000001, 0b10000010, 0b10000100, 0b10001000,
                                 0b10010000, 0b10100000, 0b11000000};
+
     for(i = 0; i < old_record.arg_count; i++) {
         if(memcmp(old_record.args[i], new_record.args[i], new_record.arg_sizes[i]) !=0) {
             diff_record.args[idx++] = new_record.args[i];
-            if(i < 7) {
-                diff_record.status = diff_record.status | diff_bits[i];
-            }
+            diff_record.status = diff_record.status | diff_bits[i];
         }
     }
+
     return diff_record;
 }
 
@@ -197,7 +194,7 @@ static inline void writeInRecorder(FILE* f, Record new_record) {
         // 3. has less than 8 arguments
         // 4. the number of different arguments is less the number of total arguments
         if ((record.func_id == new_record.func_id) && (new_record.arg_count < 8) &&
-             (new_record.arg_count > 0) && (record.arg_count > 0)) {
+            (new_record.arg_count > 0) && (record.arg_count == new_record.arg_count)) {
             Record tmp_record = get_diff_record(record, new_record);
 
             // Cond.4
@@ -273,6 +270,9 @@ void logger_init(int rank, int nprocs) {
     if(window_size_str)
         __logger.window_size = atoi(window_size_str);
     __logger.records_window = (Record*) malloc(sizeof(Record) * __logger.window_size);
+    int i;
+    for(i = 0; i < __logger.window_size; i++)
+        __logger.records_window[i].func_id = -1;
 
 
     // Global metadata, include compression mode, time resolution
@@ -300,7 +300,6 @@ void logger_exit() {
     fwrite(&__logger.local_metadata, sizeof(__logger.local_metadata), 1, __logger.metadata_file);
     printf("[Pilgrim] Rank: %d, Compressed (exact match): %d, Number of records: %d\n", __logger.rank, __logger.local_metadata.compressed_records, __logger.local_metadata.records_count);
 
-
     __membuf.dump(&__membuf);
     __membuf.release(&__membuf);
     /* Close the log file */
@@ -309,11 +308,9 @@ void logger_exit() {
         __logger.trace_file = NULL;
     }
 
-    /*
     int i;
     for(i = 0; i < 400; i++) {
         if( uncompressed_ids[i] > 0)
             printf("[Pilgrim] Rank: %d, Unmatched/Total : %s %d/%d\n", __logger.rank, func_names[i], uncompressed_ids[i], total_ids[i]);
     }
-    */
 }

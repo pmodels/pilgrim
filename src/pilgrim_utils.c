@@ -25,7 +25,6 @@ inline void** assemble_args_list(int arg_count, ...) {
 }
 
 
-
 /* Integer to stirng */
 inline char* itoa(int val) {
     char *str = malloc(sizeof(char) * 16);

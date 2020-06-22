@@ -40,6 +40,7 @@
     double tend = pilgrim_wtime();
 
 // Then store every in a Record structure and write it to log
+// Copy the arguments in case the application freed/modified the memory
 #define PILGRIM_TRACING_2(record_arg_count, record_arg_sizes, record_args)              \
     Record record = {                                                                   \
         .tstart = tstart,                                                               \
@@ -48,11 +49,17 @@
         .func_id = func_id,                                                             \
         .arg_count = record_arg_count,                                                  \
         .arg_sizes = record_arg_sizes,                                                  \
-        .args = record_args,                                                            \
     };                                                                                  \
+    record.args = malloc(sizeof(void*) * record_arg_count);                             \
+    int i;                                                                              \
+    for(i = 0; i < record_arg_count; i++) {                                             \
+        record.args[i] = malloc(record_arg_sizes[i]);                                   \
+        if(record_args[i])                                                              \
+            memcpy(record.args[i], record_args[i], record_arg_sizes[i]);                \
+        else                                                                            \
+            memset(record.args[i], 0, record_arg_sizes[i]);                             \
+    }                                                                                   \
     write_record(record);                                                               \
     return res;
-
-
 
 #endif

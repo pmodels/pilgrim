@@ -8,12 +8,26 @@
 #include <sys/types.h>
 
 #include "pilgrim.h"
+#include "utlist.h"
+#include "uthash.h"
 
 #define TIME_RESOLUTION 0.000001
 
-static int uncompressed_ids[400];
-static int total_ids[400];
 
+// Node in utlist
+typedef struct TimesPair_t {
+    int start;
+    int end;
+    struct TimesPair_t *next;
+} TimesPair;
+
+// Entry in uthash
+typedef struct RecordHash_t {
+    void *key;      // func_id + concated arguments, used as key
+    int key_len;
+    TimesPair *times;
+    UT_hash_handle hh;
+} RecordHash;
 
 struct Logger {
     int rank;
@@ -22,120 +36,18 @@ struct Logger {
     bool recording;                 // set to true only after initialization
     LocalMetadata local_metadata;   // Local metadata information
 
-    // For Recorder Compression Mode
-    int window_size;
-    Record *records_window;
+    RecordHash *hash_head;          // head of hash table
 };
+
 // Global object to access the Logger fileds
 struct Logger __logger;
 
 
-/**
- * ------------------------------------------------------------- //
- *
- * Memory buffer to hold records. Write out when its full
- *
- */
-struct MemBuf {
-    void *buffer;
-    int size;
-    int pos;
-    void (*release) (struct MemBuf*);
-    void (*append)(struct MemBuf*, const void* ptr, int length);
-    void (*dump) (struct MemBuf*);
-};
-
-// global object to access the MemBuf methods
-struct MemBuf __membuf;
-
-void membufRelease(struct MemBuf *membuf) {
-    free(membuf->buffer);
-    membuf->pos = 0;
-}
-void membufAppend(struct MemBuf* membuf, const void *ptr, int length) {
-    if (length >= membuf->size) {
-        membuf->dump(membuf);
-        fwrite(ptr, 1, length, __logger.trace_file);
-        return;
-    }
-    if (membuf->pos + length >= membuf->size) {
-        membuf->dump(membuf);
-    }
-    memcpy(membuf->buffer+membuf->pos, ptr, length);
-    membuf->pos += length;
-}
-void membufDump(struct MemBuf *membuf) {
-    fwrite(membuf->buffer, 1, membuf->pos, __logger.trace_file);
-    membuf->pos = 0;
-}
-void membufInit(struct MemBuf* membuf) {
-    membuf->size = 12*1024*1024;            // 12M
-    membuf->buffer = malloc(membuf->size);
-    membuf->pos = 0;
-    membuf->release = membufRelease;
-    membuf->append = membufAppend;
-    membuf->dump = membufDump;
-}
-// --------------- End of Memory Buffer ------------------------ //
 
 
-
-
-
-static inline Record get_diff_record(Record old_record, Record new_record) {
-    Record diff_record;
-    diff_record.status = 0b10000000;
-    diff_record.arg_count = 999;    // initialize an impossible large value at first
-    diff_record.arg_sizes = new_record.arg_sizes;
-
-    // Get the number of different arguments
-    int count = 0;
-    int i;
-    for(i = 0; i < old_record.arg_count; i++) {
-        if(memcmp(old_record.args[i], new_record.args[i], new_record.arg_sizes[i]) !=0)
-            count++;
-    }
-
-    // record.args store only the different arguments
-    // record.status keeps track the position of different arguments
-    diff_record.arg_count = count;
-    int idx = 0;
-    diff_record.args = malloc(sizeof(void *) * count);
-    static char diff_bits[] = {0b10000001, 0b10000010, 0b10000100, 0b10001000,
-                                0b10010000, 0b10100000, 0b11000000};
-
-    for(i = 0; i < old_record.arg_count; i++) {
-        if(memcmp(old_record.args[i], new_record.args[i], new_record.arg_sizes[i]) !=0) {
-            diff_record.args[idx++] = new_record.args[i];
-            diff_record.status = diff_record.status | diff_bits[i];
-        }
-    }
-
-    return diff_record;
-}
-
-// 0. Helper function, write all function arguments
-static inline void writeArguments(FILE* f, Record record) {
-    int arg_count = record.arg_count;
-    void **args = record.args;
-    int *sizes = record.arg_sizes;
-
-    void *null_ptr;
-
-    int i, j;
-    for(i = 0; i < arg_count; i++) {
-        if(args[i] == NULL) {
-            null_ptr = malloc(sizes[i]);
-            memset(null_ptr, 0, sizes[i]);
-            __membuf.append(&__membuf, null_ptr, sizes[i]);
-            free(null_ptr);
-        } else {
-            __membuf.append(&__membuf, args[i], sizes[i]);
-        }
-    }
-}
 
 // Mode 2. Write in binary format, no compression
+/*
 static inline void writeInBinary(FILE *f, Record record) {
     int tstart = (record.tstart - __logger.local_metadata.tstart) / TIME_RESOLUTION;
     int tend   = (record.tend - __logger.local_metadata.tstart) / TIME_RESOLUTION;
@@ -146,96 +58,7 @@ static inline void writeInBinary(FILE *f, Record record) {
     __membuf.append(&__membuf, &(record.func_id), sizeof(record.func_id));
     writeArguments(f, record);
 }
-
-static inline bool exist_exact_match(Record new_record) {
-    int i, j;
-    for(i = 0; i < __logger.window_size; i++) {
-        Record record = __logger.records_window[i];
-
-        if(new_record.func_id != record.func_id || new_record.arg_count != record.arg_count)
-            continue;
-
-        bool match = true;
-        for(j = 0; j < new_record.arg_count; j++) {
-            if(record.args[j] == NULL || new_record.args[j]==NULL) {
-                if(record.args[j] == NULL && new_record.args[j]==NULL)
-                    continue;
-                else {
-                    match = false;
-                    break;
-                }
-            }
-
-            if(memcmp(record.args[j], new_record.args[j], new_record.arg_sizes[j]) !=0) {
-                match = false;
-                break;
-            }
-        }
-
-        if(match) return true;
-    }
-
-    return false;
-}
-
-
-// Mode 3. Write in Recorder format (binary + peephole compression)
-static inline void writeInRecorder(FILE* f, Record new_record) {
-    bool compress = false;
-    Record diff_record;
-    int min_diff_count = 999;
-    short ref_window_id;
-    short i;
-    for(i = 0; i < __logger.window_size; i++) {
-        Record record = __logger.records_window[i];
-        // Only meets the following conditions that we consider to compress it:
-        // 1. same function as the one in sliding window
-        // 2. has at least 1 arguments
-        // 3. has less than 8 arguments
-        // 4. the number of different arguments is less the number of total arguments
-        if ((record.func_id == new_record.func_id) && (new_record.arg_count < 8) &&
-            (new_record.arg_count > 0) && (record.arg_count == new_record.arg_count)) {
-            Record tmp_record = get_diff_record(record, new_record);
-
-            // Cond.4
-            if(tmp_record.arg_count >= new_record.arg_count)
-                continue;
-
-            // Currently has the minimum number of different arguments
-            if(tmp_record.arg_count < min_diff_count) {
-                min_diff_count = tmp_record.arg_count;
-                ref_window_id = i;
-                compress = true;
-                diff_record = tmp_record;
-            }
-        }
-    }
-
-    if (exist_exact_match(new_record)) {
-        __logger.local_metadata.compressed_records++;
-    } else {
-        uncompressed_ids[new_record.func_id]++;
-    }
-    total_ids[new_record.func_id]++;
-
-    if (compress) {
-        diff_record.tstart = new_record.tstart;
-        diff_record.tend = new_record.tend;
-        diff_record.func_id = ref_window_id;
-        diff_record.res = new_record.res;
-        writeInBinary(__logger.trace_file, diff_record);
-    } else {
-        new_record.status = 0b00000000;
-        writeInBinary(__logger.trace_file, new_record);
-    }
-
-
-    // Update the most recent records window
-    if(__logger.window_size < 1) return;
-    for(i = __logger.window_size-1; i > 0; i--)
-        __logger.records_window[i] = __logger.records_window[i-1];
-    __logger.records_window[0] = new_record;
-}
+*/
 
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
@@ -245,7 +68,40 @@ void write_record(Record record) {
             record.tend-__logger.local_metadata.tstart, record.func_id);
     */
     __logger.local_metadata.records_count++;
-    writeInRecorder(__logger.trace_file, record);
+
+    // Get key length
+    int i;
+    int key_len = sizeof(record.func_id);
+    for(i = 0; i < record.arg_count; i++) {
+        key_len += record.arg_sizes[i];
+    }
+
+    // Concat func_id+arguments and use it as the key
+    void *key = malloc(key_len);
+    memcpy(key, &(record.func_id), sizeof(record.func_id));
+    int pos = sizeof(record.func_id);
+    for(i = 0; i < record.arg_count; i++) {
+        memcpy(key+pos, record.args[i], record.arg_sizes[i]);
+        pos += record.arg_sizes[i];
+    }
+
+    // Construct the Timestamp pair
+    TimesPair *t = malloc(sizeof(TimesPair));
+    t->start = record.tstart;
+    t->end = record.tend;
+
+    RecordHash *entry;
+    HASH_FIND(hh, __logger.hash_head, key, key_len, entry);
+    if(entry) {                     // Found, insert the (tstart, tend) pair.
+        LL_PREPEND(entry->times, t);
+    } else {                        // Not exisit, add to hash table
+        entry = (RecordHash*) malloc(sizeof(RecordHash));
+        entry->key = key;
+        entry->times = NULL;        // The utlist head must be NULL initialized
+        LL_PREPEND(entry->times, t);
+        HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
+    }
+
 }
 
 void logger_init(int rank, int nprocs) {
@@ -254,6 +110,7 @@ void logger_init(int rank, int nprocs) {
     __logger.local_metadata.records_count = 0;
     __logger.local_metadata.compressed_records = 0;
     __logger.local_metadata.rank = rank;
+    __logger.hash_head = NULL;         // Must be NULL initialized
 
     mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
@@ -263,16 +120,6 @@ void logger_init(int rank, int nprocs) {
     sprintf(metafile_name, "logs/%d.mt", rank);
     __logger.trace_file = fopen(logfile_name, "wb");
     __logger.metadata_file = fopen(metafile_name, "wb");
-
-
-    __logger.window_size = 3;
-    const char* window_size_str = getenv("PILGRIM_WINDOW_SIZE");
-    if(window_size_str)
-        __logger.window_size = atoi(window_size_str);
-    __logger.records_window = (Record*) malloc(sizeof(Record) * __logger.window_size);
-    int i;
-    for(i = 0; i < __logger.window_size; i++)
-        __logger.records_window[i].func_id = -1;
 
 
     // Global metadata, include compression mode, time resolution
@@ -286,31 +133,36 @@ void logger_init(int rank, int nprocs) {
         fclose(global_metafh);
     }
 
-    membufInit(&__membuf);
     __logger.recording = true;
 }
 
 
 void logger_exit() {
     __logger.recording = false;
-    free(__logger.records_window);
 
     /* Write out local metadata information */
     __logger.local_metadata.tend = pilgrim_wtime(),
     fwrite(&__logger.local_metadata, sizeof(__logger.local_metadata), 1, __logger.metadata_file);
-    printf("[Pilgrim] Rank: %d, Compressed (exact match): %d, Number of records: %d\n", __logger.rank, __logger.local_metadata.compressed_records, __logger.local_metadata.records_count);
+    printf("[Pilgrim] Rank: %d, Number of records: %d\n", __logger.rank, __logger.local_metadata.records_count);
 
-    __membuf.dump(&__membuf);
-    __membuf.release(&__membuf);
+    int num = HASH_COUNT(__logger.hash_head);
+    printf("hash count: %d\n", num);
+
+    /* Clean up the hash table and list of time pair */
+    RecordHash *entry, *tmp;
+    TimesPair *node, *tmp2;
+    HASH_ITER(hh, __logger.hash_head, entry, tmp) {
+        free(entry->key);
+        LL_FOREACH_SAFE(entry->times, node, tmp2) {
+            LL_DELETE(entry->times, node);
+            free(node);
+        }
+    }
+    HASH_CLEAR(hh, __logger.hash_head);
+
     /* Close the log file */
     if ( __logger.trace_file) {
         fclose(__logger.trace_file);
         __logger.trace_file = NULL;
-    }
-
-    int i;
-    for(i = 0; i < 400; i++) {
-        if( uncompressed_ids[i] > 0)
-            printf("[Pilgrim] Rank: %d, Unmatched/Total : %s %d/%d\n", __logger.rank, func_names[i], uncompressed_ids[i], total_ids[i]);
     }
 }

@@ -45,20 +45,25 @@ struct Logger __logger;
 
 
 
+void write_to_file() {
 
-// Mode 2. Write in binary format, no compression
-/*
-static inline void writeInBinary(FILE *f, Record record) {
-    int tstart = (record.tstart - __logger.local_metadata.tstart) / TIME_RESOLUTION;
-    int tend   = (record.tend - __logger.local_metadata.tstart) / TIME_RESOLUTION;
-    __membuf.append(&__membuf, &(record.status), sizeof(record.status));
-    __membuf.append(&__membuf, &tstart, sizeof(tstart));
-    __membuf.append(&__membuf, &tend, sizeof(tend));
-    __membuf.append(&__membuf, &(record.res), sizeof(record.res));
-    __membuf.append(&__membuf, &(record.func_id), sizeof(record.func_id));
-    writeArguments(f, record);
+    RecordHash *entry, *tmp;
+    TimesPair *node, *tmp2;
+    int times_count;
+    HASH_ITER(hh, __logger.hash_head, entry, tmp) {
+
+        fwrite(entry->key, entry->key_len, 1, __logger.trace_file);
+        LL_COUNT(entry->times, node, times_count);
+        fwrite(&times_count, sizeof(int), 1, __logger.trace_file);
+
+        printf("%d\n", times_count);
+
+        LL_FOREACH_SAFE(entry->times, node, tmp2) {
+            fwrite(&(node->start), sizeof(int), 1, __logger.trace_file);
+            fwrite(&(node->end), sizeof(int), 1, __logger.trace_file);
+        }
+    }
 }
-*/
 
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
@@ -97,6 +102,7 @@ void write_record(Record record) {
     } else {                        // Not exisit, add to hash table
         entry = (RecordHash*) malloc(sizeof(RecordHash));
         entry->key = key;
+        entry->key_len = key_len;
         entry->times = NULL;        // The utlist head must be NULL initialized
         LL_PREPEND(entry->times, t);
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
@@ -143,10 +149,13 @@ void logger_exit() {
     /* Write out local metadata information */
     __logger.local_metadata.tend = pilgrim_wtime(),
     fwrite(&__logger.local_metadata, sizeof(__logger.local_metadata), 1, __logger.metadata_file);
+    fclose(__logger.metadata_file);
     printf("[Pilgrim] Rank: %d, Number of records: %d\n", __logger.rank, __logger.local_metadata.records_count);
 
+    /* Write hash table to local trace file */
     int num = HASH_COUNT(__logger.hash_head);
     printf("hash count: %d\n", num);
+    write_to_file();
 
     /* Clean up the hash table and list of time pair */
     RecordHash *entry, *tmp;

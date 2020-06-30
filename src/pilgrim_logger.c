@@ -14,18 +14,20 @@
 #define TIME_RESOLUTION 0.000001
 
 
-// Node in utlist
-typedef struct TimesPair_t {
-    int start;
-    int end;
-    struct TimesPair_t *next;
-} TimesPair;
+typedef struct SpanNode_t {
+    int tstart;
+    int interval;
+    int duration;
+    int count;
+    struct SpanNode_t *prev;
+    struct SpanNode_t *next;
+} SpanNode;
 
 // Entry in uthash
 typedef struct RecordHash_t {
     void *key;      // func_id + concated arguments, used as key
     int key_len;
-    TimesPair *times;
+    SpanNode *spans;
     UT_hash_handle hh;
 } RecordHash;
 
@@ -48,19 +50,19 @@ struct Logger __logger;
 void write_to_file() {
 
     RecordHash *entry, *tmp;
-    TimesPair *node, *tmp2;
-    int times_count;
+    SpanNode *span, *tmp2;
+    int spans_count;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-
         fwrite(entry->key, entry->key_len, 1, __logger.trace_file);
-        LL_COUNT(entry->times, node, times_count);
-        fwrite(&times_count, sizeof(int), 1, __logger.trace_file);
 
-        printf("%d\n", times_count);
+        DL_COUNT(entry->spans, span, spans_count);
+        //fwrite(&times_count, sizeof(int), 1, __logger.trace_file);
 
-        LL_FOREACH_SAFE(entry->times, node, tmp2) {
-            fwrite(&(node->start), sizeof(int), 1, __logger.trace_file);
-            fwrite(&(node->end), sizeof(int), 1, __logger.trace_file);
+        printf("DL Count:%d\n", spans_count);
+        DL_FOREACH_SAFE(entry->spans, span, tmp2) {
+            //fwrite(&(node->start), sizeof(int), 1, __logger.trace_file);
+            //fwrite(&(node->end), sizeof(int), 1, __logger.trace_file);
+            printf("tstart: %d interval: %d duration: %d count: %d\n", span->tstart, span->interval, span->duration, span->count);
         }
     }
 }
@@ -90,24 +92,42 @@ void write_record(Record record) {
         pos += record.arg_sizes[i];
     }
 
-    // Construct the Timestamp pair
-    TimesPair *t = malloc(sizeof(TimesPair));
-    t->start = record.tstart;
-    t->end = record.tend;
 
     RecordHash *entry;
     HASH_FIND(hh, __logger.hash_head, key, key_len, entry);
-    if(entry) {                     // Found, insert the (tstart, tend) pair.
-        LL_PREPEND(entry->times, t);
-    } else {                        // Not exisit, add to hash table
+    if(entry) {                         // Found, insert the (tstart, tend) pair.
+        SpanNode *last_span = entry->spans;
+
+        int this_tstart = (record.tstart - __logger.local_metadata.tstart) / TIME_RESOLUTION;
+        int interval = this_tstart - last_span->tstart;
+        int error = interval * 0.2;
+        if(abs(last_span->interval - interval) < error) {
+            last_span->count++;
+        } else {
+            // create a new span
+            SpanNode *new_span = malloc(sizeof(SpanNode));
+            new_span->tstart = this_tstart;
+            new_span->interval = interval;
+            new_span->duration = (record.tend-record.tstart) / TIME_RESOLUTION;
+            new_span->count = 0;
+            DL_PREPEND(entry->spans, new_span);
+        }
+    } else {                            // Not exisit, add to hash table
         entry = (RecordHash*) malloc(sizeof(RecordHash));
         entry->key = key;
         entry->key_len = key_len;
-        entry->times = NULL;        // The utlist head must be NULL initialized
-        LL_PREPEND(entry->times, t);
+        entry->spans = NULL;            // The utlist DL, must be initialized with NULL
+
+        // Construct the SpanNode node
+        SpanNode *span = malloc(sizeof(SpanNode));
+        span->tstart = (record.tstart - __logger.local_metadata.tstart) / TIME_RESOLUTION;
+        span->interval = 0;
+        span->duration = (record.tend-record.tstart) / TIME_RESOLUTION;
+        span->count = 0;
+        DL_PREPEND(entry->spans, span);
+
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }
-
 }
 
 void logger_init(int rank, int nprocs) {
@@ -159,11 +179,11 @@ void logger_exit() {
 
     /* Clean up the hash table and list of time pair */
     RecordHash *entry, *tmp;
-    TimesPair *node, *tmp2;
+    SpanNode *node, *tmp2;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
         free(entry->key);
-        LL_FOREACH_SAFE(entry->times, node, tmp2) {
-            LL_DELETE(entry->times, node);
+        DL_FOREACH_SAFE(entry->spans, node, tmp2) {
+            DL_DELETE(entry->spans, node);
             free(node);
         }
     }

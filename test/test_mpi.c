@@ -29,6 +29,9 @@ int main(int argc, char *argv[]) {
     TEST_MPI_CALL(MPI_Comm_size, (MPI_COMM_WORLD, &world_size));
 
     TEST_MPI_CALL(MPI_Comm_rank, (MPI_COMM_WORLD, &rank));
+    TEST_MPI_CALL(MPI_Comm_rank, (MPI_COMM_WORLD, &rank));
+    TEST_MPI_CALL(MPI_Comm_rank, (MPI_COMM_WORLD, &rank));
+    TEST_MPI_CALL(MPI_Comm_rank, (MPI_COMM_WORLD, &rank));
 
     MPI_Datatype type = MPI_LONG_INT;
     TEST_MPI_CALL(MPI_Type_commit, (&type));
@@ -50,7 +53,7 @@ int main(int argc, char *argv[]) {
     TEST_MPI_CALL(MPI_Info_set, (info, "cb_nodes", "2"));
 
 
-    /* IO-Realted MPI Calls */
+    // IO-Realted MPI Calls
     MPI_File fh;
     MPI_Status status;
     int i, a[10];
@@ -65,6 +68,9 @@ int main(int argc, char *argv[]) {
 
     TEST_MPI_CALL(MPI_File_close, (&fh))
 
+    TEST_MPI_CALL(MPI_Barrier, (MPI_COMM_WORLD))
+    TEST_MPI_CALL(MPI_Barrier, (MPI_COMM_WORLD))
+    TEST_MPI_CALL(MPI_Barrier, (MPI_COMM_WORLD))
     TEST_MPI_CALL(MPI_Barrier, (MPI_COMM_WORLD))
 
     int flag;

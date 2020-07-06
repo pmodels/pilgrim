@@ -6,7 +6,7 @@
 AM_CPPFLAGS += -I$(top_srcdir)/src
 
 libpilgrim_la_SOURCES += \
-	src/pilgrim_wrappers.c src/pilgrim_utils.c src/pilgrim_logger.c src/pilgrim_init_finalize.c src/pilgrim_wrappers_special.c
+	src/pilgrim_wrappers.c src/pilgrim_utils.c src/pilgrim_logger.c src/pilgrim_sequitur.c src/pilgrim_init_finalize.c src/pilgrim_wrappers_special.c
 
 
 pilgrim_reader_SOURCES += \

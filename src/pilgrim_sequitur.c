@@ -1,11 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "pilgrim_sequitur.h"
+#include "../include/pilgrim_sequitur.h"
 
 static int rule_number = -1;
 
+// Struct Symbol used in keys of Rules
+// Need to make sure the paddings are zeroed when adding/querying the rule table
+void zero_set_symbol(Symbol *symbol) {
+    bool terminal = symbol->terminal;
+    int val = symbol->val;
+
+    memset(symbol, 0, sizeof(Symbol));
+    symbol->terminal = terminal;
+    symbol->val = val;
+}
+
+
 RuleHash* create_rule(Symbol left, Symbol right) {
+    zero_set_symbol(&left);
+    zero_set_symbol(&right);
+
     RuleHash *rule = malloc(sizeof(RuleHash));
     int key_len = 2*sizeof(Symbol);
     rule->key = malloc(key_len);
@@ -24,17 +39,18 @@ void replace_with_new_rule(Grammar *grammar, SymbolNode *pos1, SymbolNode *pos2)
     RuleHash* rule = create_rule(pos1->symbol, pos1->next->symbol);
     HASH_ADD_KEYPTR(hh, grammar->rule_table, rule->key, rule->key_len, rule);
 
+    SymbolNode *p1, *p2, *p3, *p4;
+    p1 = pos1; p2 = pos1->next; p3 = pos2; p4 = pos2->next;
+
     insert_symbol(grammar, pos1->next, rule->symbol);
     DL_DELETE(grammar->symbols, pos1);
     DL_DELETE(grammar->symbols, pos1->next);
-    free(pos1->next);
-    free(pos1);
 
     insert_symbol(grammar, pos2->next, rule->symbol);
     DL_DELETE(grammar->symbols, pos2);
     DL_DELETE(grammar->symbols, pos2->next);
-    free(pos2->next);
-    free(pos2);
+
+    free(p1); free(p2); free(p3); free(p4);
 }
 
 bool symbol_equal(Symbol lhs, Symbol rhs) {
@@ -52,6 +68,8 @@ SymbolNode* exists_digram(Grammar *grammar, SymbolNode *left, SymbolNode *right)
 
 void new_digram(Grammar *grammar, SymbolNode *left, SymbolNode *right) {
     RuleHash *rule_table = grammar->rule_table;
+    zero_set_symbol(&left->symbol);
+    zero_set_symbol(&right->symbol);
 
     // Check rule table to see if this digram can be represented by a rule
     void *key = malloc(2 * sizeof(Symbol));
@@ -70,10 +88,12 @@ void new_digram(Grammar *grammar, SymbolNode *left, SymbolNode *right) {
         free(left);
         free(right);
         SymbolNode *sn = insert_symbol(grammar, pos, found_rule->symbol);
-        if(grammar->symbols != sn)
-            new_digram(grammar, sn->prev, sn);
+
         if(sn->next)
             new_digram(grammar, sn, sn->next);
+        if(grammar->symbols != sn)
+            new_digram(grammar, sn->prev, sn);
+
     } else {
         // Check to see if this is a repeated digram
         SymbolNode *pos = exists_digram(grammar, left, right);
@@ -87,6 +107,8 @@ SymbolNode* insert_symbol(Grammar *grammar, SymbolNode *pos, Symbol s) {
     SymbolNode *sn = malloc(sizeof(SymbolNode));
     sn->symbol = s;
     DL_APPEND_ELEM(grammar->symbols, pos, sn);
+
+    return sn;
 }
 
 
@@ -94,13 +116,10 @@ void read_terminal(Grammar *grammar, int val) {
     SymbolNode *sn = malloc(sizeof(SymbolNode));
     sn->symbol.terminal = false;
     sn->symbol.val = val;
-
     DL_APPEND(grammar->symbols, sn);
 
-    if(grammar->symbols != sn) {
-        printf("%d %d\n", sn->prev->symbol.val, sn->symbol.val);
+    if(grammar->symbols != sn)
         new_digram(grammar, sn->prev, sn);
-    }
 }
 
 
@@ -111,28 +130,29 @@ void clean_grammar(Grammar *grammar) {
     SymbolNode *elt, *tmp1;
     int count;
     DL_COUNT(symbols, elt, count);
+    printf("symbols count: %d\n", count);
     DL_FOREACH_SAFE(symbols, elt, tmp1) {
         DL_DELETE(symbols, elt);
-        printf("delete symbol: %d\n", elt->symbol.val);
+        //printf("delete symbol: %d\n", elt->symbol.val);
         free(elt);
     }
 
+    printf("rules count: %d\n", HASH_COUNT(rule_table));
     RuleHash *rule, *tmp2;
     HASH_ITER(hh, rule_table, rule, tmp2) {
         HASH_DEL(rule_table, rule);
-        printf("delete rule %d --> ", rule->symbol.val);
+        //printf("delete rule %d --> ", rule->symbol.val);
         int n = rule->key_len / sizeof(Symbol);
         Symbol s;
         for(int i = 0; i < n; i++) {
             memcpy(&s, rule->key+i*sizeof(Symbol), sizeof(Symbol));
-            printf("%d ", s.val);
+            //printf("%d ", s.val);
         }
-        printf("\n");
+        //printf("\n");
         free(rule);
     }
 }
 
-/*
 int main() {
     Grammar grammar;
     grammar.rule_table = NULL;
@@ -140,13 +160,12 @@ int main() {
 
     read_terminal(&grammar, 1);
     read_terminal(&grammar, 2);
-    read_terminal(&grammar, 3);
-    read_terminal(&grammar, 3);
     read_terminal(&grammar, 1);
     read_terminal(&grammar, 2);
-    read_terminal(&grammar, 3);
-    read_terminal(&grammar, 3);
+    read_terminal(&grammar, 1);
+    read_terminal(&grammar, 2);
+    read_terminal(&grammar, 1);
+    read_terminal(&grammar, 2);
 
     clean_grammar(&grammar);
 }
-*/

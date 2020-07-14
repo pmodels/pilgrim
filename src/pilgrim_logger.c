@@ -38,13 +38,10 @@ struct Logger {
 struct Logger __logger;
 
 
-
-
 void write_to_file() {
-
     RecordHash *entry, *tmp;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        fwrite(entry->key, entry->key_len, 1, __logger.trace_file);
+        //fwrite(entry->key, entry->key_len, 1, __logger.trace_file);
     }
 }
 
@@ -83,12 +80,11 @@ void write_record(Record record) {
         entry->key_len = key_len;
         entry->id = hash_id;
         hash_id++;
-
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }
 
-    // compress with sequitur algorithm
-    read_terminal(&__logger.grammar, entry->id);
+    // TODO
+    fwrite(&(entry->id), sizeof(int), 1, __logger.trace_file);
 }
 
 void logger_init(int rank, int nprocs) {
@@ -98,8 +94,6 @@ void logger_init(int rank, int nprocs) {
     __logger.local_metadata.compressed_records = 0;
     __logger.local_metadata.rank = rank;
     __logger.hash_head = NULL;          // Must be NULL initialized
-    __logger.grammar.rule_table = NULL;
-    __logger.grammar.symbols = NULL;
 
     mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
@@ -147,7 +141,6 @@ void logger_exit() {
     }
     HASH_CLEAR(hh, __logger.hash_head);
 
-    clean_grammar(&__logger.grammar);
 
     /* Close the log file */
     if ( __logger.trace_file) {

@@ -5,6 +5,11 @@
 
 static int rule_number = -1;
 
+
+
+
+
+
 // Struct Symbol used in keys of Rules
 // Need to make sure the paddings are zeroed when adding/querying the rule table
 void zero_set_symbol(Symbol *symbol) {

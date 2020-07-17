@@ -87,7 +87,7 @@ void rule_deref(Symbol *rule);
 int check_digram(Symbol *sym);
 Symbol* append_terminal(int val);
 void sequitur_init();
-void sequitur_finalize();
+void sequitur_finalize(int mpi_rank);
 
 
 #endif

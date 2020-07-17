@@ -250,8 +250,9 @@ void sequitur_init() {
     rule_put(&grammar.rules, new_rule());
 }
 
-void sequitur_finalize() {
-    print_rules();
+void sequitur_finalize(int mpi_rank) {
+    if(mpi_rank == 0)
+        print_rules();
 }
 
 /*

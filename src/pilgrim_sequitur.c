@@ -1,176 +1,283 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "../include/pilgrim_sequitur.h"
+#include "pilgrim_sequitur.h"
 
-static int rule_number = -1;
+static Grammar grammar;
 
-
-
-
-
-
-// Struct Symbol used in keys of Rules
-// Need to make sure the paddings are zeroed when adding/querying the rule table
-void zero_set_symbol(Symbol *symbol) {
-    bool terminal = symbol->terminal;
-    int val = symbol->val;
-
-    memset(symbol, 0, sizeof(Symbol));
-    symbol->terminal = terminal;
-    symbol->val = val;
+void delete_symbol(Symbol *sym) {
+    symbol_delete(sym->rule, sym);
+    //if(IS_NONTERMINAL(sym))
+    //    rule_deref(sym->rule);
 }
 
+/**
+ * Replace a digram by a rule (non-terminal)
+ *
+ * @delete_digram: we only put digram after we perform check_digram();
+ * during the process of check_digram, we found a match and try to this==match
+ * In this case, the matched digram is already in the digram table, however the
+ * new digram has not been inserted into the table yet, so we don't delete becuase
+ * other rules body may have the same key.
+ *
+ */
+void replace_digram(Symbol *origin, Symbol *rule, bool delete_digram) {
+    if(!IS_RULE_HEAD(rule))
+        ERROR_ABORT("replace_digram: not a rule head?\n");
 
-RuleHash* create_rule(Symbol left, Symbol right) {
-    zero_set_symbol(&left);
-    zero_set_symbol(&right);
+    // Create an non-terminal
+    Symbol *replaced = new_symbol(rule->val, false, rule);
 
-    RuleHash *rule = malloc(sizeof(RuleHash));
-    int key_len = 2*sizeof(Symbol);
-    rule->key = malloc(key_len);
-    rule->key_len = key_len;
-    memcpy(rule->key, &left, sizeof(Symbol));
-    memcpy(rule->key+sizeof(Symbol), &right, sizeof(Symbol));
-    rule->symbol.terminal = false;
-    rule->symbol.val = rule_number;
-    rule_number--;
+    // carefule here, if orgin is the first symbol, then
+    // NULL will be used as the tail node.
+    Symbol *prev = NULL;
+    if(origin->rule->rule_body != origin)
+        prev = origin->prev;
+    if(prev != NULL)
+        digram_delete(&grammar.digram_table, prev);
 
-    return rule;
-}
-
-void replace_with_new_rule(Grammar *grammar, SymbolNode *pos1, SymbolNode *pos2) {
-    // Create a new rule to represent this digram
-    RuleHash* rule = create_rule(pos1->symbol, pos1->next->symbol);
-    HASH_ADD_KEYPTR(hh, grammar->rule_table, rule->key, rule->key_len, rule);
-
-    SymbolNode *p1, *p2, *p3, *p4;
-    p1 = pos1; p2 = pos1->next; p3 = pos2; p4 = pos2->next;
-
-    insert_symbol(grammar, pos1->next, rule->symbol);
-    DL_DELETE(grammar->symbols, pos1);
-    DL_DELETE(grammar->symbols, pos1->next);
-
-    insert_symbol(grammar, pos2->next, rule->symbol);
-    DL_DELETE(grammar->symbols, pos2);
-    DL_DELETE(grammar->symbols, pos2->next);
-
-    free(p1); free(p2); free(p3); free(p4);
-}
-
-bool symbol_equal(Symbol lhs, Symbol rhs) {
-    return (lhs.terminal == rhs.terminal && lhs.val == rhs.val);
-}
-
-SymbolNode* exists_digram(Grammar *grammar, SymbolNode *left, SymbolNode *right) {
-    SymbolNode* tmp;
-    for(tmp = grammar->symbols; tmp!=left && tmp->next!=left; tmp = tmp->next) {
-        if(symbol_equal(tmp->symbol, left->symbol) && symbol_equal(tmp->next->symbol, right->symbol))
-            return tmp;
+    // delete digram before deleting symbols, otherwise we won't have correct digrams
+    if(delete_digram) {
+        digram_delete(&grammar.digram_table, origin);
+        digram_delete(&grammar.digram_table, origin->next);
     }
-    return NULL;
+
+    delete_symbol(origin);
+    delete_symbol(origin->next);
+
+    symbol_put(origin->rule, prev, replaced);
+
+    // Add a new symbol (replaced) after prev
+    // may introduce another repeated digram that we need to check
+    if( check_digram(prev) == 0) {
+        check_digram(replaced);
+    }
 }
 
-void new_digram(Grammar *grammar, SymbolNode *left, SymbolNode *right) {
-    RuleHash *rule_table = grammar->rule_table;
-    zero_set_symbol(&left->symbol);
-    zero_set_symbol(&right->symbol);
+/**
+ * Rule Utility
+ * Replace a rule with its body if the rule is used only once
+ *
+ * @sym: is an non-terminal which should be replaced by sym->rule_head->rule_body
+ */
+void expand_instance(Symbol *sym) {
+    Symbol *rule = sym->rule_head;
+    // just double check to make sure
+    if(rule->ref != 1)
+        ERROR_ABORT("Attempt to delete a rule that has multiple references!\n");
 
-    // Check rule table to see if this digram can be represented by a rule
-    void *key = malloc(2 * sizeof(Symbol));
-    memcpy(key, &left->symbol, sizeof(Symbol));
-    memcpy(key+sizeof(Symbol), &right->symbol, sizeof(Symbol));
+    digram_delete(&grammar.digram_table, sym);
 
-    RuleHash *found_rule;
-    HASH_FIND(hh, rule_table, key, 2*sizeof(Symbol), found_rule);
-    free(key);
 
-    if(found_rule) {
-        // Repalce the left, right nodes with the rule symbol
-        SymbolNode *pos = left->prev;
-        DL_DELETE(grammar->symbols, right);
-        DL_DELETE(grammar->symbols, left);
-        free(left);
-        free(right);
-        SymbolNode *sn = insert_symbol(grammar, pos, found_rule->symbol);
+    int n = 0;
+    Symbol *this;
+    Symbol *tail = sym;
+    DL_FOREACH(rule->rule_body, this) {
+        digram_delete(&grammar.digram_table, this);
 
-        if(sn->next)
-            new_digram(grammar, sn, sn->next);
-        if(grammar->symbols != sn)
-            new_digram(grammar, sn->prev, sn);
+        Symbol *s = new_symbol(this->val, this->terminal, this->rule_head);
+        symbol_put(sym->rule, tail, s);
+        tail = s;
+        n++;
+    }
 
+    this = sym->next;
+    for(int i = 0; i < n; i++) {
+        digram_put(&grammar.digram_table, this);
+        this = this->next;
+    }
+
+    delete_symbol(sym);
+    rule_delete(&grammar.rules, rule);
+}
+
+/**
+ * Handle the case in which a just-created digram matches
+ * a previously existing one.
+ *
+ */
+void process_match(Symbol *this, Symbol *match) {
+    Symbol *rule = NULL;
+
+    // 1. The match consists of entire body of a rule
+    // Then we replace the new digram with this rule
+    if(match->prev == match->next) {
+        rule = match->rule;
+        replace_digram(this, match->rule, false);
     } else {
-        // Check to see if this is a repeated digram
-        SymbolNode *pos = exists_digram(grammar, left, right);
-        if(pos)
-            replace_with_new_rule(grammar, pos, left);
-    }
-}
+        // 2. Otherwise, we create a new rule and replace the repeated digrams with this rule
+        rule = new_rule();
+        symbol_put(rule, rule->rule_body, new_symbol(this->val, this->terminal, this->rule_head));
+        symbol_put(rule, rule->rule_body->prev, new_symbol(this->next->val, this->next->terminal, this->next->rule_head));
+        rule_put(&grammar.rules, rule);
 
-// Insert one symbol after pos
-SymbolNode* insert_symbol(Grammar *grammar, SymbolNode *pos, Symbol s) {
-    SymbolNode *sn = malloc(sizeof(SymbolNode));
-    sn->symbol = s;
-    DL_APPEND_ELEM(grammar->symbols, pos, sn);
+        replace_digram(match, rule, true);
+        replace_digram(this, rule, false);
 
-    return sn;
-}
-
-
-void read_terminal(Grammar *grammar, int val) {
-    SymbolNode *sn = malloc(sizeof(SymbolNode));
-    sn->symbol.terminal = false;
-    sn->symbol.val = val;
-    DL_APPEND(grammar->symbols, sn);
-
-    if(grammar->symbols != sn)
-        new_digram(grammar, sn->prev, sn);
-}
-
-
-void clean_grammar(Grammar *grammar) {
-    SymbolNode *symbols = grammar->symbols;
-    RuleHash *rule_table = grammar->rule_table;
-
-    SymbolNode *elt, *tmp1;
-    int count;
-    DL_COUNT(symbols, elt, count);
-    printf("symbols count: %d\n", count);
-    DL_FOREACH_SAFE(symbols, elt, tmp1) {
-        DL_DELETE(symbols, elt);
-        //printf("delete symbol: %d\n", elt->symbol.val);
-        free(elt);
+        // Insert the rule body into the digram table
+        digram_put(&grammar.digram_table, rule->rule_body);
     }
 
-    printf("rules count: %d\n", HASH_COUNT(rule_table));
-    RuleHash *rule, *tmp2;
-    HASH_ITER(hh, rule_table, rule, tmp2) {
-        HASH_DEL(rule_table, rule);
-        //printf("delete rule %d --> ", rule->symbol.val);
-        int n = rule->key_len / sizeof(Symbol);
-        Symbol s;
-        for(int i = 0; i < n; i++) {
-            memcpy(&s, rule->key+i*sizeof(Symbol), sizeof(Symbol));
-            //printf("%d ", s.val);
+
+    // Check for "Rule Utility"
+    // The first symbol of the just-created rule,
+    // if is an non-terminal could be underutilized
+    if(rule && rule->rule_body) {
+        Symbol* tocheck = rule->rule_body->rule_head;
+        if(tocheck && tocheck->ref < 2) {
+            #ifdef DEBUG
+                printf("rule utility:%d %d\n", tocheck->val, tocheck->ref);
+            #endif
+            expand_instance(rule->rule_body);
         }
-        //printf("\n");
-        free(rule);
+    }
+
+}
+
+/**
+ * Return 1 means the digram is replaced by a rule
+ * (Either a new rule or an exisiting rule)
+ */
+int check_digram(Symbol *sym) {
+
+    if(sym == NULL || sym->next == NULL || sym->next == sym)
+        return 0;
+
+    Symbol *match = digram_get(grammar.digram_table, sym->val, sym->next->val);
+
+    if(match == NULL) {
+        // Case 1. new digram, put it in the table
+        #ifdef DEBUG
+            printf("new digram %d %d\n", sym->val, sym->next->val);
+        #endif
+        digram_put(&grammar.digram_table, sym);
+        return 0;
+    }
+
+    if(match->next == sym) {
+        // Case 2. match found but overlap: do nothing
+        #ifdef DEBUG
+            printf("found digram but overlap\n");
+        #endif
+        return 0;
+    } else {
+        // Case 3. non-overlapping match found
+        #ifdef DEBUG
+            printf("found non-overlapping digram %d %d\n", sym->val, sym->next->val);
+        #endif
+        process_match(sym, match);
+        return 1;
+    }
+
+}
+
+Symbol* append_terminal(int val) {
+    Symbol *sym = new_symbol(val, true, NULL);
+
+    Symbol *main_rule = grammar.rules;
+    Symbol *tail;
+    if(main_rule->rule_body)
+        tail = main_rule->rule_body->prev;  // Get the last symbol
+    else
+        tail = main_rule->rule_body;        // NULL, no symbol yet
+
+    symbol_put(main_rule, tail, sym);
+
+    return sym;
+}
+
+
+
+
+void print_digrams() {
+    Digram *digram, *tmp;
+
+    printf("digrams count: %d\n", HASH_COUNT(grammar.digram_table));
+    HASH_ITER(hh, grammar.digram_table, digram, tmp) {
+        int v1, v2;
+        memcpy(&v1, digram->key, sizeof(int));
+        memcpy(&v2, digram->key+sizeof(int), sizeof(int));
+
+        if(digram->symbol->rule)
+            printf("digram(%d, %d, rule:%d): %d %d\n", v1, v2, digram->symbol->rule->val, digram->symbol->val, digram->symbol->next->val);
+        else
+            printf("digram(%d, %d, rule:): %d %d\n", v1, v2, digram->symbol->val, digram->symbol->next->val);
     }
 }
 
-int main() {
-    Grammar grammar;
-    grammar.rule_table = NULL;
-    grammar.symbols = NULL;
+void print_rules() {
+    Symbol *rule, *sym;
+    int rules_count = 0, symbols_count = 0;
+    DL_COUNT(grammar.rules, rule, rules_count);
 
-    read_terminal(&grammar, 1);
-    read_terminal(&grammar, 2);
-    read_terminal(&grammar, 1);
-    read_terminal(&grammar, 2);
-    read_terminal(&grammar, 1);
-    read_terminal(&grammar, 2);
-    read_terminal(&grammar, 1);
-    read_terminal(&grammar, 2);
+    DL_FOREACH(grammar.rules, rule) {
+        printf("Rule %d :-> ", rule->val);
 
-    clean_grammar(&grammar);
+        int count;
+        DL_COUNT(rule->rule_body, sym, count);
+        symbols_count += count;
+
+        DL_FOREACH(rule->rule_body, sym) {
+            printf("%d ", sym->val);
+        }
+        printf("\n");
+    }
+
+    printf("\n=======================\nNumber of rule: %d\n", rules_count);
+    printf("Number of symbols: %d\n=======================\n", symbols_count);
 }
+
+
+void read_from_file(char* path, int **data, int *len) {
+
+    FILE* f =  fopen(path, "rb");
+    fseek(f, 0, SEEK_END);
+    *len = ftell(f) / sizeof(int);
+
+    *data = malloc(sizeof(int) * (*len));
+
+    fseek(f, 0, SEEK_SET);
+    fread(*data, sizeof(int), *len, f);
+
+    fclose(f);
+}
+
+void sequitur_init() {
+    grammar.digram_table = NULL;
+    grammar.rules = NULL;
+
+    // Add the main rule: S, which will be the head of the rule list
+    rule_put(&grammar.rules, new_rule());
+}
+
+void sequitur_finalize() {
+    print_rules();
+}
+
+/*
+int main(int argc, char** argv) {
+    grammar.digram_table = NULL;
+    grammar.rules = NULL;
+
+    // Add the main rule: S, which will be the head of the rule list
+    rule_put(&grammar.rules, new_rule());
+
+    Symbol *sym;
+
+    int *data;
+    int len;
+    read_from_file(argv[1], &data, &len);
+    //int data[] = {1,2,3,4,1,2,3,1,2,3,1,2,3,4};
+    //int len = sizeof(data)/sizeof(int);
+
+    for(int i = 0; i < len; i++) {
+        sym = append_terminal(data[i]);
+        check_digram(sym->prev);
+    }
+
+    print_rules();
+    //print_digrams();
+
+    return 0;
+}
+*/

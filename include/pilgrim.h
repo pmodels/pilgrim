@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "pilgrim_func_ids.h"
 #include "pilgrim_logger.h"
-#include "pilgrim_sequitur.h"
 #include "pilgrim_utils.h"
 
 

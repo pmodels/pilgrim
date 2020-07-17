@@ -8,6 +8,7 @@
 #include <sys/types.h>
 
 #include "pilgrim.h"
+#include "pilgrim_sequitur.h"
 #include "utlist.h"
 #include "uthash.h"
 
@@ -31,7 +32,6 @@ struct Logger {
     LocalMetadata local_metadata;   // Local metadata information
 
     RecordHash *hash_head;          // head of hash table
-    Grammar grammar;
 };
 
 // Global object to access the Logger fileds
@@ -85,6 +85,7 @@ void write_record(Record record) {
 
     // TODO
     fwrite(&(entry->id), sizeof(int), 1, __logger.trace_file);
+    append_terminal(entry->id);
 }
 
 void logger_init(int rank, int nprocs) {
@@ -116,6 +117,8 @@ void logger_init(int rank, int nprocs) {
         fclose(global_metafh);
     }
 
+
+    sequitur_init();
     __logger.recording = true;
 }
 
@@ -147,4 +150,6 @@ void logger_exit() {
         fclose(__logger.trace_file);
         __logger.trace_file = NULL;
     }
+
+    sequitur_finalize();
 }

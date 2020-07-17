@@ -182,10 +182,10 @@ Symbol* append_terminal(int val) {
         tail = main_rule->rule_body;        // NULL, no symbol yet
 
     symbol_put(main_rule, tail, sym);
+    check_digram(sym->prev);
 
     return sym;
 }
-
 
 
 

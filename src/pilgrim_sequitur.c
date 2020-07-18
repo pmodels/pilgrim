@@ -244,7 +244,7 @@ void sequitur_finalize() {
     if(mpi_rank == 0)
         print_rules();
 
-    sequitur_dump(&grammar, mpi_rank, mpi_size);
+    sequitur_dump("logs/grammars.txt", &grammar, mpi_rank, mpi_size);
 }
 
 /*

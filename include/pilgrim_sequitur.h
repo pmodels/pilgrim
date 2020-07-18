@@ -86,7 +86,7 @@ void rule_deref(Symbol *rule);
 
 int check_digram(Symbol *sym);
 Symbol* append_terminal(int val);
-void sequitur_dump(Grammar *grammar, int mpi_rank, int mpi_size);
+void sequitur_dump(char *path, Grammar *grammar, int mpi_rank, int mpi_size);
 void sequitur_init();
 void sequitur_finalize();
 

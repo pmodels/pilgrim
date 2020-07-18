@@ -39,10 +39,24 @@ struct Logger __logger;
 
 
 void write_to_file() {
+    char logfile_name[256];
+    char metafile_name[256];
+    sprintf(logfile_name, "logs/%d.itf", __logger.rank);
+    sprintf(metafile_name, "logs/%d.mt", __logger.rank);
+    __logger.trace_file = fopen(logfile_name, "wb");
+    __logger.metadata_file = fopen(metafile_name, "wb");
+
+    // Write out local metadata information
+    __logger.local_metadata.tend = pilgrim_wtime(),
+    fwrite(&__logger.local_metadata, sizeof(__logger.local_metadata), 1, __logger.metadata_file);
+
     RecordHash *entry, *tmp;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        //fwrite(entry->key, entry->key_len, 1, __logger.trace_file);
+        fwrite(entry->key, entry->key_len, 1, __logger.trace_file);
     }
+
+    fclose(__logger.trace_file);
+    fclose(__logger.metadata_file);
 }
 
 void write_record(Record record) {
@@ -83,8 +97,6 @@ void write_record(Record record) {
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }
 
-    // TODO
-    fwrite(&(entry->id), sizeof(int), 1, __logger.trace_file);
     append_terminal(entry->id);
 }
 
@@ -98,14 +110,6 @@ void logger_init(int rank, int nprocs) {
 
     mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-    char logfile_name[256];
-    char metafile_name[256];
-    sprintf(logfile_name, "logs/%d.itf", rank);
-    sprintf(metafile_name, "logs/%d.mt", rank);
-    __logger.trace_file = fopen(logfile_name, "wb");
-    __logger.metadata_file = fopen(metafile_name, "wb");
-
-
     // Global metadata, include compression mode, time resolution
     if (rank == 0) {
         FILE* global_metafh = fopen("logs/pilgrim.mt", "wb");
@@ -117,7 +121,6 @@ void logger_init(int rank, int nprocs) {
         fclose(global_metafh);
     }
 
-
     sequitur_init();
     __logger.recording = true;
 }
@@ -126,16 +129,12 @@ void logger_init(int rank, int nprocs) {
 void logger_exit() {
     __logger.recording = false;
 
-    /* Write out local metadata information */
-    __logger.local_metadata.tend = pilgrim_wtime(),
-    fwrite(&__logger.local_metadata, sizeof(__logger.local_metadata), 1, __logger.metadata_file);
-    fclose(__logger.metadata_file);
-    printf("[Pilgrim] Rank: %d, Number of records: %d\n", __logger.rank, __logger.local_metadata.records_count);
+    printf("[Pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
+            HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
 
-    /* Write hash table to local trace file */
-    int num = HASH_COUNT(__logger.hash_head);
-    printf("hash count: %d\n", num);
-    write_to_file();
+    // write_to_file();
+
+    sequitur_finalize();
 
     /* Clean up the hash table and list of time pair */
     RecordHash *entry, *tmp;
@@ -143,13 +142,4 @@ void logger_exit() {
         free(entry->key);
     }
     HASH_CLEAR(hh, __logger.hash_head);
-
-
-    /* Close the log file */
-    if ( __logger.trace_file) {
-        fclose(__logger.trace_file);
-        __logger.trace_file = NULL;
-    }
-
-    sequitur_finalize();
 }

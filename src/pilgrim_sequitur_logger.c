@@ -80,14 +80,14 @@ int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, int* len_sum)
 }
 
 
-void sequitur_dump(Grammar *grammar, int mpi_rank, int mpi_size) {
+void sequitur_dump(char* path, Grammar *grammar, int mpi_rank, int mpi_size) {
     // gathered_grammars is NULL except rank 0
     int len;
     int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
     if( mpi_rank != 0)
         return;
 
-    FILE* f = fopen("./grammars.txt", "w");
+    FILE* f = fopen(path, "w");
     for(int i = 0; i < len; i++) {
         fprintf(f, "%d ", gathered_grammars[i]);
         if( i != 0 && i % 20 == 0)

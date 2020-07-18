@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "pilgrim_sequitur.h"
+#include "mpi.h"
 
 static Grammar grammar;
 
@@ -188,7 +189,6 @@ Symbol* append_terminal(int val) {
 }
 
 
-
 void print_digrams() {
     Digram *digram, *tmp;
 
@@ -228,20 +228,6 @@ void print_rules() {
 }
 
 
-void read_from_file(char* path, int **data, int *len) {
-
-    FILE* f =  fopen(path, "rb");
-    fseek(f, 0, SEEK_END);
-    *len = ftell(f) / sizeof(int);
-
-    *data = malloc(sizeof(int) * (*len));
-
-    fseek(f, 0, SEEK_SET);
-    fread(*data, sizeof(int), *len, f);
-
-    fclose(f);
-}
-
 void sequitur_init() {
     grammar.digram_table = NULL;
     grammar.rules = NULL;
@@ -250,9 +236,15 @@ void sequitur_init() {
     rule_put(&grammar.rules, new_rule());
 }
 
-void sequitur_finalize(int mpi_rank) {
+void sequitur_finalize() {
+    int mpi_rank, mpi_size;
+    PMPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
     if(mpi_rank == 0)
         print_rules();
+
+    sequitur_dump(&grammar, mpi_rank, mpi_size);
 }
 
 /*

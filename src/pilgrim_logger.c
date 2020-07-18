@@ -151,5 +151,5 @@ void logger_exit() {
         __logger.trace_file = NULL;
     }
 
-    sequitur_finalize(__logger.rank);
+    sequitur_finalize();
 }

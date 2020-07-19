@@ -42,13 +42,13 @@ typedef struct Symbol_t {           // utlist node
     bool terminal;
 
     // For terminal and non-termial this filed
-    // keeps the rule (rule head) they belong to
+    // remembers the rule (Symbol of Rule Head type) they belong to
     struct Symbol_t *rule;
 
-    // Only used by non-terminal, points to the rule it represents
+    // Only used by non-terminals, points to the rule (Symbol of Rule Head type) it represents
     struct Symbol_t *rule_head;
 
-    // if this is a rule (non-terminal)
+    // if this is a rule (Rule Head type)
     // rule_body will be a list of symbols this rule represent
     // ref will be the number of usages of this rule
     struct Symbol_t *rule_body;
@@ -59,7 +59,7 @@ typedef struct Symbol_t {           // utlist node
 
 
 typedef struct Digram_t {           // uthash node
-    void *key;
+    void *key;                      // the key is composed of two symbol values (sym->val)
     Symbol *symbol;                 // first symbol of the digram
     UT_hash_handle hh;
 } Digram;
@@ -68,6 +68,16 @@ typedef struct Grammar_t {
     Symbol *rules;
     Digram *digram_table;
 } Grammar;
+
+
+/* Only these three functions should be exposed
+ * to the pilgrim looger code.
+ * Alls the rest are used internally for the Sequitur
+ * algorithm implementation.
+ */
+void sequitur_init();
+void sequitur_finalize();
+Symbol* append_terminal(int val);
 
 
 Symbol* new_symbol(int val, bool terminal, Symbol* rule_head);
@@ -85,10 +95,7 @@ void rule_ref(Symbol *rule);
 void rule_deref(Symbol *rule);
 
 int check_digram(Symbol *sym);
-Symbol* append_terminal(int val);
 void sequitur_dump(char *path, Grammar *grammar, int mpi_rank, int mpi_size);
-void sequitur_init();
-void sequitur_finalize();
 
 
 #endif

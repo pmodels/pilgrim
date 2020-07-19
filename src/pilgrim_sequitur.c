@@ -1,15 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "pilgrim_sequitur.h"
 #include "mpi.h"
+#include "pilgrim_sequitur.h"
 
 static Grammar grammar;
 
 void delete_symbol(Symbol *sym) {
     symbol_delete(sym->rule, sym);
-    //if(IS_NONTERMINAL(sym))
-    //    rule_deref(sym->rule);
 }
 
 /**
@@ -244,33 +242,24 @@ void sequitur_finalize() {
     if(mpi_rank == 0)
         print_rules();
 
+    // Write grammars from all ranks to one file
     sequitur_dump("logs/grammars.txt", &grammar, mpi_rank, mpi_size);
-}
 
-/*
-int main(int argc, char** argv) {
-    grammar.digram_table = NULL;
-    grammar.rules = NULL;
-
-    // Add the main rule: S, which will be the head of the rule list
-    rule_put(&grammar.rules, new_rule());
-
-    Symbol *sym;
-
-    int *data;
-    int len;
-    read_from_file(argv[1], &data, &len);
-    //int data[] = {1,2,3,4,1,2,3,1,2,3,1,2,3,4};
-    //int len = sizeof(data)/sizeof(int);
-
-    for(int i = 0; i < len; i++) {
-        sym = append_terminal(data[i]);
-        check_digram(sym->prev);
+    // clean up
+    Digram *digram, *tmp;
+    HASH_ITER(hh, grammar.digram_table, digram, tmp) {
+        free(digram->key);
     }
+    HASH_CLEAR(hh, grammar.digram_table);
 
-    print_rules();
-    //print_digrams();
-
-    return 0;
+    Symbol *rule, *sym, *tmp2, *tmp3;
+    DL_FOREACH_SAFE(grammar.rules, rule, tmp2) {
+        DL_FOREACH_SAFE(rule->rule_body, sym, tmp3) {
+            DL_DELETE(rule->rule_body, sym);
+            free(sym);
+        }
+        DL_DELETE(grammar.rules, rule);
+        free(rule);
+    }
 }
-*/
+

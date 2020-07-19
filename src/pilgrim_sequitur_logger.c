@@ -79,7 +79,6 @@ int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, int* len_sum)
     return gathered_grammars;
 }
 
-
 void sequitur_dump(char* path, Grammar *grammar, int mpi_rank, int mpi_size) {
     // gathered_grammars is NULL except rank 0
     int len;

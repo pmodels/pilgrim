@@ -69,11 +69,11 @@ int digram_delete(Digram **digram_table, Symbol *symbol) {
     HASH_FIND(hh, *digram_table, key, DIGRAM_KEY_LEN, found);
 
     if(found) {
-        free(key);
         HASH_DELETE(hh, *digram_table, found);
+        free(found);
         return 0;
     }
-
+    free(key);
     return -1;
 }
 

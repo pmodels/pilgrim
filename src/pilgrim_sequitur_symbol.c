@@ -46,6 +46,7 @@ void symbol_delete(Symbol *rule, Symbol *sym) {
         rule_deref(sym->rule_head);
 
     DL_DELETE(rule->rule_body, sym);
+    free(sym);
 }
 
 
@@ -72,7 +73,7 @@ void rule_put(Symbol **rules_head, Symbol *rule) {
  */
 void rule_delete(Symbol **rules_head, Symbol *rule) {
     DL_DELETE(*rules_head, rule);
-    // free ?
+    free(rule);
 }
 
 void rule_ref(Symbol *rule) {

@@ -235,7 +235,8 @@ void print_rules() {
     }
 
     printf("\n=======================\nNumber of rule: %d\n", rules_count);
-    printf("Number of symbols: %d\n=======================\n", symbols_count);
+    printf("Number of symbols: %d\n", symbols_count);
+    printf("Number of Digrams: %d\n=======================\n", HASH_COUNT(grammar.digram_table));
 }
 
 

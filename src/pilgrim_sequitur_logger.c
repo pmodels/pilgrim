@@ -86,14 +86,16 @@ void sequitur_dump(char* path, Grammar *grammar, int mpi_rank, int mpi_size) {
     if( mpi_rank != 0)
         return;
 
-    FILE* f = fopen(path, "w");
+    FILE* f = fopen(path, "wb");
+    /*
     for(int i = 0; i < len; i++) {
         fprintf(f, "%d ", gathered_grammars[i]);
         if( i != 0 && i % 20 == 0)
             fprintf(f, "\n");
     }
+    */
 
-    // fwrite(gathered_grammars, sizeof(int), len, f);
+    fwrite(gathered_grammars, sizeof(int), len, f);
 
     fclose(f);
     myfree(gathered_grammars, len);

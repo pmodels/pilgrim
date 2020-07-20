@@ -37,7 +37,7 @@
  *      `rule` and `rule_head` filed are ignored
  *
  */
-typedef struct Symbol_t {           // utlist node
+typedef struct Symbol_t {           // utlist node, sizeof(Symbol) = 56
     int val;
     bool terminal;
 
@@ -58,7 +58,7 @@ typedef struct Symbol_t {           // utlist node
 } Symbol;
 
 
-typedef struct Digram_t {           // uthash node
+typedef struct Digram_t {           // uthash node, sizesof(Digram) = 72
     void *key;                      // the key is composed of two symbol values (sym->val)
     Symbol *symbol;                 // first symbol of the digram
     UT_hash_handle hh;
@@ -97,5 +97,9 @@ void rule_deref(Symbol *rule);
 int check_digram(Symbol *sym);
 void sequitur_dump(char *path, Grammar *grammar, int mpi_rank, int mpi_size);
 
+
+// malloc and free wrappers to monitor memory usage
+void* mymalloc(size_t size);
+void myfree(void* ptr, size_t size);
 
 #endif

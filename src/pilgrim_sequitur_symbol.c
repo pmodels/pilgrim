@@ -5,7 +5,7 @@
 static int rule_id = -1;
 
 Symbol* new_symbol(int val, bool terminal, Symbol *rule_head) {
-    Symbol* symbol = malloc(sizeof(Symbol));
+    Symbol* symbol = mymalloc(sizeof(Symbol));
     symbol->val = val;
     symbol->terminal = terminal;
 
@@ -46,7 +46,7 @@ void symbol_delete(Symbol *rule, Symbol *sym) {
         rule_deref(sym->rule_head);
 
     DL_DELETE(rule->rule_body, sym);
-    free(sym);
+    myfree(sym, sizeof(Symbol));
 }
 
 
@@ -64,7 +64,6 @@ Symbol* new_rule() {
  */
 void rule_put(Symbol **rules_head, Symbol *rule) {
     DL_APPEND(*rules_head, rule);
-    // free ?
 }
 
 /**
@@ -73,7 +72,7 @@ void rule_put(Symbol **rules_head, Symbol *rule) {
  */
 void rule_delete(Symbol **rules_head, Symbol *rule) {
     DL_DELETE(*rules_head, rule);
-    free(rule);
+    myfree(rule, sizeof(Symbol));
 }
 
 void rule_ref(Symbol *rule) {

@@ -136,7 +136,7 @@ void logger_exit() {
 
     sequitur_finalize();
 
-    /* Clean up the hash table and list of time pair */
+    // Clean up the hash table
     RecordHash *entry, *tmp;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
         free(entry->key);

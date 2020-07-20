@@ -34,4 +34,5 @@ void write_record(Record record);
 void** read_record_args(FILE*f, int func_id);
 void** read_record_args_special(FILE*f, int func_id);
 
+
 #endif

@@ -5,6 +5,19 @@
 #include "pilgrim_sequitur.h"
 
 static Grammar grammar;
+static size_t memory_usage = 0;
+static size_t peak_memory = 0;
+
+void* mymalloc(size_t size) {
+    memory_usage += size;
+    if(memory_usage > peak_memory)
+        peak_memory = memory_usage;
+    return malloc(size);
+}
+void myfree(void *ptr, size_t size) {
+    memory_usage -= size;
+    free(ptr);
+}
 
 void delete_symbol(Symbol *sym) {
     symbol_delete(sym->rule, sym);
@@ -232,6 +245,8 @@ void sequitur_init() {
 
     // Add the main rule: S, which will be the head of the rule list
     rule_put(&grammar.rules, new_rule());
+    printf("size of Symbol: %ld\n", sizeof(Symbol));
+    printf("size of Digram: %ld\n", sizeof(Digram));
 }
 
 void sequitur_finalize() {
@@ -241,6 +256,8 @@ void sequitur_finalize() {
 
     if(mpi_rank == 0)
         print_rules();
+
+    printf("Peak memory usage: %ldKB\n", peak_memory/1024);
 
     // Write grammars from all ranks to one file
     sequitur_dump("logs/grammars.txt", &grammar, mpi_rank, mpi_size);

@@ -30,7 +30,7 @@ int* grammar_to_array(Grammar *grammar, int *len) {
     }
 
     int i = 0;
-    int *data = malloc(sizeof(int) * total_integers);
+    int *data = mymalloc(sizeof(int) * total_integers);
     data[i++]  = rules_count;
     DL_FOREACH(grammar->rules, rule) {
         DL_COUNT(rule->rule_body, sym, symbols_count);
@@ -71,11 +71,11 @@ int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, int* len_sum)
 
     int *gathered_grammars = NULL;
     if(mpi_rank == 0)
-        gathered_grammars = malloc(sizeof(int) * (*len_sum));
+        gathered_grammars = mymalloc(sizeof(int) * (*len_sum));
 
     PMPI_Gatherv(local_grammar, len, MPI_INT, gathered_grammars, recvcounts, displs, MPI_INT, 0, MPI_COMM_WORLD);
 
-    free(local_grammar);
+    myfree(local_grammar, len);
     return gathered_grammars;
 }
 
@@ -93,6 +93,8 @@ void sequitur_dump(char* path, Grammar *grammar, int mpi_rank, int mpi_size) {
             fprintf(f, "\n");
     }
 
+    // fwrite(gathered_grammars, sizeof(int), len, f);
+
     fclose(f);
-    free(gathered_grammars);
+    myfree(gathered_grammars, len);
 }

@@ -23,9 +23,13 @@ int MPI_Waitsome(int incount, MPI_Request array_of_requests[], int *outcount, in
         tmp = malloc( (*outcount) * sizeof(MPI_Status) );
         memset(tmp, 0, (*outcount)*sizeof(MPI_Status));
     }
-    void **args = assemble_args_list(5, &incount, array_of_requests, outcount, array_of_indices, tmp);
-    int sizes[] = { sizeof(incount), incount * sizeof(MPI_Request), 1 * sizeof(int), (*outcount) * sizeof(int), (*outcount) * sizeof(MPI_Status) };
-    PILGRIM_TRACING_2(5, sizes, args);
+    // TODO
+    //void **args = assemble_args_list(5, &incount, array_of_requests, outcount, array_of_indices, tmp);
+    //int sizes[] = { sizeof(incount), incount * sizeof(MPI_Request), 1 * sizeof(int), (*outcount) * sizeof(int), (*outcount) * sizeof(MPI_Status) };
+    //PILGRIM_TRACING_2(5, sizes, args);
+    void **args = assemble_args_list(3, &incount, outcount, array_of_indices);
+    int sizes[] = { sizeof(incount), 1 * sizeof(int), (*outcount) * sizeof(int) };
+    PILGRIM_TRACING_2(3, sizes, args);
 }
 int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_statuses[])
 {
@@ -37,9 +41,13 @@ int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_
         tmp = malloc( count * sizeof(MPI_Status) );
         memset(tmp, 0, count*sizeof(MPI_Status));
     }
-    void **args = assemble_args_list(3, &count, array_of_requests, tmp);
-    int sizes[] = { sizeof(count), count * sizeof(MPI_Request), count * sizeof(MPI_Status) };
-    PILGRIM_TRACING(int, MPI_Waitall, (count, array_of_requests, array_of_statuses), 3, sizes, args);
+    //void **args = assemble_args_list(3, &count, array_of_requests, tmp);
+    //int sizes[] = { sizeof(count), count * sizeof(MPI_Request), count * sizeof(MPI_Status) };
+    //PILGRIM_TRACING(int, MPI_Waitall, (count, array_of_requests, array_of_statuses), 3, sizes, args);
+    //TODO
+    void **args = assemble_args_list(1, &count);
+    int sizes[] = { sizeof(count) };
+    PILGRIM_TRACING(int, MPI_Waitall, (count, array_of_requests, array_of_statuses), 1, sizes, args);
 
 }
 int MPI_Testall(int count, MPI_Request array_of_requests[], int *flag, MPI_Status array_of_statuses[])
@@ -50,9 +58,13 @@ int MPI_Testall(int count, MPI_Request array_of_requests[], int *flag, MPI_Statu
         memset(tmp, 0, count*sizeof(MPI_Status));
     }
 
-    void **args = assemble_args_list(4, &count, array_of_requests, flag, tmp);
-    int sizes[] = { sizeof(count), count * sizeof(MPI_Request), 1 * sizeof(int), count * sizeof(MPI_Status) };
-    PILGRIM_TRACING(int, MPI_Testall, (count, array_of_requests, flag, array_of_statuses), 4, sizes, args);
+    //void **args = assemble_args_list(4, &count, array_of_requests, flag, tmp);
+    //int sizes[] = { sizeof(count), count * sizeof(MPI_Request), 1 * sizeof(int), count * sizeof(MPI_Status) };
+    //PILGRIM_TRACING(int, MPI_Testall, (count, array_of_requests, flag, array_of_statuses), 4, sizes, args);
+    //TODO
+    void **args = assemble_args_list(2, &count, flag);
+    int sizes[] = { sizeof(count), 1 * sizeof(int) };
+    PILGRIM_TRACING(int, MPI_Testall, (count, array_of_requests, flag, array_of_statuses), 2, sizes, args);
 }
 int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[])
 {
@@ -63,8 +75,12 @@ int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount, in
         tmp = malloc( (*outcount) * sizeof(MPI_Status) );
         memset(tmp, 0, (*outcount)*sizeof(MPI_Status));
     }
-    void **args = assemble_args_list(5, &incount, array_of_requests, outcount, array_of_indices, tmp);
-    int sizes[] = { sizeof(incount), incount * sizeof(MPI_Request), 1 * sizeof(int), (*outcount) * sizeof(int),  (*outcount) * sizeof(MPI_Status) };
-    PILGRIM_TRACING_2(5, sizes, args);
+    //void **args = assemble_args_list(5, &incount, array_of_requests, outcount, array_of_indices, tmp);
+    //int sizes[] = { sizeof(incount), incount * sizeof(MPI_Request), 1 * sizeof(int), (*outcount) * sizeof(int),  (*outcount) * sizeof(MPI_Status) };
+    //PILGRIM_TRACING_2(5, sizes, args);
+    //TODO
+    void **args = assemble_args_list(3, &incount, outcount, array_of_indices );
+    int sizes[] = { sizeof(incount),  1 * sizeof(int), (*outcount) * sizeof(int)  };
+    PILGRIM_TRACING_2(3, sizes, args);
 }
 

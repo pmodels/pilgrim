@@ -15,8 +15,12 @@ nodist_noinst_SCRIPTS =
 dist_noinst_SCRIPTS = autogen.sh
 
 lib_LTLIBRARIES = libpilgrim.la
+bin_PROGRAMS = pilgrim_reader
+
 
 libpilgrim_la_SOURCES =
+pilgrim_reader_SOURCES = 
+
 AM_CPPFLAGS =
 
 libpilgrim_la_LDFLAGS = -version-info @libpilgrim_so_version@

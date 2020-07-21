@@ -121,7 +121,7 @@ void write_to_file() {
 
     // gathered will be NULL for all ranks except 0
     if(__logger.rank == 0) {
-        FILE *trace_file = fopen("./logs/funcs.txt", "wb");
+        FILE *trace_file = fopen("./logs/funcs.dat", "wb");
         fwrite(gathered, len, 1, trace_file);
         fclose(trace_file);
         free(gathered);

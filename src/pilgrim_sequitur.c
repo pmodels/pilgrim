@@ -7,11 +7,18 @@
 static Grammar grammar;
 static size_t memory_usage = 0;
 static size_t peak_memory = 0;
+static int peak_digrams;
+static int peak_rules;
+
 
 void* mymalloc(size_t size) {
     memory_usage += size;
-    if(memory_usage > peak_memory)
+    if(memory_usage > peak_memory) {
         peak_memory = memory_usage;
+        peak_digrams = HASH_COUNT(grammar.digram_table);
+        Symbol *tmp;
+        DL_COUNT(grammar.rules, tmp, peak_rules);
+    }
     return malloc(size);
 }
 void myfree(void *ptr, size_t size) {
@@ -256,7 +263,7 @@ void sequitur_finalize() {
     if(mpi_rank == 0)
         print_rules();
 
-    printf("Peak memory usage: %ldKB\n", peak_memory/1024);
+    printf("Peak memory usage: %ldKB, digrams: %d, rules: %d\n", peak_memory/1024, peak_digrams, peak_rules);
 
     // Write grammars from all ranks to one file
     sequitur_dump("logs/grammars.txt", &grammar, mpi_rank, mpi_size);

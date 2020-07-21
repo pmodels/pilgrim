@@ -45,7 +45,7 @@ int digram_put(Digram **digram_table, Symbol *symbol) {
     Digram *found;
     HASH_FIND(hh, *digram_table, key, DIGRAM_KEY_LEN, found);
 
-    // Found a same digram in the table already
+    // Found the same digram in the table already
     if(found) {
         myfree(key, DIGRAM_KEY_LEN);
         return 1;
@@ -70,6 +70,7 @@ int digram_delete(Digram **digram_table, Symbol *symbol) {
 
     if(found) {
         HASH_DELETE(hh, *digram_table, found);
+        myfree(found->key, DIGRAM_KEY_LEN);
         myfree(found, sizeof(Digram));
         return 0;
     }

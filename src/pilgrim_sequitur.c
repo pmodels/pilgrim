@@ -253,6 +253,7 @@ void sequitur_init() {
 
     // Add the main rule: S, which will be the head of the rule list
     rule_put(&grammar.rules, new_rule());
+    printf("%ld %ld\n", sizeof(Digram), sizeof(Symbol));
 }
 
 void sequitur_finalize() {

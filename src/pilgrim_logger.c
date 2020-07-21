@@ -11,6 +11,7 @@
 #include "pilgrim_sequitur.h"
 #include "utlist.h"
 #include "uthash.h"
+#include "mpi.h"
 
 #define TIME_RESOLUTION 0.000001
 
@@ -20,14 +21,13 @@ static int hash_id = 0;
 typedef struct RecordHash_t {
     void *key;      // func_id + concated arguments, used as key
     int key_len;
-    int id;
+    int id;         // terminal id used for sequitur compression
     UT_hash_handle hh;
 } RecordHash;
 
 struct Logger {
     int rank;
-    FILE *trace_file;               // log file
-    FILE *metadata_file;            // metadata file
+    int nprocs;
     bool recording;                 // set to true only after initialization
     LocalMetadata local_metadata;   // Local metadata information
 
@@ -38,25 +38,95 @@ struct Logger {
 struct Logger __logger;
 
 
-void write_to_file() {
-    char logfile_name[256];
-    char metafile_name[256];
-    sprintf(logfile_name, "logs/%d.itf", __logger.rank);
-    sprintf(metafile_name, "logs/%d.mt", __logger.rank);
-    __logger.trace_file = fopen(logfile_name, "wb");
-    __logger.metadata_file = fopen(metafile_name, "wb");
-
-    // Write out local metadata information
-    __logger.local_metadata.tend = pilgrim_wtime(),
-    fwrite(&__logger.local_metadata, sizeof(__logger.local_metadata), 1, __logger.metadata_file);
+/**
+ * Merge the local function entries into
+ * a contiguous memory space.
+ * | number of entries |
+ * | terminal id 1 | key 1 |  ... | terminal id N | key N |
+ *
+ * @len: output, the length of this memory space
+ * @return: the address of this memory space.
+ *
+ */
+void* merge_function_entries(int *len) {
+    *len = sizeof(int);
 
     RecordHash *entry, *tmp;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        fwrite(entry->key, entry->key_len, 1, __logger.trace_file);
+        *len = *len + sizeof(int) + entry->key_len;
     }
 
-    fclose(__logger.trace_file);
-    fclose(__logger.metadata_file);
+    int count = HASH_COUNT(__logger.hash_head);
+    void *res = malloc(*len);
+    void *ptr = res;
+
+    memcpy(ptr, &count, sizeof(int));
+    ptr += sizeof(int);
+
+    HASH_ITER(hh, __logger.hash_head, entry, tmp) {
+        memcpy(ptr, &entry->id, sizeof(int));
+        memcpy(ptr+sizeof(int), entry->key, entry->key_len);
+        ptr += sizeof(int) + entry->key_len;
+    }
+
+    return res;
+}
+
+/**
+ * Collect function entries in the hash table from all ranks
+ * so we can write them out to a single file
+ *
+ * @len_sum: output, the length of all function entries.
+ * @return: gathered function entries in a contiguous memory space
+ */
+void* gather_function_entries(int *len_sum) {
+    int len_local;
+    void *local = merge_function_entries(&len_local);
+
+    int recvcounts[__logger.nprocs], displs[__logger.nprocs];
+
+    // Gahter the length from other ranks
+    PMPI_Gather(&len_local, 1, MPI_INT, recvcounts, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    displs[0] = 0;
+    *len_sum = recvcounts[0];
+    for(int i = 1; i < __logger.nprocs; i++) {
+        *len_sum += recvcounts[i];
+        displs[i] = displs[i-1] + recvcounts[i-1];
+    }
+
+    printf("displs %d recv: %d, len_local: %d, len_sum: %d\n", displs[0], recvcounts[0], len_local, *len_sum);
+    void *gathered = NULL;
+    if(__logger.rank == 0)
+        gathered = malloc(*len_sum);
+    PMPI_Gatherv(local, len_local, MPI_BYTE, gathered, recvcounts, displs, MPI_BYTE, 0, MPI_COMM_WORLD);
+
+    free(local);
+    return gathered;
+}
+
+
+void write_to_file() {
+
+    // Write out local metadata information
+    /*
+    FILE* meta_file = fopen("./logs/metadata.txt", "wb");
+    __logger.local_metadata.tend = pilgrim_wtime(),
+    fwrite(&__logger.local_metadata, sizeof(__logger.local_metadata), 1, __logger.metadata_file);
+    fclose(meta_file);
+    */
+
+    // Collect function entries from all ranks and write to a single file
+    int len;
+    void* gathered = gather_function_entries(&len);
+
+    // gathered will be NULL for all ranks except 0
+    if(__logger.rank == 0) {
+        FILE *trace_file = fopen("./logs/funcs.txt", "wb");
+        fwrite(gathered, len, 1, trace_file);
+        fclose(trace_file);
+        free(gathered);
+    }
 }
 
 void write_record(Record record) {
@@ -102,6 +172,7 @@ void write_record(Record record) {
 
 void logger_init(int rank, int nprocs) {
     __logger.rank = rank;
+    __logger.nprocs = nprocs;
     __logger.local_metadata.tstart = pilgrim_wtime();
     __logger.local_metadata.records_count = 0;
     __logger.local_metadata.compressed_records = 0;
@@ -132,7 +203,7 @@ void logger_exit() {
     printf("[Pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
             HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
 
-    // write_to_file();
+    write_to_file();
 
     sequitur_finalize();
 

@@ -67,6 +67,7 @@ int digram_delete(Digram **digram_table, Symbol *symbol) {
 
     Digram *found;
     HASH_FIND(hh, *digram_table, key, DIGRAM_KEY_LEN, found);
+    myfree(key, DIGRAM_KEY_LEN);
 
     // 1 1 1, this sequence only has one digram (1, 1) points to the first 1.
     // if somehow digram_delete is called on the 2nd 1, we should not delete the
@@ -77,7 +78,7 @@ int digram_delete(Digram **digram_table, Symbol *symbol) {
         myfree(found, sizeof(Digram));
         return 0;
     }
-    myfree(key, DIGRAM_KEY_LEN);
+
     return -1;
 }
 

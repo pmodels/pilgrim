@@ -265,10 +265,10 @@ void sequitur_finalize() {
         //print_digrams();
     }
 
-    printf("Peak memory usage: %ldB, %ldB, digrams: %d, rules: %d\n", peak_memory, memory_usage, peak_digrams, peak_rules);
+    //printf("Peak memory usage: %ldB, %ldB, digrams: %d, rules: %d\n", peak_memory, memory_usage, peak_digrams, peak_rules);
 
     // Write grammars from all ranks to one file
-    // sequitur_dump("logs/grammars.txt", &grammar, mpi_rank, mpi_size);
+    sequitur_dump("logs/grammars.txt", &grammar, mpi_rank, mpi_size);
 
     // clean up
     Digram *digram, *tmp;

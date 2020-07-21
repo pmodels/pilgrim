@@ -260,8 +260,10 @@ void sequitur_finalize() {
     PMPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-    if(mpi_rank == 0)
+    if(mpi_rank == 0) {
         print_rules();
+        print_digrams();
+    }
 
     printf("Peak memory usage: %ldKB, digrams: %d, rules: %d\n", peak_memory/1024, peak_digrams, peak_rules);
 

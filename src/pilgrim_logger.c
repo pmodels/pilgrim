@@ -95,7 +95,6 @@ void* gather_function_entries(int *len_sum) {
         displs[i] = displs[i-1] + recvcounts[i-1];
     }
 
-    printf("displs %d recv: %d, len_local: %d, len_sum: %d\n", displs[0], recvcounts[0], len_local, *len_sum);
     void *gathered = NULL;
     if(__logger.rank == 0)
         gathered = malloc(*len_sum);

@@ -4,7 +4,6 @@
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
 
-
     MPI_Datatype myNewType;
     int blocklen[3] = {1, 6, 7 };
     MPI_Aint disp[3];

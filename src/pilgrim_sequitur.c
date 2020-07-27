@@ -244,6 +244,8 @@ void print_rules() {
     printf("\n=======================\nNumber of rule: %d\n", rules_count);
     printf("Number of symbols: %d\n", symbols_count);
     printf("Number of Digrams: %d\n=======================\n", HASH_COUNT(grammar.digram_table));
+
+    printf("memory usage: %ldB, %ldB\n", memory_usage, (rules_count+symbols_count)*sizeof(Symbol)+80*HASH_COUNT(grammar.digram_table));
 }
 
 
@@ -265,7 +267,6 @@ void sequitur_finalize() {
         //print_digrams();
     }
 
-    //printf("Peak memory usage: %ldB, %ldB, digrams: %d, rules: %d\n", peak_memory, memory_usage, peak_digrams, peak_rules);
 
     // Write grammars from all ranks to one file
     sequitur_dump("logs/grammars.dat", &grammar, mpi_rank, mpi_size);

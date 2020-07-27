@@ -66,11 +66,17 @@ int main(int argc, char *argv[]) {
     TEST_MPI_CALL(MPI_File_close, (&fh))
 
     TEST_MPI_CALL(MPI_Barrier, (MPI_COMM_WORLD))
+    TEST_MPI_CALL(MPI_Comm_size, (MPI_COMM_WORLD, &world_size));
     TEST_MPI_CALL(MPI_Barrier, (MPI_COMM_WORLD))
+    TEST_MPI_CALL(MPI_Comm_size, (MPI_COMM_WORLD, &world_size));
     TEST_MPI_CALL(MPI_Barrier, (MPI_COMM_WORLD))
+    TEST_MPI_CALL(MPI_Comm_size, (MPI_COMM_WORLD, &world_size));
     TEST_MPI_CALL(MPI_Barrier, (MPI_COMM_WORLD))
+    TEST_MPI_CALL(MPI_Comm_size, (MPI_COMM_WORLD, &world_size));
     TEST_MPI_CALL(MPI_Barrier, (MPI_COMM_WORLD))
+    TEST_MPI_CALL(MPI_Comm_size, (MPI_COMM_WORLD, &world_size));
     TEST_MPI_CALL(MPI_Barrier, (MPI_COMM_WORLD))
+    TEST_MPI_CALL(MPI_Comm_size, (MPI_COMM_WORLD, &world_size));
 
     int flag;
     MPI_Finalized(&flag);

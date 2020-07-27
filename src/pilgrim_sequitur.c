@@ -92,12 +92,16 @@ void expand_instance(Symbol *sym) {
     Symbol *this;
     Symbol *tail = sym;
     DL_FOREACH(rule->rule_body, this) {
+        // delete the digram of the old rule (rule body)
         digram_delete(&grammar.digram_table, this);
 
         Symbol *s = new_symbol(this->val, this->terminal, this->rule_head);
         symbol_put(sym->rule, tail, s);
         tail = s;
         n++;
+
+        // delete the symbol of the old rule (rule body)
+        delete_symbol(this);
     }
 
     this = sym->next;
@@ -244,6 +248,8 @@ void print_rules() {
     printf("\n=======================\nNumber of rule: %d\n", rules_count);
     printf("Number of symbols: %d\n", symbols_count);
     printf("Number of Digrams: %d\n=======================\n", HASH_COUNT(grammar.digram_table));
+
+    printf("memory usage: %ldB, %ldB\n", memory_usage, (rules_count+symbols_count)*sizeof(Symbol)+80*HASH_COUNT(grammar.digram_table));
 }
 
 
@@ -265,7 +271,6 @@ void sequitur_finalize() {
         //print_digrams();
     }
 
-    //printf("Peak memory usage: %ldB, %ldB, digrams: %d, rules: %d\n", peak_memory, memory_usage, peak_digrams, peak_rules);
 
     // Write grammars from all ranks to one file
     sequitur_dump("logs/grammars.dat", &grammar, mpi_rank, mpi_size);

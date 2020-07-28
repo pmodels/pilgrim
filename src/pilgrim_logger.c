@@ -15,13 +15,13 @@
 
 #define TIME_RESOLUTION 0.000001
 
-static int hash_id = 0;
+static int current_terminal_id = 0;
 
 // Entry in uthash
 typedef struct RecordHash_t {
-    void *key;      // func_id + concated arguments, used as key
+    void *key;               // func_id + arguments + duration, used as key
     int key_len;
-    int id;         // terminal id used for sequitur compression
+    int terminal_id;         // terminal id used for sequitur compression
     UT_hash_handle hh;
 } RecordHash;
 
@@ -64,7 +64,7 @@ void* merge_function_entries(int *len) {
     ptr += sizeof(int);
 
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        memcpy(ptr, &entry->id, sizeof(int));
+        memcpy(ptr, &entry->terminal_id, sizeof(int));
         memcpy(ptr+sizeof(int), entry->key, entry->key_len);
         ptr += sizeof(int) + entry->key_len;
     }
@@ -161,12 +161,12 @@ void write_record(Record record) {
         entry = (RecordHash*) malloc(sizeof(RecordHash));
         entry->key = key;
         entry->key_len = key_len;
-        entry->id = hash_id;
-        hash_id++;
+        entry->terminal_id = current_terminal_id;
+        current_terminal_id++;
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }
 
-    append_terminal(entry->id);
+    append_terminal(entry->terminal_id);
 }
 
 void logger_init(int rank, int nprocs) {

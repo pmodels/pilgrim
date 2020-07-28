@@ -40,7 +40,7 @@ def codegen_assemble_args(func):
     line = ""
     assemble_args = []
     for arg in func.arguments:
-        if 'void' in arg.type:
+        if 'void' in arg.type:                  # void* buf
             assemble_args.append("&"+arg.name)
         elif 'MPI_Status*' in arg.type and 'const' not in arg.type:
             line += "\tvoid* tmp = status;\n"

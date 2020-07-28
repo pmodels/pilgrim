@@ -47,7 +47,7 @@ struct Logger {
 struct Logger __logger;
 
 
-int addr2id(const void* buffer) {
+int* addr2id(const void* buffer) {
     void *key = malloc(sizeof(void*));
     memcpy(key, &buffer, sizeof(void*));
 
@@ -63,7 +63,7 @@ int addr2id(const void* buffer) {
         HASH_ADD_KEYPTR(hh, __logger.addr_table, entry->key, sizeof(void*), entry);
     }
 
-    return entry->addr_id;
+    return &(entry->addr_id);
 }
 
 /**

@@ -28,7 +28,7 @@ typedef struct _GlobalMetadata {
 void logger_init(int rank, int nprocs);
 void logger_exit();
 void write_record(Record record);
-int addr2id(const void *buffer);
+int* addr2id(const void *buffer);
 
 
 void** read_record_args(FILE*f, int func_id);

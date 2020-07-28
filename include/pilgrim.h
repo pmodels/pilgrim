@@ -60,6 +60,11 @@
             memset(record.args[i], 0, record_arg_sizes[i]);                             \
     }                                                                                   \
     write_record(record);                                                               \
+                                                                                        \
+    for(i = 0; i < record_arg_count; i++)                                               \
+        free(record.args[i]);                                                           \
+    free(record.args);                                                                  \
+                                                                                        \
     return res;
 
 #endif

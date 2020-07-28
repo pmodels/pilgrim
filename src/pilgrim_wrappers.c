@@ -549,6 +549,7 @@ int MPI_Dist_graph_create(MPI_Comm comm_old, int n, const int sources[], const i
 	int sizes[] = { sizeof(MPI_Comm), sizeof(int), n * sizeof(const int), n * sizeof(const int), 1 * sizeof(const int), 1 * sizeof(const int), sizeof(MPI_Info), sizeof(int), 1 * sizeof(MPI_Comm) };
 	PILGRIM_TRACING_2(9, sizes, args);
 }
+/*
 int MPI_File_write_at(MPI_File fh, MPI_Offset offset, const void *buf, int count, MPI_Datatype datatype, MPI_Status *status)
 {
 	PILGRIM_TRACING_1(int, MPI_File_write_at, (fh, offset, buf, count, datatype, status));
@@ -556,6 +557,7 @@ int MPI_File_write_at(MPI_File fh, MPI_Offset offset, const void *buf, int count
 	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
 	PILGRIM_TRACING_2(5, sizes, args);
 }
+*/
 int MPI_File_close(MPI_File *fh)
 {
 	PILGRIM_TRACING_1(int, MPI_File_close, (fh));

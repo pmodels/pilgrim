@@ -41,7 +41,7 @@ def codegen_assemble_args(func):
     assemble_args = []
     for arg in func.arguments:
         if 'void' in arg.type:                  # void* buf
-            assemble_args.append("&"+arg.name)
+            assemble_args.append("addr2id("+arg.name+")")
         elif 'MPI_Status*' in arg.type and 'const' not in arg.type:
             line += "\tvoid* tmp = status;\n"
             line += "\tif(status == MPI_STATUS_IGNORE) {\n"
@@ -64,7 +64,7 @@ def codegen_sizeof_args(func):
     sizeof_args = []
     for arg in func.arguments:
         if 'void' in arg.type:
-            sizeof_args.append('sizeof(void*)')
+            sizeof_args.append('sizeof(int)')
         elif 'char*' in arg.type:
             if '**' not in arg.type and '[' not in arg.type:    # only consider one single string
                 sizeof_args.append('strlen(%s)+1' %arg.name)

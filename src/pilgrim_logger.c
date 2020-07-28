@@ -16,14 +16,22 @@
 #define TIME_RESOLUTION 0.000001
 
 static int current_terminal_id = 0;
+static int current_addr_id = 0;
 
 // Entry in uthash
 typedef struct RecordHash_t {
-    void *key;               // func_id + arguments + duration, used as key
+    void *key;                  // func_id + arguments + duration, used as key
     int key_len;
-    int terminal_id;         // terminal id used for sequitur compression
+    int terminal_id;            // terminal id used for sequitur compression
     UT_hash_handle hh;
 } RecordHash;
+
+// Entry in uthash
+typedef struct AddrHash_t {
+    void *key;                  // buffer address as key, key len is sizeof(void*)
+    int addr_id;                // unique symbolic id as value
+    UT_hash_handle hh;
+} AddrHash;
 
 struct Logger {
     int rank;
@@ -31,12 +39,32 @@ struct Logger {
     bool recording;                 // set to true only after initialization
     LocalMetadata local_metadata;   // Local metadata information
 
-    RecordHash *hash_head;          // head of hash table
+    RecordHash *hash_head;          // head of the function entry hash table
+    AddrHash *addr_table;           // head of buffer address table
 };
 
 // Global object to access the Logger fileds
 struct Logger __logger;
 
+
+int addr2id(const void* buffer) {
+    void *key = malloc(sizeof(void*));
+    memcpy(key, &buffer, sizeof(void*));
+
+    AddrHash *entry;
+    HASH_FIND(hh, __logger.addr_table, key, sizeof(void*), entry);
+    if(entry) {                         // Found
+        free(key);
+    } else {                            // Not exist, add to hash table
+        entry = (AddrHash*) malloc(sizeof(AddrHash));
+        entry->key = key;
+        entry->addr_id = current_addr_id;
+        current_addr_id++;
+        HASH_ADD_KEYPTR(hh, __logger.addr_table, entry->key, sizeof(void*), entry);
+    }
+
+    return entry->addr_id;
+}
 
 /**
  * Merge the local function entries into
@@ -48,12 +76,12 @@ struct Logger __logger;
  * @return: the address of this memory space.
  *
  */
-void* merge_function_entries(int *len) {
+void* merge_local_function_entries(RecordHash *hash_head, int *len) {
     *len = sizeof(int);
 
     RecordHash *entry, *tmp;
-    HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        *len = *len + sizeof(int) + entry->key_len;
+    HASH_ITER(hh, hash_head, entry, tmp) {
+        *len = *len + sizeof(int) * 2 + entry->key_len;
     }
 
     int count = HASH_COUNT(__logger.hash_head);
@@ -63,10 +91,16 @@ void* merge_function_entries(int *len) {
     memcpy(ptr, &count, sizeof(int));
     ptr += sizeof(int);
 
-    HASH_ITER(hh, __logger.hash_head, entry, tmp) {
+    HASH_ITER(hh, hash_head, entry, tmp) {
+
         memcpy(ptr, &entry->terminal_id, sizeof(int));
-        memcpy(ptr+sizeof(int), entry->key, entry->key_len);
-        ptr += sizeof(int) + entry->key_len;
+        ptr = ptr + sizeof(int);
+
+        memcpy(ptr, &entry->key_len, sizeof(int));
+        ptr = ptr + sizeof(int);
+
+        memcpy(ptr, entry->key, entry->key_len);
+        ptr = ptr + entry->key_len;
     }
 
     return res;
@@ -81,7 +115,7 @@ void* merge_function_entries(int *len) {
  */
 void* gather_function_entries(int *len_sum) {
     int len_local;
-    void *local = merge_function_entries(&len_local);
+    void *local = merge_local_function_entries(__logger.hash_head, &len_local);
 
     int recvcounts[__logger.nprocs], displs[__logger.nprocs];
 
@@ -105,8 +139,72 @@ void* gather_function_entries(int *len_sum) {
 }
 
 
-void write_to_file() {
+/**
+ * Once we gathered function entries from every rank
+ * we compress them by inserting them into one hash table
+ *
+ * Then we transfer the compressed table into a contiguous memory space
+ */
+void* compress_gathered_function_entries(void *gathered, int length, int *out_len) {
+    RecordHash *compressed_table = NULL;
+    int terminal_id, key_len;
+    void *ptr = gathered;
+    void *key;
 
+    int before = 0, after = 0;
+
+    while(ptr < gathered + length) {
+        int count;
+        memcpy(&count, ptr, sizeof(int));
+        ptr = ptr + sizeof(int);
+
+        // function entries for one rank
+        for(int i = 0 ; i < count; i++) {
+
+            // 4 bytes terminal id
+            ptr = ptr + sizeof(int);
+
+            // 4 bytes key length
+            memcpy(&key_len, ptr, sizeof(int));
+            ptr = ptr + sizeof(int);
+
+            // key length bytes key
+            key = malloc(sizeof(key_len));
+            memcpy(key, ptr, key_len);
+            ptr = ptr + key_len;
+
+            // Check to see if this function entry is already in the table
+            RecordHash *entry;
+            HASH_FIND(hh, compressed_table, key, key_len, entry);
+            if(entry) {                         // Found, do nothing for now...
+
+            } else {                            // Not exist, add to hash table
+                entry = (RecordHash*) malloc(sizeof(RecordHash));
+                entry->key = key;
+                entry->key_len = key_len;
+                HASH_ADD_KEYPTR(hh, compressed_table, entry->key, key_len, entry);
+                after++;
+            }
+            before++;
+        }
+    }
+
+
+    printf("before: %d, after: %d\n", before, after);
+    void *compressed = merge_local_function_entries(compressed_table, out_len);
+
+    // Clean this compressed table as it is no longer used
+    RecordHash *entry, *tmp;
+    HASH_ITER(hh, compressed_table, entry, tmp) {
+        free(entry->key);
+    }
+    HASH_CLEAR(hh, compressed_table);
+
+    return compressed;
+}
+
+
+void write_to_file() {
     // Write out local metadata information
     /*
     FILE* meta_file = fopen("./logs/metadata.txt", "wb");
@@ -119,12 +217,18 @@ void write_to_file() {
     int len;
     void* gathered = gather_function_entries(&len);
 
+
     // gathered will be NULL for all ranks except 0
     if(__logger.rank == 0) {
-        FILE *trace_file = fopen("./logs/funcs.dat", "wb");
-        fwrite(gathered, len, 1, trace_file);
-        fclose(trace_file);
+
+        int compressed_len;
+        void* compressed = compress_gathered_function_entries(gathered, len, &compressed_len);
         free(gathered);
+
+        FILE *trace_file = fopen("./logs/funcs.dat", "wb");
+        fwrite(compressed, compressed_len, 1, trace_file);
+        fclose(trace_file);
+        free(compressed);
     }
 }
 
@@ -156,8 +260,8 @@ void write_record(Record record) {
     RecordHash *entry;
     HASH_FIND(hh, __logger.hash_head, key, key_len, entry);
     if(entry) {                         // Found, insert the (tstart, tend) pair.
-
-    } else {                            // Not exisit, add to hash table
+        free(key);
+    } else {                            // Not exist, add to hash table
         entry = (RecordHash*) malloc(sizeof(RecordHash));
         entry->key = key;
         entry->key_len = key_len;
@@ -210,6 +314,12 @@ void logger_exit() {
     RecordHash *entry, *tmp;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
         free(entry->key);
+    }
+    HASH_CLEAR(hh, __logger.hash_head);
+
+    AddrHash *addr_entry, *addr_tmp;
+    HASH_ITER(hh, __logger.addr_table, addr_entry, addr_tmp) {
+        free(addr_entry->key);
     }
     HASH_CLEAR(hh, __logger.hash_head);
 }

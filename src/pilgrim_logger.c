@@ -153,7 +153,7 @@ void* compress_gathered_function_entries(void *gathered, int length, int *out_le
 
     int before = 0, after = 0;
 
-    while(ptr < gathered + length) {
+    for(int rank = 0; rank < __logger.nprocs; rank++) {
         int count;
         memcpy(&count, ptr, sizeof(int));
         ptr = ptr + sizeof(int);
@@ -169,7 +169,7 @@ void* compress_gathered_function_entries(void *gathered, int length, int *out_le
             ptr = ptr + sizeof(int);
 
             // key length bytes key
-            key = malloc(sizeof(key_len));
+            key = malloc(key_len);
             memcpy(key, ptr, key_len);
             ptr = ptr + key_len;
 
@@ -184,13 +184,13 @@ void* compress_gathered_function_entries(void *gathered, int length, int *out_le
                 entry->key_len = key_len;
                 HASH_ADD_KEYPTR(hh, compressed_table, entry->key, key_len, entry);
                 after++;
+                //printf("rank: %d, i: %d, key len: %d\n", rank, i, key_len);
             }
             before++;
         }
     }
 
-
-    printf("before: %d, after: %d\n", before, after);
+    printf("Inter-process function entry compression: before: %d, after: %d\n", before, after);
     void *compressed = merge_local_function_entries(compressed_table, out_len);
 
     // Clean this compressed table as it is no longer used
@@ -235,9 +235,10 @@ void write_to_file() {
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
     /*
-    printf("[Pilgrim (rank=%d)] tstart:%.6lf, tend:%.6f, func id:%d\n", __logger.rank,
-            record.tstart-__logger.local_metadata.tstart,
-            record.tend-__logger.local_metadata.tstart, record.func_id);
+    if(__logger.rank == 0)
+        printf("[Pilgrim (rank=%d)] tstart:%.6lf, tend:%.6f, func id:%s\n", __logger.rank,
+                record.tstart-__logger.local_metadata.tstart,
+                record.tend-__logger.local_metadata.tstart, func_names[record.func_id]);
     */
     __logger.local_metadata.records_count++;
 

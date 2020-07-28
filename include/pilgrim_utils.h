@@ -8,8 +8,4 @@ double pilgrim_wtime();
 void** assemble_args_list(int arg_count, ...);
 
 
-char* itoa(int val);
-char* ftoa(double val);
-char* ptoa(const void *ptr);
-
 #endif

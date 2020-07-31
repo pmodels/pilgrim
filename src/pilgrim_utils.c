@@ -24,24 +24,3 @@ inline void** assemble_args_list(int arg_count, ...) {
     return args;
 }
 
-
-/* Integer to stirng */
-inline char* itoa(int val) {
-    char *str = malloc(sizeof(char) * 16);
-    sprintf(str, "%d", val);
-    return str;
-}
-
-/* Float to stirng */
-inline char* ftoa(double val) {
-    char *str = malloc(sizeof(char) * 24);
-    sprintf(str, "%f", val);
-    return str;
-}
-
-/* Pointer to string */
-inline char* ptoa(const void *ptr) {
-    char *str = malloc(sizeof(char) * 16);
-    sprintf(str, "%p", ptr);
-    return str;
-}

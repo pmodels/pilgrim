@@ -40,9 +40,12 @@ def codegen_assemble_args(func):
     line = ""
     assemble_args = []
     for arg in func.arguments:
-        if 'void' in arg.type:
-            assemble_args.append("&"+arg.name)
+        if 'void' in arg.type:                  # void* buf
+            assemble_args.append("addr2id("+arg.name+")")
+        elif 'MPI_Status' in arg.type or 'MPI_Request' in arg.type: # ignore for now (TODO)
+            continue
         elif 'MPI_Status*' in arg.type and 'const' not in arg.type:
+
             line += "\tvoid* tmp = status;\n"
             line += "\tif(status == MPI_STATUS_IGNORE) {\n"
             line += "\t\ttmp = malloc(sizeof(MPI_Status)); \n\t\tmemset(tmp, 0, sizeof(MPI_Status));\n\t}\n"
@@ -58,16 +61,18 @@ def codegen_assemble_args(func):
     else:
         line = '\tvoid **args = NULL;\n'
 
-    return line
+    return line, len(assemble_args)
 
 def codegen_sizeof_args(func):
     sizeof_args = []
     for arg in func.arguments:
         if 'void' in arg.type:
-            sizeof_args.append('sizeof(void*)')
+            sizeof_args.append('sizeof(int)')
         elif 'char*' in arg.type:
             if '**' not in arg.type and '[' not in arg.type:    # only consider one single string
                 sizeof_args.append('strlen(%s)+1' %arg.name)
+        elif 'MPI_Status' in arg.type or 'MPI_Request' in arg.type: # ignore for now (TODO)
+            continue
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
             fixed_type = arg.type.split('[')[0].replace('*', '')
@@ -118,9 +123,10 @@ def generate_wrapper_file(funcs):
         f.write('\tPILGRIM_TRACING_1(%s, %s, (%s));\n' %(func.ret_type, func.name, ', '.join(arg_names)))
 
         # Real thing
-        f.write(codegen_assemble_args(func))
+        line, num_args = codegen_assemble_args(func)
+        f.write(line)
         f.write(codegen_sizeof_args(func))
-        f.write('\tPILGRIM_TRACING_2(%d, sizes, args);\n' %len(arg_names))
+        f.write('\tPILGRIM_TRACING_2(%d, sizes, args);\n' %num_args)
 
         f.write('}\n')
 

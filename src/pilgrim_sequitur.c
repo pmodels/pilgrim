@@ -7,17 +7,13 @@
 static Grammar grammar;
 static size_t memory_usage = 0;
 static size_t peak_memory = 0;
-static int peak_digrams;
-static int peak_rules;
 
 
 void* mymalloc(size_t size) {
     memory_usage += size;
     if(memory_usage > peak_memory) {
         peak_memory = memory_usage;
-        peak_digrams = HASH_COUNT(grammar.digram_table);
         Symbol *tmp;
-        DL_COUNT(grammar.rules, tmp, peak_rules);
     }
     return malloc(size);
 }
@@ -233,16 +229,18 @@ void print_rules() {
     DL_COUNT(grammar.rules, rule, rules_count);
 
     DL_FOREACH(grammar.rules, rule) {
-        printf("Rule %d :-> ", rule->val);
-
         int count;
         DL_COUNT(rule->rule_body, sym, count);
         symbols_count += count;
+
+        #ifdef DEBUG
+        printf("Rule %d :-> ", rule->val);
 
         DL_FOREACH(rule->rule_body, sym) {
             printf("%d ", sym->val);
         }
         printf("\n");
+        #endif
     }
 
     printf("\n=======================\nNumber of rule: %d\n", rules_count);

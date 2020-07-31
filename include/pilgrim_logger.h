@@ -2,9 +2,8 @@
 #define _PILGRIM_LOG_FORMAT_H_
 
 typedef struct _Record {
-    char status;                // peephole compressed or not
     double tstart, tend;
-    short func_id;              // 2 bytes function id or ref id
+    short func_id;              // 2 bytes function id
     int arg_count;
     int *arg_sizes;             // size of each argument
     void **args;                // Store all arguments in array
@@ -29,6 +28,7 @@ typedef struct _GlobalMetadata {
 void logger_init(int rank, int nprocs);
 void logger_exit();
 void write_record(Record record);
+int* addr2id(const void *buffer);
 
 
 void** read_record_args(FILE*f, int func_id);

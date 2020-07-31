@@ -263,7 +263,9 @@ void sequitur_finalize() {
     PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     if(mpi_rank == 0) {
+        #ifdef DEBUG
         print_rules();
+        #endif
         //print_digrams();
     }
 

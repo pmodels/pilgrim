@@ -57,10 +57,13 @@ void replace_digram(Symbol *origin, Symbol *rule, bool delete_digram) {
         digram_delete(&grammar.digram_table, origin->next);
     }
 
-    delete_symbol(origin);
+    // delete symbol will set origin to NULL
+    // so we need to store its rule and also delete origin->next first.
+    Symbol *origin_rule = origin->rule;
     delete_symbol(origin->next);
+    delete_symbol(origin);
 
-    symbol_put(origin->rule, prev, replaced);
+    symbol_put(origin_rule, prev, replaced);
 
     // Add a new symbol (replaced) after prev
     // may introduce another repeated digram that we need to check
@@ -233,14 +236,14 @@ void print_rules() {
         DL_COUNT(rule->rule_body, sym, count);
         symbols_count += count;
 
-        #ifdef DEBUG
+        //#ifdef DEBUG
         printf("Rule %d :-> ", rule->val);
 
         DL_FOREACH(rule->rule_body, sym) {
             printf("%d ", sym->val);
         }
         printf("\n");
-        #endif
+        //#endif
     }
 
     printf("\n=======================\nNumber of rule: %d\n", rules_count);

@@ -9,6 +9,7 @@
 
 #include "pilgrim.h"
 #include "pilgrim_sequitur.h"
+#include "dlmalloc-2.8.6.h"
 #include "utlist.h"
 #include "uthash.h"
 #include "mpi.h"
@@ -48,15 +49,15 @@ struct Logger __logger;
 
 
 int* addr2id(const void* buffer) {
-    void *key = malloc(sizeof(void*));
+    void *key = dlmalloc(sizeof(void*));
     memcpy(key, &buffer, sizeof(void*));
 
     AddrHash *entry;
     HASH_FIND(hh, __logger.addr_table, key, sizeof(void*), entry);
     if(entry) {                         // Found
-        free(key);
+        dlfree(key);
     } else {                            // Not exist, add to hash table
-        entry = (AddrHash*) malloc(sizeof(AddrHash));
+        entry = (AddrHash*) dlmalloc(sizeof(AddrHash));
         entry->key = key;
         entry->addr_id = current_addr_id;
         current_addr_id++;
@@ -85,7 +86,7 @@ void* merge_local_function_entries(RecordHash *hash_head, int *len) {
     }
 
     int count = HASH_COUNT(__logger.hash_head);
-    void *res = malloc(*len);
+    void *res = dlmalloc(*len);
     void *ptr = res;
 
     memcpy(ptr, &count, sizeof(int));
@@ -131,10 +132,10 @@ void* gather_function_entries(int *len_sum) {
 
     void *gathered = NULL;
     if(__logger.rank == 0)
-        gathered = malloc(*len_sum);
+        gathered = dlmalloc(*len_sum);
     PMPI_Gatherv(local, len_local, MPI_BYTE, gathered, recvcounts, displs, MPI_BYTE, 0, MPI_COMM_WORLD);
 
-    free(local);
+    dlfree(local);
     return gathered;
 }
 
@@ -145,7 +146,7 @@ void* gather_function_entries(int *len_sum) {
  *
  * Then we transfer the compressed table into a contiguous memory space
  */
-void* compress_gathered_function_entries(void *gathered, int length, int *out_len) {
+void* compress_gathered_function_entries(void *gathered, int *out_len) {
     RecordHash *compressed_table = NULL;
     int terminal_id, key_len;
     void *ptr = gathered;
@@ -169,7 +170,7 @@ void* compress_gathered_function_entries(void *gathered, int length, int *out_le
             ptr = ptr + sizeof(int);
 
             // key length bytes key
-            key = malloc(key_len);
+            key = dlmalloc(key_len);
             memcpy(key, ptr, key_len);
             ptr = ptr + key_len;
 
@@ -177,14 +178,13 @@ void* compress_gathered_function_entries(void *gathered, int length, int *out_le
             RecordHash *entry;
             HASH_FIND(hh, compressed_table, key, key_len, entry);
             if(entry) {                         // Found, do nothing for now...
-
+                dlfree(key);
             } else {                            // Not exist, add to hash table
-                entry = (RecordHash*) malloc(sizeof(RecordHash));
+                entry = (RecordHash*) dlmalloc(sizeof(RecordHash));
                 entry->key = key;
                 entry->key_len = key_len;
                 HASH_ADD_KEYPTR(hh, compressed_table, entry->key, key_len, entry);
                 after++;
-                //printf("rank: %d, i: %d, key len: %d\n", rank, i, key_len);
             }
             before++;
         }
@@ -196,7 +196,7 @@ void* compress_gathered_function_entries(void *gathered, int length, int *out_le
     // Clean this compressed table as it is no longer used
     RecordHash *entry, *tmp;
     HASH_ITER(hh, compressed_table, entry, tmp) {
-        free(entry->key);
+        dlfree(entry->key);
     }
     HASH_CLEAR(hh, compressed_table);
 
@@ -217,18 +217,17 @@ void write_to_file() {
     int len;
     void* gathered = gather_function_entries(&len);
 
-
     // gathered will be NULL for all ranks except 0
     if(__logger.rank == 0) {
 
         int compressed_len;
-        void* compressed = compress_gathered_function_entries(gathered, len, &compressed_len);
-        free(gathered);
+        void* compressed = compress_gathered_function_entries(gathered, &compressed_len);
+        dlfree(gathered);
 
         FILE *trace_file = fopen("./logs/funcs.dat", "wb");
         fwrite(compressed, compressed_len, 1, trace_file);
         fclose(trace_file);
-        free(compressed);
+        dlfree(compressed);
     }
 }
 
@@ -249,7 +248,7 @@ void write_record(Record record) {
         key_len += record.arg_sizes[i];
 
     // Concat func_id+arguments and use it as the key
-    void *key = malloc(key_len);
+    void *key = dlmalloc(key_len);
     memcpy(key, &(record.func_id), sizeof(record.func_id));
     int pos = sizeof(record.func_id);
     for(i = 0; i < record.arg_count; i++) {
@@ -261,9 +260,9 @@ void write_record(Record record) {
     RecordHash *entry;
     HASH_FIND(hh, __logger.hash_head, key, key_len, entry);
     if(entry) {                         // Found, insert the (tstart, tend) pair.
-        free(key);
+        dlfree(key);
     } else {                            // Not exist, add to hash table
-        entry = (RecordHash*) malloc(sizeof(RecordHash));
+        entry = (RecordHash*) dlmalloc(sizeof(RecordHash));
         entry->key = key;
         entry->key_len = key_len;
         entry->terminal_id = current_terminal_id;
@@ -314,13 +313,13 @@ void logger_exit() {
     // Clean up the hash table
     RecordHash *entry, *tmp;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        free(entry->key);
+        dlfree(entry->key);
     }
     HASH_CLEAR(hh, __logger.hash_head);
 
     AddrHash *addr_entry, *addr_tmp;
     HASH_ITER(hh, __logger.addr_table, addr_entry, addr_tmp) {
-        free(addr_entry->key);
+        dlfree(addr_entry->key);
     }
     HASH_CLEAR(hh, __logger.hash_head);
 }

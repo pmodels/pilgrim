@@ -1,5 +1,6 @@
 #include <mpi.h>
 #include "pilgrim.h"
+#include "pilgrim_mem_hooks.h"
 // MPI_Init, MPI_Finalize are not implemented in pilgrim_warrper.c
 
 
@@ -12,10 +13,12 @@ void pilgrim_init(int *argc, char ***argv) {
     PMPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     logger_init(rank, nprocs);
+    install_hooks();
     elapsed_time = pilgrim_wtime();
 }
 
 void pilgrim_exit() {
+    remove_hooks();
     logger_exit();
     elapsed_time = pilgrim_wtime() - elapsed_time;
     if (rank == 0)

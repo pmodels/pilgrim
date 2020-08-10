@@ -21,7 +21,8 @@ bin_PROGRAMS = pilgrim_reader
 libpilgrim_la_SOURCES =
 pilgrim_reader_SOURCES = 
 
-AM_CPPFLAGS =
+AM_CPPFLAGS = -g -rdynamic
+AM_CFLAGS = -g -rdynamic
 
 libpilgrim_la_LDFLAGS = -version-info @libpilgrim_so_version@
 

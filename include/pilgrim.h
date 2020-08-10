@@ -5,6 +5,7 @@
 #include "pilgrim_func_ids.h"
 #include "pilgrim_logger.h"
 #include "pilgrim_utils.h"
+#include "dlmalloc-2.8.6.h"
 
 
 /*
@@ -50,10 +51,10 @@
         .arg_count = record_arg_count,                                                  \
         .arg_sizes = record_arg_sizes,                                                  \
     };                                                                                  \
-    record.args = malloc(sizeof(void*) * record_arg_count);                             \
+    record.args = dlmalloc(sizeof(void*) * record_arg_count);                             \
     int i;                                                                              \
     for(i = 0; i < record_arg_count; i++) {                                             \
-        record.args[i] = malloc(record_arg_sizes[i]);                                   \
+        record.args[i] = dlmalloc(record_arg_sizes[i]);                                   \
         if(record_args[i])                                                              \
             memcpy(record.args[i], record_args[i], record_arg_sizes[i]);                \
         else                                                                            \
@@ -62,8 +63,8 @@
     write_record(record);                                                               \
                                                                                         \
     for(i = 0; i < record_arg_count; i++)                                               \
-        free(record.args[i]);                                                           \
-    free(record.args);                                                                  \
+        dlfree(record.args[i]);                                                           \
+    dlfree(record.args);                                                                  \
                                                                                         \
     return res;
 

@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "mpi.h"
 #include "pilgrim_sequitur.h"
+#include "dlmalloc-2.8.6.h"
 
 static Grammar grammar;
 static size_t memory_usage = 0;
@@ -15,11 +16,11 @@ void* mymalloc(size_t size) {
         peak_memory = memory_usage;
         Symbol *tmp;
     }
-    return malloc(size);
+    return dlmalloc(size);
 }
 void myfree(void *ptr, size_t size) {
     memory_usage -= size;
-    free(ptr);
+    dlfree(ptr);
 }
 
 void delete_symbol(Symbol *sym) {
@@ -279,7 +280,7 @@ void sequitur_finalize() {
     // clean up
     Digram *digram, *tmp;
     HASH_ITER(hh, grammar.digram_table, digram, tmp) {
-        free(digram->key);
+        dlfree(digram->key);
     }
     HASH_CLEAR(hh, grammar.digram_table);
 
@@ -287,10 +288,10 @@ void sequitur_finalize() {
     DL_FOREACH_SAFE(grammar.rules, rule, tmp2) {
         DL_FOREACH_SAFE(rule->rule_body, sym, tmp3) {
             DL_DELETE(rule->rule_body, sym);
-            free(sym);
+            dlfree(sym);
         }
         DL_DELETE(grammar.rules, rule);
-        free(rule);
+        dlfree(rule);
     }
 }
 

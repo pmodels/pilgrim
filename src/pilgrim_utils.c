@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "pilgrim_utils.h"
+#include "dlmalloc-2.8.6.h"
 
 inline double pilgrim_wtime()
 {
@@ -13,7 +14,7 @@ inline double pilgrim_wtime()
 
 /* Put many arguments (char *) in a list (char**) */
 inline void** assemble_args_list(int arg_count, ...) {
-    void** args = malloc(sizeof(void*) * arg_count);
+    void** args = dlmalloc(sizeof(void*) * arg_count);
 
     int i;
     va_list valist;

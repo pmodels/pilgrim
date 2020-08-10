@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pilgrim.h"
+#include "dlmalloc-2.8.6.h"
 
 int MPI_Pcontrol(const int level, ...)
 {
@@ -20,7 +21,7 @@ int MPI_Waitsome(int incount, MPI_Request array_of_requests[], int *outcount, in
 	PILGRIM_TRACING_1(int, MPI_Waitsome, (incount, array_of_requests, outcount, array_of_indices, array_of_statuses))
     void *tmp = array_of_statuses;
     if(array_of_statuses == MPI_STATUSES_IGNORE) {
-        tmp = malloc( (*outcount) * sizeof(MPI_Status) );
+        tmp = dlmalloc( (*outcount) * sizeof(MPI_Status) );
         memset(tmp, 0, (*outcount)*sizeof(MPI_Status));
     }
     // TODO
@@ -38,7 +39,7 @@ int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_
 
     void *tmp = array_of_statuses;
     if(array_of_statuses == MPI_STATUSES_IGNORE) {
-        tmp = malloc( count * sizeof(MPI_Status) );
+        tmp = dlmalloc( count * sizeof(MPI_Status) );
         memset(tmp, 0, count*sizeof(MPI_Status));
     }
     //void **args = assemble_args_list(3, &count, array_of_requests, tmp);
@@ -54,7 +55,7 @@ int MPI_Testall(int count, MPI_Request array_of_requests[], int *flag, MPI_Statu
 {
     void *tmp = array_of_statuses;
     if(array_of_statuses == MPI_STATUSES_IGNORE) {
-        tmp = malloc( count * sizeof(MPI_Status) );
+        tmp = dlmalloc( count * sizeof(MPI_Status) );
         memset(tmp, 0, count*sizeof(MPI_Status));
     }
 
@@ -72,7 +73,7 @@ int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount, in
 
     void *tmp = array_of_statuses;
     if(array_of_statuses == MPI_STATUSES_IGNORE) {
-        tmp = malloc( (*outcount) * sizeof(MPI_Status) );
+        tmp = dlmalloc( (*outcount) * sizeof(MPI_Status) );
         memset(tmp, 0, (*outcount)*sizeof(MPI_Status));
     }
     //void **args = assemble_args_list(5, &incount, array_of_requests, outcount, array_of_indices, tmp);

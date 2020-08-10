@@ -36,7 +36,11 @@ avl_search(AvlTree t, intptr_t addr)
 {
     if(t == AVL_EMPTY) {
         return AVL_EMPTY;
-    } else if(t->addr <= addr && addr < t->addr+t->size) {
+    }
+
+    intptr_t lower = t->addr;
+    intptr_t upper = t->addr + (intptr_t)(t->size); // must cast size_t to intptr_t first!
+    if(lower <= addr && upper > addr) {
         return t;
     } else {
         return avl_search(t->child[addr> t->addr], addr);
@@ -183,11 +187,11 @@ avl_print_keys(AvlTree t)
 
 
 /* delete and return minimum value in a tree */
-int
+intptr_t
 avl_delete_min(AvlTree *t)
 {
     AvlTree oldroot;
-    int minValue;
+    intptr_t minValue;
 
     assert(t != AVL_EMPTY);
 

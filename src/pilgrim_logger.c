@@ -220,10 +220,12 @@ void write_to_file() {
 
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
-    if(__logger.rank == 0)
+    /*
+    if(__logger.rank == 1)
         printf("[Pilgrim (rank=%d)] tstart:%.6lf, tend:%.6f, func id:%s\n", __logger.rank,
                 record.tstart-__logger.local_metadata.tstart,
                 record.tend-__logger.local_metadata.tstart, func_names[record.func_id]);
+    */
     __logger.local_metadata.records_count++;
 
     // Get key length
@@ -281,7 +283,7 @@ void logger_init(int rank, int nprocs) {
     }
 
     sequitur_init();
-    install_hooks(&__logger.addr_tree);
+    install_hooks(__logger.rank, &__logger.addr_tree);
     __logger.recording = true;
 }
 
@@ -304,6 +306,8 @@ void logger_exit() {
     }
     HASH_CLEAR(hh, __logger.hash_head);
 
-    avl_print_keys(__logger.addr_tree);
+
+    //if(__logger.rank == 12)
+    //    avl_print_keys(__logger.addr_tree);
     avl_destroy(__logger.addr_tree);
 }

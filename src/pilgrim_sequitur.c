@@ -236,14 +236,14 @@ void print_rules() {
         DL_COUNT(rule->rule_body, sym, count);
         symbols_count += count;
 
-        //#ifdef DEBUG
+        #ifdef DEBUG
         printf("Rule %d :-> ", rule->val);
 
         DL_FOREACH(rule->rule_body, sym) {
             printf("%d ", sym->val);
         }
         printf("\n");
-        //#endif
+        #endif
     }
 
     printf("\n=======================\nNumber of rule: %d\n", rules_count);

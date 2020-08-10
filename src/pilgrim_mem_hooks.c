@@ -9,11 +9,13 @@
 
 AvlTree *addr_tree;
 static bool hook_installed = false;
+int rank;
 
 // The only public available function in .h
-void install_hooks(AvlTree *t) {
+void install_hooks(int r, AvlTree *t) {
     hook_installed = true;
     addr_tree = t;
+    rank = rank;
 }
 
 void remove_hooks() {
@@ -32,6 +34,7 @@ void* malloc(size_t size) {
 
     void* ptr = dlmalloc(size);
 
+    intptr_t tmp = (intptr_t)ptr;
     avl_insert(addr_tree, (intptr_t)ptr, size);
     return ptr;
 }
@@ -56,8 +59,15 @@ void* realloc(void *ptr, size_t size) {
 
     void *new_ptr = dlrealloc(ptr, size);
 
-    avl_delete(addr_tree, (intptr_t)ptr);
-    avl_insert(addr_tree, (intptr_t)new_ptr, size);
+    if(new_ptr == ptr) {
+        AvlTree t = avl_search(*addr_tree, (intptr_t)ptr);
+        if(t != AVL_EMPTY) {
+            t->size = size;
+        }
+    } else {
+        avl_delete(addr_tree, (intptr_t)ptr);
+        avl_insert(addr_tree, (intptr_t)new_ptr, size);
+    }
     return new_ptr;
 }
 

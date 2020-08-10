@@ -9,7 +9,7 @@ static void * (*real_pvalloc)(size_t size);
 static void * (*real_realloc)(void *ptr, size_t size);
 static void   (*real_free)(void *ptr);
 
-void install_hooks(AvlTree *t);
+void install_hooks(int rank, AvlTree *t);
 void remove_hooks();
 
 #endif

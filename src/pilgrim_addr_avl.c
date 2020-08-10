@@ -6,15 +6,7 @@
 #include "dlmalloc-2.8.6.h"
 
 /* implementation of an AVL tree with explicit heights */
-
-struct avlNode {
-    struct avlNode *child[2];    /* left and right */
-
-    intptr_t addr;               // use addr as key
-    size_t size;                 // size of allocated memory
-
-    int height;
-};
+static int current_id = 0;
 
 /* free a tree */
 void
@@ -144,7 +136,7 @@ avl_rebalance(AvlTree *t)
 /* insert into tree */
 /* this may replace root, which is why we pass
  * in a AvlTree * */
-void
+AvlTree
 avl_insert(AvlTree *t, intptr_t addr, size_t size)
 {
     /* insertion procedure */
@@ -158,21 +150,22 @@ avl_insert(AvlTree *t, intptr_t addr, size_t size)
 
         (*t)->addr = addr;
         (*t)->size = size;
+        (*t)->id = current_id++;
 
         (*t)->height = 1;
 
         /* done */
-        return;
+        return (*t);
     } else if(addr == (*t)->addr) {
         /* nothing to do */
-        return;
+        return (*t);
     } else {
         /* do the insert in subtree */
-        avl_insert(&(*t)->child[addr > (*t)->addr], addr, size);
+        AvlTree new_node = avl_insert(&(*t)->child[addr > (*t)->addr], addr, size);
 
         avl_rebalance(t);
 
-        return;
+        return new_node;
     }
 }
 
@@ -183,7 +176,7 @@ avl_print_keys(AvlTree t)
 {
     if(t != AVL_EMPTY) {
         avl_print_keys(t->child[0]);
-        printf("%ld\n", t->addr);
+        printf("addr: %ld, id: %d, size: %ld\n", t->addr, t->id, t->size);
         avl_print_keys(t->child[1]);
     }
 }
@@ -219,7 +212,7 @@ avl_delete(AvlTree *t, intptr_t addr)
 {
     AvlTree oldroot;
 
-    if(*t != AVL_EMPTY) {
+    if(*t == AVL_EMPTY) {
         return;
     } else if((*t)->addr == addr) {
         /* do we have a right child? */

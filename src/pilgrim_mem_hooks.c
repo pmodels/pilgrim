@@ -5,20 +5,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "pilgrim_mem_hooks.h"
-#include "pilgrim_addr_avl.h"
 #include "dlmalloc-2.8.6.h"
 
-static AvlTree addr_tree = AVL_EMPTY;
+AvlTree *addr_tree;
 static bool hook_installed = false;
 
 // The only public available function in .h
-void install_hooks() {
+void install_hooks(AvlTree *t) {
     hook_installed = true;
+    addr_tree = t;
 }
 
 void remove_hooks() {
     hook_installed = false;
-    avl_destroy(addr_tree);
 }
 
 
@@ -32,9 +31,8 @@ void* malloc(size_t size) {
         return dlmalloc(size);
 
     void* ptr = dlmalloc(size);
-    //fprintf(stderr, "malloc %p, %ld\n", ptr, size);
 
-    avl_insert(&addr_tree, (intptr_t)ptr, size);
+    avl_insert(addr_tree, (intptr_t)ptr, size);
     return ptr;
 }
 
@@ -43,9 +41,8 @@ void* calloc(size_t nitems, size_t size) {
         return dlcalloc(nitems, size);
 
     void *ptr = dlcalloc(nitems, size);
-    //fprintf(stderr, "calloc %ld %ld\n", nitems, size);
 
-    avl_insert(&addr_tree, (intptr_t)ptr, size*nitems);
+    avl_insert(addr_tree, (intptr_t)ptr, size*nitems);
     return ptr;
 }
 
@@ -58,12 +55,9 @@ void* realloc(void *ptr, size_t size) {
         return dlrealloc(ptr, size);
 
     void *new_ptr = dlrealloc(ptr, size);
-    //fprintf(stderr, "realloc %p, %ld\n", ptr, size);
 
-    // The new memory address returnedy by realloc
-    // maybe different from the given one
-    avl_delete(&addr_tree, (intptr_t)ptr);
-    avl_insert(&addr_tree, (intptr_t)new_ptr, size);
+    avl_delete(addr_tree, (intptr_t)ptr);
+    avl_insert(addr_tree, (intptr_t)new_ptr, size);
     return new_ptr;
 }
 
@@ -75,8 +69,7 @@ void free(void *ptr) {
         dlfree(ptr);
         return;
     }
-    //fprintf(stderr, "free %p\n", ptr);
 
-    avl_delete(&addr_tree, (intptr_t)ptr);
+    avl_delete(addr_tree, (intptr_t)ptr);
     dlfree(ptr);
 }

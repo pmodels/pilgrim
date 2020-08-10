@@ -18,7 +18,6 @@
 #define TIME_RESOLUTION 0.000001
 
 static int current_terminal_id = 0;
-static int current_addr_id = 0;
 
 // Entry in uthash
 typedef struct RecordHash_t {
@@ -28,12 +27,6 @@ typedef struct RecordHash_t {
     UT_hash_handle hh;
 } RecordHash;
 
-// Entry in uthash
-typedef struct AddrHash_t {
-    void *key;                  // buffer address as key, key len is sizeof(void*)
-    int addr_id;                // unique symbolic id as value
-    UT_hash_handle hh;
-} AddrHash;
 
 struct Logger {
     int rank;
@@ -42,7 +35,7 @@ struct Logger {
     LocalMetadata local_metadata;   // Local metadata information
 
     RecordHash *hash_head;          // head of the function entry hash table
-    AddrHash *addr_table;           // head of buffer address table
+    AvlTree addr_tree;              // head of buffer address table
 };
 
 // Global object to access the Logger fileds
@@ -50,22 +43,15 @@ struct Logger __logger;
 
 
 int* addr2id(const void* buffer) {
-    void *key = dlmalloc(sizeof(void*));
-    memcpy(key, &buffer, sizeof(void*));
-
-    AddrHash *entry;
-    HASH_FIND(hh, __logger.addr_table, key, sizeof(void*), entry);
-    if(entry) {                         // Found
-        dlfree(key);
-    } else {                            // Not exist, add to hash table
-        entry = (AddrHash*) dlmalloc(sizeof(AddrHash));
-        entry->key = key;
-        entry->addr_id = current_addr_id;
-        current_addr_id++;
-        HASH_ADD_KEYPTR(hh, __logger.addr_table, entry->key, sizeof(void*), entry);
+    AvlTree node = avl_search(__logger.addr_tree, (intptr_t) buffer);
+    if(node == AVL_EMPTY) {
+        // Not found in addr_tree suggests that this buffer is not dynamically allocated
+        // Maybe a stack buffer
+        AvlTree new_node = avl_insert(&__logger.addr_tree, (intptr_t)buffer, 1);
+        return &(new_node->id);
+    } else {
+        return &(node->id);
     }
-
-    return &(entry->addr_id);
 }
 
 /**
@@ -234,12 +220,10 @@ void write_to_file() {
 
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
-    /*
     if(__logger.rank == 0)
         printf("[Pilgrim (rank=%d)] tstart:%.6lf, tend:%.6f, func id:%s\n", __logger.rank,
                 record.tstart-__logger.local_metadata.tstart,
                 record.tend-__logger.local_metadata.tstart, func_names[record.func_id]);
-    */
     __logger.local_metadata.records_count++;
 
     // Get key length
@@ -297,8 +281,8 @@ void logger_init(int rank, int nprocs) {
     }
 
     sequitur_init();
+    install_hooks(&__logger.addr_tree);
     __logger.recording = true;
-    install_hooks();
 }
 
 
@@ -320,9 +304,6 @@ void logger_exit() {
     }
     HASH_CLEAR(hh, __logger.hash_head);
 
-    AddrHash *addr_entry, *addr_tmp;
-    HASH_ITER(hh, __logger.addr_table, addr_entry, addr_tmp) {
-        dlfree(addr_entry->key);
-    }
-    HASH_CLEAR(hh, __logger.hash_head);
+    avl_print_keys(__logger.addr_tree);
+    avl_destroy(__logger.addr_tree);
 }

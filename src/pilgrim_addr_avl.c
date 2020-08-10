@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include "pilgrim_addr_avl.h"
+#include "dlmalloc-2.8.6.h"
 
 /* implementation of an AVL tree with explicit heights */
 
@@ -22,7 +23,7 @@ avl_destroy(AvlTree t)
     if(t != AVL_EMPTY) {
         avl_destroy(t->child[0]);
         avl_destroy(t->child[1]);
-        free(t);
+        dlfree(t);
     }
 }
 
@@ -149,7 +150,7 @@ avl_insert(AvlTree *t, intptr_t addr, size_t size)
     /* insertion procedure */
     if(*t == AVL_EMPTY) {
         /* new t */
-        *t = malloc(sizeof(struct avlNode));
+        *t = dlmalloc(sizeof(struct avlNode));
         assert(*t);
 
         (*t)->child[0] = AVL_EMPTY;
@@ -202,7 +203,7 @@ avl_delete_min(AvlTree *t)
         oldroot = *t;
         minValue = oldroot->addr;
         *t = oldroot->child[1];
-        free(oldroot);
+        dlfree(oldroot);
     } else {
         /* min value is in left subtree */
         minValue = avl_delete_min(&(*t)->child[0]);
@@ -229,7 +230,7 @@ avl_delete(AvlTree *t, intptr_t addr)
             /* splice out root */
             oldroot = (*t);
             *t = (*t)->child[0];
-            free(oldroot);
+            dlfree(oldroot);
         }
     } else {
         avl_delete(&(*t)->child[addr > (*t)->addr], addr);

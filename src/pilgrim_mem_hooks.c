@@ -32,7 +32,7 @@ void* malloc(size_t size) {
         return dlmalloc(size);
 
     void* ptr = dlmalloc(size);
-    fprintf(stderr, "malloc %p, %ld\n", ptr, size);
+    //fprintf(stderr, "malloc %p, %ld\n", ptr, size);
 
     avl_insert(&addr_tree, (intptr_t)ptr, size);
     return ptr;
@@ -43,7 +43,7 @@ void* calloc(size_t nitems, size_t size) {
         return dlcalloc(nitems, size);
 
     void *ptr = dlcalloc(nitems, size);
-    fprintf(stderr, "calloc %ld %ld\n", nitems, size);
+    //fprintf(stderr, "calloc %ld %ld\n", nitems, size);
 
     avl_insert(&addr_tree, (intptr_t)ptr, size*nitems);
     return ptr;
@@ -58,7 +58,7 @@ void* realloc(void *ptr, size_t size) {
         return dlrealloc(ptr, size);
 
     void *new_ptr = dlrealloc(ptr, size);
-    fprintf(stderr, "realloc %p, %ld\n", ptr, size);
+    //fprintf(stderr, "realloc %p, %ld\n", ptr, size);
 
     // The new memory address returnedy by realloc
     // maybe different from the given one
@@ -75,7 +75,7 @@ void free(void *ptr) {
         dlfree(ptr);
         return;
     }
-    fprintf(stderr, "free %p\n", ptr);
+    //fprintf(stderr, "free %p\n", ptr);
 
     avl_delete(&addr_tree, (intptr_t)ptr);
     dlfree(ptr);

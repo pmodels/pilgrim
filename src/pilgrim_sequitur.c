@@ -87,11 +87,10 @@ void expand_instance(Symbol *sym) {
 
     digram_delete(&grammar.digram_table, sym);
 
-
     int n = 0;
-    Symbol *this;
+    Symbol *this, *tmp;
     Symbol *tail = sym;
-    DL_FOREACH(rule->rule_body, this) {
+    DL_FOREACH_SAFE(rule->rule_body, this,  tmp) {
         // delete the digram of the old rule (rule body)
         digram_delete(&grammar.digram_table, this);
 

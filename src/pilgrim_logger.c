@@ -9,6 +9,7 @@
 
 #include "pilgrim.h"
 #include "pilgrim_sequitur.h"
+#include "pilgrim_mem_hooks.h"
 #include "dlmalloc-2.8.6.h"
 #include "utlist.h"
 #include "uthash.h"
@@ -297,10 +298,12 @@ void logger_init(int rank, int nprocs) {
 
     sequitur_init();
     __logger.recording = true;
+    install_hooks();
 }
 
 
 void logger_exit() {
+    remove_hooks();
     __logger.recording = false;
 
     printf("[Pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,

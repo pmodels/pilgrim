@@ -2,69 +2,26 @@
 #include <dlfcn.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdbool.h>
-#include "uthash.h"
 #include "pilgrim_mem_hooks.h"
+#include "pilgrim_addr_avl.h"
 #include "dlmalloc-2.8.6.h"
 
+static AvlTree addr_tree = AVL_EMPTY;
 static bool hook_installed = false;
 
 // The only public available function in .h
 void install_hooks() {
-    real_malloc  = dlsym(RTLD_NEXT, "malloc");
-    real_calloc  = dlsym(RTLD_NEXT, "calloc");
-    real_valloc  = dlsym(RTLD_NEXT, "valloc");
-    real_pvalloc = dlsym(RTLD_NEXT, "pvalloc");
-    real_realloc = dlsym(RTLD_NEXT, "realloc");
-    real_free    = dlsym(RTLD_NEXT, "free");
     hook_installed = true;
 }
+
 void remove_hooks() {
     hook_installed = false;
+    avl_destroy(addr_tree);
 }
 
 
-// Entry in uthash
-typedef struct AddrHash_t {
-    void *key;
-    size_t size;
-    int id;
-    UT_hash_handle hh;
-} AddrHash;
-
-static int current_addr_id = 0;
-static AddrHash *addr_table = NULL;
-
-
-void addr_put(void *buffer, size_t size) {
-    void *key = malloc(sizeof(void*));
-    memcpy(key, &buffer, sizeof(void*));
-
-    AddrHash *entry;
-    HASH_FIND(hh, addr_table, key, sizeof(void*), entry);
-    if(entry) {                         // Found
-        dlfree(key);
-    } else {                            // Not exist, add to hash table
-        entry = (AddrHash*) dlmalloc(sizeof(AddrHash));
-        entry->key = key;
-        entry->size = size;
-        entry->id = current_addr_id++;
-        HASH_ADD_KEYPTR(hh, addr_table, entry->key, sizeof(void*), entry);
-    }
-}
-
-AddrHash* addr_get(void *buffer) {
-    if(!buffer)
-        return NULL;
-    void *key = dlmalloc(sizeof(void*));
-    memcpy(key, &buffer, sizeof(void*));
-
-    AddrHash *entry;
-    HASH_FIND(hh, addr_table, key, sizeof(void*), entry);
-    if(entry)
-        return entry;
-    return NULL;
-}
 
 
 /**
@@ -76,6 +33,8 @@ void* malloc(size_t size) {
 
     void* ptr = dlmalloc(size);
     fprintf(stderr, "malloc %p, %ld\n", ptr, size);
+
+    avl_insert(&addr_tree, (intptr_t)ptr, size);
     return ptr;
 }
 
@@ -85,6 +44,8 @@ void* calloc(size_t nitems, size_t size) {
 
     void *ptr = dlcalloc(nitems, size);
     fprintf(stderr, "calloc %ld %ld\n", nitems, size);
+
+    avl_insert(&addr_tree, (intptr_t)ptr, size*nitems);
     return ptr;
 }
 
@@ -97,16 +58,12 @@ void* realloc(void *ptr, size_t size) {
         return dlrealloc(ptr, size);
 
     void *new_ptr = dlrealloc(ptr, size);
+    fprintf(stderr, "realloc %p, %ld\n", ptr, size);
 
     // The new memory address returnedy by realloc
     // maybe different from the given one
-    if(new_ptr == ptr) {
-
-    } else {
-
-    }
-
-    fprintf(stderr, "realloc %p, %ld\n", ptr, size);
+    avl_delete(&addr_tree, (intptr_t)ptr);
+    avl_insert(&addr_tree, (intptr_t)new_ptr, size);
     return new_ptr;
 }
 
@@ -118,7 +75,8 @@ void free(void *ptr) {
         dlfree(ptr);
         return;
     }
-
     fprintf(stderr, "free %p\n", ptr);
+
+    avl_delete(&addr_tree, (intptr_t)ptr);
     dlfree(ptr);
 }

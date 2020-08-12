@@ -6,7 +6,6 @@
 #include "dlmalloc-2.8.6.h"
 
 /* implementation of an AVL tree with explicit heights */
-static int current_id = 0;
 
 /* free a tree */
 void
@@ -154,7 +153,7 @@ avl_insert(AvlTree *t, intptr_t addr, size_t size)
 
         (*t)->addr = addr;
         (*t)->size = size;
-        (*t)->id = current_id++;
+        (*t)->id = -1;      // id is assigned only when used in MPI calls
 
         (*t)->height = 1;
 

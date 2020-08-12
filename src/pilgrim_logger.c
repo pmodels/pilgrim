@@ -18,6 +18,7 @@
 #define TIME_RESOLUTION 0.000001
 
 static int current_terminal_id = 0;
+static int current_addr_id = 0;
 
 // Entry in uthash
 typedef struct RecordHash_t {
@@ -48,8 +49,12 @@ int* addr2id(const void* buffer) {
         // Not found in addr_tree suggests that this buffer is not dynamically allocated
         // Maybe a stack buffer
         AvlTree new_node = avl_insert(&__logger.addr_tree, (intptr_t)buffer, 1);
+        new_node->id = current_addr_id++;
         return &(new_node->id);
     } else {
+        // First use
+        if(node->id == -1)
+            node->id = current_addr_id++;
         return &(node->id);
     }
 }

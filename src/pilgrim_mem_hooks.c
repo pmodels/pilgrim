@@ -34,7 +34,7 @@ void* malloc(size_t size) {
 
     void* ptr = dlmalloc(size);
 
-    avl_insert(addr_tree, (intptr_t)ptr, 1);
+    avl_insert(addr_tree, (intptr_t)ptr, size);
     return ptr;
 }
 

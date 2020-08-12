@@ -45,15 +45,24 @@ def codegen_assemble_args(func):
         elif 'MPI_Status' in arg.type or 'MPI_Request' in arg.type: # ignore for now (TODO)
             continue
         elif 'MPI_Status*' in arg.type and 'const' not in arg.type:
-
             line += "\tvoid* tmp = status;\n"
             line += "\tif(status == MPI_STATUS_IGNORE) {\n"
             line += "\t\ttmp = malloc(sizeof(MPI_Status)); \n\t\tmemset(tmp, 0, sizeof(MPI_Status));\n\t}\n"
             assemble_args.append("tmp")
         elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
+        elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for rank-1/rank+1 as src or dest
+            line += "\tint %s_rank = %s;\n" %(arg.name, arg.name)
+            line += "\tif(%s_rank == self_rank - 1)\n" %arg.name
+            line += "\t\t%s_rank = RANK_MINUS_ONE;\n" %arg.name
+            line += "\tif(%s_rank == self_rank + 1)\n" %arg.name
+            line += "\t\t%s_rank = RANK_PLUS_ONE;\n" %arg.name
+            assemble_args.append( "&%s_rank" %arg.name )
         else:
             assemble_args.append( "&"+arg.name)
+
+    if func.name == "MPI_Comm_rank":
+        line += "\tself_rank = *rank;\n"
 
     if len(assemble_args) > 0:
         assemble_args_str = ', '.join(assemble_args)
@@ -89,10 +98,11 @@ def codegen_sizeof_args(func):
 
 
 def handle_special_apis(func):
-    # Ignore
+    # These are handled in pilgrim_init_finalize.c
     if func.name == "MPI_Init" or func.name == "MPI_Init_thread" or func.name == "MPI_Finalize":
         return True
 
+    # These are handled in pilgrim_init_pilgrim_wrappers_special.c
     ignored = ["MPI_Waitsome", "MPI_Waitall", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
     if func.name in ignored:
         return True
@@ -106,6 +116,7 @@ def generate_wrapper_file(funcs):
     f.write('#include <stdlib.h>\n')
     f.write('#include <string.h>\n')
     f.write('#include "pilgrim.h"\n')
+    f.write('static int self_rank;\n')
 
     for name in funcs:
         func = funcs[name]

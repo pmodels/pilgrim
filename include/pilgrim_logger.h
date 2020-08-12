@@ -1,6 +1,9 @@
 #ifndef _PILGRIM_LOG_FORMAT_H_
 #define _PILGRIM_LOG_FORMAT_H_
 
+#define RANK_MINUS_ONE -1
+#define RANK_PLUS_ONE -2
+
 typedef struct _Record {
     double tstart, tend;
     short func_id;              // 2 bytes function id

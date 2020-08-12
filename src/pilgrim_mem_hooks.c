@@ -34,8 +34,7 @@ void* malloc(size_t size) {
 
     void* ptr = dlmalloc(size);
 
-    intptr_t tmp = (intptr_t)ptr;
-    avl_insert(addr_tree, (intptr_t)ptr, size);
+    avl_insert(addr_tree, (intptr_t)ptr, 1);
     return ptr;
 }
 
@@ -51,9 +50,6 @@ void* calloc(size_t nitems, size_t size) {
 
 void* realloc(void *ptr, size_t size) {
 
-    // Before hooks are installed, the *ptr passed-in is returned from
-    // our malloc wrapper, which is a stack address. We can not
-    // realloc the stack pointer, so instead we pass NULL to real_realloc
     if(!hook_installed)
         return dlrealloc(ptr, size);
 
@@ -72,9 +68,6 @@ void* realloc(void *ptr, size_t size) {
 }
 
 void free(void *ptr) {
-    // Before hooks are installed, the *ptr passed-in is returned from
-    // our malloc wrapper, which is a stack address. We do not need to
-    // release it.
     if(!hook_installed) {
         dlfree(ptr);
         return;

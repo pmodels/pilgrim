@@ -39,7 +39,7 @@ avl_search(AvlTree t, intptr_t addr)
 
     intptr_t lower = t->addr;
     intptr_t upper = t->addr + (intptr_t)(t->size); // must cast size_t to intptr_t first!
-    if(lower <= addr && upper > addr) {
+    if(lower <= addr && addr < upper) {
         return t;
     } else {
         return avl_search(t->child[addr> t->addr], addr);
@@ -160,6 +160,7 @@ avl_insert(AvlTree *t, intptr_t addr, size_t size)
         /* done */
         return (*t);
     } else if(addr == (*t)->addr) {
+        printf("Not possible!\n");
         /* nothing to do */
         return (*t);
     } else {
@@ -185,8 +186,11 @@ avl_print_keys(AvlTree t)
 }
 
 
-/* delete and return minimum value in a tree */
-intptr_t
+/* delete and return minimum value in a tree
+ * do not free the node, we free it in avl_delete()
+ */
+
+AvlTree
 avl_delete_min(AvlTree *t)
 {
     AvlTree oldroot;
@@ -199,14 +203,13 @@ avl_delete_min(AvlTree *t)
         oldroot = *t;
         minValue = oldroot->addr;
         *t = oldroot->child[1];
-        dlfree(oldroot);
     } else {
         /* min value is in left subtree */
-        minValue = avl_delete_min(&(*t)->child[0]);
+        oldroot = avl_delete_min(&(*t)->child[0]);
     }
 
     avl_rebalance(t);
-    return minValue;
+    return oldroot;
 }
 
 /* delete the given value */
@@ -220,8 +223,12 @@ avl_delete(AvlTree *t, intptr_t addr)
     } else if((*t)->addr == addr) {
         /* do we have a right child? */
         if((*t)->child[1] != AVL_EMPTY) {
-            /* give root min value in right subtree */
-            (*t)->addr = avl_delete_min(&(*t)->child[1]);
+            /* give root min node vlaues in right subtree */
+            AvlTree min_node = avl_delete_min(&(*t)->child[1]);
+            (*t)->addr = min_node->addr;
+            (*t)->size = min_node->size;
+            (*t)->id = min_node->id;
+            dlfree(min_node);
         } else {
             /* splice out root */
             oldroot = (*t);

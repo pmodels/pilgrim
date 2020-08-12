@@ -40,6 +40,6 @@ void avl_print_keys(AvlTree t);
 void avl_delete(AvlTree *t, intptr_t addr);
 
 /* delete and return minimum value in a tree */
-intptr_t avl_delete_min(AvlTree *t);
+AvlTree avl_delete_min(AvlTree *t);
 
 #endif

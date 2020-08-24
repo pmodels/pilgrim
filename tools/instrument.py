@@ -107,6 +107,10 @@ def handle_special_apis(func):
     if func.name in ignored:
         return True
 
+    # TODO Ignore MPI IO functions for now
+    if "MPI_File_write" in func.name:
+        return True
+
     return False
 
 def generate_wrapper_file(funcs):

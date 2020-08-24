@@ -6,7 +6,7 @@ from codegen import MPIFunction, MPIArgument
 def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
-    os.system('grep -E "PMPI" /usr/include/mpi/*.h > /tmp/local_funcs.tmp')
+    os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
     for line in f.readlines():
         func_name = line.strip().split('(')[0].split(' ')[1]
@@ -52,11 +52,8 @@ def codegen_assemble_args(func):
         elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
         elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for rank-1/rank+1 as src or dest
-            line += "\tint %s_rank = %s;\n" %(arg.name, arg.name)
-            line += "\tif(%s_rank == self_rank - 1)\n" %arg.name
-            line += "\t\t%s_rank = RANK_MINUS_ONE;\n" %arg.name
-            line += "\tif(%s_rank == self_rank + 1)\n" %arg.name
-            line += "\t\t%s_rank = RANK_PLUS_ONE;\n" %arg.name
+            line += "\tint %s_rank = self_rank - %s;\n" %(arg.name, arg.name)
+            line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = -99999;\n" %(arg.name, arg.name)
             assemble_args.append( "&%s_rank" %arg.name )
         else:
             assemble_args.append( "&"+arg.name)

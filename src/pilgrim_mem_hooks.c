@@ -24,7 +24,6 @@ void remove_hooks() {
 
 
 
-
 /**
  * Wrappers
  */
@@ -75,4 +74,21 @@ void free(void *ptr) {
 
     avl_delete(addr_tree, (intptr_t)ptr);
     dlfree(ptr);
+}
+
+
+int posix_memalign(void **memptr, size_t alignment, size_t size) {
+    return dlposix_memalign(memptr, alignment, size);
+}
+
+void *valloc(size_t size) {
+    return dlvalloc(size);
+}
+
+void *memalign(size_t alignment, size_t size) {
+    return dlmemalign(alignment, size);
+}
+
+void *pvalloc(size_t size) {
+    return dlpvalloc(size);
 }

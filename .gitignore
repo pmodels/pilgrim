@@ -4,6 +4,7 @@
 /configure
 /include/pilgrim_config.h.in
 
+.deps
 .libs/
 Makefile
 config.log

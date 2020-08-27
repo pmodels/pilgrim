@@ -22,9 +22,9 @@ static int current_addr_id = 0;
 
 // Entry in uthash
 typedef struct RecordHash_t {
-    void *key;                  // func_id + arguments + duration, used as key
+    void *key;                      // func_id + arguments + duration, used as key
     int key_len;
-    int terminal_id;            // terminal id used for sequitur compression
+    int terminal_id;                // terminal id used for sequitur compression
     UT_hash_handle hh;
 } RecordHash;
 
@@ -33,21 +33,25 @@ struct Logger {
     int rank;
     int nprocs;
     bool recording;                 // set to true only after initialization
-    LocalMetadata local_metadata;   // Local metadata information
+    LocalMetadata local_metadata;   // local metadata information
 
-    RecordHash *hash_head;          // head of the function entry hash table
-    AvlTree addr_tree;              // head of buffer address table
+    RecordHash *hash_head;          // head of function entries hash table
+    AvlTree addr_tree;              // root of memory addresses AVL tree
 };
 
 // Global object to access the Logger fileds
 struct Logger __logger;
 
 
+/**
+ * Symbolic representation for memory addresses.
+ */
 int* addr2id(const void* buffer) {
     AvlTree node = avl_search(__logger.addr_tree, (intptr_t) buffer);
     if(node == AVL_EMPTY) {
         // Not found in addr_tree suggests that this buffer is not dynamically allocated
-        // Maybe a stack buffer
+        // Maybe a stack buffer so we don't know excatly the size
+        // We assume it as a 1 byte memory area.
         AvlTree new_node = avl_insert(&__logger.addr_tree, (intptr_t)buffer, 1);
         new_node->id = current_addr_id++;
         return &(new_node->id);
@@ -311,8 +315,5 @@ void logger_exit() {
     }
     HASH_CLEAR(hh, __logger.hash_head);
 
-
-    //if(__logger.rank == 12)
-    //    avl_print_keys(__logger.addr_tree);
     avl_destroy(__logger.addr_tree);
 }

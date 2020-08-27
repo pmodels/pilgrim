@@ -11,7 +11,5 @@ libpilgrim_la_SOURCES += \
 	src/pilgrim_mem_hooks.c src/dlmalloc.c	src/pilgrim_addr_avl.c
 
 
-
-
 pilgrim_reader_SOURCES += \
 	src/pilgrim_reader.c src/pilgrim_read_args.c src/pilgrim_read_args_special.c

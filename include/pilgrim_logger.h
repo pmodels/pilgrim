@@ -1,5 +1,6 @@
 #ifndef _PILGRIM_LOG_FORMAT_H_
 #define _PILGRIM_LOG_FORMAT_H_
+#include "mpi.h"
 
 
 typedef struct _Record {
@@ -30,6 +31,8 @@ void logger_init(int rank, int nprocs);
 void logger_exit();
 void write_record(Record record);
 int* addr2id(const void *buffer);
+int request2id(MPI_Request* request);
+void free_request(MPI_Request* request);
 
 
 void** read_record_args(FILE*f, int func_id);

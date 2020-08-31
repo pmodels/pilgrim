@@ -19,6 +19,7 @@
 
 static int current_terminal_id = 0;
 static int current_addr_id = 0;
+static int current_request_id = 0;
 
 // Entry in uthash
 typedef struct RecordHash_t {
@@ -27,6 +28,13 @@ typedef struct RecordHash_t {
     int terminal_id;                // terminal id used for sequitur compression
     UT_hash_handle hh;
 } RecordHash;
+
+typedef struct RequestHash_t {
+    void *key;
+    int key_len;
+    int request_id;
+    UT_hash_handle hh;
+} RequestHash;
 
 
 struct Logger {
@@ -37,6 +45,7 @@ struct Logger {
 
     RecordHash *hash_head;          // head of function entries hash table
     AvlTree addr_tree;              // root of memory addresses AVL tree
+    RequestHash *reqs_table;
 };
 
 // Global object to access the Logger fileds
@@ -61,6 +70,32 @@ int* addr2id(const void* buffer) {
             node->id = current_addr_id++;
         return &(node->id);
     }
+}
+
+
+int request2id(MPI_Request *req) {
+    if(req==NULL || *req == MPI_REQUEST_NULL)
+        return -1;
+
+    RequestHash *entry;
+    HASH_FIND(hh, __logger.reqs_table, req, sizeof(MPI_Request), entry);
+    if(entry) {
+        return entry->request_id;
+    } else {
+        entry = dlmalloc(sizeof(RequestHash));
+        entry->key = dlmalloc(sizeof(MPI_Request));
+        memcpy(entry->key, req, sizeof(MPI_Request));
+        entry->key_len = sizeof(MPI_Request);
+        entry->request_id = current_request_id++;
+        return entry->request_id;
+    }
+}
+
+void free_request(MPI_Request *req) {
+    RequestHash *entry;
+    HASH_FIND(hh, __logger.reqs_table, req, sizeof(MPI_Request), entry);
+    if(entry)
+        HASH_DEL(__logger.reqs_table, entry);
 }
 
 /**
@@ -301,8 +336,8 @@ void logger_exit() {
     remove_hooks();
     __logger.recording = false;
 
-    printf("[Pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
-            HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
+    printf("[Pilgrim] Rank: %d, Hash: %d, Number of records: %d, Remaining requests: %d\n", __logger.rank,
+            HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count, HASH_COUNT(__logger.reqs_table));
 
     write_to_file();
 

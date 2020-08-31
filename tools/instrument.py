@@ -44,10 +44,9 @@ def codegen_assemble_args(func):
             assemble_args.append("addr2id("+arg.name+")")
         elif 'MPI_Request' in arg.type:          # ignore for now (TODO)
             if '*' in arg.type:
-                line += "\tint req_id = request2id(%s);\n" %(arg.name)
+                line += "\tappend_request(%s);\n" %(arg.name)
             else:
-                line += "\tint req_id = request2id(&%s);\n" %(arg.name)
-            assemble_args.append("&req_id")
+                line += "\tappend_request(&%s);\n" %(arg.name)
         elif 'MPI_Status' in arg.type:
             pass
         elif 'MPI_Status*' in arg.type and 'const' not in arg.type:
@@ -83,10 +82,8 @@ def codegen_sizeof_args(func):
         elif 'char*' in arg.type:
             if '**' not in arg.type and '[' not in arg.type:    # only consider one single string
                 sizeof_args.append('strlen(%s)+1' %arg.name)
-        elif 'MPI_Status' in arg.type: # ignore for now (TODO)
+        elif 'MPI_Status' in arg.type or 'MPI_Request' in arg.type: # ignore for now (TODO)
             continue
-        elif 'MPI_Request' in arg.type:
-            sizeof_args.append('sizeof(int)')
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
             fixed_type = arg.type.split('[')[0].replace('*', '')

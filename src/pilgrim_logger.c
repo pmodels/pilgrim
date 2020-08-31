@@ -36,6 +36,10 @@ typedef struct RequestHash_t {
     UT_hash_handle hh;
 } RequestHash;
 
+typedef struct RequestId_t {
+    int id;
+    struct RequestId_t *next;
+} RequestId;
 
 struct Logger {
     int rank;
@@ -45,7 +49,9 @@ struct Logger {
 
     RecordHash *hash_head;          // head of function entries hash table
     AvlTree addr_tree;              // root of memory addresses AVL tree
-    RequestHash *reqs_table;
+
+    RequestHash *reqs_table;        // Mapping of <MPI_Request, id>
+    RequestId *reqs_list;           // List of request ids needed to be saved
 };
 
 // Global object to access the Logger fileds
@@ -96,6 +102,13 @@ void free_request(MPI_Request *req) {
     HASH_FIND(hh, __logger.reqs_table, req, sizeof(MPI_Request), entry);
     if(entry)
         HASH_DEL(__logger.reqs_table, entry);
+}
+
+void append_request(MPI_Request *req) {
+    // append
+    RequestId *new_node = (RequestId*) dlmalloc(sizeof(RequestId));
+    new_node->id = request2id(req);
+    LL_PREPEND(__logger.reqs_list, new_node);
 }
 
 /**
@@ -312,6 +325,8 @@ void logger_init(int rank, int nprocs) {
     __logger.local_metadata.compressed_records = 0;
     __logger.local_metadata.rank = rank;
     __logger.hash_head = NULL;          // Must be NULL initialized
+    __logger.reqs_table = NULL;
+    __logger.reqs_list = NULL;
 
     mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 

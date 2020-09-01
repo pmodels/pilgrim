@@ -29,6 +29,13 @@ int MPI_Win_create(void *base, MPI_Aint size, int disp_unit, MPI_Info info, MPI_
 	int sizes[] = { sizeof(int), sizeof(MPI_Aint), sizeof(int), sizeof(MPI_Info), sizeof(MPI_Comm), 1 * sizeof(MPI_Win) };
 	PILGRIM_TRACING_2(6, sizes, args);
 }
+int MPI_File_write_all_begin(MPI_File fh, const void *buf, int count, MPI_Datatype datatype)
+{
+	PILGRIM_TRACING_1(int, MPI_File_write_all_begin, (fh, buf, count, datatype));
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
+}
 int MPI_Error_class(int errorcode, int *errorclass)
 {
 	PILGRIM_TRACING_1(int, MPI_Error_class, (errorcode, errorclass));
@@ -426,9 +433,10 @@ int MPI_Win_attach(MPI_Win win, void *base, MPI_Aint size)
 int MPI_File_read_at_all(MPI_File fh, MPI_Offset offset, void *buf, int count, MPI_Datatype datatype, MPI_Status *status)
 {
 	PILGRIM_TRACING_1(int, MPI_File_read_at_all, (fh, offset, buf, count, datatype, status));
-	void **args = assemble_args_list(5, &fh, &offset, addr2id(buf), &count, &datatype);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
-	PILGRIM_TRACING_2(5, sizes, args);
+	append_offset(offset);
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
 }
 int MPI_File_read_ordered_end(MPI_File fh, void *buf, MPI_Status *status)
 {
@@ -550,6 +558,14 @@ int MPI_Dist_graph_create(MPI_Comm comm_old, int n, const int sources[], const i
 	void **args = assemble_args_list(9, &comm_old, &n, sources, degrees, destinations, weights, &info, &reorder, comm_dist_graph);
 	int sizes[] = { sizeof(MPI_Comm), sizeof(int), n * sizeof(const int), n * sizeof(const int), 1 * sizeof(const int), 1 * sizeof(const int), sizeof(MPI_Info), sizeof(int), 1 * sizeof(MPI_Comm) };
 	PILGRIM_TRACING_2(9, sizes, args);
+}
+int MPI_File_write_at(MPI_File fh, MPI_Offset offset, const void *buf, int count, MPI_Datatype datatype, MPI_Status *status)
+{
+	PILGRIM_TRACING_1(int, MPI_File_write_at, (fh, offset, buf, count, datatype, status));
+	append_offset(offset);
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
 }
 int MPI_File_close(MPI_File *fh)
 {
@@ -1031,10 +1047,11 @@ int MPI_Info_get(MPI_Info info, const char *key, int valuelen, char *value, int 
 int MPI_File_iwrite_at(MPI_File fh, MPI_Offset offset, const void *buf, int count, MPI_Datatype datatype, MPI_Request *request)
 {
 	PILGRIM_TRACING_1(int, MPI_File_iwrite_at, (fh, offset, buf, count, datatype, request));
+	append_offset(offset);
 	append_request(request);
-	void **args = assemble_args_list(5, &fh, &offset, addr2id(buf), &count, &datatype);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
-	PILGRIM_TRACING_2(5, sizes, args);
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
 }
 int MPI_Comm_spawn(const char *command, char *argv[], int maxprocs, MPI_Info info, int root, MPI_Comm comm, MPI_Comm *intercomm, int array_of_errcodes[])
 {
@@ -1069,9 +1086,10 @@ int MPI_Ibcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Com
 int MPI_File_read_at_all_begin(MPI_File fh, MPI_Offset offset, void *buf, int count, MPI_Datatype datatype)
 {
 	PILGRIM_TRACING_1(int, MPI_File_read_at_all_begin, (fh, offset, buf, count, datatype));
-	void **args = assemble_args_list(5, &fh, &offset, addr2id(buf), &count, &datatype);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
-	PILGRIM_TRACING_2(5, sizes, args);
+	append_offset(offset);
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
 }
 int MPI_Info_get_nthkey(MPI_Info info, int n, char *key)
 {
@@ -1111,6 +1129,13 @@ int MPI_Send_init(const void *buf, int count, MPI_Datatype datatype, int dest, i
 	void **args = assemble_args_list(6, addr2id(buf), &count, &datatype, &dest_rank, &tag, &comm);
 	int sizes[] = { sizeof(int), sizeof(int), sizeof(MPI_Datatype), sizeof(int), sizeof(int), sizeof(MPI_Comm) };
 	PILGRIM_TRACING_2(6, sizes, args);
+}
+int MPI_File_write(MPI_File fh, const void *buf, int count, MPI_Datatype datatype, MPI_Status *status)
+{
+	PILGRIM_TRACING_1(int, MPI_File_write, (fh, buf, count, datatype, status));
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
 }
 int MPI_File_set_info(MPI_File fh, MPI_Info info)
 {
@@ -1210,6 +1235,13 @@ int MPI_Win_free_keyval(int *win_keyval)
 	int sizes[] = { 1 * sizeof(int) };
 	PILGRIM_TRACING_2(1, sizes, args);
 }
+int MPI_File_write_at_all_end(MPI_File fh, const void *buf, MPI_Status *status)
+{
+	PILGRIM_TRACING_1(int, MPI_File_write_at_all_end, (fh, buf, status));
+	void **args = assemble_args_list(2, &fh, addr2id(buf));
+	int sizes[] = { sizeof(MPI_File), sizeof(int) };
+	PILGRIM_TRACING_2(2, sizes, args);
+}
 int MPI_Rget_accumulate(const void *origin_addr, int origin_count, MPI_Datatype origin_datatype, void *result_addr, int result_count, MPI_Datatype result_datatype, int target_rank, MPI_Aint target_disp, int target_count, MPI_Datatype target_datatype, MPI_Op op, MPI_Win win, MPI_Request *request)
 {
 	PILGRIM_TRACING_1(int, MPI_Rget_accumulate, (origin_addr, origin_count, origin_datatype, result_addr, result_count, result_datatype, target_rank, target_disp, target_count, target_datatype, op, win, request));
@@ -1249,9 +1281,10 @@ int MPI_Win_get_attr(MPI_Win win, int win_keyval, void *attribute_val, int *flag
 int MPI_File_get_byte_offset(MPI_File fh, MPI_Offset offset, MPI_Offset *disp)
 {
 	PILGRIM_TRACING_1(int, MPI_File_get_byte_offset, (fh, offset, disp));
-	void **args = assemble_args_list(3, &fh, &offset, disp);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset), 1 * sizeof(MPI_Offset) };
-	PILGRIM_TRACING_2(3, sizes, args);
+	append_offset(offset);
+	void **args = assemble_args_list(2, &fh, disp);
+	int sizes[] = { sizeof(MPI_File), 1 * sizeof(MPI_Offset) };
+	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_Win_lock_all(int assert, MPI_Win win)
 {
@@ -1330,13 +1363,28 @@ int MPI_Info_dup(MPI_Info info, MPI_Info *newinfo)
 	int sizes[] = { sizeof(MPI_Info), 1 * sizeof(MPI_Info) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
+int MPI_File_write_shared(MPI_File fh, const void *buf, int count, MPI_Datatype datatype, MPI_Status *status)
+{
+	PILGRIM_TRACING_1(int, MPI_File_write_shared, (fh, buf, count, datatype, status));
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
+}
 int MPI_File_iread_at(MPI_File fh, MPI_Offset offset, void *buf, int count, MPI_Datatype datatype, MPI_Request *request)
 {
 	PILGRIM_TRACING_1(int, MPI_File_iread_at, (fh, offset, buf, count, datatype, request));
+	append_offset(offset);
 	append_request(request);
-	void **args = assemble_args_list(5, &fh, &offset, addr2id(buf), &count, &datatype);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
-	PILGRIM_TRACING_2(5, sizes, args);
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
+}
+int MPI_File_write_all_end(MPI_File fh, const void *buf, MPI_Status *status)
+{
+	PILGRIM_TRACING_1(int, MPI_File_write_all_end, (fh, buf, status));
+	void **args = assemble_args_list(2, &fh, addr2id(buf));
+	int sizes[] = { sizeof(MPI_File), sizeof(int) };
+	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_Comm_remote_size(MPI_Comm comm, int *size)
 {
@@ -1352,6 +1400,14 @@ int MPI_Type_get_name(MPI_Datatype datatype, char *type_name, int *resultlen)
 	int sizes[] = { sizeof(MPI_Datatype), strlen(type_name)+1, 1 * sizeof(int) };
 	PILGRIM_TRACING_2(3, sizes, args);
 }
+int MPI_File_write_at_all(MPI_File fh, MPI_Offset offset, const void *buf, int count, MPI_Datatype datatype, MPI_Status *status)
+{
+	PILGRIM_TRACING_1(int, MPI_File_write_at_all, (fh, offset, buf, count, datatype, status));
+	append_offset(offset);
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
+}
 int MPI_File_get_group(MPI_File fh, MPI_Group *group)
 {
 	PILGRIM_TRACING_1(int, MPI_File_get_group, (fh, group));
@@ -1362,9 +1418,10 @@ int MPI_File_get_group(MPI_File fh, MPI_Group *group)
 int MPI_File_preallocate(MPI_File fh, MPI_Offset size)
 {
 	PILGRIM_TRACING_1(int, MPI_File_preallocate, (fh, size));
-	void **args = assemble_args_list(2, &fh, &size);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset) };
-	PILGRIM_TRACING_2(2, sizes, args);
+	append_offset(size);
+	void **args = assemble_args_list(1, &fh);
+	int sizes[] = { sizeof(MPI_File) };
+	PILGRIM_TRACING_2(1, sizes, args);
 }
 int MPI_File_iread_all(MPI_File fh, void *buf, int count, MPI_Datatype datatype, MPI_Request *request)
 {
@@ -1486,6 +1543,13 @@ int MPI_Scatterv(const void *sendbuf, const int sendcounts[], const int displs[]
 	int sizes[] = { sizeof(int), 1 * sizeof(const int), 1 * sizeof(const int), sizeof(MPI_Datatype), sizeof(int), sizeof(int), sizeof(MPI_Datatype), sizeof(int), sizeof(MPI_Comm) };
 	PILGRIM_TRACING_2(9, sizes, args);
 }
+int MPI_File_write_all(MPI_File fh, const void *buf, int count, MPI_Datatype datatype, MPI_Status *status)
+{
+	PILGRIM_TRACING_1(int, MPI_File_write_all, (fh, buf, count, datatype, status));
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
+}
 int MPI_Comm_connect(const char *port_name, MPI_Info info, int root, MPI_Comm comm, MPI_Comm *newcomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_connect, (port_name, info, root, comm, newcomm));
@@ -1510,9 +1574,10 @@ int MPI_Win_get_group(MPI_Win win, MPI_Group *group)
 int MPI_File_set_size(MPI_File fh, MPI_Offset size)
 {
 	PILGRIM_TRACING_1(int, MPI_File_set_size, (fh, size));
-	void **args = assemble_args_list(2, &fh, &size);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset) };
-	PILGRIM_TRACING_2(2, sizes, args);
+	append_offset(size);
+	void **args = assemble_args_list(1, &fh);
+	int sizes[] = { sizeof(MPI_File) };
+	PILGRIM_TRACING_2(1, sizes, args);
 }
 int MPI_Status_set_cancelled(MPI_Status *status, int flag)
 {
@@ -1643,6 +1708,14 @@ int MPI_Win_test(MPI_Win win, int *flag)
 	int sizes[] = { sizeof(MPI_Win), 1 * sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
+int MPI_File_write_at_all_begin(MPI_File fh, MPI_Offset offset, const void *buf, int count, MPI_Datatype datatype)
+{
+	PILGRIM_TRACING_1(int, MPI_File_write_at_all_begin, (fh, offset, buf, count, datatype));
+	append_offset(offset);
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
+}
 int MPI_Comm_get_errhandler(MPI_Comm comm, MPI_Errhandler *errhandler)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_get_errhandler, (comm, errhandler));
@@ -1697,10 +1770,11 @@ int MPI_Info_delete(MPI_Info info, const char *key)
 int MPI_File_iread_at_all(MPI_File fh, MPI_Offset offset, void *buf, int count, MPI_Datatype datatype, MPI_Request *request)
 {
 	PILGRIM_TRACING_1(int, MPI_File_iread_at_all, (fh, offset, buf, count, datatype, request));
+	append_offset(offset);
 	append_request(request);
-	void **args = assemble_args_list(5, &fh, &offset, addr2id(buf), &count, &datatype);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
-	PILGRIM_TRACING_2(5, sizes, args);
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
 }
 int MPI_Cart_rank(MPI_Comm comm, const int coords[], int *rank)
 {
@@ -1712,9 +1786,10 @@ int MPI_Cart_rank(MPI_Comm comm, const int coords[], int *rank)
 int MPI_File_read_at(MPI_File fh, MPI_Offset offset, void *buf, int count, MPI_Datatype datatype, MPI_Status *status)
 {
 	PILGRIM_TRACING_1(int, MPI_File_read_at, (fh, offset, buf, count, datatype, status));
-	void **args = assemble_args_list(5, &fh, &offset, addr2id(buf), &count, &datatype);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
-	PILGRIM_TRACING_2(5, sizes, args);
+	append_offset(offset);
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
 }
 int MPI_Iallreduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm, MPI_Request *request)
 {
@@ -1899,9 +1974,10 @@ int MPI_Scan(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatyp
 int MPI_File_seek_shared(MPI_File fh, MPI_Offset offset, int whence)
 {
 	PILGRIM_TRACING_1(int, MPI_File_seek_shared, (fh, offset, whence));
-	void **args = assemble_args_list(3, &fh, &offset, &whence);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset), sizeof(int) };
-	PILGRIM_TRACING_2(3, sizes, args);
+	append_offset(offset);
+	void **args = assemble_args_list(2, &fh, &whence);
+	int sizes[] = { sizeof(MPI_File), sizeof(int) };
+	PILGRIM_TRACING_2(2, sizes, args);
 }
 double MPI_Wtime(void)
 {
@@ -2058,10 +2134,11 @@ int MPI_Issend(const void *buf, int count, MPI_Datatype datatype, int dest, int 
 int MPI_File_iwrite_at_all(MPI_File fh, MPI_Offset offset, const void *buf, int count, MPI_Datatype datatype, MPI_Request *request)
 {
 	PILGRIM_TRACING_1(int, MPI_File_iwrite_at_all, (fh, offset, buf, count, datatype, request));
+	append_offset(offset);
 	append_request(request);
-	void **args = assemble_args_list(5, &fh, &offset, addr2id(buf), &count, &datatype);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
-	PILGRIM_TRACING_2(5, sizes, args);
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
 }
 int MPI_Abort(MPI_Comm comm, int errorcode)
 {
@@ -2098,6 +2175,13 @@ int MPI_Comm_create(MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm)
 	void **args = assemble_args_list(3, &comm, &group, newcomm);
 	int sizes[] = { sizeof(MPI_Comm), sizeof(MPI_Group), 1 * sizeof(MPI_Comm) };
 	PILGRIM_TRACING_2(3, sizes, args);
+}
+int MPI_File_write_ordered(MPI_File fh, const void *buf, int count, MPI_Datatype datatype, MPI_Status *status)
+{
+	PILGRIM_TRACING_1(int, MPI_File_write_ordered, (fh, buf, count, datatype, status));
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
 }
 int MPI_Comm_dup(MPI_Comm comm, MPI_Comm *newcomm)
 {
@@ -2160,9 +2244,10 @@ int MPI_Type_create_f90_real(int p, int r, MPI_Datatype *newtype)
 int MPI_File_seek(MPI_File fh, MPI_Offset offset, int whence)
 {
 	PILGRIM_TRACING_1(int, MPI_File_seek, (fh, offset, whence));
-	void **args = assemble_args_list(3, &fh, &offset, &whence);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset), sizeof(int) };
-	PILGRIM_TRACING_2(3, sizes, args);
+	append_offset(offset);
+	void **args = assemble_args_list(2, &fh, &whence);
+	int sizes[] = { sizeof(MPI_File), sizeof(int) };
+	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_T_cvar_get_num(int *num_cvar)
 {
@@ -2402,9 +2487,10 @@ int MPI_File_read_at_all_end(MPI_File fh, void *buf, MPI_Status *status)
 int MPI_File_set_view(MPI_File fh, MPI_Offset disp, MPI_Datatype etype, MPI_Datatype filetype, const char *datarep, MPI_Info info)
 {
 	PILGRIM_TRACING_1(int, MPI_File_set_view, (fh, disp, etype, filetype, datarep, info));
-	void **args = assemble_args_list(6, &fh, &disp, &etype, &filetype, datarep, &info);
-	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Offset), sizeof(MPI_Datatype), sizeof(MPI_Datatype), strlen(datarep)+1, sizeof(MPI_Info) };
-	PILGRIM_TRACING_2(6, sizes, args);
+	append_offset(disp);
+	void **args = assemble_args_list(5, &fh, &etype, &filetype, datarep, &info);
+	int sizes[] = { sizeof(MPI_File), sizeof(MPI_Datatype), sizeof(MPI_Datatype), strlen(datarep)+1, sizeof(MPI_Info) };
+	PILGRIM_TRACING_2(5, sizes, args);
 }
 int MPI_Status_set_elements(MPI_Status *status, MPI_Datatype datatype, int count)
 {
@@ -2584,6 +2670,20 @@ MPI_Aint MPI_Aint_diff(MPI_Aint addr1, MPI_Aint addr2)
 	PILGRIM_TRACING_1(MPI_Aint, MPI_Aint_diff, (addr1, addr2));
 	void **args = assemble_args_list(2, &addr1, &addr2);
 	int sizes[] = { sizeof(MPI_Aint), sizeof(MPI_Aint) };
+	PILGRIM_TRACING_2(2, sizes, args);
+}
+int MPI_File_write_ordered_begin(MPI_File fh, const void *buf, int count, MPI_Datatype datatype)
+{
+	PILGRIM_TRACING_1(int, MPI_File_write_ordered_begin, (fh, buf, count, datatype));
+	void **args = assemble_args_list(4, &fh, addr2id(buf), &count, &datatype);
+	int sizes[] = { sizeof(MPI_File), sizeof(int), sizeof(int), sizeof(MPI_Datatype) };
+	PILGRIM_TRACING_2(4, sizes, args);
+}
+int MPI_File_write_ordered_end(MPI_File fh, const void *buf, MPI_Status *status)
+{
+	PILGRIM_TRACING_1(int, MPI_File_write_ordered_end, (fh, buf, status));
+	void **args = assemble_args_list(2, &fh, addr2id(buf));
+	int sizes[] = { sizeof(MPI_File), sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_Graphdims_get(MPI_Comm comm, int *nnodes, int *nedges)

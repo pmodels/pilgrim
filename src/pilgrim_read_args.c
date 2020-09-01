@@ -77,7 +77,19 @@ void** read_record_args(FILE* f, int func_id) {
 		}
 		case ID_MPI_File_write_all_begin:
 		{
-			read_record_args_special(f, func_id);
+			args = malloc(4 * sizeof(void*));
+			size = sizeof(MPI_File);
+			args[0] = malloc(size);
+			fread(args[0], size, 1, f);
+			size = sizeof(void*);
+			args[1] = malloc(size);
+			fread(args[1], size, 1, f);
+			size = sizeof(int);
+			args[2] = malloc(size);
+			fread(args[2], size, 1, f);
+			size = sizeof(MPI_Datatype);
+			args[3] = malloc(size);
+			fread(args[3], size, 1, f);
 			break;
 		}
 		case ID_MPI_Error_class:
@@ -1248,7 +1260,25 @@ void** read_record_args(FILE* f, int func_id) {
 		}
 		case ID_MPI_File_write_at:
 		{
-			read_record_args_special(f, func_id);
+			args = malloc(6 * sizeof(void*));
+			size = sizeof(MPI_File);
+			args[0] = malloc(size);
+			fread(args[0], size, 1, f);
+			size = sizeof(MPI_Offset);
+			args[1] = malloc(size);
+			fread(args[1], size, 1, f);
+			size = sizeof(void*);
+			args[2] = malloc(size);
+			fread(args[2], size, 1, f);
+			size = sizeof(int);
+			args[3] = malloc(size);
+			fread(args[3], size, 1, f);
+			size = sizeof(MPI_Datatype);
+			args[4] = malloc(size);
+			fread(args[4], size, 1, f);
+			size = sizeof(MPI_Status);
+			args[5] = malloc(size);
+			fread(args[5], size, 1, f);
 			break;
 		}
 		case ID_MPI_File_close:
@@ -2584,7 +2614,22 @@ void** read_record_args(FILE* f, int func_id) {
 		}
 		case ID_MPI_File_write:
 		{
-			read_record_args_special(f, func_id);
+			args = malloc(5 * sizeof(void*));
+			size = sizeof(MPI_File);
+			args[0] = malloc(size);
+			fread(args[0], size, 1, f);
+			size = sizeof(void*);
+			args[1] = malloc(size);
+			fread(args[1], size, 1, f);
+			size = sizeof(int);
+			args[2] = malloc(size);
+			fread(args[2], size, 1, f);
+			size = sizeof(MPI_Datatype);
+			args[3] = malloc(size);
+			fread(args[3], size, 1, f);
+			size = sizeof(MPI_Status);
+			args[4] = malloc(size);
+			fread(args[4], size, 1, f);
 			break;
 		}
 		case ID_MPI_File_set_info:
@@ -2838,7 +2883,16 @@ void** read_record_args(FILE* f, int func_id) {
 		}
 		case ID_MPI_File_write_at_all_end:
 		{
-			read_record_args_special(f, func_id);
+			args = malloc(3 * sizeof(void*));
+			size = sizeof(MPI_File);
+			args[0] = malloc(size);
+			fread(args[0], size, 1, f);
+			size = sizeof(void*);
+			args[1] = malloc(size);
+			fread(args[1], size, 1, f);
+			size = sizeof(MPI_Status);
+			args[2] = malloc(size);
+			fread(args[2], size, 1, f);
 			break;
 		}
 		case ID_MPI_Rget_accumulate:
@@ -3120,7 +3174,22 @@ void** read_record_args(FILE* f, int func_id) {
 		}
 		case ID_MPI_File_write_shared:
 		{
-			read_record_args_special(f, func_id);
+			args = malloc(5 * sizeof(void*));
+			size = sizeof(MPI_File);
+			args[0] = malloc(size);
+			fread(args[0], size, 1, f);
+			size = sizeof(void*);
+			args[1] = malloc(size);
+			fread(args[1], size, 1, f);
+			size = sizeof(int);
+			args[2] = malloc(size);
+			fread(args[2], size, 1, f);
+			size = sizeof(MPI_Datatype);
+			args[3] = malloc(size);
+			fread(args[3], size, 1, f);
+			size = sizeof(MPI_Status);
+			args[4] = malloc(size);
+			fread(args[4], size, 1, f);
 			break;
 		}
 		case ID_MPI_File_iread_at:
@@ -3148,7 +3217,16 @@ void** read_record_args(FILE* f, int func_id) {
 		}
 		case ID_MPI_File_write_all_end:
 		{
-			read_record_args_special(f, func_id);
+			args = malloc(3 * sizeof(void*));
+			size = sizeof(MPI_File);
+			args[0] = malloc(size);
+			fread(args[0], size, 1, f);
+			size = sizeof(void*);
+			args[1] = malloc(size);
+			fread(args[1], size, 1, f);
+			size = sizeof(MPI_Status);
+			args[2] = malloc(size);
+			fread(args[2], size, 1, f);
 			break;
 		}
 		case ID_MPI_Comm_remote_size:
@@ -3176,7 +3254,25 @@ void** read_record_args(FILE* f, int func_id) {
 		}
 		case ID_MPI_File_write_at_all:
 		{
-			read_record_args_special(f, func_id);
+			args = malloc(6 * sizeof(void*));
+			size = sizeof(MPI_File);
+			args[0] = malloc(size);
+			fread(args[0], size, 1, f);
+			size = sizeof(MPI_Offset);
+			args[1] = malloc(size);
+			fread(args[1], size, 1, f);
+			size = sizeof(void*);
+			args[2] = malloc(size);
+			fread(args[2], size, 1, f);
+			size = sizeof(int);
+			args[3] = malloc(size);
+			fread(args[3], size, 1, f);
+			size = sizeof(MPI_Datatype);
+			args[4] = malloc(size);
+			fread(args[4], size, 1, f);
+			size = sizeof(MPI_Status);
+			args[5] = malloc(size);
+			fread(args[5], size, 1, f);
 			break;
 		}
 		case ID_MPI_File_get_group:
@@ -3501,7 +3597,22 @@ void** read_record_args(FILE* f, int func_id) {
 		}
 		case ID_MPI_File_write_all:
 		{
-			read_record_args_special(f, func_id);
+			args = malloc(5 * sizeof(void*));
+			size = sizeof(MPI_File);
+			args[0] = malloc(size);
+			fread(args[0], size, 1, f);
+			size = sizeof(void*);
+			args[1] = malloc(size);
+			fread(args[1], size, 1, f);
+			size = sizeof(int);
+			args[2] = malloc(size);
+			fread(args[2], size, 1, f);
+			size = sizeof(MPI_Datatype);
+			args[3] = malloc(size);
+			fread(args[3], size, 1, f);
+			size = sizeof(MPI_Status);
+			args[4] = malloc(size);
+			fread(args[4], size, 1, f);
 			break;
 		}
 		case ID_MPI_Comm_connect:
@@ -3909,7 +4020,22 @@ void** read_record_args(FILE* f, int func_id) {
 		}
 		case ID_MPI_File_write_at_all_begin:
 		{
-			read_record_args_special(f, func_id);
+			args = malloc(5 * sizeof(void*));
+			size = sizeof(MPI_File);
+			args[0] = malloc(size);
+			fread(args[0], size, 1, f);
+			size = sizeof(MPI_Offset);
+			args[1] = malloc(size);
+			fread(args[1], size, 1, f);
+			size = sizeof(void*);
+			args[2] = malloc(size);
+			fread(args[2], size, 1, f);
+			size = sizeof(int);
+			args[3] = malloc(size);
+			fread(args[3], size, 1, f);
+			size = sizeof(MPI_Datatype);
+			args[4] = malloc(size);
+			fread(args[4], size, 1, f);
 			break;
 		}
 		case ID_MPI_Comm_get_errhandler:
@@ -5034,7 +5160,22 @@ void** read_record_args(FILE* f, int func_id) {
 		}
 		case ID_MPI_File_write_ordered:
 		{
-			read_record_args_special(f, func_id);
+			args = malloc(5 * sizeof(void*));
+			size = sizeof(MPI_File);
+			args[0] = malloc(size);
+			fread(args[0], size, 1, f);
+			size = sizeof(void*);
+			args[1] = malloc(size);
+			fread(args[1], size, 1, f);
+			size = sizeof(int);
+			args[2] = malloc(size);
+			fread(args[2], size, 1, f);
+			size = sizeof(MPI_Datatype);
+			args[3] = malloc(size);
+			fread(args[3], size, 1, f);
+			size = sizeof(MPI_Status);
+			args[4] = malloc(size);
+			fread(args[4], size, 1, f);
 			break;
 		}
 		case ID_MPI_Comm_dup:
@@ -6209,12 +6350,33 @@ void** read_record_args(FILE* f, int func_id) {
 		}
 		case ID_MPI_File_write_ordered_begin:
 		{
-			read_record_args_special(f, func_id);
+			args = malloc(4 * sizeof(void*));
+			size = sizeof(MPI_File);
+			args[0] = malloc(size);
+			fread(args[0], size, 1, f);
+			size = sizeof(void*);
+			args[1] = malloc(size);
+			fread(args[1], size, 1, f);
+			size = sizeof(int);
+			args[2] = malloc(size);
+			fread(args[2], size, 1, f);
+			size = sizeof(MPI_Datatype);
+			args[3] = malloc(size);
+			fread(args[3], size, 1, f);
 			break;
 		}
 		case ID_MPI_File_write_ordered_end:
 		{
-			read_record_args_special(f, func_id);
+			args = malloc(3 * sizeof(void*));
+			size = sizeof(MPI_File);
+			args[0] = malloc(size);
+			fread(args[0], size, 1, f);
+			size = sizeof(void*);
+			args[1] = malloc(size);
+			fread(args[1], size, 1, f);
+			size = sizeof(MPI_Status);
+			args[2] = malloc(size);
+			fread(args[2], size, 1, f);
 			break;
 		}
 		case ID_MPI_Graphdims_get:

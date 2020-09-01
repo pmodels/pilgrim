@@ -40,15 +40,17 @@ def codegen_assemble_args(func):
     line = ""
     assemble_args = []
     for arg in func.arguments:
-        if 'void' in arg.type:                  # void* buf
+        if 'void' in arg.type:                                  # void* buf
             assemble_args.append("addr2id("+arg.name+")")
-        elif 'MPI_Request' in arg.type:          # ignore for now (TODO)
+        elif 'MPI_Request' in arg.type:                         # Keep separately
             if '*' in arg.type:
                 line += "\tappend_request(%s);\n" %(arg.name)
             else:
                 line += "\tappend_request(&%s);\n" %(arg.name)
-        elif 'MPI_Status' in arg.type:
+        elif 'MPI_Status' in arg.type:                          # TODO ignore for now
             pass
+        elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
+            line += "\tappend_offset(%s);\n" %(arg.name)
         elif 'MPI_Status*' in arg.type and 'const' not in arg.type:
             line += "\tvoid* tmp = status;\n"
             line += "\tif(status == MPI_STATUS_IGNORE) {\n"
@@ -80,9 +82,11 @@ def codegen_sizeof_args(func):
         if 'void' in arg.type:
             sizeof_args.append('sizeof(int)')
         elif 'char*' in arg.type:
-            if '**' not in arg.type and '[' not in arg.type:    # only consider one single string
+            if '**' not in arg.type and '[' not in arg.type:        # only consider one single string
                 sizeof_args.append('strlen(%s)+1' %arg.name)
         elif 'MPI_Status' in arg.type or 'MPI_Request' in arg.type: # ignore for now (TODO)
+            continue
+        elif 'MPI_Offset' in arg.type and '*' not in arg.type:      # keep separately
             continue
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
@@ -107,11 +111,8 @@ def handle_special_apis(func):
     # These are handled in pilgrim_init_pilgrim_wrappers_special.c
     ignored = ["MPI_Wait", "MPI_Waitany", "MPI_Waitsome", "MPI_Waitall", "MPI_Request_free", "MPI_Startall",
                "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
-    if func.name in ignored:
-        return True
 
-    # TODO Ignore MPI IO functions for now
-    if "MPI_File_write" in func.name:
+    if func.name in ignored:
         return True
 
     return False

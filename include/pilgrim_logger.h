@@ -35,6 +35,8 @@ int* addr2id(const void *buffer);
 void append_request(MPI_Request* request);
 void free_request(MPI_Request* request);
 
+void append_offset(MPI_Offset offset);
+
 
 void** read_record_args(FILE*f, int func_id);
 void** read_record_args_special(FILE*f, int func_id);

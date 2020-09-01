@@ -41,6 +41,11 @@ typedef struct RequestId_t {
     struct RequestId_t *next;
 } RequestId;
 
+typedef struct OffsetNode_t {
+    MPI_Offset offset;              // could be offset or size.
+    struct OffsetNode_t *next;
+} OffsetNode;
+
 struct Logger {
     int rank;
     int nprocs;
@@ -52,6 +57,7 @@ struct Logger {
 
     RequestHash *reqs_table;        // Mapping of <MPI_Request, id>
     RequestId *reqs_list;           // List of request ids needed to be saved
+    OffsetNode *offset_list;        // List of MPI_Offset
 };
 
 // Global object to access the Logger fileds
@@ -105,10 +111,15 @@ void free_request(MPI_Request *req) {
 }
 
 void append_request(MPI_Request *req) {
-    // append
     RequestId *new_node = (RequestId*) dlmalloc(sizeof(RequestId));
     new_node->id = request2id(req);
     LL_PREPEND(__logger.reqs_list, new_node);
+}
+
+void append_offset(MPI_Offset offset) {
+    OffsetNode *new_node = (OffsetNode*) dlmalloc(sizeof(RequestId));
+    new_node->offset = offset;
+    LL_PREPEND(__logger.offset_list, new_node);
 }
 
 /**
@@ -327,6 +338,7 @@ void logger_init(int rank, int nprocs) {
     __logger.hash_head = NULL;          // Must be NULL initialized
     __logger.reqs_table = NULL;
     __logger.reqs_list = NULL;
+    __logger.offset_list = NULL;
 
     mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 

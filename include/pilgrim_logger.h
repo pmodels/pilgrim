@@ -27,10 +27,16 @@ typedef struct _GlobalMetadata {
     int ranks;
 } GlobalMetadata;
 
+
+typedef struct RequestNode_t {
+    int id;
+    struct RequestNode_t *next;
+} RequestNode;
+
 typedef struct RequestHash_t {
     void *key;
     int key_len;
-    int request_id;
+    RequestNode* req_node;
     bool any_source;
     bool any_tag;
     UT_hash_handle hh;

@@ -19,7 +19,6 @@
 
 static int current_terminal_id = 0;
 static int current_addr_id = 0;
-static int current_request_id = 0;
 static int invalid_request_id = -1;
 
 // Entry in uthash
@@ -30,10 +29,13 @@ typedef struct RecordHash_t {
     UT_hash_handle hh;
 } RecordHash;
 
+
 typedef struct OffsetNode_t {
     MPI_Offset offset;              // could be offset or size.
     struct OffsetNode_t *next;
 } OffsetNode;
+
+
 
 struct Logger {
     int rank;
@@ -44,7 +46,8 @@ struct Logger {
     RecordHash *hash_head;          // head of function entries hash table
     AvlTree addr_tree;              // root of memory addresses AVL tree
 
-    RequestHash *reqs_table;        // Mapping of <MPI_Request, id>
+    RequestHash *reqs_table;        // Active MPI_Request, mapping of <MPI_Request, id>
+    RequestNode *reqs_list;         // List of free ids to be used for MPI_Request mapping
     OffsetNode *offset_list;        // List of MPI_Offset
 };
 
@@ -72,6 +75,9 @@ int* addr2id(const void* buffer) {
     }
 }
 
+/*
+ * Symbolic representation for MPI_Request
+ */
 RequestHash* request_hash_entry(MPI_Request *req) {
     if(req==NULL || *req == MPI_REQUEST_NULL)
         return NULL;
@@ -88,24 +94,26 @@ int* request2id(MPI_Request *req, int source, int tag) {
     RequestHash *entry;
     HASH_FIND(hh, __logger.reqs_table, req, sizeof(MPI_Request), entry);
     if(entry) {
-        return &(entry->request_id);
+        return &(entry->req_node->id);
     } else {
         entry = dlmalloc(sizeof(RequestHash));
         entry->key = dlmalloc(sizeof(MPI_Request));
         memcpy(entry->key, req, sizeof(MPI_Request));
         entry->key_len = sizeof(MPI_Request);
-        entry->request_id = current_request_id++;
+        entry->req_node = __logger.reqs_list;               // get the first (head) free id
         entry->any_source = (source == MPI_ANY_SOURCE);
         entry->any_tag = (tag == MPI_ANY_TAG);
-        return &(entry->request_id);
+        return &(entry->req_node->id);
     }
 }
 
 void free_request(MPI_Request *req) {
     RequestHash *entry;
     HASH_FIND(hh, __logger.reqs_table, req, sizeof(MPI_Request), entry);
-    if(entry)
+    if(entry) {
+        LL_PREPEND(__logger.reqs_list, entry->req_node);    // Add the id back to the free list
         HASH_DEL(__logger.reqs_table, entry);
+    }
 }
 
 void append_offset(MPI_Offset offset) {
@@ -329,7 +337,16 @@ void logger_init(int rank, int nprocs) {
     __logger.local_metadata.rank = rank;
     __logger.hash_head = NULL;          // Must be NULL initialized
     __logger.reqs_table = NULL;
+    __logger.reqs_list = NULL;
     __logger.offset_list = NULL;
+
+    int i;
+    for(i = 0; i < 65535; i++) {
+        RequestNode *req_node = (RequestNode*) dlmalloc(sizeof(RequestNode));
+        req_node->id = i;
+        LL_PREPEND(__logger.reqs_list, req_node);
+    }
+
 
     mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 

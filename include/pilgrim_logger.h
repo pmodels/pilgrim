@@ -1,7 +1,8 @@
 #ifndef _PILGRIM_LOG_FORMAT_H_
 #define _PILGRIM_LOG_FORMAT_H_
+#include <stdbool.h>
 #include "mpi.h"
-
+#include "uthash.h"
 
 typedef struct _Record {
     double tstart, tend;
@@ -26,13 +27,23 @@ typedef struct _GlobalMetadata {
     int ranks;
 } GlobalMetadata;
 
+typedef struct RequestHash_t {
+    void *key;
+    int key_len;
+    int request_id;
+    bool any_source;
+    bool any_tag;
+    UT_hash_handle hh;
+} RequestHash;
+
 
 void logger_init(int rank, int nprocs);
 void logger_exit();
 void write_record(Record record);
 int* addr2id(const void *buffer);
 
-void append_request(MPI_Request* request);
+RequestHash* request_hash_entry(MPI_Request* request);
+int* request2id(MPI_Request* request, int source, int tag);
 void free_request(MPI_Request* request);
 
 void append_offset(MPI_Offset offset);

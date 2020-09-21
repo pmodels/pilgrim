@@ -39,23 +39,29 @@ def generate_function_id_file(funcs):
 def codegen_assemble_args(func):
     line = ""
     assemble_args = []
+    args_set = set( [arg.name for arg in func.arguments] )
     for arg in func.arguments:
         if 'void' in arg.type:                                  # void* buf
             assemble_args.append("addr2id("+arg.name+")")
         elif 'MPI_Request' in arg.type:                         # Keep separately
             if '*' in arg.type:
-                line += "\tappend_request(%s);\n" %(arg.name)
+                if func.name == "MPI_Irecv" or func.name == "MPI_Recv_init":
+                    assemble_args.append("request2id("+arg.name+", source, tag)")
+                else:
+                    assemble_args.append("request2id("+arg.name+", 0, 0)")
             else:
-                line += "\tappend_request(&%s);\n" %(arg.name)
-        elif 'MPI_Status' in arg.type:                          # TODO ignore for now
-            pass
+                assemble_args.append("request2id(&"+arg.name+", 0, 0)")
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             line += "\tappend_offset(%s);\n" %(arg.name)
-        elif 'MPI_Status*' in arg.type and 'const' not in arg.type:
-            line += "\tvoid* tmp = status;\n"
-            line += "\tif(status == MPI_STATUS_IGNORE) {\n"
-            line += "\t\ttmp = malloc(sizeof(MPI_Status)); \n\t\tmemset(tmp, 0, sizeof(MPI_Status));\n\t}\n"
-            assemble_args.append("tmp")
+        elif 'MPI_Status*' in arg.type:
+            line += "\tint status_arg[2] = {0};\n"
+            assemble_args.append("status_arg")
+            if "source" in args_set:
+                line += "\tif(source == -99999) status_arg[0] = status->MPI_SOURCE;\n"
+            if "recvtag" in args_set:
+                line += "\tif(recvtag == MPI_ANY_TAG) status_arg[1] = status->MPI_TAG;\n"
+            elif "tag" in args_set:
+                line += "\tif(tag == MPI_ANY_TAG) status_arg[1] = status->MPI_TAG;\n"
         elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
         elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for rank-1/rank+1 as src or dest
@@ -84,9 +90,11 @@ def codegen_sizeof_args(func):
         elif 'char*' in arg.type:
             if '**' not in arg.type and '[' not in arg.type:        # only consider one single string
                 sizeof_args.append('strlen(%s)+1' %arg.name)
-        elif 'MPI_Status' in arg.type or 'MPI_Request' in arg.type: # ignore for now (TODO)
-            continue
-        elif 'MPI_Offset' in arg.type and '*' not in arg.type:      # keep separately
+        elif 'MPI_Request' in arg.type:
+            sizeof_args.append('sizeof(int)')
+        elif 'MPI_Status' in arg.type:
+            sizeof_args.append('sizeof(int)*2')
+        elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             continue
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length

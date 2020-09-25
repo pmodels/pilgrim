@@ -30,6 +30,7 @@ typedef struct _GlobalMetadata {
 
 typedef struct RequestNode_t {
     int id;
+    struct RequestNode_t *prev;
     struct RequestNode_t *next;
 } RequestNode;
 

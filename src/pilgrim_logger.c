@@ -20,6 +20,7 @@
 static int current_terminal_id = 0;
 static int current_addr_id = 0;
 static int invalid_request_id = -1;
+static int allocated_request_id = 0;
 
 // Entry in uthash
 typedef struct RecordHash_t {
@@ -103,6 +104,14 @@ int* request2id(MPI_Request *req, int source, int tag) {
         entry->req_node = __logger.reqs_list;               // get the first (head) free id
         entry->any_source = (source == MPI_ANY_SOURCE);
         entry->any_tag = (tag == MPI_ANY_TAG);
+
+        if(entry->req_node == NULL) {                       // free list is empty, create one according to allocated_request_id
+            entry->req_node = (RequestNode*) dlmalloc(sizeof(RequestNode));
+            entry->req_node->id = allocated_request_id++;
+        } else {                                            // free list is not empty, get the first one and remove it from list
+            DL_DELETE(__logger.reqs_list, entry->req_node);
+        }
+
         return &(entry->req_node->id);
     }
 }
@@ -111,7 +120,7 @@ void free_request(MPI_Request *req) {
     RequestHash *entry;
     HASH_FIND(hh, __logger.reqs_table, req, sizeof(MPI_Request), entry);
     if(entry) {
-        LL_PREPEND(__logger.reqs_list, entry->req_node);    // Add the id back to the free list
+        DL_APPEND(__logger.reqs_list, entry->req_node);    // Add the id back to the free list
         HASH_DEL(__logger.reqs_table, entry);
     }
 }
@@ -339,13 +348,6 @@ void logger_init(int rank, int nprocs) {
     __logger.reqs_table = NULL;
     __logger.reqs_list = NULL;
     __logger.offset_list = NULL;
-
-    int i;
-    for(i = 0; i < 65535; i++) {
-        RequestNode *req_node = (RequestNode*) dlmalloc(sizeof(RequestNode));
-        req_node->id = i;
-        LL_PREPEND(__logger.reqs_list, req_node);
-    }
 
 
     mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);

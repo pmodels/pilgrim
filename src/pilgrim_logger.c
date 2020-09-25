@@ -89,14 +89,12 @@ RequestHash* request_hash_entry(MPI_Request *req) {
 }
 
 int* request2id(MPI_Request *req, int source, int tag) {
-    if(req==NULL || *req == MPI_REQUEST_NULL)
+    if(req==NULL || *req == MPI_REQUEST_NULL) {
         return &invalid_request_id;
+    }
 
-    RequestHash *entry;
-    HASH_FIND(hh, __logger.reqs_table, req, sizeof(MPI_Request), entry);
-    if(entry) {
-        return &(entry->req_node->id);
-    } else {
+    RequestHash *entry = request_hash_entry(req);
+    if(entry == NULL) {
         entry = dlmalloc(sizeof(RequestHash));
         entry->key = dlmalloc(sizeof(MPI_Request));
         memcpy(entry->key, req, sizeof(MPI_Request));
@@ -112,13 +110,13 @@ int* request2id(MPI_Request *req, int source, int tag) {
             DL_DELETE(__logger.reqs_list, entry->req_node);
         }
 
-        return &(entry->req_node->id);
+        HASH_ADD_KEYPTR(hh, __logger.reqs_table, entry->key, entry->key_len, entry);
     }
+    return &(entry->req_node->id);
 }
 
 void free_request(MPI_Request *req) {
-    RequestHash *entry;
-    HASH_FIND(hh, __logger.reqs_table, req, sizeof(MPI_Request), entry);
+    RequestHash *entry = request_hash_entry(req);
     if(entry) {
         DL_APPEND(__logger.reqs_list, entry->req_node);    // Add the id back to the free list
         HASH_DEL(__logger.reqs_table, entry);

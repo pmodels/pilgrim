@@ -5,16 +5,21 @@
 #include "pilgrim.h"
 #include "dlmalloc-2.8.6.h"
 
+int invalid_request_id = -1;
+
 #define GET_STATUS_INFO(req, status)                                \
     RequestHash* entry = NULL;                                      \
     entry = request_hash_entry(req);                                \
     int status_info[] = {0, 0};                                     \
+    int *req_id = &invalid_request_id;                              \
     if(entry) {                                                     \
         if(entry->any_source)                                       \
             status_info[0] = status->MPI_SOURCE;                    \
         if(entry->any_tag)                                          \
             status_info[1] = status->MPI_TAG;                       \
-    }
+        req_id = &entry->req_node->id;                              \
+    }                                                               \
+    free_request(req);
 
 
 #define GET_STATUSES_INFO(outcount, indices, statuses)                                              \
@@ -36,10 +41,21 @@
         }                                                                                           \
     }
 
+#define COPY_REQUESTS(count)                                                                        \
+    int ids[count];                                                                                 \
+    int idx;                                                                                        \
+    MPI_Request old_reqs[count];                                                                    \
+    for(idx = 0; idx < count; idx++) {                                                              \
+        ids[idx] = *( get_request_id( &(array_of_requests[idx]) ) );                                \
+        memcpy( &old_reqs[idx],  &array_of_requests[idx], sizeof(MPI_Request));                     \
+    }
+
+
 int* get_request_id(MPI_Request* req) {
     // 2nd and 3rd arguments do not matter if the request is already existed.
     return request2id(req, 0, 0);
 }
+
 
 
 int MPI_Pcontrol(const int level, ...)
@@ -54,25 +70,22 @@ int MPI_Pcontrol(const int level, ...)
 
 int MPI_Wait(MPI_Request *request, MPI_Status *status)
 {
-    GET_STATUS_INFO(request, status);
-    int sizes[] = {sizeof(int), sizeof(status_info)};
-    void **args = assemble_args_list(2, get_request_id(request), status_info);
+    MPI_Request old_req;
+    memcpy(&old_req, request, sizeof(MPI_Request));
 
     PILGRIM_TRACING_1(int, MPI_Wait, (request, status));
-    PILGRIM_TRACING_2(2, sizes, args);
 
-    free_request(request);
+    GET_STATUS_INFO(&old_req, status);
+    int sizes[] = {sizeof(int), sizeof(status_info)};
+    void **args = assemble_args_list(2, req_id, status_info);
+
+
+    PILGRIM_TRACING_2(2, sizes, args);
 }
 
 int MPI_Waitany(int count, MPI_Request array_of_requests[], int *index, MPI_Status *status)
 {
-    int ids[count];
-    int idx;
-    MPI_Request old_reqs[count];
-    for(idx = 0; idx < count; idx++) {
-        ids[idx] = *( get_request_id( &(array_of_requests[idx]) ) );
-        old_reqs[idx] = array_of_requests[idx];
-    }
+    COPY_REQUESTS(count);
 
     PILGRIM_TRACING_1(int, MPI_Waitany, (count, array_of_requests, index, status));
 
@@ -81,42 +94,28 @@ int MPI_Waitany(int count, MPI_Request array_of_requests[], int *index, MPI_Stat
     int sizes[] = { sizeof(int), sizeof(int)*count, sizeof(int), sizeof(status_info) };
 
     PILGRIM_TRACING_2(4, sizes, args);
-    free_request(&old_reqs[*index]);
 }
 
 int MPI_Waitsome(int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[])
 {
-    int ids[incount];
-    int idx;
-    MPI_Request old_reqs[incount];
-    for(idx = 0; idx < incount; idx++) {
-        ids[idx] = *( get_request_id( &(array_of_requests[idx]) ) );
-        old_reqs[idx] = array_of_requests[idx];
-    }
 
-    // Call the original function first, so we know the correct value for output arguments
+    COPY_REQUESTS(incount);
+
 	PILGRIM_TRACING_1(int, MPI_Waitsome, (incount, array_of_requests, outcount, array_of_indices, array_of_statuses));
 
     GET_STATUSES_INFO(*outcount, array_of_indices, array_of_statuses);
 
-    //TODO include status argument
     void **args = assemble_args_list(5, &incount, ids, outcount, array_of_indices, statuses_info);
     int sizes[] = { sizeof(incount), sizeof(int)*incount, sizeof(int), (*outcount)*sizeof(int), sizeof(statuses_info) };
+
     PILGRIM_TRACING_2(5, sizes, args);
 }
 
 
 int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_statuses[])
 {
-    // TODO: Without the next non-op line, Chombo will crash, no idea why.
-    MPI_Request old_reqs[count];
 
-    int ids[count];
-    int idx;
-    for(idx = 0; idx < count; idx++) {
-        ids[idx] = *( get_request_id( &(array_of_requests[idx]) ) );
-        old_reqs[idx] = array_of_requests[idx];
-    }
+    COPY_REQUESTS(count);
 
     PILGRIM_TRACING_1(int, MPI_Waitall, (count, array_of_requests, array_of_statuses));
 
@@ -131,51 +130,34 @@ int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_
 
 int MPI_Test(MPI_Request *request, int *flag, MPI_Status *status)
 {
-
-    GET_STATUS_INFO(request, status);
-    void **args = assemble_args_list(3, get_request_id(request), flag, status_info);
-    int sizes[] = { sizeof(int), sizeof(int), sizeof(status_info)};
+    MPI_Request old_req;
+    memcpy(&old_req, request, sizeof(MPI_Request));
 
     PILGRIM_TRACING_1(int, MPI_Test, (request, flag, status));
-    PILGRIM_TRACING_2(3, sizes, args);
 
-    if(*request == MPI_REQUEST_NULL)
-        free_request(request);
+    GET_STATUS_INFO(&old_req, status);
+    void **args = assemble_args_list(3, req_id, flag, status_info);
+    int sizes[] = { sizeof(int), sizeof(int), sizeof(status_info)};
+
+    PILGRIM_TRACING_2(3, sizes, args);
 }
 
 int MPI_Testany(int count, MPI_Request array_of_requests[], int *index, int *flag, MPI_Status *status)
 {
-    int ids[count];
-    int idx;
-    MPI_Request old_reqs[count];
-    for(idx = 0; idx < count; idx++) {
-        ids[idx] = *( get_request_id( &(array_of_requests[idx]) ) );
-        old_reqs[idx] = array_of_requests[idx];
-    }
+    COPY_REQUESTS(count);
 
     PILGRIM_TRACING_1(int, MPI_Testany, (count, array_of_requests, index, flag, status));
 
-    GET_STATUS_INFO(&old_reqs[*index],  status);
+    GET_STATUS_INFO(&old_reqs[*index], status);
     void **args = assemble_args_list(5, &count, ids, index, flag, status_info);
     int sizes[] = { sizeof(int), sizeof(int)*count, sizeof(int), sizeof(int), sizeof(status_info) };
-    PILGRIM_TRACING_2(5, sizes, args);
 
-    free_request(&old_reqs[*index]);
+    PILGRIM_TRACING_2(5, sizes, args);
 }
 
 int MPI_Testall(int count, MPI_Request array_of_requests[], int *flag, MPI_Status array_of_statuses[])
 {
-    void *tmp = array_of_statuses;
-    if(array_of_statuses == MPI_STATUSES_IGNORE)
-        tmp = dlcalloc( count, sizeof(MPI_Status) );
-
-    int ids[count];
-    int idx;
-    MPI_Request old_reqs[count];
-    for(idx = 0; idx < count; idx++) {
-        ids[idx] = *( get_request_id( &(array_of_requests[idx]) ) );
-        old_reqs[idx] = array_of_requests[idx];
-    }
+    COPY_REQUESTS(count);
 
     PILGRIM_TRACING_1(int, MPI_Testall, (count, array_of_requests, flag, array_of_statuses));
 
@@ -189,13 +171,7 @@ int MPI_Testall(int count, MPI_Request array_of_requests[], int *flag, MPI_Statu
 }
 int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[])
 {
-    int ids[incount];
-    int idx;
-    MPI_Request old_reqs[incount];
-    for(idx = 0; idx < incount; idx++) {
-        ids[idx] = *( get_request_id( &(array_of_requests[idx]) ) );
-        old_reqs[idx] = array_of_requests[idx];
-    }
+    COPY_REQUESTS(incount);
 
 	PILGRIM_TRACING_1(int, MPI_Testsome, (incount, array_of_requests, outcount, array_of_indices, array_of_statuses))
 
@@ -208,14 +184,15 @@ int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount, in
 
 int MPI_Request_free(MPI_Request *request)
 {
-    PILGRIM_TRACING_1(int, MPI_Request_free, (request));
+    MPI_Request *old_req = request;
 
     void **args = assemble_args_list(1, get_request_id(request));
     int sizes[] = {sizeof(int)};
+    PILGRIM_TRACING_1(int, MPI_Request_free, (request));
+
+    free_request(old_req);
 
     PILGRIM_TRACING_2(1, sizes, args);
-
-    free_request(request);
 }
 
 int MPI_Startall(int count, MPI_Request array_of_requests[])

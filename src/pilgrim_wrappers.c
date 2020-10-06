@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pilgrim.h"
-#include "pilgrim_mpi_objects.h"
 static int self_rank;
 int MPI_Type_delete_attr(MPI_Datatype datatype, int type_keyval)
 {

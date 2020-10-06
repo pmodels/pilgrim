@@ -193,7 +193,6 @@ def generate_wrapper_file(funcs):
     f.write('#include <stdlib.h>\n')
     f.write('#include <string.h>\n')
     f.write('#include "pilgrim.h"\n')
-    f.write('#include "pilgrim_mpi_objects.h"\n')
     f.write('static int self_rank;\n')
 
     for name in funcs:

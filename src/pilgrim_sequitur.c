@@ -279,9 +279,10 @@ void sequitur_finalize() {
     // clean up
     Digram *digram, *tmp;
     HASH_ITER(hh, grammar.digram_table, digram, tmp) {
+        HASH_DEL(grammar.digram_table, digram);
         dlfree(digram->key);
+        dlfree(digram);
     }
-    HASH_CLEAR(hh, grammar.digram_table);
 
     Symbol *rule, *sym, *tmp2, *tmp3;
     DL_FOREACH_SAFE(grammar.rules, rule, tmp2) {

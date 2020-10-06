@@ -16,6 +16,8 @@
 #include "mpi.h"
 
 #define TIME_RESOLUTION 0.000001
+// from pilgrim_mpi_objects.h
+MPI_OBJ_DEFINE_ALL();
 
 static int current_terminal_id = 0;
 static int current_addr_id = 0;
@@ -382,9 +384,12 @@ void logger_exit() {
     // Clean up the hash table
     RecordHash *entry, *tmp;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
+        HASH_DEL(__logger.hash_head, entry);
         dlfree(entry->key);
+        dlfree(entry);
     }
-    HASH_CLEAR(hh, __logger.hash_head);
+
+    MPI_OBJ_CLEANUP_ALL();
 
     avl_destroy(__logger.addr_tree);
 }

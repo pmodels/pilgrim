@@ -5,18 +5,17 @@
 #include "dlmalloc-2.8.6.h"
 
 #define MPI_OBJ_NODE_STRUCT(Type)           \
-    typedef struct _ObjNode_##Type {       \
+    typedef struct _ObjNode_##Type {        \
         int id;                             \
-        struct _ObjNode_##Type *prev;      \
-        struct _ObjNode_##Type *next;      \
+        struct _ObjNode_##Type *prev;       \
+        struct _ObjNode_##Type *next;       \
     } ObjNode_##Type;
 
 
 #define MPI_OBJ_HASH_STRUCT(Type)           \
-    typedef struct _ObjHsah_##Type {       \
+    typedef struct _ObjHsah_##Type {        \
         void *key;                          \
         ObjNode_##Type *id_node;            \
-        int id;                             \
         UT_hash_handle hh;                  \
     } ObjHash_##Type;
 
@@ -75,6 +74,7 @@
 
 
 #define MPI_OBJ_ID(Type, obj) get_object_id_##Type(obj)
+#define MPI_OBJ_RELEASE(Type, obj) on_object_release_##Type(obj)
 
 
 MPI_OBJ_CREATE(MPI_Datatype);

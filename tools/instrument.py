@@ -6,7 +6,7 @@ from codegen import MPIFunction, MPIArgument
 def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
-    os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
+    os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
     for line in f.readlines():
         func_name = line.strip().split('(')[0].split(' ')[1]
@@ -36,7 +36,7 @@ def generate_function_id_file(funcs):
     function_id_file.write('#endif')
     function_id_file.close()
 
-def is_mpi_object(arg_type):
+def is_mpi_object_arg(arg_type):
     # Do not include MPI_Request, MPI_Status, MPI_Comm, and MPI_Offset
     mpi_objects = [
         "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win"
@@ -51,7 +51,20 @@ def is_mpi_object(arg_type):
             return True
     return False
 
+def is_mpi_object_release(func):
+    release_funcs = set([
+        "MPI_Info_free", "MPI_Type_free", "MPI_File_close",
+        "MPI_Win_free", "MPI_Group_free", "MPI_Op_free"])
+    if func.name in release_funcs:
+        return True
+    return False
+
+
 def codegen_assemble_args(func):
+    def arg_type_strip(type_str):
+        t = type_str.replace('*', '').replace('[', '').replace(']', '').replace(' ', '').replace('const', '')
+        return t;
+
     line = ""
     assemble_args = []
     args_set = set( [arg.name for arg in func.arguments] )
@@ -78,10 +91,9 @@ def codegen_assemble_args(func):
                 line += "\tif(recvtag == MPI_ANY_TAG) status_arg[1] = status->MPI_TAG;\n"
             elif "tag" in args_set:
                 line += "\tif(tag == MPI_ANY_TAG) status_arg[1] = status->MPI_TAG;\n"
-        elif is_mpi_object(arg.type):
+        elif is_mpi_object_arg(arg.type):
             if '*' in arg.type or '[' in arg.type:
-                t = arg.type.replace('*', '').replace('[', '').replace(']', '').replace(' ', '').replace('const', '')
-                assemble_args.append("MPI_OBJ_ID(%s, %s)" %(t, arg.name))
+                assemble_args.append("MPI_OBJ_ID(%s, %s)" %(arg_type_strip(arg.type), arg.name))
             else:
                 line += "\t%s obj_%d = %s;\n" %(arg.type, obj_count, arg.name)
                 assemble_args.append("MPI_OBJ_ID(%s, &obj_%d)" %(arg.type, obj_count))
@@ -101,8 +113,13 @@ def codegen_assemble_args(func):
     if len(assemble_args) > 0:
         assemble_args_str = ', '.join(assemble_args)
         line += '\tvoid **args = assemble_args_list(%d, %s);\n' %(len(assemble_args), assemble_args_str)
+        if is_mpi_object_release(func):
+            obj_type = arg_type_strip(func.arguments[0].type)
+            obj_name = func.arguments[0].name
+            line += '\tMPI_OBJ_RELEASE(%s, %s);\n' %(obj_type, obj_name)
     else:
         line = '\tvoid **args = NULL;\n'
+
 
     return line, len(assemble_args)
 
@@ -120,7 +137,7 @@ def codegen_sizeof_args(func):
             sizeof_args.append('sizeof(int)*2')
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             continue
-        elif is_mpi_object(arg.type):
+        elif is_mpi_object_arg(arg.type):
             sizeof_args.append('sizeof(int)')
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
@@ -151,6 +168,25 @@ def handle_special_apis(func):
     return False
 
 def generate_wrapper_file(funcs):
+    def signature(func):
+        line = func.ret_type + " " + func.name + func.signature + "\n"
+        f.write(line + '{\n')
+
+    def phase_one(func):
+        arg_names = []
+        for arg in func.arguments:
+            arg_names.append(arg.name)
+        f.write('\tPILGRIM_TRACING_1(%s, %s, (%s));\n' %(func.ret_type, func.name, ', '.join(arg_names)))
+
+    def phase_two(num_args):
+        f.write('\tPILGRIM_TRACING_2(%d, sizes, args);\n}\n' %num_args)
+
+    def logging(func):
+        line, num_args = codegen_assemble_args(func)
+        f.write(line)
+        f.write(codegen_sizeof_args(func))
+        return num_args
+
     f = open('../src/pilgrim_wrappers.c', 'w')
     f.write('#include <mpi.h>\n')
     f.write('#include <stdarg.h>\n')
@@ -166,22 +202,16 @@ def generate_wrapper_file(funcs):
         if handle_special_apis(func):
             continue
 
-        # Signature
-        line = func.ret_type + " " + func.name + func.signature + "\n"
-        f.write(line + '{\n')
+        signature(func)
 
-        arg_names = []
-        for arg in func.arguments:
-            arg_names.append(arg.name)
-        f.write('\tPILGRIM_TRACING_1(%s, %s, (%s));\n' %(func.ret_type, func.name, ', '.join(arg_names)))
+        if is_mpi_object_release(func):
+            num_args = logging(func)
+            phase_one(func)
+        else:
+            phase_one(func)
+            num_args = logging(func)
 
-        # Real thing
-        line, num_args = codegen_assemble_args(func)
-        f.write(line)
-        f.write(codegen_sizeof_args(func))
-        f.write('\tPILGRIM_TRACING_2(%d, sizes, args);\n' %num_args)
-
-        f.write('}\n')
+        phase_two(num_args)
 
     f.close()
 

@@ -620,9 +620,10 @@ int MPI_File_write_at(MPI_File fh, MPI_Offset offset, const void *buf, int count
 }
 int MPI_File_close(MPI_File *fh)
 {
-	PILGRIM_TRACING_1(int, MPI_File_close, (fh));
 	void **args = assemble_args_list(1, MPI_OBJ_ID(MPI_File, fh));
+	MPI_OBJ_RELEASE(MPI_File, fh);
 	int sizes[] = { sizeof(int) };
+	PILGRIM_TRACING_1(int, MPI_File_close, (fh));
 	PILGRIM_TRACING_2(1, sizes, args);
 }
 int MPI_Comm_call_errhandler(MPI_Comm comm, int errorcode)
@@ -648,9 +649,10 @@ int MPI_File_create_errhandler(MPI_File_errhandler_function *file_errhandler_fn,
 }
 int MPI_Group_free(MPI_Group *group)
 {
-	PILGRIM_TRACING_1(int, MPI_Group_free, (group));
 	void **args = assemble_args_list(1, group);
+	MPI_OBJ_RELEASE(MPI_Group, group);
 	int sizes[] = { 1 * sizeof(MPI_Group) };
+	PILGRIM_TRACING_1(int, MPI_Group_free, (group));
 	PILGRIM_TRACING_2(1, sizes, args);
 }
 int MPI_Ialltoall(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm, MPI_Request *request)
@@ -1850,9 +1852,10 @@ int MPI_T_pvar_handle_free(MPI_T_pvar_session session, MPI_T_pvar_handle *handle
 }
 int MPI_Type_free(MPI_Datatype *datatype)
 {
-	PILGRIM_TRACING_1(int, MPI_Type_free, (datatype));
 	void **args = assemble_args_list(1, MPI_OBJ_ID(MPI_Datatype, datatype));
+	MPI_OBJ_RELEASE(MPI_Datatype, datatype);
 	int sizes[] = { sizeof(int) };
+	PILGRIM_TRACING_1(int, MPI_Type_free, (datatype));
 	PILGRIM_TRACING_2(1, sizes, args);
 }
 int MPI_Win_test(MPI_Win win, int *flag)
@@ -2075,9 +2078,10 @@ int MPI_Win_start(MPI_Group group, int assert, MPI_Win win)
 }
 int MPI_Win_free(MPI_Win *win)
 {
-	PILGRIM_TRACING_1(int, MPI_Win_free, (win));
 	void **args = assemble_args_list(1, win);
+	MPI_OBJ_RELEASE(MPI_Win, win);
 	int sizes[] = { 1 * sizeof(MPI_Win) };
+	PILGRIM_TRACING_1(int, MPI_Win_free, (win));
 	PILGRIM_TRACING_2(1, sizes, args);
 }
 int MPI_Alltoallw(const void *sendbuf, const int sendcounts[], const int sdispls[], const MPI_Datatype sendtypes[], void *recvbuf, const int recvcounts[], const int rdispls[], const MPI_Datatype recvtypes[], MPI_Comm comm)
@@ -2107,9 +2111,10 @@ int MPI_Exscan(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datat
 }
 int MPI_Op_free(MPI_Op *op)
 {
-	PILGRIM_TRACING_1(int, MPI_Op_free, (op));
 	void **args = assemble_args_list(1, MPI_OBJ_ID(MPI_Op, op));
+	MPI_OBJ_RELEASE(MPI_Op, op);
 	int sizes[] = { sizeof(int) };
+	PILGRIM_TRACING_1(int, MPI_Op_free, (op));
 	PILGRIM_TRACING_2(1, sizes, args);
 }
 int MPI_Iscan(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm, MPI_Request *request)
@@ -2193,9 +2198,10 @@ int MPI_Igather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void 
 }
 int MPI_Info_free(MPI_Info *info)
 {
-	PILGRIM_TRACING_1(int, MPI_Info_free, (info));
 	void **args = assemble_args_list(1, MPI_OBJ_ID(MPI_Info, info));
+	MPI_OBJ_RELEASE(MPI_Info, info);
 	int sizes[] = { sizeof(int) };
+	PILGRIM_TRACING_1(int, MPI_Info_free, (info));
 	PILGRIM_TRACING_2(1, sizes, args);
 }
 int MPI_Open_port(MPI_Info info, char *port_name)

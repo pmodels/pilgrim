@@ -6,7 +6,7 @@ from codegen import MPIFunction, MPIArgument
 def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
-    os.system('grep -E "PMPI" /usr/include/mpi/*.h > /tmp/local_funcs.tmp')
+    os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
     for line in f.readlines():
         func_name = line.strip().split('(')[0].split(' ')[1]
@@ -39,7 +39,7 @@ def generate_function_id_file(funcs):
 def is_mpi_object(arg_type):
     # Do not include MPI_Request, MPI_Status, MPI_Comm, and MPI_Offset
     mpi_objects = [
-        "MPI_Error", "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win"
+        "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win"
         "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Errhandler" "MPI_Comm_delete_attr_function",
         "MPI_Comm_errhandler_function", "MPI_Comm_copy_attr_function",
         "MPI_Copy_function", "MPI_Grequest_query_function", "MPI_Grequest_cancel_function",

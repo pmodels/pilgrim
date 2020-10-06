@@ -118,6 +118,7 @@ int* request2id(MPI_Request *req, int source, int tag) {
 void free_request(MPI_Request *req) {
     RequestHash *entry = request_hash_entry(req);
     if(entry) {
+        dlfree(entry->key);
         DL_APPEND(__logger.reqs_list, entry->req_node);    // Add the id back to the free list
         HASH_DEL(__logger.reqs_table, entry);
     }

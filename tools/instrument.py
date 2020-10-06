@@ -6,7 +6,7 @@ from codegen import MPIFunction, MPIArgument
 def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
-    os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
+    os.system('grep -E "PMPI" /usr/include/mpi/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
     for line in f.readlines():
         func_name = line.strip().split('(')[0].split(' ')[1]
@@ -36,10 +36,26 @@ def generate_function_id_file(funcs):
     function_id_file.write('#endif')
     function_id_file.close()
 
+def is_mpi_object(arg_type):
+    # Do not include MPI_Request, MPI_Status, MPI_Comm, and MPI_Offset
+    mpi_objects = [
+        "MPI_Error", "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win"
+        "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Errhandler" "MPI_Comm_delete_attr_function",
+        "MPI_Comm_errhandler_function", "MPI_Comm_copy_attr_function",
+        "MPI_Copy_function", "MPI_Grequest_query_function", "MPI_Grequest_cancel_function",
+        "MPI_Grequest_free_function", "MPI_File_errhandler_function", "MPI_Datarep_conversion_function",
+        "MPI_Datarep_extent_function", "MPI_Delete_function", "MPI_Win_delete_attr_function",
+        "MPI_Win_copy_attr_function", "MPI_Win_errhandler_function", "MPI_User_function" ]
+    for t in mpi_objects:
+        if  t in arg_type:
+            return True
+    return False
+
 def codegen_assemble_args(func):
     line = ""
     assemble_args = []
     args_set = set( [arg.name for arg in func.arguments] )
+    obj_count = 0
     for arg in func.arguments:
         if 'void' in arg.type:                                  # void* buf
             assemble_args.append("addr2id("+arg.name+")")
@@ -62,6 +78,14 @@ def codegen_assemble_args(func):
                 line += "\tif(recvtag == MPI_ANY_TAG) status_arg[1] = status->MPI_TAG;\n"
             elif "tag" in args_set:
                 line += "\tif(tag == MPI_ANY_TAG) status_arg[1] = status->MPI_TAG;\n"
+        elif is_mpi_object(arg.type):
+            if '*' in arg.type or '[' in arg.type:
+                t = arg.type.replace('*', '').replace('[', '').replace(']', '').replace(' ', '').replace('const', '')
+                assemble_args.append("MPI_OBJ_ID(%s, %s)" %(t, arg.name))
+            else:
+                line += "\t%s obj_%d = %s;\n" %(arg.type, obj_count, arg.name)
+                assemble_args.append("MPI_OBJ_ID(%s, &obj_%d)" %(arg.type, obj_count))
+                obj_count += 1
         elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
         elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for rank-1/rank+1 as src or dest
@@ -96,6 +120,8 @@ def codegen_sizeof_args(func):
             sizeof_args.append('sizeof(int)*2')
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             continue
+        elif is_mpi_object(arg.type):
+            sizeof_args.append('sizeof(int)')
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
             fixed_type = arg.type.split('[')[0].replace('*', '')
@@ -107,7 +133,6 @@ def codegen_sizeof_args(func):
     if len(sizeof_args) > 0:
         sizeof_args_str = ', '.join(sizeof_args)
         line = '\tint sizes[] = { %s };\n' %sizeof_args_str
-
     return line
 
 
@@ -132,6 +157,7 @@ def generate_wrapper_file(funcs):
     f.write('#include <stdlib.h>\n')
     f.write('#include <string.h>\n')
     f.write('#include "pilgrim.h"\n')
+    f.write('#include "pilgrim_mpi_objects.h"\n')
     f.write('static int self_rank;\n')
 
     for name in funcs:

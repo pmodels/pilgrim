@@ -94,7 +94,7 @@
         ObjNode_##Type *node, *tmp2;                                    \
         DL_FOREACH_SAFE(list_##Type, node, tmp2) {                      \
             DL_DELETE(list_##Type, node);                               \
-            dlfree(tmp2);                                               \
+            dlfree(node);                                               \
         }                                                               \
     }
 

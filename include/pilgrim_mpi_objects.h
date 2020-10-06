@@ -26,10 +26,10 @@
     ObjHash_##Type *hash_##Type = NULL;     \
     ObjNode_##Type *list_##Type = NULL;     \
                                             \
-    int allocated_##Type;                   \
-    int invalid_##Type = -1;                \
+    static int allocated_##Type;            \
+    static int invalid_##Type = -1;         \
                                             \
-    ObjHash_##Type* get_hash_entry_##Type(const Type *obj) {              \
+    ObjHash_##Type* get_hash_entry_##Type(const Type *obj) {            \
         if(obj == NULL)                                                 \
             return NULL;                                                \
         ObjHash_##Type *entry = NULL;                                   \
@@ -37,8 +37,10 @@
         return entry;                                                   \
     }                                                                   \
                                                                         \
-    int* get_object_id_##Type(const Type *obj) {                                 \
-        ObjHash_##Type *entry = get_hash_entry_##Type(obj);         \
+    int* get_object_id_##Type(const Type *obj) {                        \
+        if(obj == NULL)                                                 \
+            return &invalid_##Type;                                     \
+        ObjHash_##Type *entry = get_hash_entry_##Type(obj);             \
         /* if not exists in the hash table, then this should be the     \
          first time the object is created, need to add it to the        \
          hash table */                                                  \
@@ -61,7 +63,7 @@
         return &(entry->id_node->id);                                   \
     }                                                                   \
                                                                         \
-    void on_object_release_##Type(const Type *obj) {                          \
+    void on_object_release_##Type(const Type *obj) {                    \
         ObjHash_##Type *entry = get_hash_entry_##Type(obj);             \
         if(entry) {                                                     \
             /* add the id back to the free list */                      \

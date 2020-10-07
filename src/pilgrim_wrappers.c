@@ -89,8 +89,8 @@ int MPI_Win_flush_local_all(MPI_Win win)
 int MPI_Comm_create_keyval(MPI_Comm_copy_attr_function *comm_copy_attr_fn, MPI_Comm_delete_attr_function *comm_delete_attr_fn, int *comm_keyval, void *extra_state)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_create_keyval, (comm_copy_attr_fn, comm_delete_attr_fn, comm_keyval, extra_state));
-	void **args = assemble_args_list(4, MPI_OBJ_ID(MPI_Comm_copy_attr_function, comm_copy_attr_fn), comm_delete_attr_fn, comm_keyval, addr2id(extra_state));
-	int sizes[] = { sizeof(int), 1 * sizeof(MPI_Comm_delete_attr_function), 1 * sizeof(int), sizeof(int) };
+	void **args = assemble_args_list(4, comm_copy_attr_fn, comm_delete_attr_fn, comm_keyval, addr2id(extra_state));
+	int sizes[] = { 1 * sizeof(MPI_Comm_copy_attr_function), 1 * sizeof(MPI_Comm_delete_attr_function), 1 * sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(4, sizes, args);
 }
 int MPI_Comm_get_parent(MPI_Comm *parent)
@@ -179,8 +179,8 @@ int MPI_Get_count(const MPI_Status *status, MPI_Datatype datatype, int *count)
 int MPI_Grequest_start(MPI_Grequest_query_function *query_fn, MPI_Grequest_free_function *free_fn, MPI_Grequest_cancel_function *cancel_fn, void *extra_state, MPI_Request *request)
 {
 	PILGRIM_TRACING_1(int, MPI_Grequest_start, (query_fn, free_fn, cancel_fn, extra_state, request));
-	void **args = assemble_args_list(5, MPI_OBJ_ID(MPI_Grequest_query_function, query_fn), MPI_OBJ_ID(MPI_Grequest_free_function, free_fn), MPI_OBJ_ID(MPI_Grequest_cancel_function, cancel_fn), addr2id(extra_state), request2id(request, 0, 0));
-	int sizes[] = { sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int) };
+	void **args = assemble_args_list(5, query_fn, free_fn, cancel_fn, addr2id(extra_state), request2id(request, 0, 0));
+	int sizes[] = { 1 * sizeof(MPI_Grequest_query_function), 1 * sizeof(MPI_Grequest_free_function), 1 * sizeof(MPI_Grequest_cancel_function), sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(5, sizes, args);
 }
 int MPI_Cartdim_get(MPI_Comm comm, int *ndims)
@@ -383,8 +383,8 @@ int MPI_Comm_free_keyval(int *comm_keyval)
 int MPI_Op_create(MPI_User_function *user_fn, int commute, MPI_Op *op)
 {
 	PILGRIM_TRACING_1(int, MPI_Op_create, (user_fn, commute, op));
-	void **args = assemble_args_list(3, MPI_OBJ_ID(MPI_User_function, user_fn), &commute, MPI_OBJ_ID(MPI_Op, op));
-	int sizes[] = { sizeof(int), sizeof(int), sizeof(int) };
+	void **args = assemble_args_list(3, user_fn, &commute, MPI_OBJ_ID(MPI_Op, op));
+	int sizes[] = { 1 * sizeof(MPI_User_function), sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(3, sizes, args);
 }
 int MPI_T_enum_get_info(MPI_T_enum enumtype, int *num, char *name, int *name_len)
@@ -1371,8 +1371,8 @@ int MPI_Comm_delete_attr(MPI_Comm comm, int comm_keyval)
 int MPI_Comm_create_errhandler(MPI_Comm_errhandler_function *comm_errhandler_fn, MPI_Errhandler *errhandler)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_create_errhandler, (comm_errhandler_fn, errhandler));
-	void **args = assemble_args_list(2, MPI_OBJ_ID(MPI_Comm_errhandler_function, comm_errhandler_fn), errhandler);
-	int sizes[] = { sizeof(int), 1 * sizeof(MPI_Errhandler) };
+	void **args = assemble_args_list(2, comm_errhandler_fn, errhandler);
+	int sizes[] = { 1 * sizeof(MPI_Comm_errhandler_function), 1 * sizeof(MPI_Errhandler) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_Barrier(MPI_Comm comm)
@@ -1627,8 +1627,8 @@ int MPI_Get_accumulate(const void *origin_addr, int origin_count, MPI_Datatype o
 int MPI_Win_create_errhandler(MPI_Win_errhandler_function *win_errhandler_fn, MPI_Errhandler *errhandler)
 {
 	PILGRIM_TRACING_1(int, MPI_Win_create_errhandler, (win_errhandler_fn, errhandler));
-	void **args = assemble_args_list(2, MPI_OBJ_ID(MPI_Win_errhandler_function, win_errhandler_fn), errhandler);
-	int sizes[] = { sizeof(int), 1 * sizeof(MPI_Errhandler) };
+	void **args = assemble_args_list(2, win_errhandler_fn, errhandler);
+	int sizes[] = { 1 * sizeof(MPI_Win_errhandler_function), 1 * sizeof(MPI_Errhandler) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_Win_fence(int assert, MPI_Win win)
@@ -2128,8 +2128,8 @@ int MPI_Iscan(const void *sendbuf, void *recvbuf, int count, MPI_Datatype dataty
 int MPI_Keyval_create(MPI_Copy_function *copy_fn, MPI_Delete_function *delete_fn, int *keyval, void *extra_state)
 {
 	PILGRIM_TRACING_1(int, MPI_Keyval_create, (copy_fn, delete_fn, keyval, extra_state));
-	void **args = assemble_args_list(4, MPI_OBJ_ID(MPI_Copy_function, copy_fn), MPI_OBJ_ID(MPI_Delete_function, delete_fn), keyval, addr2id(extra_state));
-	int sizes[] = { sizeof(int), sizeof(int), 1 * sizeof(int), sizeof(int) };
+	void **args = assemble_args_list(4, copy_fn, delete_fn, keyval, addr2id(extra_state));
+	int sizes[] = { 1 * sizeof(MPI_Copy_function), 1 * sizeof(MPI_Delete_function), 1 * sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(4, sizes, args);
 }
 int MPI_Type_vector(int count, int blocklength, int stride, MPI_Datatype oldtype, MPI_Datatype *newtype)
@@ -2143,8 +2143,8 @@ int MPI_Type_vector(int count, int blocklength, int stride, MPI_Datatype oldtype
 int MPI_Win_create_keyval(MPI_Win_copy_attr_function *win_copy_attr_fn, MPI_Win_delete_attr_function *win_delete_attr_fn, int *win_keyval, void *extra_state)
 {
 	PILGRIM_TRACING_1(int, MPI_Win_create_keyval, (win_copy_attr_fn, win_delete_attr_fn, win_keyval, extra_state));
-	void **args = assemble_args_list(4, MPI_OBJ_ID(MPI_Win_copy_attr_function, win_copy_attr_fn), MPI_OBJ_ID(MPI_Win_delete_attr_function, win_delete_attr_fn), win_keyval, addr2id(extra_state));
-	int sizes[] = { sizeof(int), sizeof(int), 1 * sizeof(int), sizeof(int) };
+	void **args = assemble_args_list(4, win_copy_attr_fn, win_delete_attr_fn, win_keyval, addr2id(extra_state));
+	int sizes[] = { 1 * sizeof(MPI_Win_copy_attr_function), 1 * sizeof(MPI_Win_delete_attr_function), 1 * sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(4, sizes, args);
 }
 int MPI_Type_match_size(int typeclass, int size, MPI_Datatype *datatype)
@@ -2432,8 +2432,8 @@ int MPI_File_set_errhandler(MPI_File file, MPI_Errhandler errhandler)
 int MPI_Register_datarep(const char *datarep, MPI_Datarep_conversion_function *read_conversion_fn, MPI_Datarep_conversion_function *write_conversion_fn, MPI_Datarep_extent_function *dtype_file_extent_fn, void *extra_state)
 {
 	PILGRIM_TRACING_1(int, MPI_Register_datarep, (datarep, read_conversion_fn, write_conversion_fn, dtype_file_extent_fn, extra_state));
-	void **args = assemble_args_list(5, datarep, MPI_OBJ_ID(MPI_Datarep_conversion_function, read_conversion_fn), MPI_OBJ_ID(MPI_Datarep_conversion_function, write_conversion_fn), MPI_OBJ_ID(MPI_Datarep_extent_function, dtype_file_extent_fn), addr2id(extra_state));
-	int sizes[] = { strlen(datarep)+1, sizeof(int), sizeof(int), sizeof(int), sizeof(int) };
+	void **args = assemble_args_list(5, datarep, read_conversion_fn, write_conversion_fn, dtype_file_extent_fn, addr2id(extra_state));
+	int sizes[] = { strlen(datarep)+1, 1 * sizeof(MPI_Datarep_conversion_function), 1 * sizeof(MPI_Datarep_conversion_function), 1 * sizeof(MPI_Datarep_extent_function), sizeof(int) };
 	PILGRIM_TRACING_2(5, sizes, args);
 }
 int MPI_Reduce_scatter(const void *sendbuf, void *recvbuf, const int recvcounts[], MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)

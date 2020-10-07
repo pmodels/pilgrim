@@ -149,24 +149,7 @@
     MPI_OBJ_DEFINE(MPI_Win);                                            \
     MPI_OBJ_DEFINE(MPI_Group);                                          \
     MPI_OBJ_DEFINE(MPI_Op);                                             \
-    MPI_OBJ_DEFINE(MPI_Message);                                        \
-    MPI_OBJ_DEFINE(MPI_Errhandler);                                     \
-    MPI_OBJ_DEFINE(MPI_Comm_delete_attr_function);                      \
-    MPI_OBJ_DEFINE(MPI_Comm_errhandler_function);                       \
-    MPI_OBJ_DEFINE(MPI_Comm_copy_attr_function);                        \
-    MPI_OBJ_DEFINE(MPI_Copy_function);                                  \
-    MPI_OBJ_DEFINE(MPI_Grequest_query_function);                        \
-    MPI_OBJ_DEFINE(MPI_Grequest_cancel_function);                       \
-    MPI_OBJ_DEFINE(MPI_Grequest_free_function);                         \
-    MPI_OBJ_DEFINE(MPI_File_errhandler_function);                       \
-    MPI_OBJ_DEFINE(MPI_Datarep_conversion_function);                    \
-    MPI_OBJ_DEFINE(MPI_Datarep_extent_function);                        \
-    MPI_OBJ_DEFINE(MPI_Delete_function);                                \
-    MPI_OBJ_DEFINE(MPI_Win_delete_attr_function);                       \
-    MPI_OBJ_DEFINE(MPI_Win_copy_attr_function);                         \
-    MPI_OBJ_DEFINE(MPI_Win_errhandler_function);                        \
-    MPI_OBJ_DEFINE(MPI_User_function);
-
+    MPI_OBJ_DEFINE(MPI_Message);
 
 MPI_OBJ_DECLARE(MPI_Datatype);
 MPI_OBJ_DECLARE(MPI_Info);
@@ -175,21 +158,5 @@ MPI_OBJ_DECLARE(MPI_Win);
 MPI_OBJ_DECLARE(MPI_Group);
 MPI_OBJ_DECLARE(MPI_Op);
 MPI_OBJ_DECLARE(MPI_Message);
-MPI_OBJ_DECLARE(MPI_Errhandler);
-MPI_OBJ_DECLARE(MPI_Comm_delete_attr_function);
-MPI_OBJ_DECLARE(MPI_Comm_errhandler_function);
-MPI_OBJ_DECLARE(MPI_Comm_copy_attr_function);
-MPI_OBJ_DECLARE(MPI_Copy_function);
-MPI_OBJ_DECLARE(MPI_Grequest_query_function);
-MPI_OBJ_DECLARE(MPI_Grequest_cancel_function);
-MPI_OBJ_DECLARE(MPI_Grequest_free_function);
-MPI_OBJ_DECLARE(MPI_File_errhandler_function);
-MPI_OBJ_DECLARE(MPI_Datarep_conversion_function);
-MPI_OBJ_DECLARE(MPI_Datarep_extent_function);
-MPI_OBJ_DECLARE(MPI_Delete_function);
-MPI_OBJ_DECLARE(MPI_Win_delete_attr_function);
-MPI_OBJ_DECLARE(MPI_Win_copy_attr_function);
-MPI_OBJ_DECLARE(MPI_Win_errhandler_function);
-MPI_OBJ_DECLARE(MPI_User_function);
 
 #endif

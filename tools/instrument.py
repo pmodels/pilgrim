@@ -40,12 +40,7 @@ def is_mpi_object_arg(arg_type):
     # Do not include MPI_Request, MPI_Status, MPI_Comm, and MPI_Offset
     mpi_objects = [
         "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win"
-        "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Errhandler" "MPI_Comm_delete_attr_function",
-        "MPI_Comm_errhandler_function", "MPI_Comm_copy_attr_function",
-        "MPI_Copy_function", "MPI_Grequest_query_function", "MPI_Grequest_cancel_function",
-        "MPI_Grequest_free_function", "MPI_File_errhandler_function", "MPI_Datarep_conversion_function",
-        "MPI_Datarep_extent_function", "MPI_Delete_function", "MPI_Win_delete_attr_function",
-        "MPI_Win_copy_attr_function", "MPI_Win_errhandler_function", "MPI_User_function" ]
+        "MPI_Group", "MPI_Op", "MPI_Message"]
     for t in mpi_objects:
         if  t in arg_type:
             return True

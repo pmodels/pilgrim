@@ -38,12 +38,11 @@ def generate_function_id_file(funcs):
 
 def is_mpi_object_arg(arg_type):
     # Do not include MPI_Request, MPI_Status, MPI_Comm, and MPI_Offset
-    mpi_objects = [
-        "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win"
-        "MPI_Group", "MPI_Op", "MPI_Message"]
-    for t in mpi_objects:
-        if  t in arg_type:
-            return True
+    mpi_objects = set([
+        "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win",
+        "MPI_Group", "MPI_Op", "MPI_Message"])
+    if arg_type in mpi_objects:
+        return True
     return False
 
 # Return if this funciton is used to free a MPI object
@@ -89,7 +88,7 @@ def codegen_assemble_args(func):
                 line += "\tif(recvtag == MPI_ANY_TAG) status_arg[1] = status->MPI_TAG;\n"
             elif "tag" in args_set:
                 line += "\tif(tag == MPI_ANY_TAG) status_arg[1] = status->MPI_TAG;\n"
-        elif is_mpi_object_arg(arg.type):
+        elif is_mpi_object_arg(arg_type_strip(arg.type)):
             if '*' in arg.type or '[' in arg.type:
                 assemble_args.append("MPI_OBJ_ID(%s, %s)" %(arg_type_strip(arg.type), arg.name))
             else:
@@ -204,7 +203,7 @@ def generate_wrapper_file(funcs):
 
         signature(func)
 
-        if is_mpi_object_release(func):
+        if is_mpi_object_release(func)[0]:
             num_args = logging(func)
             phase_one(func)
         else:

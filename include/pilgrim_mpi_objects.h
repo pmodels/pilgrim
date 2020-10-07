@@ -154,5 +154,24 @@ MPI_OBJ_DECLARE(MPI_Message);
 /**
  * 2. Here starts MPI_Request
  */
+typedef struct RequestNode_t {
+    int id;
+    struct RequestNode_t *prev;
+    struct RequestNode_t *next;
+} RequestNode;
+
+typedef struct RequestHash_t {
+    void *key;
+    int key_len;
+    RequestNode* req_node;
+    bool any_source;
+    bool any_tag;
+    UT_hash_handle hh;
+} RequestHash;
+
+RequestHash* request_hash_entry(MPI_Request* request);
+int* request2id(MPI_Request* request, int source, int tag);
+void free_request(MPI_Request* request);
+
 
 #endif

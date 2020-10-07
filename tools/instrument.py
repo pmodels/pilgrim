@@ -46,14 +46,17 @@ def is_mpi_object_arg(arg_type):
             return True
     return False
 
+# Return if this funciton is used to free a MPI object
+# If so, also return the index of this MPI object
 def is_mpi_object_release(func):
     release_funcs = set([
         "MPI_Info_free", "MPI_Type_free", "MPI_File_close",
         "MPI_Win_free", "MPI_Group_free", "MPI_Op_free"])
     if func.name in release_funcs:
-        return True
-    return False
-
+        return True, 0
+    elif func.name == "MPI_Imrecv" or func.name == "MPI_Mrecv":
+        return True, 3
+    return False, 0
 
 def codegen_assemble_args(func):
     def arg_type_strip(type_str):
@@ -108,9 +111,12 @@ def codegen_assemble_args(func):
     if len(assemble_args) > 0:
         assemble_args_str = ', '.join(assemble_args)
         line += '\tvoid **args = assemble_args_list(%d, %s);\n' %(len(assemble_args), assemble_args_str)
-        if is_mpi_object_release(func):
-            obj_type = arg_type_strip(func.arguments[0].type)
-            obj_name = func.arguments[0].name
+
+        # Check if this is a MPI object free function
+        free_mpi_object, arg_idx = is_mpi_object_release(func)
+        if free_mpi_object:
+            obj_type = arg_type_strip(func.arguments[arg_idx].type)
+            obj_name = func.arguments[arg_idx].name
             line += '\tMPI_OBJ_RELEASE(%s, %s);\n' %(obj_type, obj_name)
     else:
         line = '\tvoid **args = NULL;\n'

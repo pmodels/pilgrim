@@ -6,6 +6,12 @@
 #include "utlist.h"
 #include "dlmalloc-2.8.6.h"
 
+/**
+ * 1. Following structs, MACROS and functions
+ * are for general MPI objects such as MPI_Info,
+ * MPI_Win, etc.
+ */
+
 #define MPI_OBJ_NODE_STRUCT(Type)           \
     typedef struct _ObjNode_##Type {        \
         int id;                             \
@@ -124,23 +130,7 @@
     object_cleanup_MPI_Win();                                           \
     object_cleanup_MPI_Group();                                         \
     object_cleanup_MPI_Op();                                            \
-    object_cleanup_MPI_Message();                                       \
-    object_cleanup_MPI_Errhandler();                                    \
-    object_cleanup_MPI_Comm_delete_attr_function();                     \
-    object_cleanup_MPI_Comm_errhandler_function();                      \
-    object_cleanup_MPI_Comm_copy_attr_function();                       \
-    object_cleanup_MPI_Copy_function();                                 \
-    object_cleanup_MPI_Grequest_query_function();                       \
-    object_cleanup_MPI_Grequest_cancel_function();                      \
-    object_cleanup_MPI_Grequest_free_function();                        \
-    object_cleanup_MPI_File_errhandler_function();                      \
-    object_cleanup_MPI_Datarep_conversion_function();                   \
-    object_cleanup_MPI_Datarep_extent_function();                       \
-    object_cleanup_MPI_Delete_function();                               \
-    object_cleanup_MPI_Win_delete_attr_function();                      \
-    object_cleanup_MPI_Win_copy_attr_function();                        \
-    object_cleanup_MPI_Win_errhandler_function();                       \
-    object_cleanup_MPI_User_function();
+    object_cleanup_MPI_Message();
 
 #define MPI_OBJ_DEFINE_ALL()                                            \
     MPI_OBJ_DEFINE(MPI_Datatype);                                       \
@@ -158,5 +148,11 @@ MPI_OBJ_DECLARE(MPI_Win);
 MPI_OBJ_DECLARE(MPI_Group);
 MPI_OBJ_DECLARE(MPI_Op);
 MPI_OBJ_DECLARE(MPI_Message);
+
+
+
+/**
+ * 2. Here starts MPI_Request
+ */
 
 #endif

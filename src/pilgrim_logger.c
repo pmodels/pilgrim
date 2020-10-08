@@ -16,13 +16,9 @@
 #include "mpi.h"
 
 #define TIME_RESOLUTION 0.000001
-// from pilgrim_mpi_objects.h
-MPI_OBJ_DEFINE_ALL();
 
 static int current_terminal_id = 0;
 static int current_addr_id = 0;
-static int invalid_request_id = -1;
-static int allocated_request_id = 0;
 
 // Entry in uthash
 typedef struct RecordHash_t {
@@ -75,54 +71,6 @@ int* addr2id(const void* buffer) {
         if(node->id == -1)
             node->id = current_addr_id++;
         return &(node->id);
-    }
-}
-
-/*
- * Symbolic representation for MPI_Request
- */
-RequestHash* request_hash_entry(MPI_Request *req) {
-    if(req==NULL || *req == MPI_REQUEST_NULL)
-        return NULL;
-
-    RequestHash *entry = NULL;
-    HASH_FIND(hh, __logger.reqs_table, req, sizeof(MPI_Request), entry);
-    return entry;
-}
-
-int* request2id(MPI_Request *req, int source, int tag) {
-    if(req==NULL || *req == MPI_REQUEST_NULL) {
-        return &invalid_request_id;
-    }
-
-    RequestHash *entry = request_hash_entry(req);
-    if(entry == NULL) {
-        entry = dlmalloc(sizeof(RequestHash));
-        entry->key = dlmalloc(sizeof(MPI_Request));
-        memcpy(entry->key, req, sizeof(MPI_Request));
-        entry->key_len = sizeof(MPI_Request);
-        entry->req_node = __logger.reqs_list;               // get the first (head) free id
-        entry->any_source = (source == MPI_ANY_SOURCE);
-        entry->any_tag = (tag == MPI_ANY_TAG);
-
-        if(entry->req_node == NULL) {                       // free list is empty, create one according to allocated_request_id
-            entry->req_node = (RequestNode*) dlmalloc(sizeof(RequestNode));
-            entry->req_node->id = allocated_request_id++;
-        } else {                                            // free list is not empty, get the first one and remove it from list
-            DL_DELETE(__logger.reqs_list, entry->req_node);
-        }
-
-        HASH_ADD_KEYPTR(hh, __logger.reqs_table, entry->key, entry->key_len, entry);
-    }
-    return &(entry->req_node->id);
-}
-
-void free_request(MPI_Request *req) {
-    RequestHash *entry = request_hash_entry(req);
-    if(entry) {
-        dlfree(entry->key);
-        DL_APPEND(__logger.reqs_list, entry->req_node);    // Add the id back to the free list
-        HASH_DEL(__logger.reqs_table, entry);
     }
 }
 

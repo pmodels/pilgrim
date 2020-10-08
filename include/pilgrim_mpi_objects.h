@@ -1,6 +1,7 @@
 #ifndef _PILGRIM_MPI_OBJECTS_H_
 #define _PILGRIM_MPI_OBJECTS_H_
 #include <stdio.h>
+#include <stdbool.h>
 #include "mpi.h"
 #include "uthash.h"
 #include "utlist.h"
@@ -37,76 +38,8 @@
     void object_cleanup_##Type();
 
 
-#define MPI_OBJ_DEFINE(Type)                \
-    ObjHash_##Type *hash_##Type = NULL;     \
-    ObjNode_##Type *list_##Type = NULL;     \
-                                            \
-    static int allocated_##Type;            \
-    static int invalid_##Type = -1;         \
-                                            \
-    ObjHash_##Type* get_hash_entry_##Type(const Type *obj) {            \
-        if(obj == NULL)                                                 \
-            return NULL;                                                \
-        ObjHash_##Type *entry = NULL;                                   \
-        HASH_FIND(hh, hash_##Type, obj, sizeof(Type), entry);           \
-        return entry;                                                   \
-    }                                                                   \
-                                                                        \
-    int* get_object_id_##Type(const Type *obj) {                        \
-        if(obj == NULL)                                                 \
-            return &invalid_##Type;                                     \
-        ObjHash_##Type *entry = get_hash_entry_##Type(obj);             \
-        /* if not exists in the hash table, then this should be the     \
-         first time the object is created, need to add it to the        \
-         hash table */                                                  \
-        if(entry == NULL) {                                             \
-            entry = dlmalloc(sizeof(ObjHash_##Type));                   \
-            entry->key = dlmalloc(sizeof(Type));                        \
-            memcpy(entry->key, obj, sizeof(Type));                      \
-            entry->id_node = list_##Type;                               \
-            /* get a free id from the head of the free list             \
-               if the head is NULL, which means we have no free ids,    \
-               then create one according to the allocated counter */    \
-            if(entry->id_node == NULL) {                                \
-                entry->id_node = dlmalloc(sizeof(ObjNode_##Type));      \
-                entry->id_node->id = allocated_##Type ++;               \
-            } else {                                                    \
-                DL_DELETE(list_##Type, entry->id_node);                 \
-            }                                                           \
-            HASH_ADD_KEYPTR(hh, hash_##Type, entry->key, sizeof(Type), entry); \
-        }                                                               \
-        return &(entry->id_node->id);                                   \
-    }                                                                   \
-                                                                        \
-    void object_release_##Type(const Type *obj) {                       \
-        ObjHash_##Type *entry = get_hash_entry_##Type(obj);             \
-        if(entry) {                                                     \
-            /* add the id back to the free list */                      \
-            DL_APPEND(list_##Type, entry->id_node);                     \
-            dlfree(entry->key);                                         \
-            HASH_DEL(hash_##Type, entry);                               \
-        }                                                               \
-    }                                                                   \
-                                                                        \
-    void object_cleanup_##Type() {                                      \
-        ObjHash_##Type *entry, *tmp;                                    \
-        HASH_ITER(hh, hash_##Type, entry, tmp) {                        \
-            HASH_DEL(hash_##Type, entry);                               \
-            dlfree(entry->key);                                         \
-            dlfree(entry->id_node);                                     \
-            dlfree(entry);                                              \
-        }                                                               \
-                                                                        \
-        ObjNode_##Type *node, *tmp2;                                    \
-        DL_FOREACH_SAFE(list_##Type, node, tmp2) {                      \
-            DL_DELETE(list_##Type, node);                               \
-            dlfree(node);                                               \
-        }                                                               \
-    }
-
-
 /**
- * Only four three MARCOs are used by the outsiders.
+ * Only three MARCOs are used by the outsiders.
  *
  * MPI_OBJ_ID() will return the id for a given MPI object
  * If the object does not have a entry in the hash table,
@@ -130,16 +63,9 @@
     object_cleanup_MPI_Win();                                           \
     object_cleanup_MPI_Group();                                         \
     object_cleanup_MPI_Op();                                            \
-    object_cleanup_MPI_Message();
-
-#define MPI_OBJ_DEFINE_ALL()                                            \
-    MPI_OBJ_DEFINE(MPI_Datatype);                                       \
-    MPI_OBJ_DEFINE(MPI_Info);                                           \
-    MPI_OBJ_DEFINE(MPI_File);                                           \
-    MPI_OBJ_DEFINE(MPI_Win);                                            \
-    MPI_OBJ_DEFINE(MPI_Group);                                          \
-    MPI_OBJ_DEFINE(MPI_Op);                                             \
-    MPI_OBJ_DEFINE(MPI_Message);
+    object_cleanup_MPI_Message();                                       \
+    object_cleanup_MPI_Comm();                                          \
+    object_cleanup_MPI_Request();
 
 MPI_OBJ_DECLARE(MPI_Datatype);
 MPI_OBJ_DECLARE(MPI_Info);
@@ -150,9 +76,12 @@ MPI_OBJ_DECLARE(MPI_Op);
 MPI_OBJ_DECLARE(MPI_Message);
 
 
-
-/**
- * 2. Here starts MPI_Request
+// MPI_Request and MPI_Comm need special implementations as below
+/*
+ * ======================================================================
+ *                          MPI_Request
+ * ======================================================================
+ *
  */
 typedef struct RequestNode_t {
     int id;
@@ -172,6 +101,33 @@ typedef struct RequestHash_t {
 RequestHash* request_hash_entry(MPI_Request* request);
 int* request2id(MPI_Request* request, int source, int tag);
 void free_request(MPI_Request* request);
+void object_cleanup_MPI_Request();
+
+
+/*
+ * ======================================================================
+ *                          MPI_Comm
+ * ======================================================================
+ *
+ */
+typedef struct MPICommHash_t {
+    void *key;
+    void* id;           // (newcomm, global rank of newcomm's rank 0)
+    UT_hash_handle hh;
+} MPICommHash;
+
+void* generate_newcomm_id(MPI_Comm *newcomm);
+void* get_predefined_comm_id(MPI_Comm comm);
+
+/*
+ * Name the following functinos in a way that
+ * we can use the above defined MACROs:
+ *  - MPI_OBJ_ID(MPI_Comm, comm);
+ *  - MPI_OBJ_RELEASE(MPI_Comm, comm);
+ */
+void* get_object_id_MPI_Comm(MPI_Comm *comm);
+void object_release_MPI_Comm(MPI_Comm *comm);
+void object_cleanup_MPI_Comm();
 
 
 #endif

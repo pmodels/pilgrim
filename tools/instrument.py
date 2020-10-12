@@ -40,7 +40,7 @@ def is_mpi_object_arg(arg_type):
     # Do not include MPI_Request, MPI_Status, MPI_Comm, and MPI_Offset
     mpi_objects = set([
         "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win",
-        "MPI_Group", "MPI_Op", "MPI_Message"])
+        "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Comm"])
     if arg_type in mpi_objects:
         return True
     return False
@@ -50,18 +50,18 @@ def is_mpi_object_arg(arg_type):
 def is_mpi_object_release(func):
     release_funcs = set([
         "MPI_Info_free", "MPI_Type_free", "MPI_File_close",
-        "MPI_Win_free", "MPI_Group_free", "MPI_Op_free"])
+        "MPI_Win_free", "MPI_Group_free", "MPI_Op_free", "MPI_Comm_free"])
     if func.name in release_funcs:
         return True, 0
     elif func.name == "MPI_Imrecv" or func.name == "MPI_Mrecv":
         return True, 3
     return False, 0
 
-def codegen_assemble_args(func):
-    def arg_type_strip(type_str):
-        t = type_str.replace('*', '').replace('[', '').replace(']', '').replace(' ', '').replace('const', '')
-        return t;
+def arg_type_strip(type_str):
+    t = type_str.replace('*', '').replace('[', '').replace(']', '').replace(' ', '').replace('const', '')
+    return t;
 
+def codegen_assemble_args(func):
     line = ""
     assemble_args = []
     args_set = set( [arg.name for arg in func.arguments] )
@@ -137,12 +137,15 @@ def codegen_sizeof_args(func):
             sizeof_args.append('sizeof(int)*2')
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             continue
-        elif is_mpi_object_arg(arg.type):
-            sizeof_args.append('sizeof(int)')
+        elif is_mpi_object_arg(arg_type_strip(arg.type)):
+            if "MPI_Comm" in arg.type :
+                sizeof_args.append('sizeof(MPI_Comm)+sizeof(int)')
+            else:
+                sizeof_args.append('sizeof(int)')
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
             fixed_type = arg.type.split('[')[0].replace('*', '')
-            sizeof_args.append("%s * sizeof(%s)" %(n, fixed_type))
+            sizeof_args.append("%s*sizeof(%s)" %(n, fixed_type))
         else:
             sizeof_args.append("sizeof(%s)" %arg.type)
 
@@ -167,21 +170,31 @@ def handle_special_apis(func):
 
     return False
 
+def handle_mpi_comm_creation(func, f):
+    creation_funcs = set([
+        "MPI_Comm_split", "MPI_Comm_dup", "MPI_Comm_dup_with_info",
+        "MPI_Comm_create", "MPI_Comm_create_group", "MPI_Comm_split_type",
+        "MPI_Cart_sub", "MPI_Dist_graph_create", "MPI_Dist_graph_create_adjacent",
+        "MPI_Graph_create", "MPI_Cart_create", "MPI_Intercomm_merge"]);
+    if func.name in creation_funcs:
+        f.write("\tgenerate_newcomm_id(%s);\n" %func.arguments[-1].name);
+
+
 def generate_wrapper_file(funcs):
-    def signature(func):
+    def signature(func, f):
         line = func.ret_type + " " + func.name + func.signature + "\n"
         f.write(line + '{\n')
 
-    def phase_one(func):
+    def phase_one(func, f):
         arg_names = []
         for arg in func.arguments:
             arg_names.append(arg.name)
         f.write('\tPILGRIM_TRACING_1(%s, %s, (%s));\n' %(func.ret_type, func.name, ', '.join(arg_names)))
 
-    def phase_two(num_args):
+    def phase_two(num_args, f):
         f.write('\tPILGRIM_TRACING_2(%d, sizes, args);\n}\n' %num_args)
 
-    def logging(func):
+    def logging(func, f):
         line, num_args = codegen_assemble_args(func)
         f.write(line)
         f.write(codegen_sizeof_args(func))
@@ -201,16 +214,17 @@ def generate_wrapper_file(funcs):
         if handle_special_apis(func):
             continue
 
-        signature(func)
+        signature(func, f)
 
         if is_mpi_object_release(func)[0]:
-            num_args = logging(func)
-            phase_one(func)
+            num_args = logging(func, f)
+            phase_one(func, f)
         else:
-            phase_one(func)
-            num_args = logging(func)
+            phase_one(func, f)
+            handle_mpi_comm_creation(func, f)
+            num_args = logging(func, f)
 
-        phase_two(num_args)
+        phase_two(num_args, f)
 
     f.close()
 

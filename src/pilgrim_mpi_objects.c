@@ -162,22 +162,31 @@ void object_cleanup_MPI_Request() {
 MPICommHash *hash_MPI_Comm = NULL;
 char predefined_comm_id[64];
 
-void* generate_newcomm_id(MPI_Comm *newcomm) {
-    int rank, world_rank, id_len;
-    void* id;
+void* generate_intercomm_id(MPI_Comm *newcomm) {
+    int rank, world_rank;
     MPI_Comm_rank(*newcomm, &rank);
+
+    int id_len = sizeof(MPI_Comm) + sizeof(int);
+    void *id = dlmalloc(id_len);
 
     if(rank == 0) {
         MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-        id_len = sizeof(MPI_Comm) + sizeof(int);
-        id = dlmalloc(id_len);
         memcpy(id, newcomm, sizeof(MPI_Comm));
         memcpy(id+sizeof(MPI_Comm), &world_rank, sizeof(int));
     }
-
     MPI_Bcast(&id, id_len, MPI_BYTE, 0, *newcomm);
 
+    MPICommHash *entry = dlmalloc(sizeof(MPICommHash));
+    entry->key = dlmalloc(sizeof(MPI_Comm));
+    memcpy(entry->key, newcomm, sizeof(MPI_Comm));
+    entry->id = id;
+
+    HASH_ADD_KEYPTR(hh, hash_MPI_Comm, entry->key, sizeof(MPI_Comm), entry);
+
     return id;
+}
+
+void* generate_intracomm_id(MPI_Comm oldcomm, MPI_Comm *newcomm) {
 }
 
 void* get_predefined_comm_id(MPI_Comm comm) {
@@ -189,8 +198,8 @@ void* get_predefined_comm_id(MPI_Comm comm) {
 }
 
 /*
- * Name the following two functinos so we can use the
- * above defined MACROs:
+ * Name the following functinos in a way that we can
+ * use the above defined MACROs:
  *  - MPI_OBJ_ID(MPI_Comm, comm);
  *  - MPI_OBJ_RELEASE(MPI_Comm, comm);
  */

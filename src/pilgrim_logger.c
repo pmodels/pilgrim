@@ -45,8 +45,6 @@ struct Logger {
     RecordHash *hash_head;          // head of function entries hash table
     AvlTree addr_tree;              // root of memory addresses AVL tree
 
-    RequestHash *reqs_table;        // Active MPI_Request, mapping of <MPI_Request, id>
-    RequestNode *reqs_list;         // List of free ids to be used for MPI_Request mapping
     OffsetNode *offset_list;        // List of MPI_Offset
 };
 
@@ -294,8 +292,6 @@ void logger_init(int rank, int nprocs) {
     __logger.local_metadata.compressed_records = 0;
     __logger.local_metadata.rank = rank;
     __logger.hash_head = NULL;          // Must be NULL initialized
-    __logger.reqs_table = NULL;
-    __logger.reqs_list = NULL;
     __logger.offset_list = NULL;
 
 
@@ -322,8 +318,8 @@ void logger_exit() {
     remove_hooks();
     __logger.recording = false;
 
-    printf("[Pilgrim] Rank: %d, Hash: %d, Number of records: %d, Remaining requests: %d\n", __logger.rank,
-            HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count, HASH_COUNT(__logger.reqs_table));
+    printf("[Pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
+            HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
 
     write_to_file();
 

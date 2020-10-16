@@ -32,6 +32,13 @@ void pilgrim_exit() {
 int MPI_Init(int *argc, char ***argv) {
     int res = PMPI_Init(argc, argv);
     pilgrim_init(argc, argv);
+
+    MPI_Comm intercomm;
+    PMPI_Comm_get_parent(&intercomm);
+    // Spawned by the parent calling MPI_Comm_spawn
+    // Need to find out the id for the intercomm.
+    if(intercomm != MPI_COMM_NULL)
+        generate_intercomm_id(MPI_COMM_WORLD, &intercomm, 0);
     return res;
 }
 

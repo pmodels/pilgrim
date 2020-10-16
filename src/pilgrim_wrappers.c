@@ -219,7 +219,7 @@ int MPI_Cart_coords(MPI_Comm comm, int rank, int maxdims, int coords[])
 int MPI_Comm_split_type(MPI_Comm comm, int split_type, int key, MPI_Info info, MPI_Comm *newcomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_split_type, (comm, split_type, key, info, newcomm));
-	generate_newcomm_id(newcomm);
+	generate_intracomm_id(newcomm);
 	MPI_Comm obj_0 = comm;
 	MPI_Info obj_1 = info;
 	void **args = assemble_args_list(5, MPI_OBJ_ID(MPI_Comm, &obj_0), &split_type, &key, MPI_OBJ_ID(MPI_Info, &obj_1), MPI_OBJ_ID(MPI_Comm, newcomm));
@@ -638,7 +638,7 @@ int MPI_File_get_atomicity(MPI_File fh, int *flag)
 int MPI_Dist_graph_create(MPI_Comm comm_old, int n, const int sources[], const int degrees[], const int destinations[], const int weights[], MPI_Info info, int reorder, MPI_Comm *comm_dist_graph)
 {
 	PILGRIM_TRACING_1(int, MPI_Dist_graph_create, (comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_dist_graph));
-	generate_newcomm_id(comm_dist_graph);
+	generate_intracomm_id(comm_dist_graph);
 	MPI_Comm obj_0 = comm_old;
 	MPI_Info obj_1 = info;
 	void **args = assemble_args_list(9, MPI_OBJ_ID(MPI_Comm, &obj_0), &n, sources, degrees, destinations, weights, MPI_OBJ_ID(MPI_Info, &obj_1), &reorder, MPI_OBJ_ID(MPI_Comm, comm_dist_graph));
@@ -786,6 +786,7 @@ int MPI_Win_flush(int rank, MPI_Win win)
 int MPI_Intercomm_create(MPI_Comm local_comm, int local_leader, MPI_Comm peer_comm, int remote_leader, int tag, MPI_Comm *newintercomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Intercomm_create, (local_comm, local_leader, peer_comm, remote_leader, tag, newintercomm));
+	generate_intercomm_id(local_comm, newintercomm, tag);
 	MPI_Comm obj_0 = local_comm;
 	MPI_Comm obj_1 = peer_comm;
 	void **args = assemble_args_list(6, MPI_OBJ_ID(MPI_Comm, &obj_0), &local_leader, MPI_OBJ_ID(MPI_Comm, &obj_1), &remote_leader, &tag, MPI_OBJ_ID(MPI_Comm, newintercomm));
@@ -1129,7 +1130,7 @@ int MPI_Type_get_extent(MPI_Datatype datatype, MPI_Aint *lb, MPI_Aint *extent)
 int MPI_Graph_create(MPI_Comm comm_old, int nnodes, const int index[], const int edges[], int reorder, MPI_Comm *comm_graph)
 {
 	PILGRIM_TRACING_1(int, MPI_Graph_create, (comm_old, nnodes, index, edges, reorder, comm_graph));
-	generate_newcomm_id(comm_graph);
+	generate_intracomm_id(comm_graph);
 	MPI_Comm obj_0 = comm_old;
 	void **args = assemble_args_list(6, MPI_OBJ_ID(MPI_Comm, &obj_0), &nnodes, index, edges, &reorder, MPI_OBJ_ID(MPI_Comm, comm_graph));
 	int sizes[] = { sizeof(MPI_Comm)+sizeof(int), sizeof(int), nnodes*sizeof(const int), 1*sizeof(const int), sizeof(int), sizeof(MPI_Comm)+sizeof(int) };
@@ -1192,7 +1193,7 @@ int MPI_Info_get_valuelen(MPI_Info info, const char *key, int *valuelen, int *fl
 int MPI_Cart_sub(MPI_Comm comm, const int remain_dims[], MPI_Comm *newcomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Cart_sub, (comm, remain_dims, newcomm));
-	generate_newcomm_id(newcomm);
+	generate_intracomm_id(newcomm);
 	MPI_Comm obj_0 = comm;
 	void **args = assemble_args_list(3, MPI_OBJ_ID(MPI_Comm, &obj_0), remain_dims, MPI_OBJ_ID(MPI_Comm, newcomm));
 	int sizes[] = { sizeof(MPI_Comm)+sizeof(int), 1*sizeof(const int), sizeof(MPI_Comm)+sizeof(int) };
@@ -1219,6 +1220,7 @@ int MPI_File_iwrite_at(MPI_File fh, MPI_Offset offset, const void *buf, int coun
 int MPI_Comm_spawn(const char *command, char *argv[], int maxprocs, MPI_Info info, int root, MPI_Comm comm, MPI_Comm *intercomm, int array_of_errcodes[])
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_spawn, (command, argv, maxprocs, info, root, comm, intercomm, array_of_errcodes));
+	generate_intercomm_id(comm, intercomm, 0);
 	MPI_Info obj_0 = info;
 	MPI_Comm obj_1 = comm;
 	void **args = assemble_args_list(8, command, argv, &maxprocs, MPI_OBJ_ID(MPI_Info, &obj_0), &root, MPI_OBJ_ID(MPI_Comm, &obj_1), MPI_OBJ_ID(MPI_Comm, intercomm), array_of_errcodes);
@@ -1377,6 +1379,7 @@ int MPI_Type_create_keyval(MPI_Type_copy_attr_function *type_copy_attr_fn, MPI_T
 int MPI_Comm_accept(const char *port_name, MPI_Info info, int root, MPI_Comm comm, MPI_Comm *newcomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_accept, (port_name, info, root, comm, newcomm));
+	generate_intercomm_id(comm, newcomm, 0);
 	MPI_Info obj_0 = info;
 	MPI_Comm obj_1 = comm;
 	void **args = assemble_args_list(5, port_name, MPI_OBJ_ID(MPI_Info, &obj_0), &root, MPI_OBJ_ID(MPI_Comm, &obj_1), MPI_OBJ_ID(MPI_Comm, newcomm));
@@ -1518,7 +1521,7 @@ int MPI_Group_range_excl(MPI_Group group, int n, int ranges[][3], MPI_Group *new
 int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_split, (comm, color, key, newcomm));
-	generate_newcomm_id(newcomm);
+	generate_intracomm_id(newcomm);
 	MPI_Comm obj_0 = comm;
 	void **args = assemble_args_list(4, MPI_OBJ_ID(MPI_Comm, &obj_0), &color, &key, MPI_OBJ_ID(MPI_Comm, newcomm));
 	int sizes[] = { sizeof(MPI_Comm)+sizeof(int), sizeof(int), sizeof(int), sizeof(MPI_Comm)+sizeof(int) };
@@ -1706,7 +1709,7 @@ int MPI_Initialized(int *flag)
 int MPI_Comm_create_group(MPI_Comm comm, MPI_Group group, int tag, MPI_Comm *newcomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_create_group, (comm, group, tag, newcomm));
-	generate_newcomm_id(newcomm);
+	generate_intracomm_id(newcomm);
 	MPI_Comm obj_0 = comm;
 	MPI_Group obj_1 = group;
 	void **args = assemble_args_list(4, MPI_OBJ_ID(MPI_Comm, &obj_0), MPI_OBJ_ID(MPI_Group, &obj_1), &tag, MPI_OBJ_ID(MPI_Comm, newcomm));
@@ -1809,6 +1812,7 @@ int MPI_File_write_all(MPI_File fh, const void *buf, int count, MPI_Datatype dat
 int MPI_Comm_connect(const char *port_name, MPI_Info info, int root, MPI_Comm comm, MPI_Comm *newcomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_connect, (port_name, info, root, comm, newcomm));
+	generate_intercomm_id(comm, newcomm, 0);
 	MPI_Info obj_0 = info;
 	MPI_Comm obj_1 = comm;
 	void **args = assemble_args_list(5, port_name, MPI_OBJ_ID(MPI_Info, &obj_0), &root, MPI_OBJ_ID(MPI_Comm, &obj_1), MPI_OBJ_ID(MPI_Comm, newcomm));
@@ -1955,6 +1959,7 @@ int MPI_Alltoall(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void
 int MPI_Comm_spawn_multiple(int count, char *array_of_commands[], char **array_of_argv[], const int array_of_maxprocs[], const MPI_Info array_of_info[], int root, MPI_Comm comm, MPI_Comm *intercomm, int array_of_errcodes[])
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_spawn_multiple, (count, array_of_commands, array_of_argv, array_of_maxprocs, array_of_info, root, comm, intercomm, array_of_errcodes));
+	generate_intercomm_id(comm, intercomm, 0);
 	MPI_Comm obj_0 = comm;
 	void **args = assemble_args_list(9, &count, array_of_commands, array_of_argv, array_of_maxprocs, MPI_OBJ_ID(MPI_Info, array_of_info), &root, MPI_OBJ_ID(MPI_Comm, &obj_0), MPI_OBJ_ID(MPI_Comm, intercomm), array_of_errcodes);
 	int sizes[] = { sizeof(int), count*sizeof(const int), sizeof(int), sizeof(int), sizeof(MPI_Comm)+sizeof(int), sizeof(MPI_Comm)+sizeof(int), 1*sizeof(int) };
@@ -1963,7 +1968,7 @@ int MPI_Comm_spawn_multiple(int count, char *array_of_commands[], char **array_o
 int MPI_Comm_dup_with_info(MPI_Comm comm, MPI_Info info, MPI_Comm *newcomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_dup_with_info, (comm, info, newcomm));
-	generate_newcomm_id(newcomm);
+	generate_intracomm_id(newcomm);
 	MPI_Comm obj_0 = comm;
 	MPI_Info obj_1 = info;
 	void **args = assemble_args_list(3, MPI_OBJ_ID(MPI_Comm, &obj_0), MPI_OBJ_ID(MPI_Info, &obj_1), MPI_OBJ_ID(MPI_Comm, newcomm));
@@ -2050,7 +2055,7 @@ int MPI_Op_commutative(MPI_Op op, int *commute)
 int MPI_Dist_graph_create_adjacent(MPI_Comm comm_old, int indegree, const int sources[], const int sourceweights[], int outdegree, const int destinations[], const int destweights[], MPI_Info info, int reorder, MPI_Comm *comm_dist_graph)
 {
 	PILGRIM_TRACING_1(int, MPI_Dist_graph_create_adjacent, (comm_old, indegree, sources, sourceweights, outdegree, destinations, destweights, info, reorder, comm_dist_graph));
-	generate_newcomm_id(comm_dist_graph);
+	generate_intracomm_id(comm_dist_graph);
 	MPI_Comm obj_0 = comm_old;
 	MPI_Info obj_1 = info;
 	void **args = assemble_args_list(10, MPI_OBJ_ID(MPI_Comm, &obj_0), &indegree, sources, sourceweights, &outdegree, destinations, destweights, MPI_OBJ_ID(MPI_Info, &obj_1), &reorder, MPI_OBJ_ID(MPI_Comm, comm_dist_graph));
@@ -2548,7 +2553,7 @@ int MPI_Gatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void 
 int MPI_Comm_create(MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_create, (comm, group, newcomm));
-	generate_newcomm_id(newcomm);
+	generate_intracomm_id(newcomm);
 	MPI_Comm obj_0 = comm;
 	MPI_Group obj_1 = group;
 	void **args = assemble_args_list(3, MPI_OBJ_ID(MPI_Comm, &obj_0), MPI_OBJ_ID(MPI_Group, &obj_1), MPI_OBJ_ID(MPI_Comm, newcomm));
@@ -2568,7 +2573,7 @@ int MPI_File_write_ordered(MPI_File fh, const void *buf, int count, MPI_Datatype
 int MPI_Comm_dup(MPI_Comm comm, MPI_Comm *newcomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_dup, (comm, newcomm));
-	generate_newcomm_id(newcomm);
+	generate_intracomm_id(newcomm);
 	MPI_Comm obj_0 = comm;
 	void **args = assemble_args_list(2, MPI_OBJ_ID(MPI_Comm, &obj_0), MPI_OBJ_ID(MPI_Comm, newcomm));
 	int sizes[] = { sizeof(MPI_Comm)+sizeof(int), sizeof(MPI_Comm)+sizeof(int) };
@@ -2690,7 +2695,7 @@ int MPI_Type_get_true_extent(MPI_Datatype datatype, MPI_Aint *true_lb, MPI_Aint 
 int MPI_Cart_create(MPI_Comm comm_old, int ndims, const int dims[], const int periods[], int reorder, MPI_Comm *comm_cart)
 {
 	PILGRIM_TRACING_1(int, MPI_Cart_create, (comm_old, ndims, dims, periods, reorder, comm_cart));
-	generate_newcomm_id(comm_cart);
+	generate_intracomm_id(comm_cart);
 	MPI_Comm obj_0 = comm_old;
 	void **args = assemble_args_list(6, MPI_OBJ_ID(MPI_Comm, &obj_0), &ndims, dims, periods, &reorder, MPI_OBJ_ID(MPI_Comm, comm_cart));
 	int sizes[] = { sizeof(MPI_Comm)+sizeof(int), sizeof(int), ndims*sizeof(const int), ndims*sizeof(const int), sizeof(int), sizeof(MPI_Comm)+sizeof(int) };
@@ -2803,7 +2808,7 @@ int MPI_Pack_size(int incount, MPI_Datatype datatype, MPI_Comm comm, int *size)
 int MPI_Intercomm_merge(MPI_Comm intercomm, int high, MPI_Comm *newintracomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Intercomm_merge, (intercomm, high, newintracomm));
-	generate_newcomm_id(newintracomm);
+	generate_intracomm_id(newintracomm);
 	MPI_Comm obj_0 = intercomm;
 	void **args = assemble_args_list(3, MPI_OBJ_ID(MPI_Comm, &obj_0), &high, MPI_OBJ_ID(MPI_Comm, newintracomm));
 	int sizes[] = { sizeof(MPI_Comm)+sizeof(int), sizeof(int), sizeof(MPI_Comm)+sizeof(int) };

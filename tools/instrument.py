@@ -171,14 +171,19 @@ def handle_special_apis(func):
     return False
 
 def handle_mpi_comm_creation(func, f):
-    creation_funcs = set([
+    intra_creation_funcs = set([
         "MPI_Comm_split", "MPI_Comm_dup", "MPI_Comm_dup_with_info",
         "MPI_Comm_create", "MPI_Comm_create_group", "MPI_Comm_split_type",
         "MPI_Cart_sub", "MPI_Dist_graph_create", "MPI_Dist_graph_create_adjacent",
-        "MPI_Graph_create", "MPI_Cart_create", "MPI_Intercomm_merge"]);
-    if func.name in creation_funcs:
-        f.write("\tgenerate_newcomm_id(%s);\n" %func.arguments[-1].name);
-
+        "MPI_Graph_create", "MPI_Cart_create", "MPI_Intercomm_merge"])
+    if func.name in intra_creation_funcs:
+        f.write("\tgenerate_intracomm_id(%s);\n" %func.arguments[-1].name)
+    elif func.name == "MPI_Intercomm_create":
+        f.write("\tgenerate_intercomm_id(%s, %s, %s);\n" %(func.arguments[0].name, func.arguments[5].name, func.arguments[4].name))
+    elif func.name == "MPI_Comm_accept" or func.name == "MPI_Comm_connect":
+        f.write("\tgenerate_intercomm_id(%s, %s, 0);\n" %(func.arguments[-2].name, func.arguments[-1].name))
+    elif func.name == "MPI_Comm_spawn" or func.name == "MPI_Comm_spawn_multiple":
+        f.write("\tgenerate_intercomm_id(%s, %s, 0);\n" %(func.arguments[-3].name, func.arguments[-2].name))
 
 def generate_wrapper_file(funcs):
     def signature(func, f):

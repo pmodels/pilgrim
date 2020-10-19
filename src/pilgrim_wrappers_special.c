@@ -25,7 +25,7 @@ int invalid_request_id = -1;
 #define GET_STATUSES_INFO(outcount, indices, statuses)                                              \
     int iidx;                                                                                       \
     int statuses_info[outcount*2];                                                                  \
-    memset(statuses, 0, sizeof(int)*2*outcount);                                                    \
+    memset(statuses_info, 0, sizeof(int)*2*outcount);                                               \
     for(idx = 0; idx < outcount; idx++) {                                                           \
         iidx = indices[idx];                                                                        \
         if(old_reqs[iidx] != MPI_REQUEST_NULL && array_of_requests[iidx] == MPI_REQUEST_NULL) {     \

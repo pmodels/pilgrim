@@ -13,11 +13,10 @@ int main(int argc, char** argv) {
             MPI_Request reqs[1];
             MPI_Isend(&rank, 1, MPI_INT, 1, 123, MPI_COMM_WORLD, &reqs[0]);
             MPI_Request old = reqs[0];
-
             MPI_Waitall(1, reqs, MPI_STATUSES_IGNORE);
             if(old == MPI_REQUEST_NULL)
                 printf("Okay!\n");
-        } else if(rank == 1){
+        } else if(rank == 1) {
             int buf;
             MPI_Request reqs[1];
             MPI_Irecv(&buf, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &reqs[0]);

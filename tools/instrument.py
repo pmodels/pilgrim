@@ -6,7 +6,7 @@ from codegen import MPIFunction, MPIArgument
 def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
-    os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
+    os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
     for line in f.readlines():
         func_name = line.strip().split('(')[0].split(' ')[1]

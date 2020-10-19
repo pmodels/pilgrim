@@ -266,7 +266,10 @@ void* get_object_id_MPI_Comm(MPI_Comm *comm) {
         return entry->id;
     } else {
         // not possible
-        printf("Not possible?\n");
+        if(!entry)
+            printf("Not possible! cannot find MPI_Comm entry\n");
+        else
+            printf("Not possible! entry->id is NULL\n");
     }
 }
 void object_release_MPI_Comm(MPI_Comm *comm) {

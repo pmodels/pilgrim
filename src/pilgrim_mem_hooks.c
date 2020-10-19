@@ -72,8 +72,15 @@ void free(void *ptr) {
         return;
     }
 
-    avl_delete(addr_tree, (intptr_t)ptr);
-    dlfree(ptr);
+    if(AVL_EMPTY == avl_search(*addr_tree, (intptr_t)ptr)) {
+        if(ptr != NULL) {
+            // TODO: potential memory leak. why
+            // printf("p%\n", ptr);
+        }
+    } else {
+        avl_delete(addr_tree, (intptr_t)ptr);
+        dlfree(ptr);
+    }
 }
 
 

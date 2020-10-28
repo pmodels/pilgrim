@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <math.h>
 
 #include "pilgrim.h"
 #include "pilgrim_sequitur.h"
@@ -20,11 +21,18 @@
 static int current_terminal_id = 0;
 static int current_addr_id = 0;
 
+typedef struct DurationNode_t {
+    double duration;
+    int count;
+    struct DurationNode_t *next;
+} DurationNode;
+
 // Entry in uthash
 typedef struct RecordHash_t {
     void *key;                      // func_id + arguments + duration, used as key
     int key_len;
     int terminal_id;                // terminal id used for sequitur compression
+    DurationNode *duration_list;    // List of durations of this function signature
     UT_hash_handle hh;
 } RecordHash;
 
@@ -271,13 +279,33 @@ void write_record(Record record) {
     RecordHash *entry;
     HASH_FIND(hh, __logger.hash_head, key, key_len, entry);
     if(entry) {                         // Found, insert the (tstart, tend) pair.
+
         dlfree(key);
+
+        double dur = record.tend - record.tstart;
+        double prev_dur = entry->duration_list->duration;
+        if(fmax(dur, prev_dur) / fmin(dur, prev_dur) < 10) {
+            entry->duration_list->count++;      // Same magnitude
+        } else {                                // Different magnitude, add a new node.
+            DurationNode *n = (DurationNode*) dlmalloc(sizeof(DurationNode));
+            n->duration = dur;
+            n->count = 1;
+            LL_PREPEND(entry->duration_list, n);
+        }
+
     } else {                            // Not exist, add to hash table
         entry = (RecordHash*) dlmalloc(sizeof(RecordHash));
         entry->key = key;
         entry->key_len = key_len;
         entry->terminal_id = current_terminal_id;
         current_terminal_id++;
+
+        entry->duration_list = NULL;
+        DurationNode *n = (DurationNode*) dlmalloc(sizeof(DurationNode));
+        n->duration = record.tend - record.tstart;
+        n->count = 1;
+        LL_PREPEND(entry->duration_list, n);
+
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }
 
@@ -327,10 +355,20 @@ void logger_exit() {
 
     // Clean up the hash table
     RecordHash *entry, *tmp;
+    DurationNode *elt, *tmp2;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
         HASH_DEL(__logger.hash_head, entry);
         dlfree(entry->key);
+        LL_FOREACH_SAFE(entry->duration_list, elt, tmp2) {
+            LL_DELETE(entry->duration_list, elt);
+            dlfree(elt);
+        }
         dlfree(entry);
+    }
+    OffsetNode *elt2, *tmp3;
+    LL_FOREACH_SAFE(__logger.offset_list, elt2, tmp3) {
+        LL_DELETE(__logger.offset_list, elt2);
+        dlfree(elt);
     }
 
     MPI_OBJ_CLEANUP_ALL();

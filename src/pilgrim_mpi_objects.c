@@ -177,6 +177,14 @@ void* comm2id(MPI_Comm *newcomm) {
     return id;
 }
 
+void add_mpi_comm_hash_entry(MPI_Comm *newcomm, void *id) {
+    MPICommHash *entry = dlmalloc(sizeof(MPICommHash));
+    entry->key = dlmalloc(sizeof(MPI_Comm));
+    memcpy(entry->key, newcomm, sizeof(MPI_Comm));
+    entry->id = id;
+    HASH_ADD_KEYPTR(hh, hash_MPI_Comm, entry->key, sizeof(MPI_Comm), entry);
+}
+
 void* generate_intracomm_id(MPI_Comm *newcomm) {
     int rank;
     PMPI_Comm_rank(*newcomm, &rank);
@@ -189,14 +197,7 @@ void* generate_intracomm_id(MPI_Comm *newcomm) {
         id = dlmalloc(COMM_ID_LEN);
 
     PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, *newcomm);
-
-    MPICommHash *entry = dlmalloc(sizeof(MPICommHash));
-    entry->key = dlmalloc(sizeof(MPI_Comm));
-    memcpy(entry->key, newcomm, sizeof(MPI_Comm));
-    entry->id = id;
-
-    HASH_ADD_KEYPTR(hh, hash_MPI_Comm, entry->key, sizeof(MPI_Comm), entry);
-
+    add_mpi_comm_hash_entry(newcomm, id);
     return id;
 }
 
@@ -229,12 +230,7 @@ void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
     }
 
     PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, local_comm);
-    MPICommHash *entry = dlmalloc(sizeof(MPICommHash));
-    entry->key = dlmalloc(sizeof(MPI_Comm));
-    memcpy(entry->key, newcomm, sizeof(MPI_Comm));
-    entry->id = id;
-
-    HASH_ADD_KEYPTR(hh, hash_MPI_Comm, entry->key, sizeof(MPI_Comm), entry);
+    add_mpi_comm_hash_entry(newcomm, id);
     return id;
 }
 

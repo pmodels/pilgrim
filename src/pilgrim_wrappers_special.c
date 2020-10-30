@@ -5,7 +5,79 @@
 #include "pilgrim.h"
 #include "dlmalloc-2.8.6.h"
 
-int invalid_request_id = -1;
+static int invalid_request_id = -1;
+
+
+typedef struct IdupReqHash_t {
+    void *key;              // idup_req
+    MPI_Comm *newcomm;
+    void *id;
+    bool idup_req_completed;
+    MPI_Request *ibcast_req;
+    UT_hash_handle hh;
+} IdupReqHash;
+
+static int idup_reqs_counter = 0;
+IdupReqHash *idup_reqs_table = NULL;
+
+// Check if the given request is genereated from MPI_Comm_idup.
+// and if it is completed.
+// if so, wait on the ibcast request
+void check_idup_request(MPI_Request *req) {
+    IdupReqHash* entry = NULL;
+    HASH_FIND(hh, idup_reqs_table, req, sizeof(MPI_Request), entry);
+    if(entry) {
+        PMPI_Wait(entry->ibcast_req, MPI_STATUS_IGNORE);
+
+        add_mpi_comm_hash_entry(entry->newcomm, entry->id);
+
+        dlfree(entry->key);
+        dlfree(entry->newcomm);
+        dlfree(entry->ibcast_req);
+        HASH_DEL(idup_reqs_table, entry);
+    }
+}
+
+void check_idup_requests(int count, MPI_Request reqs[], int indices[], bool all) {
+    int i;
+    for(i = 0; i < count; i++) {
+        MPI_Request *req;
+        if(all)
+            req = &(reqs[i]);
+        else
+            req = &(reqs[indices[i]]);
+        check_idup_request(req);
+    }
+}
+
+void check_idup_request_test(MPI_Request *req, int *flag) {
+    IdupReqHash* entry = NULL;
+    HASH_FIND(hh, idup_reqs_table, req, sizeof(MPI_Request), entry);
+
+    // Not a idup request, do nothing
+    if(!entry)
+        return;
+
+    // Completed by a previous Test but the ibcast_req
+    // at that time has not yet completed. Now, we need
+    // to test the ibcast_req again
+    if(entry && entry->idup_req_completed) {
+        int ibcast_completed;
+        //PMPI_Test(ibcast_req, &ibcast_completed);
+        if(ibcast_completed) {
+            *flag = 1;
+        }
+    }
+}
+
+bool is_completed_idup_request(MPI_Request *req) {
+    IdupReqHash* entry = NULL;
+    HASH_FIND(hh, idup_reqs_table, req, sizeof(MPI_Request), entry);
+    if(entry && entry->idup_req_completed)
+        return true;
+    return false;
+}
+
 
 #define GET_STATUS_INFO(req, status, flag)                          \
     RequestHash* entry = NULL;                                      \
@@ -61,7 +133,6 @@ int* get_request_id(MPI_Request* req) {
 }
 
 
-
 int MPI_Pcontrol(const int level, ...)
 {
 	void **args = assemble_args_list(1, &level);
@@ -79,10 +150,11 @@ int MPI_Wait(MPI_Request *request, MPI_Status *status)
 
     PILGRIM_TRACING_1(int, MPI_Wait, (request, status));
 
+    check_idup_request(request);
+
     GET_STATUS_INFO(&old_req, status, true);
     int sizes[] = {sizeof(int), sizeof(status_info)};
     void **args = assemble_args_list(2, req_id, status_info);
-
 
     PILGRIM_TRACING_2(2, sizes, args);
 }
@@ -92,6 +164,8 @@ int MPI_Waitany(int count, MPI_Request array_of_requests[], int *index, MPI_Stat
     COPY_REQUESTS(count);
 
     PILGRIM_TRACING_1(int, MPI_Waitany, (count, array_of_requests, index, status));
+
+    check_idup_request(&old_reqs[*index]);
 
     GET_STATUS_INFO(&old_reqs[*index], status, true);
     void **args = assemble_args_list(4, &count, ids, index, status_info);
@@ -110,6 +184,7 @@ int MPI_Waitsome(int incount, MPI_Request array_of_requests[], int *outcount, in
     int num_args;
     if(*outcount > 0) {
         num_args = 5;
+        check_idup_requests(*outcount, old_reqs, array_of_indices, false);
         GET_STATUSES_INFO(*outcount, array_of_indices, array_of_statuses);
         void **args = assemble_args_list(num_args, &incount, ids, outcount, array_of_indices, statuses_info);
         int sizes[] = { sizeof(incount), sizeof(int)*incount, sizeof(int), (*outcount)*sizeof(int), sizeof(statuses_info) };
@@ -129,6 +204,8 @@ int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_
     COPY_REQUESTS(count);
 
     PILGRIM_TRACING_1(int, MPI_Waitall, (count, array_of_requests, array_of_statuses));
+
+    check_idup_requests(count, old_reqs, NULL, false);
 
     int indices[count];
     for(idx = 0; idx < count; idx++) indices[idx] = idx;
@@ -199,7 +276,6 @@ int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount, in
         int sizes[] = { sizeof(incount), sizeof(int)*incount, sizeof(outcount) };
         PILGRIM_TRACING_2(num_args, sizes, args);
     }
-
 }
 
 int MPI_Request_free(MPI_Request *request)
@@ -229,3 +305,36 @@ int MPI_Startall(int count, MPI_Request array_of_requests[])
 
     PILGRIM_TRACING_2(1, sizes, args);
 }
+
+/*
+int MPI_Comm_idup(MPI_Comm comm, MPI_Comm *newcomm, MPI_Request *request)
+
+    IdupReqHash *entry = dlmalloc(sizeof(IdupReqHash));
+
+    // Use the output request as the key
+    entry->key = dlmalloc(sizeof(MPI_Request));
+    memcpy(entry->key, request, sizeof(MPI_Request));
+
+    // Store the newcomm
+    entry->newcomm = dlmalloc(sizeof(MPI_Comm));
+    memcpy(entry->newcomm, newcomm, sizeof(MPI_Comm));
+
+    int local_rank, global_rank;
+    PMPI_Comm_rank(comm, &local_rank);
+    PMPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
+
+    // rank 0 decides the newcomm id
+    entry->id = dlmalloc(sizeof(MPI_Comm) + sizeof(int));
+    if(local_rank = 0) {
+        memcpy(entry->id, newcomm, sizeof(MPI_Comm));
+        memcpy(entry->id+sizeof(MPI_Comm), &global_rank, sizeof(int));
+    }
+
+    entry->ibcast_req = dlmalloc(sizeof(MPI_Request));
+    PMPI_Ibcast(entry->id, sizeof(MPI_Comm)+sizeof(int), MPI_BYTE, 0, comm, entry->ibcast_req);
+
+    HASH_ADD_KEYPTR(hh, idup_reqs_table, entry->key, sizeof(MPI_Request), entry);
+    idup_reqs_counter++;
+}
+*/
+

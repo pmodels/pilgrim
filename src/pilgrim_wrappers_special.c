@@ -205,7 +205,7 @@ int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_
 
     PILGRIM_TRACING_1(int, MPI_Waitall, (count, array_of_requests, array_of_statuses));
 
-    check_idup_requests(count, old_reqs, NULL, false);
+    check_idup_requests(count, old_reqs, NULL, true);
 
     int indices[count];
     for(idx = 0; idx < count; idx++) indices[idx] = idx;
@@ -215,6 +215,7 @@ int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_
 
     PILGRIM_TRACING_2(3, sizes, args);
 }
+
 int MPI_Test(MPI_Request *request, int *flag, MPI_Status *status)
 {
     MPI_Request old_req;

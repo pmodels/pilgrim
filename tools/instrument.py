@@ -83,11 +83,11 @@ def codegen_assemble_args(func):
             line += "\tint status_arg[2] = {0};\n"
             assemble_args.append("status_arg")
             if "source" in args_set:
-                line += "\tif(source == -99999) status_arg[0] = status->MPI_SOURCE;\n"
+                line += "\tif(source == MPI_ANY_SOURCE && status && status!=MPI_STATUS_IGNORE) status_arg[0] = status->MPI_SOURCE;\n"
             if "recvtag" in args_set:
-                line += "\tif(recvtag == MPI_ANY_TAG) status_arg[1] = status->MPI_TAG;\n"
+                line += "\tif(recvtag == MPI_ANY_TAG && status && status!=MPI_STATUS_IGNORE) status_arg[1] = status->MPI_TAG;\n"
             elif "tag" in args_set:
-                line += "\tif(tag == MPI_ANY_TAG) status_arg[1] = status->MPI_TAG;\n"
+                line += "\tif(tag == MPI_ANY_TAG && status && status!=MPI_STATUS_IGNORE) status_arg[1] = status->MPI_TAG;\n"
         elif is_mpi_object_arg(arg_type_strip(arg.type)):
             if '*' in arg.type or '[' in arg.type:
                 assemble_args.append("MPI_OBJ_ID(%s, %s)" %(arg_type_strip(arg.type), arg.name))

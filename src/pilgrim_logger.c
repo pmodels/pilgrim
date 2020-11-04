@@ -265,7 +265,7 @@ void write_record(Record record) {
     // Actually set the key
     void *key = dlmalloc(key_len);
     memcpy(key, &(record.func_id), sizeof(record.func_id));
-    int dur_id = get_duration_id(record.func_id, record.tend-record.tstart);
+    int dur_id = get_duration_id(record.tend-record.tstart);
     memcpy(key+sizeof(record.func_id), &dur_id, sizeof(int));
     int interval_id = 0;
     memcpy(key+sizeof(record.func_id), &interval_id, sizeof(int));

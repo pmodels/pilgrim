@@ -165,13 +165,20 @@ int MPI_Waitany(int count, MPI_Request array_of_requests[], int *index, MPI_Stat
 
     PILGRIM_TRACING_1(int, MPI_Waitany, (count, array_of_requests, index, status));
 
-    check_idup_request(&old_reqs[*index]);
-
-    GET_STATUS_INFO(&old_reqs[*index], status, true);
-    void **args = assemble_args_list(4, &count, ids, index, status_info);
-    int sizes[] = { sizeof(int), sizeof(int)*count, sizeof(int), sizeof(status_info) };
-
-    PILGRIM_TRACING_2(4, sizes, args);
+    int num_args;
+    if(*index != MPI_UNDEFINED) {
+        num_args = 4;
+        check_idup_request(&old_reqs[*index]);
+        GET_STATUS_INFO(&old_reqs[*index], status, true);
+        void **args = assemble_args_list(num_args, &count, ids, index, status_info);
+        int sizes[] = { sizeof(int), sizeof(int)*count, sizeof(int), sizeof(status_info) };
+        PILGRIM_TRACING_2(num_args, sizes, args);
+    } else {
+        num_args = 3;
+        void **args = assemble_args_list(num_args, &count, ids, index);
+        int sizes[] = { sizeof(int), sizeof(int)*count, sizeof(int)};
+        PILGRIM_TRACING_2(num_args, sizes, args);
+    }
 }
 
 int MPI_Waitsome(int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[])

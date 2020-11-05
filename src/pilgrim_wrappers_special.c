@@ -87,7 +87,7 @@ bool is_completed_idup_request(MPI_Request *req) {
     if(entry)                                                       \
         req_id = &entry->req_node->id;                              \
     if(flag) {                                                      \
-        if(entry) {                                                 \
+        if(entry && status && status != MPI_STATUS_IGNORE) {        \
             if(entry->any_source)                                   \
                 status_info[0] = status->MPI_SOURCE;                \
             if(entry->any_tag)                                      \
@@ -107,7 +107,7 @@ bool is_completed_idup_request(MPI_Request *req) {
         if(old_reqs[iidx] != MPI_REQUEST_NULL && array_of_requests[iidx] == MPI_REQUEST_NULL) {     \
             RequestHash* entry = NULL;                                                              \
             entry = request_hash_entry(&old_reqs[iidx]);                                            \
-            if(entry) {                                                                             \
+            if(entry && statuses && statuses != MPI_STATUSES_IGNORE) {                              \
                 if(entry->any_source)                                                               \
                     statuses_info[idx*2+0] = statuses[idx].MPI_SOURCE;                              \
                 if(entry->any_tag)                                                                  \

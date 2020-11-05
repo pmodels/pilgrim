@@ -243,11 +243,19 @@ int MPI_Testany(int count, MPI_Request array_of_requests[], int *index, int *fla
 
     PILGRIM_TRACING_1(int, MPI_Testany, (count, array_of_requests, index, flag, status));
 
-    GET_STATUS_INFO(&old_reqs[*index], status, *flag);
-    void **args = assemble_args_list(5, &count, ids, index, flag, status_info);
-    int sizes[] = { sizeof(int), sizeof(int)*count, sizeof(int), sizeof(int), sizeof(status_info) };
-
-    PILGRIM_TRACING_2(5, sizes, args);
+    int num_args;
+    if(*index != MPI_UNDEFINED) {
+        num_args = 5;
+        GET_STATUS_INFO(&old_reqs[*index], status, *flag);
+        void **args = assemble_args_list(num_args, &count, ids, index, flag, status_info);
+        int sizes[] = { sizeof(int), sizeof(int)*count, sizeof(int), sizeof(int), sizeof(status_info) };
+        PILGRIM_TRACING_2(num_args, sizes, args);
+    } else {
+        num_args = 4;
+        void **args = assemble_args_list(num_args, &count, ids, index, flag);
+        int sizes[] = { sizeof(int), sizeof(int)*count, sizeof(int), sizeof(int)};
+        PILGRIM_TRACING_2(num_args, sizes, args);
+    }
 }
 
 int MPI_Testall(int count, MPI_Request array_of_requests[], int *flag, MPI_Status array_of_statuses[])
@@ -263,7 +271,9 @@ int MPI_Testall(int count, MPI_Request array_of_requests[], int *flag, MPI_Statu
     int sizes[] = { sizeof(count), count*sizeof(int), sizeof(int) };
 
     PILGRIM_TRACING_2(3, sizes, args);
+    return 0;
 }
+
 int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[])
 {
     COPY_REQUESTS(incount);
@@ -279,8 +289,7 @@ int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount, in
     } else {
         // *outcount == MPI_UNDEFINED, we don't keep array_of_indices and array_of_statuses
         num_args = 3;
-        GET_STATUSES_INFO(*outcount, array_of_indices, array_of_statuses);
-        void **args = assemble_args_list(num_args, &incount, ids, outcount, array_of_indices, statuses_info);
+        void **args = assemble_args_list(num_args, &incount, ids, outcount);
         int sizes[] = { sizeof(incount), sizeof(int)*incount, sizeof(outcount) };
         PILGRIM_TRACING_2(num_args, sizes, args);
     }

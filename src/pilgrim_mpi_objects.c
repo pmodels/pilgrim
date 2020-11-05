@@ -1,5 +1,5 @@
 #include "pilgrim_mpi_objects.h"
-#include <time.h>
+#include "pilgrim_utils.h"
 
 #define MPI_OBJ_DEFINE(Type)                \
     ObjHash_##Type *hash_##Type = NULL;     \
@@ -202,8 +202,9 @@ void* generate_intracomm_id(MPI_Comm *newcomm) {
 }
 
 void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
-    int local_rank;
-    PMPI_Comm_rank(*newcomm, &local_rank);
+    int local_rank, newcomm_rank;
+    PMPI_Comm_rank(local_comm, &local_rank);
+    PMPI_Comm_rank(*newcomm, &newcomm_rank);
 
     void *id;
 
@@ -211,18 +212,20 @@ void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
     // to decide who picks the unique name for the new communicator
     if(local_rank == 0) {
         time_t t;
-        srand((unsigned) time(&t));
-        int sendbuf, recvbuf;
-        sendbuf = rand();
+        int sendbuf = 0, recvbuf = 0;
+        sendbuf = randint();
         PMPI_Sendrecv(&sendbuf, 1, MPI_INT, 0, tag, &recvbuf, 1, MPI_INT, 0, tag, *newcomm, MPI_STATUS_IGNORE);
 
         // I will decide the unique id and send it to the other one
         if(sendbuf < recvbuf) {
             id = comm2id(newcomm);
             PMPI_Send(id, 1, MPI_INT, 0, tag, *newcomm);
-        } else {
+        } else if(sendbuf > recvbuf) {
             id = dlmalloc(COMM_ID_LEN);
             PMPI_Recv(id, 1, MPI_INT, 0, tag, *newcomm, MPI_STATUS_IGNORE);
+        } else {
+            // Very unlikely
+            abort();
         }
     } else {
         // all non-rank 0 processes in the two local communicators
@@ -266,6 +269,8 @@ void* get_object_id_MPI_Comm(MPI_Comm *comm) {
             printf("Not possible! cannot find MPI_Comm entry\n");
         else
             printf("Not possible! entry->id is NULL\n");
+        // TODO
+        return comm2id(comm);
     }
 }
 void object_release_MPI_Comm(MPI_Comm *comm) {

@@ -2,8 +2,11 @@
 #include <stdarg.h>     // for va_list, va_start and va_end
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
+#include <unistd.h>
 #include "pilgrim_utils.h"
 #include "dlmalloc-2.8.6.h"
+#include "mpi.h"
 
 inline double pilgrim_wtime()
 {
@@ -25,3 +28,11 @@ inline void** assemble_args_list(int arg_count, ...) {
     return args;
 }
 
+int randint() {
+    time_t t;
+    int rank;
+    PMPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    int pid = getpid();
+    srand((unsigned) time(&t) + rank * pid);
+    return rand();
+}

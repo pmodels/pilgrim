@@ -186,6 +186,10 @@ void add_mpi_comm_hash_entry(MPI_Comm *newcomm, void *id) {
 }
 
 void* generate_intracomm_id(MPI_Comm *newcomm) {
+    // check for predefined comm
+    if((newcomm == NULL) || (*newcomm==MPI_COMM_NULL))
+        return get_predefined_comm_id(MPI_COMM_NULL);
+
     int rank;
     PMPI_Comm_rank(*newcomm, &rank);
 
@@ -202,6 +206,10 @@ void* generate_intracomm_id(MPI_Comm *newcomm) {
 }
 
 void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
+    // check for predefined comm
+    if((newcomm == NULL) || (*newcomm== MPI_COMM_NULL))
+        return get_predefined_comm_id(MPI_COMM_NULL);
+
     int local_rank, newcomm_rank;
     PMPI_Comm_rank(local_comm, &local_rank);
     PMPI_Comm_rank(*newcomm, &newcomm_rank);

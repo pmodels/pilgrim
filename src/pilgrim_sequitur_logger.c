@@ -11,7 +11,7 @@
  * | rule 2 head | #symbols of rule 2 | symbol 1, ..., symbol N|
  * ...
  *
- * @len: output the length of the array, 1 + 2 * number of ruls + number of symbols
+ * @len: [out] the length of the array: 1 + 2 * number of rules + number of symbols
  * @return: return the array, need to be freed by the caller
  *
  */

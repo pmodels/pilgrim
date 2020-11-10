@@ -330,11 +330,12 @@ void logger_exit() {
     printf("[Pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
             HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
 
+    // 1. Dump loacl metadata and call signatures
     write_to_file();
-
+    // 2. Merge and dump grammars
     sequitur_finalize();
 
-    // Clean up the hash table
+    // 3. Clean up all resources
     RecordHash *entry, *tmp;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
         HASH_DEL(__logger.hash_head, entry);

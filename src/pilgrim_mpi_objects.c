@@ -185,22 +185,33 @@ void add_mpi_comm_hash_entry(MPI_Comm *newcomm, void *id) {
     HASH_ADD_KEYPTR(hh, hash_MPI_Comm, entry->key, sizeof(MPI_Comm), entry);
 }
 
+
 void* generate_intracomm_id(MPI_Comm *newcomm) {
     // check for predefined comm
     if((newcomm == NULL) || (*newcomm==MPI_COMM_NULL))
         return get_predefined_comm_id(MPI_COMM_NULL);
 
-    int rank;
-    PMPI_Comm_rank(*newcomm, &rank);
-
     void *id;
+    int rank, is_inter;
+    PMPI_Comm_rank(*newcomm, &rank);
 
     if(rank == 0)
         id = comm2id(newcomm);
     else
         id = dlmalloc(COMM_ID_LEN);
 
-    PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, *newcomm);
+    // *newcomm might actually be an inter-communicator
+    // This is only possible for MPI_Comm_create() where
+    // the input comm is an inter-communicator.
+    PMPI_Comm_test_inter(*newcomm, &is_inter);
+
+
+    if(!is_inter)
+        PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, *newcomm);
+    else {
+        // TODO
+    }
+
     add_mpi_comm_hash_entry(newcomm, id);
     return id;
 }
@@ -210,9 +221,8 @@ void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
     if((newcomm == NULL) || (*newcomm== MPI_COMM_NULL))
         return get_predefined_comm_id(MPI_COMM_NULL);
 
-    int local_rank, newcomm_rank;
-    PMPI_Comm_rank(local_comm, &local_rank);
-    PMPI_Comm_rank(*newcomm, &newcomm_rank);
+    int local_rank;
+    PMPI_Comm_rank(*newcomm, &local_rank);
 
     void *id;
 
@@ -277,7 +287,6 @@ void* get_object_id_MPI_Comm(MPI_Comm *comm) {
             printf("Not possible! cannot find MPI_Comm entry\n");
         else
             printf("Not possible! entry->id is NULL\n");
-        // TODO
         return comm2id(comm);
     }
 }

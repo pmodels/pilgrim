@@ -186,55 +186,6 @@ def handle_mpi_comm_creation(func, f):
     elif func.name == "MPI_Comm_spawn" or func.name == "MPI_Comm_spawn_multiple":
         f.write("\tgenerate_intercomm_id(%s, %s, 0);\n" %(func.arguments[-3].name, func.arguments[-2].name))
 
-def generate_wrapper_file(funcs):
-    def signature(func, f):
-        line = func.ret_type + " " + func.name + func.signature + "\n"
-        f.write(line + '{\n')
-
-    def phase_one(func, f):
-        arg_names = []
-        for arg in func.arguments:
-            arg_names.append(arg.name)
-        f.write('\tPILGRIM_TRACING_1(%s, %s, (%s));\n' %(func.ret_type, func.name, ', '.join(arg_names)))
-
-    def phase_two(num_args, f):
-        f.write('\tPILGRIM_TRACING_2(%d, sizes, args);\n}\n' %num_args)
-
-    def logging(func, f):
-        line, num_args = codegen_assemble_args(func)
-        f.write(line)
-        f.write(codegen_sizeof_args(func))
-        return num_args
-
-    f = open('../src/pilgrim_wrappers.c', 'w')
-    f.write('#include <mpi.h>\n')
-    f.write('#include <stdarg.h>\n')
-    f.write('#include <stdlib.h>\n')
-    f.write('#include <string.h>\n')
-    f.write('#include "pilgrim.h"\n')
-    f.write('static int self_rank;\n')
-
-    for name in funcs:
-        func = funcs[name]
-
-        if handle_special_apis(func):
-            continue
-
-        signature(func, f)
-
-        if is_mpi_object_release(func)[0]:
-            num_args = logging(func, f)
-            phase_one(func, f)
-        else:
-            phase_one(func, f)
-            handle_mpi_comm_creation(func, f)
-            num_args = logging(func, f)
-
-        phase_two(num_args, f)
-
-    f.close()
-
-
 def codegen_read_one_arg(func, i):
 
     def find_arg_idx(func, arg_name):
@@ -316,5 +267,4 @@ if __name__ == "__main__":
     funcs = filter_with_local_mpi_functions(funcs)
     print(len(funcs))
 
-    generate_function_id_file(funcs)
-    generate_wrapper_file(funcs)
+    generate_reader_file(funcs)

@@ -792,7 +792,6 @@ int MPI_Intercomm_create(MPI_Comm local_comm, int local_leader, MPI_Comm peer_co
 	void **args = assemble_args_list(6, MPI_OBJ_ID(MPI_Comm, &obj_0), &local_leader, MPI_OBJ_ID(MPI_Comm, &obj_1), &remote_leader, &tag, MPI_OBJ_ID(MPI_Comm, newintercomm));
 	int sizes[] = { sizeof(MPI_Comm)+sizeof(int), sizeof(int), sizeof(MPI_Comm)+sizeof(int), sizeof(int), sizeof(int), sizeof(MPI_Comm)+sizeof(int) };
 	PILGRIM_TRACING_2(6, sizes, args);
-    return 0;
 }
 int MPI_Allreduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
 {

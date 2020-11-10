@@ -4,8 +4,8 @@
  *
  * Each function has its own BST
  */
+#include <math.h>
 #include "pilgrim_timings.h"
-#include "math.h"
 
 int get_id(double val) {
     double base = 1.1;

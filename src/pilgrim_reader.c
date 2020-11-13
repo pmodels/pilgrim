@@ -65,13 +65,38 @@ void read_grammars(char *path, int nprocs) {
     fclose(f);
 }
 
+void read_signatures_table(char *directory) {
+    char path[256];
+    sprintf(path, "%s/funcs.dat", directory);
+    FILE* f = fopen(path, "rb");
+
+    short func_id;
+    int entries, key_len, terminal, duration, interval;
+    fread(&entries, sizeof(int), 1, f);
+
+    char args[100];
+    for(int i = 0; i < entries; i++) {
+        fread(&terminal, sizeof(int), 1, f);
+        fread(&key_len, sizeof(int), 1, f);
+
+        fread(&func_id, sizeof(short), 1, f);
+        fread(&duration, sizeof(int), 1, f);
+        fread(&interval, sizeof(int), 1, f);
+
+        fread(args, 1, key_len-sizeof(short)-2*sizeof(int), f);
+
+        printf("terminal id: %d, func: %s, key len: %d\n", terminal, func_names[func_id], key_len);
+    }
+
+    fclose(f);
+}
+
 int main(int argc, char** argv) {
-    char *path = argv[1];
+    char *directory = argv[1];
 
     printf("Global Metadata\n");
     GlobalMetadata gm;
-    read_global_metadata(path, &gm);
-
+    read_global_metadata(directory, &gm);
 
     /*
     printf("Local Metadata\n");
@@ -81,6 +106,8 @@ int main(int argc, char** argv) {
     }
     */
 
-    read_grammars(path, gm.ranks);
+    read_grammars(directory, gm.ranks);
+    read_signatures_table(directory);
+
     return 0;
 }

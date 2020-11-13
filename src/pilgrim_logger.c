@@ -176,6 +176,7 @@ void* compress_gathered_function_entries(void *gathered, int *out_len) {
         for(int i = 0 ; i < count; i++) {
 
             // 4 bytes terminal id
+            // TODO
             ptr = ptr + sizeof(int);
 
             // 4 bytes key length
@@ -256,7 +257,7 @@ void write_record(Record record) {
     __logger.local_metadata.records_count++;
 
     // Compose key: (func_id, interval_id, duration_id, arguments)
-    // Compute key length first
+    // Compute key length first, not func_id is a short type
     int i;
     int key_len = sizeof(record.func_id) + sizeof(int)*2;
     for(i = 0; i < record.arg_count; i++)

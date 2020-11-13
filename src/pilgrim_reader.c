@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include "pilgrim.h"
 
+
 int rank;
 int nprocs;
 static int func_counter[400];
+
 
 
 void read_global_metadata(char* path, GlobalMetadata *gm) {
@@ -48,7 +50,7 @@ void read_grammar(FILE *f) {
 
         sym = (int*) malloc(sizeof(int) * symbols);
         fread(sym, sizeof(int), symbols, f);
-        print_rule(rule_head, sym, symbols);
+        //print_rule(rule_head, sym, symbols);
         free(sym);
     }
 }
@@ -66,6 +68,8 @@ void read_grammars(char *path, int nprocs) {
 }
 
 void read_signatures_table(char *directory) {
+    bool used[400] = {0};
+
     char path[256];
     sprintf(path, "%s/funcs.dat", directory);
     FILE* f = fopen(path, "rb");
@@ -85,7 +89,13 @@ void read_signatures_table(char *directory) {
 
         fread(args, 1, key_len-sizeof(short)-2*sizeof(int), f);
 
-        printf("terminal id: %d, func: %s, key len: %d\n", terminal, func_names[func_id], key_len);
+        used[func_id] = 1;
+        //printf("terminal id: %d, func: %s, key len: %d\n", terminal, func_names[func_id], key_len);
+    }
+
+    for(func_id = 0; func_id < 400; func_id++) {
+        if(used[func_id])
+            printf("%s\n", func_names[func_id]);
     }
 
     fclose(f);

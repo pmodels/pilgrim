@@ -71,8 +71,7 @@ def codegen_read_one_arg(func, i):
             lines.append('size = sizeof(int);')
     elif 'char*' in arg.type:
         if '**' not in arg.type and '[' not in arg.type:    # only consider one single string
-            lines = ['getdelim(((char**)&args[%d]), &n, 0, f);' %i]
-            return lines
+            lines.append('size = strlen(buff+pos)+1;')
     elif '*' in arg.type or '[' in arg.type:
         fixed_type = arg_type_strip(arg.type)
         if arg.length:
@@ -87,8 +86,9 @@ def codegen_read_one_arg(func, i):
     else:
         lines.append( "size = sizeof(%s);" %arg.type )
 
-    lines.append('args[%d] = malloc(size);' %i)
-    lines.append('fread(args[%d], size, 1, f);' %i)
+    lines.append('args[%d] = calloc(size, 1);' %i)
+    lines.append('memcpy(args[%d], buff+pos, size);' %i)
+    lines.append('pos += size;')
     return lines
 
 
@@ -100,10 +100,9 @@ def generate_reader_file(funcs):
 #include <string.h>
 #include <mpi.h>
 #include "pilgrim.h"
-void** read_record_args(FILE* f, int func_id) {
+void** read_record_args(int func_id, void* buff) {
     void **args;
-    int size;
-    int length;
+    int size, length, pos;
     size_t n;
     switch(func_id) {
 '''
@@ -115,11 +114,12 @@ void** read_record_args(FILE* f, int func_id) {
         f.write('\t\tcase ID_%s:\n\t\t{\n' %name)
 
         if handle_special_apis(func):
-            f.write('\t\t\tread_record_args_special(f, func_id);')
+            f.write('\t\t\tread_record_args_special(func_id, buff);')
         else:
             f.write('\t\t\targs = malloc(%d * sizeof(void*));' %len(func.arguments))
-            f.write('\n\t\t\t')
+            f.write('\n\t\t\tpos = 0;')
             for i in range(len(func.arguments)):
+                f.write('\n\t\t\t')
                 lines = codegen_read_one_arg(func, i)
                 f.write('\n\t\t\t'.join(lines))
         f.write('\n\t\t\tbreak;\n\t\t}\n')

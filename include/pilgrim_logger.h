@@ -38,8 +38,8 @@ int* addr2id(const void *buffer);
 void append_offset(MPI_Offset offset);
 
 
-void** read_record_args(FILE*f, int func_id);
-void** read_record_args_special(FILE*f, int func_id);
+void** read_record_args(int func_id, void* buff);
+void** read_record_args_special(int func_id, void* buff);
 
 
 #endif

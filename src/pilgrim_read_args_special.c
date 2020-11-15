@@ -4,11 +4,12 @@
 #include <mpi.h>
 #include "pilgrim.h"
 
-void** read_record_args_special(FILE* f, int func_id) {
+void** read_record_args_special(int func_id, void* buff) {
     void **args;
     int size;
     int length;
     size_t n;
+    /*
     switch(func_id) {
         case ID_MPI_Pcontrol:
         {
@@ -78,6 +79,7 @@ void** read_record_args_special(FILE* f, int func_id) {
             break;
         }
     }
+    */
 
     return args;
 }

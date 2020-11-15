@@ -78,7 +78,7 @@ void read_signatures_table(char *directory) {
     int entries, key_len, terminal, duration, interval;
     fread(&entries, sizeof(int), 1, f);
 
-    char args[100];
+    char buff[100];
     for(int i = 0; i < entries; i++) {
         fread(&terminal, sizeof(int), 1, f);
         fread(&key_len, sizeof(int), 1, f);
@@ -87,7 +87,7 @@ void read_signatures_table(char *directory) {
         fread(&duration, sizeof(int), 1, f);
         fread(&interval, sizeof(int), 1, f);
 
-        fread(args, 1, key_len-sizeof(short)-2*sizeof(int), f);
+        fread(buff, 1, key_len-sizeof(short)-2*sizeof(int), f);
 
         used[func_id] = 1;
         //printf("terminal id: %d, func: %s, key len: %d\n", terminal, func_names[func_id], key_len);

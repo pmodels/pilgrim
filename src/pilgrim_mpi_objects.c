@@ -193,27 +193,30 @@ void* generate_intracomm_id(MPI_Comm *newcomm) {
 
     void *id;
     int rank, is_inter;
-    PMPI_Comm_rank(*newcomm, &rank);
-
-    if(rank == 0)
-        id = comm2id(newcomm);
-    else
-        id = dlmalloc(COMM_ID_LEN);
 
     // *newcomm might actually be an inter-communicator
     // This is only possible when MPI_Comm_create() is
     // called with an inter-communicator as the input.
     PMPI_Comm_test_inter(*newcomm, &is_inter);
 
+    MPI_Comm intracomm;
     if(!is_inter)
-        PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, *newcomm);
-    else {
-        MPI_Comm newintra;
-        PMPI_Intercomm_merge(*newcomm, 0, &newintra);
-        PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, newintra);
-    }
+        intracomm = *newcomm;
+    else
+        PMPI_Intercomm_merge(*newcomm, 0, &intracomm);
+
+    PMPI_Comm_rank(intracomm, &rank);
+    if(rank == 0)
+        id = comm2id(newcomm);
+    else
+        id = dlmalloc(COMM_ID_LEN);
+
+    PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, intracomm);
+    if(is_inter)
+        PMPI_Comm_free(&intracomm);
 
     add_mpi_comm_hash_entry(newcomm, id);
+
     return id;
 }
 

@@ -201,15 +201,16 @@ void* generate_intracomm_id(MPI_Comm *newcomm) {
         id = dlmalloc(COMM_ID_LEN);
 
     // *newcomm might actually be an inter-communicator
-    // This is only possible for MPI_Comm_create() where
-    // the input comm is an inter-communicator.
+    // This is only possible when MPI_Comm_create() is
+    // called with an inter-communicator as the input.
     PMPI_Comm_test_inter(*newcomm, &is_inter);
-
 
     if(!is_inter)
         PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, *newcomm);
     else {
-        // TODO
+        MPI_Comm newintra;
+        PMPI_Intercomm_merge(*newcomm, 0, &newintra);
+        PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, newintra);
     }
 
     add_mpi_comm_hash_entry(newcomm, id);

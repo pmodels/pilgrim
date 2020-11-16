@@ -75,7 +75,7 @@ void read_signatures_table(char *directory) {
     FILE* f = fopen(path, "rb");
 
     short func_id;
-    int entries, key_len, terminal, duration, interval;
+    int entries, key_len, terminal, duration, interval, nargs;
     fread(&entries, sizeof(int), 1, f);
 
     char buff[100];
@@ -91,6 +91,10 @@ void read_signatures_table(char *directory) {
 
         used[func_id] = 1;
         //printf("terminal id: %d, func: %s, key len: %d\n", terminal, func_names[func_id], key_len);
+        void** args = read_record_args(func_id, buff, &nargs);
+        for(int j = 0; j < nargs; j++)
+            free(args[j]);
+        free(args);
     }
 
     for(func_id = 0; func_id < 400; func_id++) {

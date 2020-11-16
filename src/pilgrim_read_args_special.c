@@ -4,7 +4,7 @@
 #include <mpi.h>
 #include "pilgrim.h"
 
-void** read_record_args_special(int func_id, void* buff) {
+void** read_record_args_special(int func_id, void* buff, int* nargs) {
     void **args;
     int size;
     int length;

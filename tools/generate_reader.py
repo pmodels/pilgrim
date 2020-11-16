@@ -100,7 +100,7 @@ def generate_reader_file(funcs):
 #include <string.h>
 #include <mpi.h>
 #include "pilgrim.h"
-void** read_record_args(int func_id, void* buff) {
+void** read_record_args(int func_id, void* buff, int* nargs) {
     void **args;
     int size, length, pos;
     size_t n;
@@ -114,10 +114,11 @@ void** read_record_args(int func_id, void* buff) {
         f.write('\t\tcase ID_%s:\n\t\t{\n' %name)
 
         if handle_special_apis(func):
-            f.write('\t\t\tread_record_args_special(func_id, buff);')
+            f.write('\t\t\tread_record_args_special(func_id, buff, nargs);')
         else:
             f.write('\t\t\targs = malloc(%d * sizeof(void*));' %len(func.arguments))
             f.write('\n\t\t\tpos = 0;')
+            f.write('\n\t\t\t*nargs = %d;' %len(func.arguments))
             for i in range(len(func.arguments)):
                 f.write('\n\t\t\t')
                 lines = codegen_read_one_arg(func, i)

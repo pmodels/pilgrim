@@ -3,7 +3,7 @@
 #include <string.h>
 #include <mpi.h>
 #include "pilgrim.h"
-void** read_record_args(int func_id, void* buff) {
+void** read_record_args(int func_id, void* buff, int* nargs) {
     void **args;
     int size, length, pos;
     size_t n;
@@ -12,6 +12,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -26,6 +27,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -68,6 +70,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -98,6 +101,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -120,6 +124,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -134,6 +139,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -144,6 +150,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -158,6 +165,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -172,6 +180,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Aint);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -186,6 +195,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -196,6 +206,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Comm_copy_attr_function);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -218,6 +229,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -226,13 +238,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Testany:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_T_cvar_handle_alloc:
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -255,6 +268,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -273,6 +287,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -287,6 +302,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -301,6 +317,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -319,6 +336,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -333,6 +351,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -355,6 +374,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -369,6 +389,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -407,6 +428,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int)*2;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -425,6 +447,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(MPI_Grequest_query_function);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -451,6 +474,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -465,6 +489,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -499,6 +524,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -522,6 +548,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -548,6 +575,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -578,6 +606,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -592,6 +621,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -630,6 +660,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -640,6 +671,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -658,6 +690,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int)*2;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -676,6 +709,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -690,6 +724,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -704,6 +739,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -730,6 +766,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -744,6 +781,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -752,13 +790,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Request_free:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_File_read_all_end:
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -777,6 +816,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -811,6 +851,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -829,6 +870,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -867,6 +909,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -877,6 +920,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -891,6 +935,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -929,6 +974,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -963,6 +1009,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -982,6 +1029,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -992,6 +1040,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_User_function);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1010,6 +1059,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_T_enum);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1032,6 +1082,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1066,6 +1117,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1100,6 +1152,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(10 * sizeof(void*));
 			pos = 0;
+			*nargs = 10;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1146,6 +1199,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1172,6 +1226,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1195,6 +1250,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1209,6 +1265,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1231,6 +1288,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1249,6 +1307,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1278,6 +1337,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1296,6 +1356,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1314,6 +1375,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1332,6 +1394,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1368,6 +1431,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1390,6 +1454,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1404,6 +1469,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1414,6 +1480,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1428,6 +1495,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_T_pvar_session);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1442,6 +1510,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1468,6 +1537,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1498,6 +1568,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1510,13 +1581,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Finalize:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Type_create_hindexed_block:
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1544,6 +1616,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1554,6 +1627,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Aint);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1572,6 +1646,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1586,6 +1661,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1630,6 +1706,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1659,6 +1736,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1669,6 +1747,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1683,6 +1762,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1697,6 +1777,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_File_errhandler_function);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1711,6 +1792,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1721,6 +1803,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1759,6 +1842,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1773,6 +1857,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(MPI_Request);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1783,6 +1868,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1801,6 +1887,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1811,6 +1898,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1837,6 +1925,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1855,6 +1944,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1877,6 +1967,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1906,6 +1997,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1920,6 +2012,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1950,6 +2043,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1980,6 +2074,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -1998,6 +2093,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2032,6 +2128,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2046,6 +2143,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2080,6 +2178,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2094,6 +2193,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2104,6 +2204,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2130,6 +2231,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2155,13 +2257,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Wait:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Type_create_hindexed:
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2190,6 +2293,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2226,6 +2330,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2244,6 +2349,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2254,6 +2360,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2296,6 +2403,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2330,6 +2438,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2340,6 +2449,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2362,6 +2472,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2372,6 +2483,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_T_pvar_session);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2390,6 +2502,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2412,6 +2525,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(MPI_T_cvar_handle);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2422,6 +2536,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(MPI_T_enum);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2448,6 +2563,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2462,6 +2578,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2480,6 +2597,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2506,6 +2624,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2520,6 +2639,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int)*2;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2534,6 +2654,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2548,6 +2669,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2562,6 +2684,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2580,6 +2703,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2594,6 +2718,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2622,6 +2747,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2648,6 +2774,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2670,6 +2797,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(10 * sizeof(void*));
 			pos = 0;
+			*nargs = 10;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2716,6 +2844,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_T_pvar_session);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2734,6 +2863,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2748,6 +2878,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2790,6 +2921,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2832,6 +2964,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2850,6 +2983,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2868,6 +3002,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2899,6 +3034,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2937,6 +3073,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2955,6 +3092,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2989,6 +3127,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -2999,6 +3138,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3026,6 +3166,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3048,6 +3189,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3066,6 +3208,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3092,6 +3235,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3121,6 +3265,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3158,6 +3303,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3176,6 +3322,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3218,6 +3365,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3248,6 +3396,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3273,6 +3422,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3291,6 +3441,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3305,6 +3456,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3347,6 +3499,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3375,6 +3528,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3409,6 +3563,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3435,6 +3590,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3449,6 +3605,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3463,6 +3620,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3491,6 +3649,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(char);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3513,6 +3672,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(10 * sizeof(void*));
 			pos = 0;
+			*nargs = 10;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3563,6 +3723,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3577,6 +3738,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Type_copy_attr_function);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3599,6 +3761,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3625,6 +3788,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3653,6 +3817,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3691,6 +3856,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3701,6 +3867,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3711,6 +3878,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3748,6 +3916,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3758,6 +3927,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3776,6 +3946,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(13 * sizeof(void*));
 			pos = 0;
+			*nargs = 13;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3832,13 +4003,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Waitall:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Comm_delete_attr:
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3851,13 +4023,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Testall:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Comm_create_errhandler:
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm_errhandler_function);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3872,6 +4045,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3882,6 +4056,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3904,6 +4079,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3919,13 +4095,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Waitsome:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Win_lock_all:
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3940,6 +4117,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3958,6 +4136,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -3979,6 +4158,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4001,6 +4181,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(MPI_T_pvar_session);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4027,6 +4208,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4049,6 +4231,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4075,6 +4258,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4089,6 +4273,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4103,6 +4288,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4117,6 +4303,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4131,6 +4318,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4157,6 +4345,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4186,6 +4375,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4204,6 +4394,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4218,6 +4409,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4236,6 +4428,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4265,6 +4458,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4279,6 +4473,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4292,6 +4487,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4318,6 +4514,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_T_cvar_handle);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4332,6 +4529,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4358,13 +4556,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Testsome:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Type_create_hvector:
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4391,6 +4590,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4413,6 +4613,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4423,6 +4624,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4445,6 +4647,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(MPI_Request);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4455,6 +4658,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(12 * sizeof(void*));
 			pos = 0;
+			*nargs = 12;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4509,6 +4713,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Win_errhandler_function);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4521,13 +4726,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Init_thread:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Win_fence:
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4542,6 +4748,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4580,6 +4787,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4598,6 +4806,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_T_pvar_session);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4612,6 +4821,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4630,6 +4840,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4640,6 +4851,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4682,6 +4894,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4708,6 +4921,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4734,6 +4948,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4744,6 +4959,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4758,6 +4974,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4771,6 +4988,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int)*2;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4785,6 +5003,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4811,6 +5030,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_T_pvar_session);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4829,6 +5049,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4852,6 +5073,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4871,6 +5093,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4909,6 +5132,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4943,6 +5167,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(10 * sizeof(void*));
 			pos = 0;
+			*nargs = 10;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -4989,6 +5214,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(10 * sizeof(void*));
 			pos = 0;
+			*nargs = 10;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5035,6 +5261,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5045,6 +5272,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_T_cvar_handle);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5059,6 +5287,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5093,6 +5322,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5127,6 +5357,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5168,6 +5399,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5184,13 +5416,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Pcontrol:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_T_pvar_handle_free:
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_T_pvar_session);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5205,6 +5438,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5215,6 +5449,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5229,6 +5464,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5254,6 +5490,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5268,6 +5505,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5294,6 +5532,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5308,6 +5547,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5318,6 +5558,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5332,6 +5573,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(10 * sizeof(void*));
 			pos = 0;
+			*nargs = 10;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5380,6 +5622,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5394,6 +5637,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5423,6 +5667,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5441,6 +5686,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5470,6 +5716,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5504,6 +5751,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5518,6 +5766,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5552,6 +5801,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5582,6 +5832,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5624,6 +5875,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5642,6 +5894,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5656,6 +5909,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(10 * sizeof(void*));
 			pos = 0;
+			*nargs = 10;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5702,6 +5956,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5716,6 +5971,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5742,6 +5998,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5756,6 +6013,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5774,6 +6032,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5816,6 +6075,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5834,6 +6094,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5844,6 +6105,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5886,6 +6148,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5928,6 +6191,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5958,6 +6222,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -5968,6 +6233,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6002,6 +6268,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Copy_function);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6024,6 +6291,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6050,6 +6318,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Win_copy_attr_function);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6072,6 +6341,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6090,6 +6360,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6118,13 +6389,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Startall:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_File_seek_shared:
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6142,12 +6414,14 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(0 * sizeof(void*));
 			pos = 0;
+			*nargs = 0;
 			break;
 		}
 		case ID_MPI_Add_error_class:
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6158,6 +6432,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6200,6 +6475,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6210,6 +6486,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6224,6 +6501,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(MPI_Aint);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6254,6 +6532,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6268,6 +6547,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6286,6 +6566,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6300,6 +6581,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6318,6 +6600,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6352,6 +6635,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6362,6 +6646,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6376,6 +6661,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(MPI_T_pvar_session);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6386,6 +6672,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6400,6 +6687,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6426,6 +6714,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6456,6 +6745,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6490,6 +6780,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6524,6 +6815,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6558,6 +6850,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6587,6 +6880,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6601,6 +6895,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6635,6 +6930,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6661,6 +6957,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6703,6 +7000,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6721,6 +7019,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6747,6 +7046,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6761,12 +7061,14 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(0 * sizeof(void*));
 			pos = 0;
+			*nargs = 0;
 			break;
 		}
 		case ID_MPI_File_iread_shared:
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6793,6 +7095,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6807,6 +7110,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6831,13 +7135,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Init:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Reduce_scatter:
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6868,6 +7173,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6882,6 +7188,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6900,6 +7207,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6917,6 +7225,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6927,6 +7236,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6950,6 +7260,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6964,6 +7275,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(char);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -6998,6 +7310,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7024,6 +7337,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7042,6 +7356,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7074,6 +7389,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(12 * sizeof(void*));
 			pos = 0;
+			*nargs = 12;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7128,6 +7444,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7154,6 +7471,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7172,6 +7490,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(MPI_Aint);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7202,6 +7521,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7220,6 +7540,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7246,6 +7567,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7260,6 +7582,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7278,6 +7601,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7316,6 +7640,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(10 * sizeof(void*));
 			pos = 0;
+			*nargs = 10;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7362,6 +7687,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7384,6 +7710,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7402,6 +7729,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7420,6 +7748,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = strlen(buff+pos)+1;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7434,6 +7763,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7468,6 +7798,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_T_pvar_session);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7482,6 +7813,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(MPI_Request);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7492,6 +7824,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7526,6 +7859,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7552,6 +7886,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(MPI_T_pvar_session);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7562,6 +7897,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7596,6 +7932,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(char);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7630,6 +7967,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7642,13 +7980,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Test:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Request_get_status:
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Request);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7665,13 +8004,14 @@ void** read_record_args(int func_id, void* buff) {
 		}
 		case ID_MPI_Waitany:
 		{
-			read_record_args_special(func_id, buff);
+			read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_File_read_at_all_end:
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7690,6 +8030,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7719,6 +8060,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int)*2;
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7737,6 +8079,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7756,6 +8099,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(MPI_Group);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7777,6 +8121,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7815,6 +8160,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7841,6 +8187,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7855,6 +8202,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(5 * sizeof(void*));
 			pos = 0;
+			*nargs = 5;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7881,6 +8229,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7895,6 +8244,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7925,6 +8275,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(6 * sizeof(void*));
 			pos = 0;
+			*nargs = 6;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -7955,6 +8306,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(10 * sizeof(void*));
 			pos = 0;
+			*nargs = 10;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8001,6 +8353,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(10 * sizeof(void*));
 			pos = 0;
+			*nargs = 10;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8047,12 +8400,14 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(0 * sizeof(void*));
 			pos = 0;
+			*nargs = 0;
 			break;
 		}
 		case ID_MPI_T_category_get_cvars:
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8072,6 +8427,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(MPI_Errhandler);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8082,6 +8438,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8096,6 +8453,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(8 * sizeof(void*));
 			pos = 0;
+			*nargs = 8;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8134,6 +8492,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8148,6 +8507,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(7 * sizeof(void*));
 			pos = 0;
+			*nargs = 7;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8182,6 +8542,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8196,6 +8557,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(9 * sizeof(void*));
 			pos = 0;
+			*nargs = 9;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8238,6 +8600,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(1 * sizeof(void*));
 			pos = 0;
+			*nargs = 1;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8248,6 +8611,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8262,6 +8626,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(2 * sizeof(void*));
 			pos = 0;
+			*nargs = 2;
 			size = sizeof(MPI_Aint);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8276,6 +8641,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(4 * sizeof(void*));
 			pos = 0;
+			*nargs = 4;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8298,6 +8664,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8316,6 +8683,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(3 * sizeof(void*));
 			pos = 0;
+			*nargs = 3;
 			size = sizeof(MPI_Comm)+sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);
@@ -8334,6 +8702,7 @@ void** read_record_args(int func_id, void* buff) {
 		{
 			args = malloc(13 * sizeof(void*));
 			pos = 0;
+			*nargs = 13;
 			size = sizeof(int);
 			args[0] = calloc(size, 1);
 			memcpy(args[0], buff+pos, size);

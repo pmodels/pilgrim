@@ -305,7 +305,10 @@ void logger_init(int rank, int nprocs) {
     __logger.offset_list = NULL;
 
 
-    mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if(rank == 0) {
+        mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    }
+    PMPI_Barrier(MPI_COMM_WORLD);
 
     // Global metadata, include compression mode, time resolution
     if (rank == 0) {

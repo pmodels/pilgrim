@@ -264,18 +264,23 @@ void write_record(Record record) {
         key_len += record.arg_sizes[i];
 
     // Actually set the key
+    int pos = 0;
     void *key = dlmalloc(key_len);
-    memcpy(key, &(record.func_id), sizeof(record.func_id));
+    memcpy(key+pos, &(record.func_id), sizeof(record.func_id));
+    pos += sizeof(record.func_id);
+
     int dur_id = get_duration_id(record.tend-record.tstart);
-    memcpy(key+sizeof(record.func_id), &dur_id, sizeof(int));
+    memcpy(key+pos, &dur_id, sizeof(int));
+    pos += sizeof(int);
+
     int interval_id = 0;
-    memcpy(key+sizeof(record.func_id), &interval_id, sizeof(int));
-    int pos = sizeof(record.func_id);
+    memcpy(key+pos, &interval_id, sizeof(int));
+    pos += sizeof(int);
+
     for(i = 0; i < record.arg_count; i++) {
         memcpy(key+pos, record.args[i], record.arg_sizes[i]);
         pos += record.arg_sizes[i];
     }
-
 
     RecordHash *entry;
     HASH_FIND(hh, __logger.hash_head, key, key_len, entry);

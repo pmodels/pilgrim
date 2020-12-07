@@ -103,12 +103,15 @@ void free(void *ptr) {
         return;
     }
 
-    if(AVL_EMPTY == avl_search(addr_tree, (intptr_t)ptr)) {
+    AvlTree avl_node = avl_search(addr_tree, (intptr_t)ptr);
+
+    if(AVL_EMPTY == avl_node) {
         if(ptr != NULL) {
             // TODO: potential memory leak. why
             // printf("p%\n", ptr);
         }
     } else {
+        DL_APPEND(addr_id_list, avl_node->id_node);
         avl_delete(&addr_tree, (intptr_t)ptr);
         dlfree(ptr);
     }

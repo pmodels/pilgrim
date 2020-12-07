@@ -360,7 +360,7 @@ void logger_exit() {
     sequitur_finalize();
 
     // 3. Clean up all resources
-    count_func_entries();
+    //count_func_entries();
     RecordHash *entry, *tmp;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
         HASH_DEL(__logger.hash_head, entry);

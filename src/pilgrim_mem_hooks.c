@@ -39,17 +39,20 @@ int* addr2id(const void* buffer) {
         avl_node = avl_insert(&addr_tree, (intptr_t)buffer, 1);
     }
 
-    if(avl_node->id_node == NULL)
-        avl_node->id_node = addr_id_list;
-
-    // free id list is empty? create one
+    // Two possible cases:
+    // 1. New created avl_node
+    // 2. Already created but never used by MPI call
+    // In both cases, need to assign it a addr id node.
     if(avl_node->id_node == NULL) {
-        avl_node->id_node = (AddrIdNode*) dlmalloc(sizeof(AddrIdNode));
-        avl_node->id_node->id = allocated_addr_id++;
-    }
-    // free id list is not empty, get the first one and remove it from list
-    else {
-        DL_DELETE(addr_id_list, avl_node->id_node);
+        if(addr_id_list == NULL) {
+            // free id list is empty? create one
+            avl_node->id_node = (AddrIdNode*) dlmalloc(sizeof(AddrIdNode));
+            avl_node->id_node->id = allocated_addr_id++;
+        } else {
+            // free id list is not empty, get the first one and remove it from list
+            avl_node->id_node = addr_id_list;
+            DL_DELETE(addr_id_list, avl_node->id_node);
+        }
     }
 
     return &(avl_node->id_node->id);

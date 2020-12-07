@@ -3,6 +3,6 @@
 
 int get_duration_id(double duration);
 
-int get_interval_id(double interval);
+int get_interval_id(const Record *record);
 
 #endif

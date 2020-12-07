@@ -1,13 +1,19 @@
 #ifndef _PILGRIM_ADDR_AVL_H
 #define _PILGRIM_ADDR_AVL_H
 /* implementation of an AVL tree with explicit heights */
+typedef struct AddrIdNode_t {
+    int id;
+    struct AddrIdNode_t *prev;
+    struct AddrIdNode_t *next;
+} AddrIdNode;
+
 
 struct avlNode {
     struct avlNode *child[2];    /* left and right */
 
     intptr_t addr;               // use addr as key
     size_t size;                 // size of allocated memory
-    int id;                      // symbolic id to represent this memory buffer
+    AddrIdNode* id_node;         // symbolic id to represent this memory buffer
 
     int height;
 };

@@ -153,7 +153,7 @@ avl_insert(AvlTree *t, intptr_t addr, size_t size)
 
         (*t)->addr = addr;
         (*t)->size = size;
-        (*t)->id = -1;      // id is assigned only when used in MPI calls
+        (*t)->id_node = NULL;      // id is assigned only when used in MPI calls
 
         (*t)->height = 1;
 
@@ -180,7 +180,7 @@ avl_print_keys(AvlTree t)
 {
     if(t != AVL_EMPTY) {
         avl_print_keys(t->child[0]);
-        printf("addr: %ld, id: %d, size: %ld\n", t->addr, t->id, t->size);
+        printf("addr: %ld, id: %d, size: %ld\n", t->addr, t->id_node->id, t->size);
         avl_print_keys(t->child[1]);
     }
 }
@@ -227,7 +227,7 @@ avl_delete(AvlTree *t, intptr_t addr)
             AvlTree min_node = avl_delete_min(&(*t)->child[1]);
             (*t)->addr = min_node->addr;
             (*t)->size = min_node->size;
-            (*t)->id = min_node->id;
+            (*t)->id_node = min_node->id_node;
             dlfree(min_node);
         } else {
             /* splice out root */

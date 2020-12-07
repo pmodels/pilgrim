@@ -7,16 +7,21 @@
 #include "pilgrim_mem_hooks.h"
 #include "pilgrim_addr_avl.h"
 #include "dlmalloc-2.8.6.h"
+#include "utlist.h"
+
 
 AvlTree addr_tree;
+AddrIdNode *addr_id_list;               // free list of addr ids
 static bool hook_installed = false;
-static int current_addr_id = 0;
+static int allocated_addr_id = 0;
+
 
 
 // Three public available function in .h
 void install_mem_hooks() {
     hook_installed = true;
     addr_tree = NULL;
+    addr_id_list = NULL;
 }
 
 void uninstall_mem_hooks() {
@@ -26,20 +31,28 @@ void uninstall_mem_hooks() {
 
 // Symbolic representation of memory addresses
 int* addr2id(const void* buffer) {
-    AvlTree node = avl_search(addr_tree, (intptr_t) buffer);
-    if(node == AVL_EMPTY) {
+    AvlTree avl_node = avl_search(addr_tree, (intptr_t) buffer);
+    if(avl_node == AVL_EMPTY) {
         // Not found in addr_tree suggests that this buffer is not dynamically allocated
         // Maybe a stack buffer so we don't know excatly the size
         // We assume it as a 1 byte memory area.
-        AvlTree new_node = avl_insert(&addr_tree, (intptr_t)buffer, 1);
-        new_node->id = current_addr_id++;
-        return &(new_node->id);
-    } else {
-        // First use
-        if(node->id == -1)
-            node->id = current_addr_id++;
-        return &(node->id);
+        avl_node = avl_insert(&addr_tree, (intptr_t)buffer, 1);
     }
+
+    if(avl_node->id_node == NULL)
+        avl_node->id_node = addr_id_list;
+
+    // free id list is empty? create one
+    if(avl_node->id_node == NULL) {
+        avl_node->id_node = (AddrIdNode*) dlmalloc(sizeof(AddrIdNode));
+        avl_node->id_node->id = allocated_addr_id++;
+    }
+    // free id list is not empty, get the first one and remove it from list
+    else {
+        DL_DELETE(addr_id_list, avl_node->id_node);
+    }
+
+    return &(avl_node->id_node->id);
 }
 
 /**

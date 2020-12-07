@@ -5,6 +5,7 @@
 #include "pilgrim_func_ids.h"
 #include "pilgrim_logger.h"
 #include "pilgrim_utils.h"
+#include "pilgrim_mem_hooks.h"
 #include "pilgrim_mpi_objects.h"
 #include "dlmalloc-2.8.6.h"
 

@@ -10,7 +10,6 @@
 
 #include "pilgrim.h"
 #include "pilgrim_sequitur.h"
-#include "pilgrim_mem_hooks.h"
 #include "pilgrim_timings.h"
 #include "dlmalloc-2.8.6.h"
 #include "utlist.h"
@@ -20,7 +19,6 @@
 #define TIME_RESOLUTION 0.000001
 
 static int current_terminal_id = 0;
-static int current_addr_id = 0;
 
 
 // Entry in uthash
@@ -45,7 +43,6 @@ struct Logger {
     LocalMetadata local_metadata;   // local metadata information
 
     RecordHash *hash_head;          // head of function entries hash table
-    AvlTree addr_tree;              // root of memory addresses AVL tree
 
     OffsetNode *offset_list;        // List of MPI_Offset
 };
@@ -53,26 +50,6 @@ struct Logger {
 // Global object to access the Logger fileds
 struct Logger __logger;
 
-
-/**
- * Symbolic representation for memory addresses.
- */
-int* addr2id(const void* buffer) {
-    AvlTree node = avl_search(__logger.addr_tree, (intptr_t) buffer);
-    if(node == AVL_EMPTY) {
-        // Not found in addr_tree suggests that this buffer is not dynamically allocated
-        // Maybe a stack buffer so we don't know excatly the size
-        // We assume it as a 1 byte memory area.
-        AvlTree new_node = avl_insert(&__logger.addr_tree, (intptr_t)buffer, 1);
-        new_node->id = current_addr_id++;
-        return &(new_node->id);
-    } else {
-        // First use
-        if(node->id == -1)
-            node->id = current_addr_id++;
-        return &(node->id);
-    }
-}
 
 void append_offset(MPI_Offset offset) {
     OffsetNode *new_node = (OffsetNode*) dlmalloc(sizeof(OffsetNode));
@@ -136,6 +113,7 @@ void* gather_function_entries(int *len_sum) {
     // Gahter the length from other ranks
     PMPI_Gather(&len_local, 1, MPI_INT, recvcounts, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
+    *len_sum = 0;
     displs[0] = 0;
     *len_sum = recvcounts[0];
     for(int i = 1; i < __logger.nprocs; i++) {
@@ -144,9 +122,16 @@ void* gather_function_entries(int *len_sum) {
     }
 
     void *gathered = NULL;
-    if(__logger.rank == 0)
+    if(__logger.rank == 0) {
         gathered = dlmalloc(*len_sum);
+    }
+    printf("%d Start MPI_Gatherv, len_local: %d, allocate %d\n", __logger.rank, len_local, *len_sum);
+
     PMPI_Gatherv(local, len_local, MPI_BYTE, gathered, recvcounts, displs, MPI_BYTE, 0, MPI_COMM_WORLD);
+
+    if(__logger.rank == 0)
+        printf("finish MPI_Gatherv, allocate %d\n", *len_sum);
+
 
     dlfree(local);
     return gathered;
@@ -233,7 +218,6 @@ void write_to_file() {
 
     // gathered will be NULL for all ranks except 0
     if(__logger.rank == 0) {
-
         int compressed_len;
         void* compressed = compress_gathered_function_entries(gathered, &compressed_len);
         dlfree(gathered);
@@ -270,10 +254,12 @@ void write_record(Record record) {
     pos += sizeof(record.func_id);
 
     int dur_id = get_duration_id(record.tend-record.tstart);
+    dur_id = 0;
     memcpy(key+pos, &dur_id, sizeof(int));
     pos += sizeof(int);
 
-    int interval_id = 0;
+    int interval_id = get_interval_id(&record);
+    interval_id = 0;
     memcpy(key+pos, &interval_id, sizeof(int));
     pos += sizeof(int);
 
@@ -327,13 +313,42 @@ void logger_init(int rank, int nprocs) {
     }
 
     sequitur_init();
-    install_hooks(__logger.rank, &__logger.addr_tree);
+    install_mem_hooks();
     __logger.recording = true;
+}
+
+void count_func_entries() {
+    int count[400];
+    for(int i = 0; i < 400; i++)
+        count[i] = 0;
+
+    RecordHash *entry, *tmp;
+    HASH_ITER(hh, __logger.hash_head, entry, tmp) {
+        if(__logger.rank == 0) {
+            short func_id;
+            memcpy(&func_id, entry->key, sizeof(short));
+            count[func_id]++;
+
+            int args[5];
+            int arg_start = sizeof(int)*2 + sizeof(short);
+            if(func_id == ID_MPI_Isend) {
+                memcpy(args, entry->key+arg_start, sizeof(args));
+                printf("buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d\n",
+                        args[0], args[1], args[2], args[3], args[4]);
+            }
+        }
+    }
+
+    for(int i = 0; i < 400; i++) {
+        if(count[i] > 0)
+            printf("Func: %s, count: %d\n", func_names[i], count[i]);
+    }
 }
 
 
 void logger_exit() {
-    remove_hooks();
+
+    uninstall_mem_hooks();
     __logger.recording = false;
 
     printf("[Pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
@@ -345,6 +360,7 @@ void logger_exit() {
     sequitur_finalize();
 
     // 3. Clean up all resources
+    count_func_entries();
     RecordHash *entry, *tmp;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
         HASH_DEL(__logger.hash_head, entry);
@@ -358,6 +374,4 @@ void logger_exit() {
     }
 
     MPI_OBJ_CLEANUP_ALL();
-
-    avl_destroy(__logger.addr_tree);
 }

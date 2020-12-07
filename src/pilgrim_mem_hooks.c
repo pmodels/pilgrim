@@ -111,7 +111,8 @@ void free(void *ptr) {
             // printf("p%\n", ptr);
         }
     } else {
-        DL_APPEND(addr_id_list, avl_node->id_node);
+        if(avl_node->id_node)
+            DL_APPEND(addr_id_list, avl_node->id_node);
         avl_delete(&addr_tree, (intptr_t)ptr);
         dlfree(ptr);
     }

@@ -56,7 +56,7 @@ double get_interval(const Record *record) {
 
         HASH_ADD_KEYPTR(hh, interval_table, entry->key, key_len, entry);
 
-        interval = -1;
+        interval = 0;
     }
 
     return interval;

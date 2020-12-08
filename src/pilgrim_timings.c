@@ -2,6 +2,7 @@
  * Interval ID and Duration ID stored in the key
  */
 #include <math.h>
+#include <limits.h>
 #include "pilgrim.h"
 #include "pilgrim_timings.h"
 #include "uthash.h"
@@ -17,6 +18,8 @@ static IntervalHash *interval_table = NULL;
 
 
 int get_id(double val) {
+    if(val==0)
+        return INT_MIN;
     double base = 1.1;
     int res = log(val) / log(base);
     return res;

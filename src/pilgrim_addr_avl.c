@@ -14,6 +14,8 @@ avl_destroy(AvlTree t)
     if(t != AVL_EMPTY) {
         avl_destroy(t->child[0]);
         avl_destroy(t->child[1]);
+        if(t->id_node)
+            dlfree(t->id_node);
         dlfree(t);
     }
 }

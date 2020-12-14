@@ -39,7 +39,10 @@ int* serialize_grammar(Grammar *grammar, int* update_terminal_id, int *len) {
         data[i++] = symbols_count;
 
         DL_FOREACH(rule->rule_body, sym) {
-            data[i++] = update_terminal_id[sym->val];
+            if(sym->val < 0)
+                data[i++] = sym->val;       // rule id does not change
+            else
+                data[i++] = update_terminal_id[sym->val];   // terminal id is updated according to the compressed function table
         }
 
     }

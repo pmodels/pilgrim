@@ -81,22 +81,22 @@ void cleanup_function_entry_table(RecordHash* table) {
  * @return: the address of this memory space.
  *
  */
-void* serialize_function_entries(RecordHash *hash_head, size_t *len) {
+void* serialize_function_entries(RecordHash *table, size_t *len) {
     *len = sizeof(int);
 
     RecordHash *entry, *tmp;
-    HASH_ITER(hh, hash_head, entry, tmp) {
+    HASH_ITER(hh, table, entry, tmp) {
         *len = *len + sizeof(int) * 2 + entry->key_len;
     }
 
-    int count = HASH_COUNT(__logger.hash_head);
+    int count = HASH_COUNT(table);
     void *res = pilgrim_malloc(*len);
     void *ptr = res;
 
     memcpy(ptr, &count, sizeof(int));
     ptr += sizeof(int);
 
-    HASH_ITER(hh, hash_head, entry, tmp) {
+    HASH_ITER(hh, table, entry, tmp) {
 
         memcpy(ptr, &entry->terminal_id, sizeof(int));
         ptr = ptr + sizeof(int);
@@ -129,6 +129,7 @@ RecordHash* deserialize_function_entries(void *data) {
         memcpy( &(entry->key_len), ptr, sizeof(int) );
         ptr += sizeof(int);
 
+        entry->key = pilgrim_malloc(entry->key_len);
         memcpy( entry->key, ptr, entry->key_len );
         ptr += entry->key_len;
 
@@ -167,16 +168,10 @@ void* gather_function_entries(size_t *len_sum) {
     }
 
     void *gathered = NULL;
-    if(__logger.rank == 0) {
+    if(__logger.rank == 0)
         gathered = pilgrim_malloc(*len_sum);
-        printf("%d Start MPI_Gatherv, len_local: %ld, allocate %ld\n", __logger.rank, len_local, *len_sum);
-    }
 
     PMPI_Gatherv(local, len_local, MPI_BYTE, gathered, recvcounts, displs, MPI_BYTE, 0, MPI_COMM_WORLD);
-
-    if(__logger.rank == 0)
-        printf("finish MPI_Gatherv, allocate %ld\n", *len_sum);
-
 
     pilgrim_free(local, len_local);
     return gathered;
@@ -197,7 +192,6 @@ void* compress_gathered_function_entries(void *gathered, size_t *out_len) {
 
     int before = 0, after = 0;
 
-    printf("CHEN here!!!\n");
     for(int rank = 0; rank < __logger.nprocs; rank++) {
         int count;
         memcpy(&count, ptr, sizeof(int));
@@ -234,12 +228,11 @@ void* compress_gathered_function_entries(void *gathered, size_t *out_len) {
                 entry->key = key;
                 entry->key_len = key_len;
                 HASH_ADD_KEYPTR(hh, compressed_table, key, key_len, entry);
-                after++;
             }
         }
     }
 
-    printf("Inter-process function entry compression: before: %d, after: %d\n", before, after);
+    printf("Inter-process function entry compression: before: %d, after: %d\n", before, HASH_COUNT(compressed_table));
     void *compressed = serialize_function_entries(compressed_table, out_len);
 
     // Clean this compressed table as it is no longer used
@@ -292,7 +285,7 @@ int* write_to_file() {
         if(res) {
             update_terminal_id[entry->terminal_id] = res->terminal_id;
         } else {
-            printf("Not possible! Not exist in compressed table?");
+            printf("Not possible! Not exist in compressed table?\n");
         }
     }
 

@@ -19,7 +19,7 @@ static int allocated_addr_id = 0;
 
 // Three public available function in .h
 void install_mem_hooks() {
-    hook_installed = true;
+    hook_installed = false;
     addr_tree = NULL;
     addr_id_list = NULL;
 }
@@ -27,10 +27,17 @@ void install_mem_hooks() {
 void uninstall_mem_hooks() {
     hook_installed = false;
     avl_destroy(addr_tree);
+
+    AddrIdNode *node, *tmp;
+    DL_FOREACH_SAFE(addr_id_list, node, tmp) {
+        DL_DELETE(addr_id_list, node);
+        dlfree(node);
+    }
 }
 
 // Symbolic representation of memory addresses
 int* addr2id(const void* buffer) {
+    return &allocated_addr_id;
     AvlTree avl_node = avl_search(addr_tree, (intptr_t) buffer);
     if(avl_node == AVL_EMPTY) {
         // Not found in addr_tree suggests that this buffer is not dynamically allocated
@@ -111,7 +118,7 @@ void free(void *ptr) {
     if(AVL_EMPTY == avl_node) {
         if(ptr != NULL) {
             // TODO: potential memory leak. why
-            // printf("p%\n", ptr);
+             printf("Huh, at free() wrapper?????? %p\n", ptr);
         }
     } else {
         if(avl_node->id_node)

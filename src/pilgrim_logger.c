@@ -11,7 +11,6 @@
 #include "pilgrim.h"
 #include "pilgrim_sequitur.h"
 #include "pilgrim_timings.h"
-#include "dlmalloc-2.8.6.h"
 #include "utlist.h"
 #include "uthash.h"
 #include "mpi.h"
@@ -52,9 +51,11 @@ struct Logger __logger;
 
 
 void append_offset(MPI_Offset offset) {
-    OffsetNode *new_node = (OffsetNode*) dlmalloc(sizeof(OffsetNode));
+    /*
+    OffsetNode *new_node = (OffsetNode*) pilgrim_malloc(sizeof(OffsetNode));
     new_node->offset = offset;
     LL_PREPEND(__logger.offset_list, new_node);
+    */
 }
 
 /**
@@ -76,7 +77,7 @@ void* merge_local_function_entries(RecordHash *hash_head, int *len) {
     }
 
     int count = HASH_COUNT(__logger.hash_head);
-    void *res = dlmalloc(*len);
+    void *res = pilgrim_malloc(*len);
     void *ptr = res;
 
     memcpy(ptr, &count, sizeof(int));
@@ -105,8 +106,9 @@ void* merge_local_function_entries(RecordHash *hash_head, int *len) {
  * @return: gathered function entries in a contiguous memory space
  */
 void* gather_function_entries(int *len_sum) {
-    int len_local;
-    void *local = merge_local_function_entries(__logger.hash_head, &len_local);
+    int len_local = 0;
+    void *local = NULL;
+    local = merge_local_function_entries(__logger.hash_head, &len_local);
 
     int recvcounts[__logger.nprocs], displs[__logger.nprocs];
 
@@ -123,9 +125,9 @@ void* gather_function_entries(int *len_sum) {
 
     void *gathered = NULL;
     if(__logger.rank == 0) {
-        gathered = dlmalloc(*len_sum);
+        gathered = pilgrim_malloc(*len_sum);
+        printf("%d Start MPI_Gatherv, len_local: %d, allocate %d\n", __logger.rank, len_local, *len_sum);
     }
-    printf("%d Start MPI_Gatherv, len_local: %d, allocate %d\n", __logger.rank, len_local, *len_sum);
 
     PMPI_Gatherv(local, len_local, MPI_BYTE, gathered, recvcounts, displs, MPI_BYTE, 0, MPI_COMM_WORLD);
 
@@ -133,7 +135,7 @@ void* gather_function_entries(int *len_sum) {
         printf("finish MPI_Gatherv, allocate %d\n", *len_sum);
 
 
-    dlfree(local);
+    pilgrim_free(local, len_local);
     return gathered;
 }
 
@@ -152,10 +154,13 @@ void* compress_gathered_function_entries(void *gathered, int *out_len) {
 
     int before = 0, after = 0;
 
+    printf("CHEN here!!!\n");
     for(int rank = 0; rank < __logger.nprocs; rank++) {
         int count;
         memcpy(&count, ptr, sizeof(int));
         ptr = ptr + sizeof(int);
+
+        before += count;
 
         // function entries for one rank
         for(int i = 0 ; i < count; i++) {
@@ -169,23 +174,22 @@ void* compress_gathered_function_entries(void *gathered, int *out_len) {
             ptr = ptr + sizeof(int);
 
             // key length bytes key
-            key = dlmalloc(key_len);
+            key = pilgrim_malloc(key_len);
             memcpy(key, ptr, key_len);
             ptr = ptr + key_len;
 
             // Check to see if this function entry is already in the table
-            RecordHash *entry;
+            RecordHash *entry = NULL;
             HASH_FIND(hh, compressed_table, key, key_len, entry);
             if(entry) {                         // Found, do nothing for now...
-                dlfree(key);
+                pilgrim_free(key, key_len);
             } else {                            // Not exist, add to hash table
-                entry = (RecordHash*) dlmalloc(sizeof(RecordHash));
+                entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
                 entry->key = key;
                 entry->key_len = key_len;
-                HASH_ADD_KEYPTR(hh, compressed_table, entry->key, key_len, entry);
+                HASH_ADD_KEYPTR(hh, compressed_table, key, key_len, entry);
                 after++;
             }
-            before++;
         }
     }
 
@@ -195,7 +199,8 @@ void* compress_gathered_function_entries(void *gathered, int *out_len) {
     // Clean this compressed table as it is no longer used
     RecordHash *entry, *tmp;
     HASH_ITER(hh, compressed_table, entry, tmp) {
-        dlfree(entry->key);
+        pilgrim_free(entry->key, entry->key_len);
+        pilgrim_free(entry, sizeof(RecordHash));
     }
     HASH_CLEAR(hh, compressed_table);
 
@@ -220,12 +225,12 @@ void write_to_file() {
     if(__logger.rank == 0) {
         int compressed_len;
         void* compressed = compress_gathered_function_entries(gathered, &compressed_len);
-        dlfree(gathered);
+        pilgrim_free(gathered, len);
 
         FILE *trace_file = fopen("./logs/funcs.dat", "wb");
         fwrite(compressed, compressed_len, 1, trace_file);
         fclose(trace_file);
-        dlfree(compressed);
+        pilgrim_free(compressed, compressed_len);
     }
 }
 
@@ -249,17 +254,17 @@ void write_record(Record record) {
 
     // Actually set the key
     int pos = 0;
-    void *key = dlmalloc(key_len);
+    void *key = pilgrim_malloc(key_len);
     memcpy(key+pos, &(record.func_id), sizeof(record.func_id));
     pos += sizeof(record.func_id);
 
     int dur_id = get_duration_id(record.tend-record.tstart);
-    dur_id = 0;
+    //dur_id = 0;
     memcpy(key+pos, &dur_id, sizeof(int));
     pos += sizeof(int);
 
     int interval_id = get_interval_id(&record);
-    interval_id = 0;
+    //interval_id = 0;
     memcpy(key+pos, &interval_id, sizeof(int));
     pos += sizeof(int);
 
@@ -268,12 +273,12 @@ void write_record(Record record) {
         pos += record.arg_sizes[i];
     }
 
-    RecordHash *entry;
+    RecordHash *entry = NULL;
     HASH_FIND(hh, __logger.hash_head, key, key_len, entry);
     if(entry) {                         // Found
-        dlfree(key);
+        pilgrim_free(key, key_len);
     } else {                            // Not exist, add to hash table
-        entry = (RecordHash*) dlmalloc(sizeof(RecordHash));
+        entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
         entry->key = key;
         entry->key_len = key_len;
         entry->terminal_id = current_terminal_id;
@@ -356,6 +361,7 @@ void logger_exit() {
 
     // 1. Dump loacl metadata and call signatures
     write_to_file();
+
     // 2. Merge and dump grammars
     sequitur_finalize();
 
@@ -364,14 +370,17 @@ void logger_exit() {
     RecordHash *entry, *tmp;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
         HASH_DEL(__logger.hash_head, entry);
-        dlfree(entry->key);
-        dlfree(entry);
+        pilgrim_free(entry->key, entry->key_len);
+        pilgrim_free(entry, sizeof(RecordHash));
     }
     OffsetNode *elt, *tmp2;
     LL_FOREACH_SAFE(__logger.offset_list, elt, tmp2) {
         LL_DELETE(__logger.offset_list, elt);
-        dlfree(elt);
+        pilgrim_free(elt, sizeof(OffsetNode));
     }
 
     MPI_OBJ_CLEANUP_ALL();
+
+    if(__logger.rank == 0)
+        pilgrim_report_memory_status();
 }

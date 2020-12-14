@@ -12,10 +12,8 @@ static size_t peak_memory = 0;
 
 void* mymalloc(size_t size) {
     memory_usage += size;
-    if(memory_usage > peak_memory) {
+    if(memory_usage > peak_memory)
         peak_memory = memory_usage;
-        Symbol *tmp;
-    }
     return dlmalloc(size);
 }
 void myfree(void *ptr, size_t size) {

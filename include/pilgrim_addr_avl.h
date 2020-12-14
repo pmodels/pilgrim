@@ -8,17 +8,17 @@ typedef struct AddrIdNode_t {
 } AddrIdNode;
 
 
-struct avlNode {
-    struct avlNode *child[2];    /* left and right */
+typedef struct AvlNode_t {
+    struct AvlNode_t *child[2];  // left and right
 
     intptr_t addr;               // use addr as key
     size_t size;                 // size of allocated memory
     AddrIdNode* id_node;         // symbolic id to represent this memory buffer
 
     int height;
-};
+} AvlNode;
 
-typedef struct avlNode *AvlTree;
+typedef struct AvlNode_t *AvlTree;
 
 /* empty avl tree is just a null pointer */
 #define AVL_EMPTY (0)

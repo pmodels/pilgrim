@@ -32,7 +32,7 @@ double get_interval(const Record *record) {
     for(i = 0; i < record->arg_count; i++)
         key_len += record->arg_sizes[i];
 
-    void *key = dlmalloc(key_len);
+    void *key = pilgrim_malloc(key_len);
     memcpy(key, &(record->func_id), sizeof(record->func_id));
 
     int pos = sizeof(record->func_id);
@@ -46,10 +46,10 @@ double get_interval(const Record *record) {
 
     double interval;
     if(entry) {                         // Found
-        dlfree(key);
+        pilgrim_free(key, key_len);
         interval = record->tstart - entry->tstart;
     } else {                            // Not exist, add to hash table
-        entry = (IntervalHash*) dlmalloc(sizeof(IntervalHash));
+        entry = (IntervalHash*) pilgrim_malloc(sizeof(IntervalHash));
         entry->key = key;
         entry->key_len = key_len;
         entry->tstart = record->tstart;

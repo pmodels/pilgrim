@@ -24,15 +24,15 @@
          first time the object is created, need to add it to the        \
          hash table */                                                  \
         if(entry == NULL) {                                             \
-            entry = dlmalloc(sizeof(ObjHash_##Type));                   \
-            entry->key = dlmalloc(sizeof(Type));                        \
+            entry = pilgrim_malloc(sizeof(ObjHash_##Type));                   \
+            entry->key = pilgrim_malloc(sizeof(Type));                        \
             memcpy(entry->key, obj, sizeof(Type));                      \
             entry->id_node = list_##Type;                               \
             /* get a free id from the head of the free list             \
                if the head is NULL, which means we have no free ids,    \
                then create one according to the allocated counter */    \
             if(entry->id_node == NULL) {                                \
-                entry->id_node = dlmalloc(sizeof(ObjNode_##Type));      \
+                entry->id_node = pilgrim_malloc(sizeof(ObjNode_##Type));      \
                 entry->id_node->id = allocated_##Type ++;               \
             } else {                                                    \
                 DL_DELETE(list_##Type, entry->id_node);                 \
@@ -48,8 +48,8 @@
             /* add the id back to the free list */                      \
             DL_APPEND(list_##Type, entry->id_node);                     \
             HASH_DEL(hash_##Type, entry);                               \
-            dlfree(entry->key);                                         \
-            dlfree(entry);                                              \
+            pilgrim_free(entry->key, sizeof(Type));                     \
+            pilgrim_free(entry, sizeof(ObjHash_##Type));                \
         }                                                               \
     }                                                                   \
                                                                         \
@@ -57,15 +57,15 @@
         ObjHash_##Type *entry, *tmp;                                    \
         HASH_ITER(hh, hash_##Type, entry, tmp) {                        \
             HASH_DEL(hash_##Type, entry);                               \
-            dlfree(entry->key);                                         \
-            dlfree(entry->id_node);                                     \
-            dlfree(entry);                                              \
+            pilgrim_free(entry->key, sizeof(Type));                     \
+            pilgrim_free(entry->id_node, sizeof(ObjNode_##Type));       \
+            pilgrim_free(entry, sizeof(ObjHash_##Type));                \
         }                                                               \
                                                                         \
         ObjNode_##Type *node, *tmp2;                                    \
         DL_FOREACH_SAFE(list_##Type, node, tmp2) {                      \
             DL_DELETE(list_##Type, node);                               \
-            dlfree(node);                                               \
+            pilgrim_free(node, sizeof(ObjNode_##Type));                 \
         }                                                               \
     }
 
@@ -106,8 +106,8 @@ int* request2id(MPI_Request *req, int source, int tag) {
 
     RequestHash *entry = request_hash_entry(req);
     if(entry == NULL) {
-        entry = dlmalloc(sizeof(RequestHash));
-        entry->key = dlmalloc(sizeof(MPI_Request));
+        entry = pilgrim_malloc(sizeof(RequestHash));
+        entry->key = pilgrim_malloc(sizeof(MPI_Request));
         memcpy(entry->key, req, sizeof(MPI_Request));
         entry->key_len = sizeof(MPI_Request);
         entry->req_node = list_MPI_Request;               // get the first (head) free id
@@ -115,7 +115,7 @@ int* request2id(MPI_Request *req, int source, int tag) {
         entry->any_tag = (tag == MPI_ANY_TAG);
 
         if(entry->req_node == NULL) {                       // free list is empty, create one according to allocated_request_id
-            entry->req_node = (RequestNode*) dlmalloc(sizeof(RequestNode));
+            entry->req_node = (RequestNode*) pilgrim_malloc(sizeof(RequestNode));
             entry->req_node->id = allocated_request_id++;
         } else {                                            // free list is not empty, get the first one and remove it from list
             DL_DELETE(list_MPI_Request, entry->req_node);
@@ -131,8 +131,8 @@ void free_request(MPI_Request *req) {
     if(entry) {
         DL_APPEND(list_MPI_Request, entry->req_node);    // Add the id back to the free list
         HASH_DEL(hash_MPI_Request, entry);
-        dlfree(entry->key);
-        dlfree(entry);
+        pilgrim_free(entry->key, entry->key_len);
+        pilgrim_free(entry, sizeof(RequestHash));
     }
 }
 
@@ -140,14 +140,14 @@ void object_cleanup_MPI_Request() {
     RequestHash *entry, *tmp;
     HASH_ITER(hh, hash_MPI_Request, entry, tmp) {
         HASH_DEL(hash_MPI_Request, entry);
-        dlfree(entry->key);
-        dlfree(entry->req_node);
-        dlfree(entry);
+        pilgrim_free(entry->key, entry->key_len);
+        pilgrim_free(entry->req_node, sizeof(RequestNode));
+        pilgrim_free(entry, sizeof(RequestHash));
     }
     RequestNode *node, *tmp2;
     DL_FOREACH_SAFE(list_MPI_Request, node, tmp2) {
         DL_DELETE(list_MPI_Request, node);
-        dlfree(node);
+        pilgrim_free(node, sizeof(RequestNode));
     }
 }
 
@@ -166,7 +166,7 @@ char predefined_comm_id[64];
 
 // Pick a unique name for newcomm
 void* comm2id(MPI_Comm *newcomm) {
-    void *id = dlmalloc(COMM_ID_LEN);
+    void *id = pilgrim_malloc(COMM_ID_LEN);
 
     int world_rank;
     PMPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
@@ -178,8 +178,8 @@ void* comm2id(MPI_Comm *newcomm) {
 }
 
 void add_mpi_comm_hash_entry(MPI_Comm *newcomm, void *id) {
-    MPICommHash *entry = dlmalloc(sizeof(MPICommHash));
-    entry->key = dlmalloc(sizeof(MPI_Comm));
+    MPICommHash *entry = pilgrim_malloc(sizeof(MPICommHash));
+    entry->key = pilgrim_malloc(sizeof(MPI_Comm));
     memcpy(entry->key, newcomm, sizeof(MPI_Comm));
     entry->id = id;
     HASH_ADD_KEYPTR(hh, hash_MPI_Comm, entry->key, sizeof(MPI_Comm), entry);
@@ -209,7 +209,7 @@ void* generate_intracomm_id(MPI_Comm *newcomm) {
     if(rank == 0)
         id = comm2id(newcomm);
     else
-        id = dlmalloc(COMM_ID_LEN);
+        id = pilgrim_malloc(COMM_ID_LEN);
 
     PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, intracomm);
     if(is_inter)
@@ -243,7 +243,7 @@ void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
             id = comm2id(newcomm);
             PMPI_Send(id, 1, MPI_INT, 0, tag, *newcomm);
         } else if(sendbuf > recvbuf) {
-            id = dlmalloc(COMM_ID_LEN);
+            id = pilgrim_malloc(COMM_ID_LEN);
             PMPI_Recv(id, 1, MPI_INT, 0, tag, *newcomm, MPI_STATUS_IGNORE);
         } else {
             // Very unlikely
@@ -251,7 +251,7 @@ void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
         }
     } else {
         // all non-rank 0 processes in the two local communicators
-        id = dlmalloc(COMM_ID_LEN);
+        id = pilgrim_malloc(COMM_ID_LEN);
     }
 
     PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, local_comm);
@@ -302,9 +302,9 @@ void object_release_MPI_Comm(MPI_Comm *comm) {
     HASH_FIND(hh, hash_MPI_Comm, comm, sizeof(MPI_Comm), entry);
     if(entry) {
         HASH_DEL(hash_MPI_Comm, entry);
-        dlfree(entry->key);
-        dlfree(entry->id);
-        dlfree(entry);
+        pilgrim_free(entry->key, sizeof(MPI_Comm));
+        pilgrim_free(entry->id, COMM_ID_LEN);
+        pilgrim_free(entry, sizeof(MPICommHash));
     }
 }
 
@@ -312,8 +312,8 @@ void object_cleanup_MPI_Comm() {
     MPICommHash *entry, *tmp;
     HASH_ITER(hh, hash_MPI_Comm, entry, tmp) {
         HASH_DEL(hash_MPI_Comm, entry);
-        dlfree(entry->key);
-        dlfree(entry->id);
-        dlfree(entry);
+        pilgrim_free(entry->key, sizeof(MPI_Comm));
+        pilgrim_free(entry->id, COMM_ID_LEN);
+        pilgrim_free(entry, sizeof(MPICommHash));
     }
 }

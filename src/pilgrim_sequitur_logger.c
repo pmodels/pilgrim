@@ -58,7 +58,7 @@ int* grammar_to_array(Grammar *grammar, int* update_terminal_id, int *len) {
 int* gather_grammars(Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size, int* len_sum) {
     int len = 0;
     int *local_grammar = grammar_to_array(grammar, update_terminal_id, &len);
-    printf("Grammar size: %ld\n", len*4);
+    printf("Grammar size: %d\n", len*4);
 
     int recvcounts[mpi_size], displs[mpi_size];
     PMPI_Gather(&len, 1, MPI_INT, recvcounts, 1, MPI_INT, 0, MPI_COMM_WORLD);

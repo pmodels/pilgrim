@@ -169,13 +169,13 @@ void* gather_function_entries(size_t *len_sum) {
     void *gathered = NULL;
     if(__logger.rank == 0) {
         gathered = pilgrim_malloc(*len_sum);
-        printf("%d Start MPI_Gatherv, len_local: %d, allocate %d\n", __logger.rank, len_local, *len_sum);
+        printf("%d Start MPI_Gatherv, len_local: %ld, allocate %ld\n", __logger.rank, len_local, *len_sum);
     }
 
     PMPI_Gatherv(local, len_local, MPI_BYTE, gathered, recvcounts, displs, MPI_BYTE, 0, MPI_COMM_WORLD);
 
     if(__logger.rank == 0)
-        printf("finish MPI_Gatherv, allocate %d\n", *len_sum);
+        printf("finish MPI_Gatherv, allocate %ld\n", *len_sum);
 
 
     pilgrim_free(local, len_local);

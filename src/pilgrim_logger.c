@@ -59,16 +59,18 @@ void append_offset(MPI_Offset offset) {
 }
 
 /**
- * Merge the local function entries into
+ * Serialize the local function entries into
  * a contiguous memory space.
  * | number of entries |
- * | terminal id 1 | key 1 |  ... | terminal id N | key N |
+ * | terminal id 1 | key len 1 | key 1 |
+ * ...
+ * | terminal id N | key len N | key N |
  *
  * @len: output, the length of this memory space
  * @return: the address of this memory space.
  *
  */
-void* merge_local_function_entries(RecordHash *hash_head, int *len) {
+void* serialize_function_entries(RecordHash *hash_head, size_t *len) {
     *len = sizeof(int);
 
     RecordHash *entry, *tmp;
@@ -98,6 +100,7 @@ void* merge_local_function_entries(RecordHash *hash_head, int *len) {
     return res;
 }
 
+
 /**
  * Collect function entries in the hash table from all ranks
  * so we can write them out to a single file
@@ -105,10 +108,10 @@ void* merge_local_function_entries(RecordHash *hash_head, int *len) {
  * @len_sum: output, the length of all function entries.
  * @return: gathered function entries in a contiguous memory space
  */
-void* gather_function_entries(int *len_sum) {
-    int len_local = 0;
+void* gather_function_entries(size_t *len_sum) {
+    size_t len_local = 0;
     void *local = NULL;
-    local = merge_local_function_entries(__logger.hash_head, &len_local);
+    local = serialize_function_entries(__logger.hash_head, &len_local);
 
     int recvcounts[__logger.nprocs], displs[__logger.nprocs];
 
@@ -146,7 +149,7 @@ void* gather_function_entries(int *len_sum) {
  *
  * Then we transfer the compressed table into a contiguous memory space
  */
-void* compress_gathered_function_entries(void *gathered, int *out_len) {
+void* compress_gathered_function_entries(void *gathered, size_t *out_len) {
     RecordHash *compressed_table = NULL;
     int terminal_id, key_len;
     void *ptr = gathered;
@@ -194,7 +197,7 @@ void* compress_gathered_function_entries(void *gathered, int *out_len) {
     }
 
     printf("Inter-process function entry compression: before: %d, after: %d\n", before, after);
-    void *compressed = merge_local_function_entries(compressed_table, out_len);
+    void *compressed = serialize_function_entries(compressed_table, out_len);
 
     // Clean this compressed table as it is no longer used
     RecordHash *entry, *tmp;
@@ -218,12 +221,12 @@ void write_to_file() {
     */
 
     // Collect function entries from all ranks and write to a single file
-    int len;
+    size_t len;
     void* gathered = gather_function_entries(&len);
 
     // gathered will be NULL for all ranks except 0
     if(__logger.rank == 0) {
-        int compressed_len;
+        size_t compressed_len;
         void* compressed = compress_gathered_function_entries(gathered, &compressed_len);
         pilgrim_free(gathered, len);
 

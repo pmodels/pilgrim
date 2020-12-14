@@ -8,6 +8,7 @@
 static Grammar grammar;
 static size_t memory_usage = 0;
 static size_t peak_memory = 0;
+int mpi_rank, mpi_size;
 
 
 void* mymalloc(size_t size) {
@@ -244,11 +245,14 @@ void print_rules() {
         #endif
     }
 
+    /*
     printf("\n=======================\nNumber of rule: %d\n", rules_count);
     printf("Number of symbols: %d\n", symbols_count);
     printf("Number of Digrams: %d\n=======================\n", HASH_COUNT(grammar.digram_table));
-
     printf("memory usage: %ldB, %ldB\n", memory_usage, (rules_count+symbols_count)*sizeof(Symbol)+80*HASH_COUNT(grammar.digram_table));
+    */
+
+    printf("Rank: %d, Rules: %d, Symbols: %d\n", mpi_rank, rules_count, symbols_count);
 }
 
 
@@ -256,19 +260,19 @@ void sequitur_init() {
     grammar.digram_table = NULL;
     grammar.rules = NULL;
 
+    PMPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
     // Add the main rule: S, which will be the head of the rule list
     rule_put(&grammar.rules, new_rule());
 }
 
 void sequitur_finalize() {
-    int mpi_rank, mpi_size;
-    PMPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-    if(mpi_rank == 0) {
+    //if(mpi_rank == 0) {
         print_rules();
         //print_digrams();
-    }
+    //}
 
 
     // Write grammars from all ranks to one file

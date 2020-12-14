@@ -7,8 +7,9 @@
 /**
  * Store the Grammer in an integer array
  *
- * | #rules | rule 1 head | #symbols of rule 1| symbol 1, ..., symbol N |
- * | rule 2 head | #symbols of rule 2 | symbol 1, ..., symbol N|
+ * | #rules |
+ * | rule 1 head | #symbols of rule 1 | symbol 1, ..., symbol N |
+ * | rule 2 head | #symbols of rule 2 | symbol 1, ..., symbol N |
  * ...
  *
  * @len: [out] the length of the array: 1 + 2 * number of rules + number of symbols
@@ -57,6 +58,7 @@ int* grammar_to_array(Grammar *grammar, int *len) {
 int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, int* len_sum) {
     int len = 0;
     int *local_grammar = grammar_to_array(grammar, &len);
+    printf("Grammar size: %ld\n", len*4);
 
     int recvcounts[mpi_size], displs[mpi_size];
     PMPI_Gather(&len, 1, MPI_INT, recvcounts, 1, MPI_INT, 0, MPI_COMM_WORLD);

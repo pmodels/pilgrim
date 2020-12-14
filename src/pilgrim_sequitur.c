@@ -267,7 +267,7 @@ void sequitur_init() {
     rule_put(&grammar.rules, new_rule());
 }
 
-void sequitur_finalize() {
+void sequitur_finalize(int* update_terminal_id) {
 
     //if(mpi_rank == 0) {
         print_rules();
@@ -276,7 +276,7 @@ void sequitur_finalize() {
 
 
     // Write grammars from all ranks to one file
-    sequitur_dump("logs/grammars.dat", &grammar, mpi_rank, mpi_size);
+    sequitur_dump("logs/grammars.dat", &grammar, update_terminal_id, mpi_rank, mpi_size);
 
     // clean up
     Digram *digram, *tmp;

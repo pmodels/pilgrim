@@ -16,7 +16,7 @@
  * @return: return the array, need to be freed by the caller
  *
  */
-int* grammar_to_array(Grammar *grammar, int *len) {
+int* grammar_to_array(Grammar *grammar, int* update_terminal_id, int *len) {
 
     int total_integers = 1, symbols_count = 0, rules_count = 0;
 
@@ -39,7 +39,7 @@ int* grammar_to_array(Grammar *grammar, int *len) {
         data[i++] = symbols_count;
 
         DL_FOREACH(rule->rule_body, sym) {
-            data[i++] = sym->val;
+            data[i++] = update_terminal_id[sym->val];
         }
 
     }
@@ -55,9 +55,9 @@ int* grammar_to_array(Grammar *grammar, int *len) {
  * @total_len: output parameter, is length of the returned grammar (interger array)
  * @return: gathered grammars in a 1D integer array
  */
-int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, int* len_sum) {
+int* gather_grammars(Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size, int* len_sum) {
     int len = 0;
-    int *local_grammar = grammar_to_array(grammar, &len);
+    int *local_grammar = grammar_to_array(grammar, update_terminal_id, &len);
     printf("Grammar size: %ld\n", len*4);
 
     int recvcounts[mpi_size], displs[mpi_size];
@@ -81,10 +81,10 @@ int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, int* len_sum)
     return gathered_grammars;
 }
 
-void sequitur_dump(char* path, Grammar *grammar, int mpi_rank, int mpi_size) {
+void sequitur_dump(char* path, Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size) {
     // gathered_grammars is NULL except rank 0
     int len;
-    int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
+    int *gathered_grammars = gather_grammars(grammar, update_terminal_id, mpi_rank, mpi_size, &len);
     if( mpi_rank != 0)
         return;
 

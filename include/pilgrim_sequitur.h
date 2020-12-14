@@ -95,7 +95,7 @@ void rule_ref(Symbol *rule);
 void rule_deref(Symbol *rule);
 
 int check_digram(Symbol *sym);
-void sequitur_dump(char *path, Grammar *grammar, int mpi_rank, int mpi_size);
+void sequitur_dump(char *path, Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size);
 
 
 // malloc and free wrappers to monitor memory usage

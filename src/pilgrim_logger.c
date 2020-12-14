@@ -58,6 +58,17 @@ void append_offset(MPI_Offset offset) {
     */
 }
 
+void cleanup_function_entry_table(RecordHash* table) {
+    RecordHash *entry, *tmp;
+    HASH_ITER(hh, table, entry, tmp) {
+        HASH_DEL(table, entry);
+        pilgrim_free(entry->key, entry->key_len);
+        pilgrim_free(entry, sizeof(RecordHash));
+    }
+    table = NULL;
+}
+
+
 /**
  * Serialize the local function entries into
  * a contiguous memory space.
@@ -99,6 +110,35 @@ void* serialize_function_entries(RecordHash *hash_head, size_t *len) {
 
     return res;
 }
+
+// Caller need to be sure that data containts no duplicated keys
+// We don't check it when inserting entries into the hash table.
+RecordHash* deserialize_function_entries(void *data) {
+    int num;
+    memcpy(&num, data, sizeof(int));
+
+    void *ptr = data + sizeof(int);
+
+    RecordHash *table = NULL, *entry = NULL;
+    for(int i = 0; i < num; i++) {
+        entry = pilgrim_malloc(sizeof(RecordHash));
+
+        memcpy( &(entry->terminal_id), ptr, sizeof(int) );
+        ptr += sizeof(int);
+
+        memcpy( &(entry->key_len), ptr, sizeof(int) );
+        ptr += sizeof(int);
+
+        memcpy( entry->key, ptr, entry->key_len );
+        ptr += entry->key_len;
+
+        HASH_ADD_KEYPTR(hh, table, entry->key, entry->key_len, entry);
+    }
+
+    return table;
+}
+
+
 
 
 /**
@@ -151,7 +191,7 @@ void* gather_function_entries(size_t *len_sum) {
  */
 void* compress_gathered_function_entries(void *gathered, size_t *out_len) {
     RecordHash *compressed_table = NULL;
-    int terminal_id, key_len;
+    int terminal_id = 0, key_len;
     void *ptr = gathered;
     void *key;
 
@@ -169,7 +209,9 @@ void* compress_gathered_function_entries(void *gathered, size_t *out_len) {
         for(int i = 0 ; i < count; i++) {
 
             // 4 bytes terminal id
-            // TODO
+            // Don't use the old terminal id.
+            // Instead, assign a new id for each entry
+            // then broadcast it back to all ranks.
             ptr = ptr + sizeof(int);
 
             // 4 bytes key length
@@ -188,6 +230,7 @@ void* compress_gathered_function_entries(void *gathered, size_t *out_len) {
                 pilgrim_free(key, key_len);
             } else {                            // Not exist, add to hash table
                 entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
+                entry->terminal_id = terminal_id++;
                 entry->key = key;
                 entry->key_len = key_len;
                 HASH_ADD_KEYPTR(hh, compressed_table, key, key_len, entry);
@@ -200,18 +243,13 @@ void* compress_gathered_function_entries(void *gathered, size_t *out_len) {
     void *compressed = serialize_function_entries(compressed_table, out_len);
 
     // Clean this compressed table as it is no longer used
-    RecordHash *entry, *tmp;
-    HASH_ITER(hh, compressed_table, entry, tmp) {
-        pilgrim_free(entry->key, entry->key_len);
-        pilgrim_free(entry, sizeof(RecordHash));
-    }
-    HASH_CLEAR(hh, compressed_table);
+    cleanup_function_entry_table(compressed_table);
 
     return compressed;
 }
 
 
-void write_to_file() {
+int* write_to_file() {
     // Write out local metadata information
     /*
     FILE* meta_file = fopen("./logs/metadata.txt", "wb");
@@ -220,21 +258,47 @@ void write_to_file() {
     fclose(meta_file);
     */
 
-    // Collect function entries from all ranks and write to a single file
+    // 1. Collect function entries from all ranks and write to a single file
     size_t len;
     void* gathered = gather_function_entries(&len);
 
+    // 2. Compress the function entries accross ranks
     // gathered will be NULL for all ranks except 0
+    // Rank 0 write the compressed table to the file
+    void* compressed;
+    size_t compressed_len;
     if(__logger.rank == 0) {
-        size_t compressed_len;
-        void* compressed = compress_gathered_function_entries(gathered, &compressed_len);
+        compressed = compress_gathered_function_entries(gathered, &compressed_len);
         pilgrim_free(gathered, len);
 
         FILE *trace_file = fopen("./logs/funcs.dat", "wb");
         fwrite(compressed, compressed_len, 1, trace_file);
         fclose(trace_file);
-        pilgrim_free(compressed, compressed_len);
     }
+
+    // 3. Broadcast the compssed function table to all ranks
+    PMPI_Bcast(&compressed_len, sizeof(compressed_len), MPI_BYTE, 0, MPI_COMM_WORLD);
+    if(__logger.rank != 0)
+        compressed = pilgrim_malloc(compressed_len);
+    PMPI_Bcast(compressed, compressed_len, MPI_BYTE, 0, MPI_COMM_WORLD);
+
+    // 4. Update function entry's terminal id
+    RecordHash* compressed_table = deserialize_function_entries(compressed);
+
+    int *update_terminal_id = pilgrim_malloc(sizeof(int) * current_terminal_id);
+    RecordHash *entry, *tmp, *res;
+    HASH_ITER(hh, __logger.hash_head, entry, tmp) {
+        HASH_FIND(hh, compressed_table, entry->key, entry->key_len, res);
+        if(res) {
+            update_terminal_id[entry->terminal_id] = res->terminal_id;
+        } else {
+            printf("Not possible! Not exist in compressed table?");
+        }
+    }
+
+    cleanup_function_entry_table(compressed_table);
+    pilgrim_free(compressed, compressed_len);
+    return update_terminal_id;
 }
 
 
@@ -363,19 +427,15 @@ void logger_exit() {
             HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
 
     // 1. Dump loacl metadata and call signatures
-    write_to_file();
+    int* update_terminal_id = write_to_file();
 
     // 2. Merge and dump grammars
-    sequitur_finalize();
+    sequitur_finalize(update_terminal_id);
+    pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
 
     // 3. Clean up all resources
     //count_func_entries();
-    RecordHash *entry, *tmp;
-    HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        HASH_DEL(__logger.hash_head, entry);
-        pilgrim_free(entry->key, entry->key_len);
-        pilgrim_free(entry, sizeof(RecordHash));
-    }
+    cleanup_function_entry_table(__logger.hash_head);
     OffsetNode *elt, *tmp2;
     LL_FOREACH_SAFE(__logger.offset_list, elt, tmp2) {
         LL_DELETE(__logger.offset_list, elt);

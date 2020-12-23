@@ -78,6 +78,7 @@ typedef struct Grammar_t {
  */
 void sequitur_init(Grammar *grammar);
 void sequitur_finalize(const char* output_path, Grammar *grammar, int *update_terminals);
+void cleanup(Grammar *grammar);
 Symbol* append_terminal(Grammar  *grammar, int val);
 
 
@@ -97,7 +98,7 @@ void rule_deref(Symbol *rule);
 
 int* serialize_grammar(Grammar *grammar, int* update_terminal_id, size_t *len);
 int check_digram(Grammar *grammar, Symbol *sym);
-int* sequitur_dump(const char *path, Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size, size_t* outlen);
+void sequitur_dump(const char *path, Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size);
 
 
 // malloc and free wrappers to monitor memory usage

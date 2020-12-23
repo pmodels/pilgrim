@@ -298,35 +298,7 @@ void sequitur_finalize(const char* output_path, Grammar *grammar, int* update_te
     }
 
     // Write grammars from all ranks to one file
-    size_t len = 0, len2 = 0;
-    int *gathered_grammars = sequitur_dump(output_path, grammar, update_terminal_id, mpi_rank, mpi_size, &len);
+    sequitur_dump(output_path, grammar, update_terminal_id, mpi_rank, mpi_size);
     cleanup(grammar);
-
-
-    // TODO test code
-    if(mpi_rank == 0) {
-        int max = 0;
-        for(size_t i = 0; i < len; i++)
-            if(gathered_grammars[i] > max)
-                max = gathered_grammars[i];
-        sequitur_init(grammar);
-        for(size_t i = 0; i < len; i++) {
-            int symbol_id = gathered_grammars[i];
-            if(symbol_id < 0)
-                symbol_id = (symbol_id * (-1)) + max;
-            append_terminal(grammar, symbol_id);
-        }
-
-        int* tmp = serialize_grammar(grammar, NULL, &len2);
-        printf("%s: Original Total integers: %ld, Second Sequitor pass: %ld, max terminal id: %d\n", output_path, len, len2, max);
-
-        //FILE* f = fopen("logs/grammar.dat.comp", "wb");
-        //fwrite(tmp, sizeof(int), len2, f);
-        //fclose(f);
-        //myfree(tmp, sizeof(int)*len2);
-
-        //cleanup(grammar);
-        myfree(gathered_grammars, sizeof(int)*len);
-    }
 }
 

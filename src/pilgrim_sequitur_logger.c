@@ -58,14 +58,6 @@ int* serialize_grammar(Grammar *grammar, int* update_terminal_id, size_t *len) {
  * @total_len: output parameter, is length of the returned grammar (interger array)
  * @return: gathered grammars in a 1D integer array
  */
-#include "uthash.h"
-struct GrammarSize {
-    int size;
-    int count;
-    int rank;
-    UT_hash_handle hh;
-};
-struct GrammarSize *gs_table = NULL;
 int* gather_grammars(Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size, size_t* len_sum) {
     size_t len = 0;
     int *local_grammar = serialize_grammar(grammar, update_terminal_id, &len);
@@ -78,35 +70,7 @@ int* gather_grammars(Grammar *grammar, int* update_terminal_id, int mpi_rank, in
     for(int i = 1; i < mpi_size;i++) {
         *len_sum += recvcounts[i];
         displs[i] = displs[i-1] + recvcounts[i-1];
-
-        // TODO: remove this if when finsihed debuging
-        /*
-        if(mpi_rank ==0) {
-            struct GrammarSize *gs_entry = NULL;
-            HASH_FIND_INT(gs_table, &(recvcounts[i]), gs_entry);
-            if(gs_entry) {
-                gs_entry->count++;
-            } else {
-                gs_entry = dlmalloc(sizeof(struct GrammarSize));
-                gs_entry->size = recvcounts[i];
-                gs_entry->count = 1;
-                gs_entry->rank = i;
-                HASH_ADD_INT(gs_table, size, gs_entry);
-            }
-        }
-        */
     }
-    // TODO: remove this when finsihed debuging
-    /*
-    struct GrammarSize *s, *tmp;
-    if(mpi_rank == 0)
-        printf("Rank: 0, Size: %d, Count: 1\n", recvcounts[0]);
-    HASH_ITER(hh, gs_table, s, tmp) {
-        printf("Rank: %d, Size: %d, Count: %d\n", s->rank, s->size, s->count);
-        HASH_DEL(gs_table, s);
-        dlfree(s);
-    }
-    */
 
     int *gathered_grammars = NULL;
     if(mpi_rank == 0)
@@ -118,18 +82,47 @@ int* gather_grammars(Grammar *grammar, int* update_terminal_id, int mpi_rank, in
     return gathered_grammars;
 }
 
-int* sequitur_dump(const char* path, Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size, size_t* outlen) {
+/*
+ * After collecting grammars from all ranks
+ * Do a second Sequitur pass to generate a
+ * grammar that represents all grammars.
+ * This pass severs as inter-process compression
+ * as many ranks should have identical grammar.
+ */
+void compress_gathered_grammars(const char* path, int *gathered_grammars, size_t len) {
+    int max = 0;
+    for(size_t i = 0; i < len; i++)
+        if(gathered_grammars[i] > max)
+            max = gathered_grammars[i];
+
+    Grammar grammar;
+    sequitur_init(&grammar);
+    for(size_t i = 0; i < len; i++) {
+        int symbol_id = gathered_grammars[i];
+        if(symbol_id < 0)
+            symbol_id = (symbol_id * (-1)) + max;
+        append_terminal(&grammar, symbol_id);
+    }
+
+    size_t compressed_len;
+    int* compressed_grammar = serialize_grammar(&grammar, NULL, &compressed_len);
+    cleanup(&grammar);
+
+    printf("%s: Original Total integers: %ld, Second Sequitor pass: %ld, max terminal id: %d\n", path, len, compressed_len, max);
+
+    FILE* f = fopen(path, "wb");
+    fwrite(compressed_grammar, sizeof(int), compressed_len, f);
+    fclose(f);
+    myfree(compressed_grammar, sizeof(int)*compressed_len);
+}
+
+void sequitur_dump(const char* path, Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size) {
     // gathered_grammars is NULL except rank 0
     size_t len;
     int *gathered_grammars = gather_grammars(grammar, update_terminal_id, mpi_rank, mpi_size, &len);
-    if( mpi_rank != 0)
-        return gathered_grammars;
 
-    FILE* f = fopen(path, "wb");
-    fwrite(gathered_grammars, sizeof(int), len, f);
-    fclose(f);
-
-    //myfree(gathered_grammars, len);
-    *outlen = len;
-    return gathered_grammars;
+    if(mpi_rank == 0) {
+        compress_gathered_grammars(path, gathered_grammars, len);
+        myfree(gathered_grammars, sizeof(int)*len);
+    }
 }

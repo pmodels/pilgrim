@@ -439,7 +439,7 @@ void logger_exit() {
     int* update_terminal_id = write_to_file();
 
     // 2. Merge and dump grammars
-    //sequitur_finalize("logs/grammar.dat", &(__logger.grammar), update_terminal_id);
+    sequitur_finalize("logs/grammar.dat", &(__logger.grammar), update_terminal_id);
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
     //sequitur_finalize("logs/durations.dat", &(__logger.durations_grammar), NULL);
     //sequitur_finalize("logs/intervals.dat", &(__logger.intervals_grammar), NULL);

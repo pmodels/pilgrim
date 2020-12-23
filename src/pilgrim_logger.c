@@ -25,6 +25,7 @@ typedef struct RecordHash_t {
     void *key;                      // func_id + arguments + duration, used as key
     int key_len;
     int terminal_id;                // terminal id used for sequitur compression
+    double tstart;                  // last call's tstart
     UT_hash_handle hh;
 } RecordHash;
 
@@ -44,6 +45,10 @@ struct Logger {
     RecordHash *hash_head;          // head of function entries hash table
 
     OffsetNode *offset_list;        // List of MPI_Offset
+
+    Grammar grammar;                // Context-free-grammar for the function calls
+    Grammar durations_grammar;
+    Grammar intervals_grammar;
 };
 
 // Global object to access the Logger fileds
@@ -86,7 +91,7 @@ void* serialize_function_entries(RecordHash *table, size_t *len) {
 
     RecordHash *entry, *tmp;
     HASH_ITER(hh, table, entry, tmp) {
-        *len = *len + sizeof(int) * 2 + entry->key_len;
+        *len = *len + entry->key_len + sizeof(int)*2;
     }
 
     int count = HASH_COUNT(table);
@@ -305,10 +310,10 @@ void write_record(Record record) {
     */
     __logger.local_metadata.records_count++;
 
-    // Compose key: (func_id, interval_id, duration_id, arguments)
+    // Compose key: (func_id, arguments)
     // Compute key length first, not func_id is a short type
     int i;
-    int key_len = sizeof(record.func_id) + sizeof(int)*2;
+    int key_len = sizeof(record.func_id);
     for(i = 0; i < record.arg_count; i++)
         key_len += record.arg_sizes[i];
 
@@ -318,36 +323,45 @@ void write_record(Record record) {
     memcpy(key+pos, &(record.func_id), sizeof(record.func_id));
     pos += sizeof(record.func_id);
 
-    int dur_id = get_duration_id(record.tend-record.tstart);
-    //dur_id = 0;
-    memcpy(key+pos, &dur_id, sizeof(int));
-    pos += sizeof(int);
-
-    int interval_id = get_interval_id(&record);
-    //interval_id = 0;
-    memcpy(key+pos, &interval_id, sizeof(int));
-    pos += sizeof(int);
 
     for(i = 0; i < record.arg_count; i++) {
         memcpy(key+pos, record.args[i], record.arg_sizes[i]);
         pos += record.arg_sizes[i];
     }
 
+    double duration = record.tend - record.tstart;
+    double interval = 0;
+
     RecordHash *entry = NULL;
     HASH_FIND(hh, __logger.hash_head, key, key_len, entry);
     if(entry) {                         // Found
+        interval = record.tstart - entry->tstart;
+        entry->tstart = record.tstart;
         pilgrim_free(key, key_len);
     } else {                            // Not exist, add to hash table
         entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
         entry->key = key;
         entry->key_len = key_len;
+        entry->tstart = record.tstart;
         entry->terminal_id = current_terminal_id;
         current_terminal_id++;
-
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }
 
-    append_terminal(entry->terminal_id);
+    append_terminal(&(__logger.grammar), entry->terminal_id);
+
+
+    /*
+     * Durations and Intervals
+     * Ignore them for now.
+     *
+    int dur_id = get_duration_id(duration);
+    int interval_id = get_interval_id(interval);
+    append_terminal(&(__logger.durations_grammar), dur_id);
+    append_terminal(&(__logger.intervals_grammar), interval_id);
+    if(__logger.rank == 0)
+        printf("duration: %f, id: %d, interval: %f, id: %d\n", duration, dur_id, interval, interval_id);
+    */
 }
 
 void logger_init(int rank, int nprocs) {
@@ -377,7 +391,9 @@ void logger_init(int rank, int nprocs) {
         fclose(global_metafh);
     }
 
-    sequitur_init();
+    sequitur_init(&(__logger.grammar));
+    sequitur_init(&(__logger.intervals_grammar));
+    sequitur_init(&(__logger.durations_grammar));
     install_mem_hooks();
     __logger.recording = true;
 }
@@ -423,8 +439,10 @@ void logger_exit() {
     int* update_terminal_id = write_to_file();
 
     // 2. Merge and dump grammars
-    sequitur_finalize(update_terminal_id);
+    //sequitur_finalize("logs/grammar.dat", &(__logger.grammar), update_terminal_id);
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
+    //sequitur_finalize("logs/durations.dat", &(__logger.durations_grammar), NULL);
+    //sequitur_finalize("logs/intervals.dat", &(__logger.intervals_grammar), NULL);
 
     // 3. Clean up all resources
     //count_func_entries();

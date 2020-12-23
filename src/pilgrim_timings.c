@@ -19,7 +19,7 @@ static IntervalHash *interval_table = NULL;
 
 int get_id(double val) {
     if(val==0)
-        return INT_MIN;
+        val = 0.000001;
     double base = 1.1;
     int res = log(val) / log(base);
     return res;
@@ -62,12 +62,26 @@ double get_interval(const Record *record) {
     return interval;
 }
 
-int get_interval_id(const Record* record) {
-    double interval = get_interval(record);
-    return get_id(interval);
+int min(int a, int b) {
+    return a < b? a: b;
+}
+int max(int a, int b) {
+    return a > b ? a: b;
+}
+
+int get_interval_id(double interval) {
+    int id = get_id(interval);
+    if(id < 0)
+        id = -id;
+    id = min(999999, id);
+    return id;
 }
 
 int get_duration_id(double duration) {
-    return get_id(duration);
+    int id = get_id(duration);
+    if(id < 0)
+        id = -id;
+    id = min(999999, id);
+    return id;
 }
 

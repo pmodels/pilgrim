@@ -67,6 +67,7 @@ typedef struct Digram_t {           // uthash node, sizesof(Digram) = 72
 typedef struct Grammar_t {
     Symbol *rules;
     Digram *digram_table;
+    int rule_id;                    // current_rule id, a negative number start from -1
 } Grammar;
 
 
@@ -75,9 +76,9 @@ typedef struct Grammar_t {
  * Alls the rest are used internally for the Sequitur
  * algorithm implementation.
  */
-void sequitur_init();
-void sequitur_finalize();
-Symbol* append_terminal(int val);
+void sequitur_init(Grammar *grammar);
+void sequitur_finalize(const char* output_path, Grammar *grammar, int *update_terminals);
+Symbol* append_terminal(Grammar  *grammar, int val);
 
 
 Symbol* new_symbol(int val, bool terminal, Symbol* rule_head);
@@ -88,14 +89,15 @@ Symbol* digram_get(Digram *digram_table, int v1, int v2);
 int digram_put(Digram **digram_table, Symbol *symbol);
 int digram_delete(Digram **digram_table, Symbol *symbol);
 
-Symbol* new_rule();
+Symbol* new_rule(Grammar *grammar);
 void rule_put(Symbol **rules_head, Symbol *rule);
 void rule_delete(Symbol **rules_head, Symbol *rule);
 void rule_ref(Symbol *rule);
 void rule_deref(Symbol *rule);
 
-int check_digram(Symbol *sym);
-void sequitur_dump(char *path, Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size);
+int* serialize_grammar(Grammar *grammar, int* update_terminal_id, size_t *len);
+int check_digram(Grammar *grammar, Symbol *sym);
+int* sequitur_dump(const char *path, Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size, size_t* outlen);
 
 
 // malloc and free wrappers to monitor memory usage

@@ -13,4 +13,8 @@ void** assemble_args_list(int arg_count, ...);
 
 int randint();
 
+
+unsigned char* pilgrim_sha256(const unsigned char *d, unsigned long n, unsigned char *md);
+char *base64encode(const void *b64_encode_this, int encode_this_many_bytes);
+
 #endif

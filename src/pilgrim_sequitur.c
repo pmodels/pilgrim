@@ -301,4 +301,3 @@ void sequitur_finalize(const char* output_path, Grammar *grammar, int* update_te
     sequitur_dump(output_path, grammar, update_terminal_id, mpi_rank, mpi_size);
     cleanup(grammar);
 }
-

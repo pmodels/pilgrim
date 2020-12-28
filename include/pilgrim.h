@@ -10,33 +10,13 @@
 #include "dlmalloc-2.8.6.h"
 
 
-/*
-#define PILGRIM_TRACING(ret_type, func, func_args, record_arg_count, record_arg_sizes, record_args) \
-    short func_id = ID_##func;                                                          \
-    double tstart = pilgrim_wtime();                                                    \
-    ret_type res = P##func func_args;                                                   \
-    double tend = pilgrim_wtime();                                                      \
-    Record record = {                                                                   \
-        .tstart = tstart,                                                               \
-        .tend = tend,                                                                   \
-        .res = res,                                                                     \
-        .func_id = func_id,                                                             \
-        .arg_count = record_arg_count,                                                  \
-        .arg_sizes = record_arg_sizes,                                                  \
-        .args = record_args,                                                            \
-    };                                                                                  \
-    write_record(record);                                                               \
-    return res;
-    */
-
-#define PILGRIM_TRACING(ret_type, func, func_args, record_arg_count, record_arg_sizes, record_args) \
-    PILGRIM_TRACING_1(ret_type, func, func_args)                                        \
-    PILGRIM_TRACING_2(record_arg_count, record_arg_sizes, record_args)
-
-
 // First call the original function and stores the elapsed time, func id, etc
 // Need to call the function first so the output arguments have the correct value
 #define PILGRIM_TRACING_1(ret_type, func, func_args)                                    \
+    if(!is_recording()) {                                                               \
+        ret_type res = P##func func_args;                                               \
+        return res;                                                                     \
+    }                                                                                   \
     short func_id = ID_##func;                                                          \
     double tstart = pilgrim_wtime();                                                    \
     ret_type res = P##func func_args;                                                   \

@@ -7,7 +7,7 @@ def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
     #os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
-    os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
+    os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
     for line in f.readlines():
         func_name = line.strip().split('(')[0].split(' ')[1]
@@ -229,7 +229,6 @@ def generate_wrapper_file(funcs):
             phase_one(func, f)
             handle_mpi_comm_creation(func, f)
             num_args = logging(func, f)
-
         phase_two(num_args, f)
 
     f.close()

@@ -22,11 +22,11 @@ typedef struct _LocalMetadata {
     int compressed_records;
 } LocalMetadata;
 
+
 typedef struct _GlobalMetadata {
     double time_resolution;
     int ranks;
 } GlobalMetadata;
-
 
 
 void logger_init(int rank, int nprocs);
@@ -34,7 +34,9 @@ void logger_exit();
 void write_record(Record record);
 
 
+bool is_recording();
 void append_offset(MPI_Offset offset);
+
 
 
 void** read_record_args(int func_id, void* buff, int* nargs);

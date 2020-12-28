@@ -139,8 +139,8 @@ int MPI_Pcontrol(const int level, ...)
 	int sizes[] = { sizeof(level) };
 	va_list pcontrol_args;
 	va_start(pcontrol_args, level);
-	PILGRIM_TRACING(int, MPI_Pcontrol, (level, pcontrol_args), 1, sizes, args);
-	va_end(pcontrol_args);
+    PILGRIM_TRACING_1(int, MPI_Pcontrol, (level, pcontrol_args));
+    PILGRIM_TRACING_2(1, sizes, args);
 }
 
 int MPI_Wait(MPI_Request *request, MPI_Status *status)

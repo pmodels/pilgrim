@@ -68,6 +68,7 @@ int* addr2id(const void* buffer) {
 /**
  * Below are Wrappers for intercepting memory management calls.
  */
+/*
 void* malloc(size_t size) {
     if(!hook_installed)
         return dlmalloc(size);
@@ -128,7 +129,6 @@ void free(void *ptr) {
     }
 }
 
-
 int posix_memalign(void **memptr, size_t alignment, size_t size) {
     return dlposix_memalign(memptr, alignment, size);
 }
@@ -144,3 +144,4 @@ void *memalign(size_t alignment, size_t size) {
 void *pvalloc(size_t size) {
     return dlpvalloc(size);
 }
+*/

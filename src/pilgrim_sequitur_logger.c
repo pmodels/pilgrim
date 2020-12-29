@@ -63,10 +63,12 @@ int* gather_grammars(Grammar *grammar, int* update_terminal_id, int mpi_rank, in
     size_t len = 0;
     int *local_grammar = serialize_grammar(grammar, update_terminal_id, &len);
 
+    /*
     unsigned char hash[33];
     pilgrim_sha256((const unsigned char*)local_grammar, sizeof(int)*len, hash);
     char* str = base64encode(hash, 32);
     printf("%d: %s\n", mpi_rank, str);
+    */
 
     int recvcounts[mpi_size], displs[mpi_size];
     PMPI_Gather(&len, 1, MPI_INT, recvcounts, 1, MPI_INT, 0, MPI_COMM_WORLD);

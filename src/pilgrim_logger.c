@@ -306,10 +306,12 @@ int* write_to_file() {
 
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
+    /*
     if(__logger.rank == 0)
         printf("[Pilgrim (rank=%d)] tstart:%.6lf, tend:%.6f, func:%s\n", __logger.rank,
                 record.tstart-__logger.local_metadata.tstart,
                 record.tend-__logger.local_metadata.tstart, func_names[record.func_id]);
+    */
     __logger.local_metadata.records_count++;
 
     // Compose key: (func_id, arguments)

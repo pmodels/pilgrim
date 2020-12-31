@@ -8,7 +8,14 @@
 #include "pilgrim_mem_hooks.h"
 #include "pilgrim_addr_avl.h"
 #include "dlmalloc-2.8.6.h"
+#include "uthash.h"
 #include "utlist.h"
+
+typedef struct PointerEntry_t {
+    void *key;
+    UT_hash_handle hh;
+} PointerEntry;
+PointerEntry *pointers_table;
 
 AvlTree addr_tree;
 AddrIdNode *addr_id_list;               // free list of addr ids
@@ -16,11 +23,23 @@ static bool hook_installed = false;
 static int allocated_addr_id = 0;
 
 
+void add_pointer_entry(void *ptr) {
+    PointerEntry *find;
+    HASH_FIND_PTR(pointers_table, &ptr, find);
+    if(find == NULL) {
+        find = pilgrim_malloc(sizeof(PointerEntry));
+        find->key = ptr;
+        HASH_ADD_PTR(pointers_table, key, find);
+    }
+}
+
+
 // Three public available function in .h
 void install_mem_hooks() {
     hook_installed = true;
     addr_tree = NULL;
     addr_id_list = NULL;
+    pointers_table = NULL;
 }
 
 void uninstall_mem_hooks() {
@@ -74,6 +93,8 @@ void* malloc(size_t size) {
     void* ptr = dlmalloc(size);
 
     avl_insert(&addr_tree, (intptr_t)ptr, size, true);
+
+    add_pointer_entry(ptr);
     return ptr;
 }
 
@@ -84,6 +105,8 @@ void* calloc(size_t nitems, size_t size) {
     void *ptr = dlcalloc(nitems, size);
 
     avl_insert(&addr_tree, (intptr_t)ptr, size*nitems, true);
+
+    add_pointer_entry(ptr);
     return ptr;
 }
 
@@ -102,6 +125,7 @@ void* realloc(void *ptr, size_t size) {
     } else {
         avl_delete(&addr_tree, (intptr_t)ptr);
         avl_insert(&addr_tree, (intptr_t)new_ptr, size, true);
+        add_pointer_entry(new_ptr);
     }
     return new_ptr;
 }
@@ -117,15 +141,23 @@ void free(void *ptr) {
     if(AVL_EMPTY == avl_node) {
         if(ptr != NULL) {
             // TODO: potential memory leak. why
-            printf("Huh?? at free() wrapper?????? %p\n", ptr);
+            //printf("Huh?? at free() wrapper?????? %p\n", ptr);
         }
     } else {
         if(avl_node->id_node)
             DL_APPEND(addr_id_list, avl_node->id_node);
-        bool heap = avl_node->heap && (avl_node->addr==(intptr_t)ptr);
+        //bool heap = avl_node->heap && (avl_node->addr==(intptr_t)ptr);
         avl_delete(&addr_tree, (intptr_t)ptr);
-        if(heap)
-            dlfree(ptr);
+        //if(heap)
+        //    dlfree(ptr);
+    }
+
+    PointerEntry *d = NULL;
+    HASH_FIND_PTR(pointers_table, &ptr, d);
+    if(d) {
+        HASH_DEL(pointers_table, d);
+        pilgrim_free(d, sizeof(PointerEntry));
+        dlfree(ptr);
     }
 }
 

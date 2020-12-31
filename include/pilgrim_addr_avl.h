@@ -1,5 +1,7 @@
 #ifndef _PILGRIM_ADDR_AVL_H
 #define _PILGRIM_ADDR_AVL_H
+#include <stdbool.h>
+
 /* implementation of an AVL tree with explicit heights */
 typedef struct AddrIdNode_t {
     int id;
@@ -13,6 +15,8 @@ typedef struct AvlNode_t {
 
     intptr_t addr;               // use addr as key
     size_t size;                 // size of allocated memory
+
+    bool heap;
     AddrIdNode* id_node;         // symbolic id to represent this memory buffer
 
     int height;
@@ -34,7 +38,7 @@ AvlTree avl_search(AvlTree t, intptr_t addr);
 
 /* insert a new element into a tree */
 /* note *t is actual tree */
-AvlTree avl_insert(AvlTree *t, intptr_t addr, size_t size);
+AvlTree avl_insert(AvlTree *t, intptr_t addr, size_t size, bool heap);
 
 /* run sanity checks on tree (for debugging) */
 /* assert will fail if heights are wrong */

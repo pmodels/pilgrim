@@ -142,7 +142,7 @@ avl_rebalance(AvlTree *t)
 /* this may replace root, which is why we pass
  * in a AvlTree * */
 AvlTree
-avl_insert(AvlTree *t, intptr_t addr, size_t size)
+avl_insert(AvlTree *t, intptr_t addr, size_t size, bool heap)
 {
     /* insertion procedure */
     if(*t == AVL_EMPTY) {
@@ -155,6 +155,7 @@ avl_insert(AvlTree *t, intptr_t addr, size_t size)
 
         (*t)->addr = addr;
         (*t)->size = size;
+        (*t)->heap = heap;
         (*t)->id_node = NULL;      // id is assigned only when used in MPI calls
 
         (*t)->height = 1;
@@ -167,7 +168,7 @@ avl_insert(AvlTree *t, intptr_t addr, size_t size)
         return (*t);
     } else {
         /* do the insert in subtree */
-        AvlTree new_node = avl_insert(&(*t)->child[addr > (*t)->addr], addr, size);
+        AvlTree new_node = avl_insert(&(*t)->child[addr > (*t)->addr], addr, size, heap);
 
         avl_rebalance(t);
 

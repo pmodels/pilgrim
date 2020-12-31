@@ -5,13 +5,14 @@
 #include "pilgrim_interval_tree.h"
 
 // A utility function to create a new BST node
-IntervalNode* newIntervalNode(intptr_t start, size_t size)
+IntervalNode* newIntervalNode(intptr_t start, size_t size, bool heap)
 {
 	IntervalNode* temp = pilgrim_malloc(sizeof(IntervalNode));
 	temp->start = start;
 	temp->size = size;
     temp->id_node = NULL;
 	temp->left = temp->right = NULL;
+    temp->heap = heap;
 	return temp;
 }
 
@@ -26,17 +27,17 @@ void itree_inorder(IntervalNode* root)
 }
 
 /* A utility function to insert a new node with given addr_start in BST */
-IntervalNode* itree_insert(IntervalNode* node, intptr_t start, size_t size)
+IntervalNode* itree_insert(IntervalNode* node, intptr_t start, size_t size, bool heap)
 {
 	/* If the tree is empty, return a new node */
 	if (node == NULL)
-		return newIntervalNode(start, size);
+		return newIntervalNode(start, size, heap);
 
 	/* Otherwise, recur down the tree */
 	if (start < node->start)
-		node->left = itree_insert(node->left, start, size);
+		node->left = itree_insert(node->left, start, size, heap);
 	else
-		node->right = itree_insert(node->right, start, size);
+		node->right = itree_insert(node->right, start, size, heap);
 
 	/* return the (unchanged) node pointer */
 	return node;
@@ -55,17 +56,17 @@ void itree_destroy(IntervalNode* node) {
     pilgrim_free(node, sizeof(IntervalNode));
 }
 
-IntervalNode* itree_search(IntervalNode* root, intptr_t start)
+IntervalNode* itree_search(IntervalNode* root, intptr_t key)
 {
     // Base Cases: root is null or key is present at root
-    if (root == NULL || root->start == start)
+    if (root == NULL || (root->start <= key && root->start+root->size > key))
        return root;
 
     // Key is greater than root's key
-    if (root->start < start)
-       return itree_search(root->right, start);
+    if (root->start < key)
+       return itree_search(root->right, key);
     // Key is smaller than root's key
-    return itree_search(root->left, start);
+    return itree_search(root->left, key);
 }
 
 

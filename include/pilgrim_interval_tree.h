@@ -1,6 +1,7 @@
 //#include <stdio.h>
 //#include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct AddrIdNode_t {
     int id;
@@ -12,6 +13,7 @@ typedef struct AddrIdNode_t {
 typedef struct IntervalNode_t {
     intptr_t start;
     size_t size;
+    bool heap;
 
     AddrIdNode *id_node;
 
@@ -19,7 +21,7 @@ typedef struct IntervalNode_t {
 } IntervalNode;
 
 
-IntervalNode* itree_insert(IntervalNode* node, intptr_t start, size_t end);
+IntervalNode* itree_insert(IntervalNode* node, intptr_t start, size_t end, bool heap);
 
 void itree_destroy(IntervalNode* node);
 

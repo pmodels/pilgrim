@@ -107,6 +107,9 @@ def codegen_assemble_args(func):
 
     if func.name == "MPI_Comm_rank":
         line += "\tself_rank = *rank;\n"
+        # For MPI_Comm_rank, we always set the last argument(output rank) to 0
+        # So every process will have the same function signature.
+        assemble_args[-1] = "&placeholder"
 
     if len(assemble_args) > 0:
         assemble_args_str = ', '.join(assemble_args)
@@ -213,6 +216,7 @@ def generate_wrapper_file(funcs):
     f.write('#include <string.h>\n')
     f.write('#include "pilgrim.h"\n')
     f.write('static int self_rank;\n')
+    f.write('static int placeholder = 0;\n')
 
     for name in funcs:
         func = funcs[name]

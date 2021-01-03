@@ -51,6 +51,12 @@ void uninstall_mem_hooks() {
         DL_DELETE(addr_id_list, node);
         pilgrim_free(node, sizeof(AddrIdNode));
     }
+
+    PointerEntry *entry, *tmp2;
+    HASH_ITER(hh, pointers_table, entry, tmp2) {
+        HASH_DEL(pointers_table, entry);
+        pilgrim_free(entry, sizeof(PointerEntry));
+    }
 }
 
 // Symbolic representation of memory addresses

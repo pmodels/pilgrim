@@ -266,7 +266,7 @@ int* write_to_file() {
 
     // 2. Compress the function entries accross ranks
     // gathered will be NULL for all ranks except 0
-    // Rank 0 write the compressed table to the file
+    // Rank 0 write the merged function table to the file
     void* compressed;
     size_t compressed_len;
     if(__logger.rank == 0) {
@@ -443,7 +443,8 @@ void logger_exit() {
     int* update_terminal_id = write_to_file();
 
     // 2. Merge and dump grammars
-    sequitur_finalize("logs/grammar.dat", &(__logger.grammar), update_terminal_id);
+    sequitur_update(&(__logger.grammar), update_terminal_id);
+    sequitur_finalize("logs/grammar.dat", &(__logger.grammar));
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
     //sequitur_finalize("logs/durations.dat", &(__logger.durations_grammar), NULL);
     //sequitur_finalize("logs/intervals.dat", &(__logger.intervals_grammar), NULL);

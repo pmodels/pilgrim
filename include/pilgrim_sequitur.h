@@ -71,15 +71,16 @@ typedef struct Grammar_t {
 } Grammar;
 
 
-/* Only these three functions should be exposed
+/* Only these five functions should be exposed
  * to the pilgrim looger code.
  * Alls the rest are used internally for the Sequitur
  * algorithm implementation.
  */
-void sequitur_init(Grammar *grammar);
-void sequitur_finalize(const char* output_path, Grammar *grammar, int *update_terminals);
-void cleanup(Grammar *grammar);
 Symbol* append_terminal(Grammar  *grammar, int val);
+void sequitur_init(Grammar *grammar);
+void sequitur_update(Grammar *grammar, int *update_terminal_id);
+void sequitur_finalize(const char* output_path, Grammar *grammar);
+void sequitur_cleanup(Grammar *grammar);
 
 
 Symbol* new_symbol(int val, bool terminal, Symbol* rule_head);
@@ -96,9 +97,9 @@ void rule_delete(Symbol **rules_head, Symbol *rule);
 void rule_ref(Symbol *rule);
 void rule_deref(Symbol *rule);
 
-int* serialize_grammar(Grammar *grammar, int* update_terminal_id, size_t *len);
+int* serialize_grammar(Grammar *grammar, size_t *len);
 int check_digram(Grammar *grammar, Symbol *sym);
-void sequitur_dump(const char *path, Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size);
+void sequitur_dump(const char *path, Grammar *grammar, int mpi_rank, int mpi_size);
 
 
 // malloc and free wrappers to monitor memory usage

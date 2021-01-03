@@ -17,7 +17,7 @@
  * @return: return the array, need to be freed by the caller
  *
  */
-int* serialize_grammar(Grammar *grammar, int* update_terminal_id, size_t *len) {
+int* serialize_grammar(Grammar *grammar, size_t *len) {
 
     int total_integers = 1, symbols_count = 0, rules_count = 0;
 
@@ -40,10 +40,7 @@ int* serialize_grammar(Grammar *grammar, int* update_terminal_id, size_t *len) {
         data[i++] = symbols_count;
 
         DL_FOREACH(rule->rule_body, sym) {
-            if(sym->val >= 0 && update_terminal_id)
-                data[i++] = update_terminal_id[sym->val];   // terminal id is updated according to the compressed function table
-            else
-                data[i++] = sym->val;       // rule id does not change
+            data[i++] = sym->val;       // rule id does not change
         }
 
     }
@@ -59,9 +56,9 @@ int* serialize_grammar(Grammar *grammar, int* update_terminal_id, size_t *len) {
  * @total_len: output parameter, is length of the returned grammar (interger array)
  * @return: gathered grammars in a 1D integer array
  */
-int* gather_grammars(Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size, size_t* len_sum) {
+int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, size_t* len_sum) {
     size_t len = 0;
-    int *local_grammar = serialize_grammar(grammar, update_terminal_id, &len);
+    int *local_grammar = serialize_grammar(grammar, &len);
 
     /*
     unsigned char hash[33];
@@ -113,8 +110,8 @@ void compress_gathered_grammars(const char* path, int *gathered_grammars, size_t
     }
 
     size_t compressed_len;
-    int* compressed_grammar = serialize_grammar(&grammar, NULL, &compressed_len);
-    cleanup(&grammar);
+    int* compressed_grammar = serialize_grammar(&grammar, &compressed_len);
+    sequitur_cleanup(&grammar);
 
     printf("%s: Original Total integers: %ld, Second Sequitor pass: %ld, max terminal id: %d\n", path, len, compressed_len, max);
 
@@ -124,10 +121,10 @@ void compress_gathered_grammars(const char* path, int *gathered_grammars, size_t
     myfree(compressed_grammar, sizeof(int)*compressed_len);
 }
 
-void sequitur_dump(const char* path, Grammar *grammar, int* update_terminal_id, int mpi_rank, int mpi_size) {
+void sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_size) {
     // gathered_grammars is NULL except rank 0
     size_t len;
-    int *gathered_grammars = gather_grammars(grammar, update_terminal_id, mpi_rank, mpi_size, &len);
+    int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
 
     if(mpi_rank == 0) {
         compress_gathered_grammars(path, gathered_grammars, len);

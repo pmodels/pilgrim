@@ -254,7 +254,7 @@ void print_rules(Grammar *grammar) {
     printf("Rank: %d, Rules: %d, Symbols: %d\n", mpi_rank, rules_count, symbols_count);
 }
 
-void cleanup(Grammar *grammar) {
+void sequitur_cleanup(Grammar *grammar) {
     Digram *digram, *tmp;
     HASH_ITER(hh, grammar->digram_table, digram, tmp) {
         HASH_DEL(grammar->digram_table, digram);
@@ -289,8 +289,17 @@ void sequitur_init(Grammar *grammar) {
     rule_put(&(grammar->rules), new_rule(grammar));
 }
 
+void sequitur_update(Grammar *grammar, int *update_terminal_id) {
+    Symbol* rule, *sym;
+    DL_FOREACH(grammar->rules, rule) {
+        DL_FOREACH(rule->rule_body, sym) {
+            if(sym->val >= 0)
+                sym->val = update_terminal_id[sym->val];
+        }
+    }
+}
 
-void sequitur_finalize(const char* output_path, Grammar *grammar, int* update_terminal_id) {
+void sequitur_finalize(const char* output_path, Grammar *grammar) {
 
     if(mpi_rank == 0) {
         print_rules(grammar);
@@ -298,6 +307,6 @@ void sequitur_finalize(const char* output_path, Grammar *grammar, int* update_te
     }
 
     // Write grammars from all ranks to one file
-    sequitur_dump(output_path, grammar, update_terminal_id, mpi_rank, mpi_size);
-    cleanup(grammar);
+    sequitur_dump(output_path, grammar, mpi_rank, mpi_size);
+    sequitur_cleanup(grammar);
 }

@@ -99,6 +99,7 @@ void unique_rules(int *gathered, int world_size) {
     int rank = 0;
     int *ptr = gathered;
     int total_rules = 0;
+    size_t total_size;
     while(rank < world_size) {
         int rules = *ptr;
         total_rules += rules;
@@ -122,13 +123,14 @@ void unique_rules(int *gathered, int world_size) {
                 entry->count = 0;
                 memcpy(entry->key, ptr, entry->key_len);
                 HASH_ADD_KEYPTR(hh, rules_table, entry->key, entry->key_len, entry);
+                total_size += entry->key_len;
             }
 
             ptr += symbols;
         }
         rank++;
     }
-    printf("total rules: %d, unique rules: %d\n", total_rules, HASH_COUNT(rules_table));
+    printf("total rules: %d, unique rules: %d, total size: %ld\n", total_rules, HASH_COUNT(rules_table), total_size);
 }
 
 /*

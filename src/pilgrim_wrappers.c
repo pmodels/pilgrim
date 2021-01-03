@@ -4,6 +4,7 @@
 #include <string.h>
 #include "pilgrim.h"
 static int self_rank;
+static int placeholder = 0;
 int MPI_Type_delete_attr(MPI_Datatype datatype, int type_keyval)
 {
 	PILGRIM_TRACING_1(int, MPI_Type_delete_attr, (datatype, type_keyval));
@@ -710,7 +711,7 @@ int MPI_Comm_rank(MPI_Comm comm, int *rank)
 	PILGRIM_TRACING_1(int, MPI_Comm_rank, (comm, rank));
 	MPI_Comm obj_0 = comm;
 	self_rank = *rank;
-	void **args = assemble_args_list(2, MPI_OBJ_ID(MPI_Comm, &obj_0), rank);
+	void **args = assemble_args_list(2, MPI_OBJ_ID(MPI_Comm, &obj_0), &placeholder);
 	int sizes[] = { sizeof(MPI_Comm)+sizeof(int), 1*sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }

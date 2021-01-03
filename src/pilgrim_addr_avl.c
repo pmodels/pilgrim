@@ -163,7 +163,7 @@ avl_insert(AvlTree *t, intptr_t addr, size_t size, bool heap)
         /* done */
         return (*t);
     } else if(addr == (*t)->addr) {
-        printf("Not possible!\n");
+        //printf("Not possible!\n");
         /* nothing to do */
         return (*t);
     } else {

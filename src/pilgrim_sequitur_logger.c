@@ -95,7 +95,7 @@ int* gather_grammars(Grammar *grammar, int* update_terminal_id, int mpi_rank, in
  * Do a second Sequitur pass to generate a
  * grammar that represents all grammars.
  * This pass severs as inter-process compression
- * as many ranks should have identical grammar.
+ * as many ranks should have similar grammar.
  */
 void compress_gathered_grammars(const char* path, int *gathered_grammars, size_t len) {
     int max = 0;

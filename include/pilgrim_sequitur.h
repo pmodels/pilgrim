@@ -97,8 +97,7 @@ void rule_delete(Symbol **rules_head, Symbol *rule);
 void rule_ref(Symbol *rule);
 void rule_deref(Symbol *rule);
 
-int* serialize_grammar(Grammar *grammar, size_t *len);
-int check_digram(Grammar *grammar, Symbol *sym);
+// pilgrim_sequitur_logger.c
 void sequitur_dump(const char *path, Grammar *grammar, int mpi_rank, int mpi_size);
 
 

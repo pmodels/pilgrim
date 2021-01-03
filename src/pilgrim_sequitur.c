@@ -25,6 +25,9 @@ void delete_symbol(Symbol *sym) {
     symbol_delete(sym->rule, sym);
 }
 
+
+int check_digram(Grammar *grammar, Symbol *sym);
+
 /**
  * Replace a digram by a rule (non-terminal)
  *

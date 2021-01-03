@@ -87,6 +87,50 @@ int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, size_t* len_s
     return gathered_grammars;
 }
 
+typedef struct RuleHash_t {
+    void *key;
+    int key_len;
+    int count;
+    UT_hash_handle hh;
+} RuleHash;
+
+static RuleHash *rules_table;
+void unique_rules(int *gathered, int world_size) {
+    int rank = 0;
+    int *ptr = gathered;
+    int total_rules = 0;
+    while(rank < world_size) {
+        int rules = *ptr;
+        total_rules += rules;
+        ptr++;
+
+        for(int i = 0; i < rules; i++) {
+            int rule_id = *ptr;
+            ptr++;
+
+            int symbols = *ptr;
+            ptr++;
+
+            RuleHash* entry;
+            HASH_FIND(hh, rules_table, ptr, sizeof(int)*symbols, entry);
+            if(entry) {
+                entry->count++;
+            } else {
+                entry = pilgrim_malloc(sizeof(RuleHash));
+                entry->key = pilgrim_malloc(sizeof(int) * symbols);
+                entry->key_len = sizeof(int) * symbols;
+                entry->count = 0;
+                memcpy(entry->key, ptr, entry->key_len);
+                HASH_ADD_KEYPTR(hh, rules_table, entry->key, entry->key_len, entry);
+            }
+
+            ptr += symbols;
+        }
+        rank++;
+    }
+    printf("total rules: %d, unique rules: %d\n", total_rules, HASH_COUNT(rules_table));
+}
+
 /*
  * After collecting grammars from all ranks
  * Do a second Sequitur pass to generate a
@@ -127,8 +171,8 @@ void sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_siz
     int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
 
     if(mpi_rank == 0) {
+        unique_rules(gathered_grammars, mpi_size);
         compress_gathered_grammars(path, gathered_grammars, len);
         myfree(gathered_grammars, sizeof(int)*len);
     }
 }
-

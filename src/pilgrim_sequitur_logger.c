@@ -95,7 +95,7 @@ typedef struct RuleHash_t {
 } RuleHash;
 
 static RuleHash *rules_table;
-void unique_rules(int *gathered, int world_size) {
+void compress2(int *gathered, int world_size) {
     int rank = 0;
     int *ptr = gathered;
     int total_rules = 0;
@@ -130,7 +130,34 @@ void unique_rules(int *gathered, int world_size) {
         }
         rank++;
     }
-    printf("total rules: %d, unique rules: %d, total size: %ld\n", total_rules, HASH_COUNT(rules_table), total_size);
+    int unique_rules = HASH_COUNT(rules_table);
+
+    Grammar grammar;
+    sequitur_init(&grammar);
+
+    RuleHash *r, *tmp;
+    HASH_ITER(hh, rules_table, r, tmp) {
+        ptr = (int*) r->key;
+        for(int i = 0; i < r->key_len/sizeof(int); i++) {
+            int symbol_id = ptr[i];
+            if(symbol_id < 0)
+                symbol_id = 10000 + (-symbol_id);
+
+            append_terminal(&grammar, symbol_id);
+
+        }
+        HASH_DEL(rules_table, r);
+        pilgrim_free(r->key, r->key_len);
+        pilgrim_free(r, sizeof(RuleHash));
+    }
+
+    size_t compressed_len;
+    int* compressed_grammar = serialize_grammar(&grammar, &compressed_len);
+    sequitur_cleanup(&grammar);
+    myfree(compressed_grammar, sizeof(int)*compressed_len);
+
+    printf("total rules: %d, unique rules: %d, total size: %ld, another sequitur pass: %ldMB\n",
+            total_rules, unique_rules, total_size, compressed_len/1024.0/1024.0);
 }
 
 /*
@@ -173,8 +200,8 @@ void sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_siz
     int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
 
     if(mpi_rank == 0) {
-        unique_rules(gathered_grammars, mpi_size);
-        compress_gathered_grammars(path, gathered_grammars, len);
+        compress2(gathered_grammars, mpi_size);
+        //compress_gathered_grammars(path, gathered_grammars, len);
         myfree(gathered_grammars, sizeof(int)*len);
     }
 }

@@ -65,10 +65,10 @@ struct Logger __logger;
 
 void append_offset(MPI_Offset offset) {
     /*
-    OffsetNode *new_node = (OffsetNode*) pilgrim_malloc(sizeof(OffsetNode));
-    new_node->offset = offset;
-    LL_PREPEND(__logger.offset_list, new_node);
-    */
+       OffsetNode *new_node = (OffsetNode*) pilgrim_malloc(sizeof(OffsetNode));
+       new_node->offset = offset;
+       LL_PREPEND(__logger.offset_list, new_node);
+       */
 }
 
 bool is_recording() {
@@ -160,16 +160,17 @@ RecordHash* deserialize_function_entries(void *data) {
 
 
 /**
- * Collect function entries in the hash table from all ranks
- * so we can write them out to a single file
+ * Collect function signatures from all ranks
+ * Will be compressed and write out later.
  *
  * @len_sum: output, the length of all function entries.
  * @return: gathered function entries in a contiguous memory space
  */
 void* gather_function_entries(size_t *len_sum) {
-    size_t len_local = 0;
+    size_t len_local_tmp = 0;
     void *local = NULL;
-    local = serialize_function_entries(__logger.hash_head, &len_local);
+    local = serialize_function_entries(__logger.hash_head, &len_local_tmp);
+    int len_local = (int)len_local_tmp;
 
     int recvcounts[__logger.nprocs], displs[__logger.nprocs];
 
@@ -195,137 +196,152 @@ void* gather_function_entries(size_t *len_sum) {
     return gathered;
 }
 
+RecordHash* copy_function_entries(RecordHash* origin) {
+    RecordHash* table = NULL;
+    RecordHash *entry, *tmp, *new_entry;
+    HASH_ITER(hh, origin, entry, tmp) {
+        new_entry = pilgrim_malloc(sizeof(RecordHash));
+        new_entry->terminal_id = entry->terminal_id;
+        new_entry->key_len = entry->key_len;
+        new_entry->key = pilgrim_malloc(entry->key_len);
+        memcpy(new_entry->key, entry->key, entry->key_len);
+        HASH_ADD_KEYPTR(hh, table, new_entry->key, new_entry->key_len, new_entry);
+    }
+    return table;
+}
 
-/**
- * Once we gathered function entries from every rank
- * we compress them by inserting them into one hash table
- *
- * Then we transfer the compressed table into a contiguous memory space
- */
-void* compress_gathered_function_entries(void *gathered, size_t *out_len) {
-    RecordHash *compressed_table = NULL;
-    int terminal_id = 0, key_len;
-    void *ptr = gathered;
-    void *key;
+RecordHash* merge_function_entries() {
+    int gap = 2;
+    int rank = __logger.rank;
+    int terminal_id = 0;
 
-    int before = 0, after = 0;
+    RecordHash* merged_table = copy_function_entries(__logger.hash_head);
 
-    for(int rank = 0; rank < __logger.nprocs; rank++) {
-        int count;
-        memcpy(&count, ptr, sizeof(int));
-        ptr = ptr + sizeof(int);
+    while(gap <= __logger.nprocs) {
+        size_t size;
+        void* buf;
+        if(rank % gap == 0) {                 // RECEIVER
 
-        before += count;
+            PMPI_Recv(&size, sizeof(size), MPI_BYTE, rank+gap/2, gap, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            buf = pilgrim_malloc(size);
+            PMPI_Recv(buf, size, MPI_BYTE, rank+gap/2, gap, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        // function entries for one rank
-        for(int i = 0 ; i < count; i++) {
-
-            // 4 bytes terminal id
-            // Don't use the old terminal id.
-            // Instead, assign a new id for each entry
-            // then broadcast it back to all ranks.
+            int added = 0;
+            int entries, key_len;
+            void *ptr = buf;
+            memcpy(&entries, ptr, sizeof(int));
             ptr = ptr + sizeof(int);
+            for(int i = 0; i < entries; i++) {
+                // skip 4 bytes terminal id
+                ptr = ptr + sizeof(int);
 
-            // 4 bytes key length
-            memcpy(&key_len, ptr, sizeof(int));
-            ptr = ptr + sizeof(int);
+                // 4 bytes key length
+                memcpy(&key_len, ptr, sizeof(int));
+                ptr = ptr + sizeof(int);
 
-            // key length bytes key
-            key = pilgrim_malloc(key_len);
-            memcpy(key, ptr, key_len);
-            ptr = ptr + key_len;
+                // key length bytes key
+                void *key = pilgrim_malloc(key_len);
+                memcpy(key, ptr, key_len);
+                ptr = ptr + key_len;
 
-            // Check to see if this function entry is already in the table
-            RecordHash *entry = NULL;
-            HASH_FIND(hh, compressed_table, key, key_len, entry);
-            if(entry) {                         // Found, do nothing for now...
-                pilgrim_free(key, key_len);
-            } else {                            // Not exist, add to hash table
-                entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
-                entry->terminal_id = terminal_id++;
-                entry->key = key;
-                entry->key_len = key_len;
-                HASH_ADD_KEYPTR(hh, compressed_table, key, key_len, entry);
+                // Check to see if this function entry is already in the table
+                RecordHash *entry = NULL;
+                HASH_FIND(hh, merged_table, key, key_len, entry);
+                if(entry) {                         // Found, do nothing for now...
+                    pilgrim_free(key, key_len);
+                } else {                            // Not exist, add to hash table
+                    entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
+                    entry->key = key;
+                    entry->key_len = key_len;
+                    entry->terminal_id = terminal_id++; // only important for rank 0
+                    HASH_ADD_KEYPTR(hh, merged_table, key, key_len, entry);
+                    added++;
+                }
             }
+
+            pilgrim_free(buf, size);
+            if(rank == 0)
+                printf("Recv from %d %ldbytes, add %d entries, total entries: %d\n", rank+gap/2, size, added, HASH_COUNT(merged_table));
+
+        } else if((rank+gap/2) % gap ==0) {   // SENDER
+
+            buf = serialize_function_entries(merged_table, &size);
+            PMPI_Send(&size, sizeof(size), MPI_BYTE, rank-gap/2, gap, MPI_COMM_WORLD);
+            PMPI_Send(buf, size, MPI_BYTE, rank-gap/2, gap, MPI_COMM_WORLD);
+            pilgrim_free(buf, size);
+
+        } else {                              // DO NOTHING
         }
+        gap = gap * 2;
     }
 
-    printf("Inter-process function entry compression: before: %d, after: %d\n", before, HASH_COUNT(compressed_table));
-    void *compressed = serialize_function_entries(compressed_table, out_len);
-
-    // Clean this compressed table as it is no longer used
-    cleanup_function_entry_table(compressed_table);
-
-    return compressed;
+    return merged_table;
 }
 
 
-int* write_to_file() {
-    // Write out local metadata information
-    /*
-    FILE* meta_file = fopen("./logs/metadata.txt", "wb");
-    __logger.local_metadata.tend = pilgrim_wtime(),
-    fwrite(&__logger.local_metadata, sizeof(__logger.local_metadata), 1, __logger.metadata_file);
-    fclose(meta_file);
-    */
+/**
+ * Once we gathered function entries from every rank
+ * we merge them by inserting them into one hash table
+ *
+ */
+int* dump_function_entries() {
+    // 1. Collect function entries from all ranks
+    // Eventually, rank 0 will have the fully merged table.
+    RecordHash* merged_table = merge_function_entries();
 
-    // 1. Collect function entries from all ranks and write to a single file
-    size_t len;
-    void* gathered = gather_function_entries(&len);
+    // 2. Broadcast the merged function table to all ranks
+    size_t merged_size;
+    void *merged;
+    if(__logger.rank !=0 )
+        cleanup_function_entry_table(merged_table);
+    else
+        merged = serialize_function_entries(merged_table, &merged_size);
 
-    // 2. Compress the function entries accross ranks
-    // gathered will be NULL for all ranks except 0
-    // Rank 0 write the merged function table to the file
-    void* compressed;
-    size_t compressed_len;
+    PMPI_Bcast(&merged_size, sizeof(merged_size), MPI_BYTE, 0, MPI_COMM_WORLD);
+    if(__logger.rank != 0)
+        merged = pilgrim_malloc(merged_size);
+    PMPI_Bcast(merged, merged_size, MPI_BYTE, 0, MPI_COMM_WORLD);
+
+    // 3. Rank 0 write the merged function table to the file
     if(__logger.rank == 0) {
-        compressed = compress_gathered_function_entries(gathered, &compressed_len);
-        pilgrim_free(gathered, len);
-
         errno = 0;
         FILE *trace_file = fopen(FUNCS_OUTPUT_PATH, "wb");
         if(trace_file) {
-            fwrite(compressed, 1, compressed_len, trace_file);
+            fwrite(merged, 1, merged_size, trace_file);
             fclose(trace_file);
         } else {
             printf("Open file: %s failed, errno: %d\n", FUNCS_OUTPUT_PATH, errno);
         }
+        cleanup_function_entry_table(merged_table);
     }
 
-    // 3. Broadcast the compssed function table to all ranks
-    PMPI_Bcast(&compressed_len, sizeof(compressed_len), MPI_BYTE, 0, MPI_COMM_WORLD);
-    if(__logger.rank != 0)
-        compressed = pilgrim_malloc(compressed_len);
-    PMPI_Bcast(compressed, compressed_len, MPI_BYTE, 0, MPI_COMM_WORLD);
-
     // 4. Update function entry's terminal id
-    RecordHash* compressed_table = deserialize_function_entries(compressed);
-
+    merged_table = deserialize_function_entries(merged);
+    pilgrim_free(merged, merged_size);
 
     int *update_terminal_id = pilgrim_malloc(sizeof(int) * current_terminal_id);
     RecordHash *entry, *tmp, *res;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        HASH_FIND(hh, compressed_table, entry->key, entry->key_len, res);
-        if(res) {
+        HASH_FIND(hh, merged_table, entry->key, entry->key_len, res);
+        if(res)
             update_terminal_id[entry->terminal_id] = res->terminal_id;
-        } else {
-            printf("Not possible! Not exist in compressed table?\n");
-        }
+        else
+            printf("%d Not possible! Not exist in merged table?\n", __logger.rank);
     }
 
-    cleanup_function_entry_table(compressed_table);
-    pilgrim_free(compressed, compressed_len);
+    cleanup_function_entry_table(merged_table);
     return update_terminal_id;
 }
 
 
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
+
     /*
     if(__logger.rank == 0)
-        printf("[Pilgrim (rank=%d)] tstart:%.6lf, tend:%.6f, func:%s\n", __logger.rank,
-                record.tstart-__logger.local_metadata.tstart,
-                record.tend-__logger.local_metadata.tstart, func_names[record.func_id]);
+       printf("[Pilgrim (rank=%d)] tstart:%.6lf, tend:%.6f, func:%s\n", __logger.rank,
+       record.tstart-__logger.local_metadata.tstart,
+       record.tend-__logger.local_metadata.tstart, func_names[record.func_id]);
     */
     __logger.local_metadata.records_count++;
 
@@ -341,7 +357,6 @@ void write_record(Record record) {
     void *key = pilgrim_malloc(key_len);
     memcpy(key+pos, &(record.func_id), sizeof(record.func_id));
     pos += sizeof(record.func_id);
-
 
     for(i = 0; i < record.arg_count; i++) {
         memcpy(key+pos, record.args[i], record.arg_sizes[i]);
@@ -374,13 +389,13 @@ void write_record(Record record) {
      * Durations and Intervals
      * Ignore them for now.
      *
-    int dur_id = get_duration_id(duration);
-    int interval_id = get_interval_id(interval);
-    append_terminal(&(__logger.durations_grammar), dur_id);
-    append_terminal(&(__logger.intervals_grammar), interval_id);
-    if(__logger.rank == 0)
-        printf("duration: %f, id: %d, interval: %f, id: %d\n", duration, dur_id, interval, interval_id);
-    */
+     int dur_id = get_duration_id(duration);
+     int interval_id = get_interval_id(interval);
+     append_terminal(&(__logger.durations_grammar), dur_id);
+     append_terminal(&(__logger.intervals_grammar), interval_id);
+     if(__logger.rank == 0)
+     printf("duration: %f, id: %d, interval: %f, id: %d\n", duration, dur_id, interval, interval_id);
+     */
 }
 
 void logger_init(int rank, int nprocs) {
@@ -462,7 +477,7 @@ void logger_exit() {
             HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
 
     // 1. Dump loacl metadata and call signatures
-    int* update_terminal_id = write_to_file();
+    int* update_terminal_id = dump_function_entries();
 
     // 2. Merge and dump grammars
     sequitur_update(&(__logger.grammar), update_terminal_id);

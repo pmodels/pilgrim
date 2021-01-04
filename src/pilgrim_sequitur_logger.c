@@ -95,7 +95,7 @@ typedef struct RuleHash_t {
 } RuleHash;
 
 static RuleHash *rules_table;
-void compress2(int *gathered, int world_size) {
+void compress2(const char* path, int *gathered, int world_size) {
     int rank = 0;
     int *ptr = gathered;
     int total_rules = 0;
@@ -154,10 +154,14 @@ void compress2(int *gathered, int world_size) {
     size_t compressed_len;
     int* compressed_grammar = serialize_grammar(&grammar, &compressed_len);
     sequitur_cleanup(&grammar);
+
+    FILE* f = fopen(path, "wb");
+    fwrite(compressed_grammar, sizeof(int), compressed_len, f);
+    fclose(f);
     myfree(compressed_grammar, sizeof(int)*compressed_len);
 
-    printf("total rules: %d, unique rules: %d, total size: %ld, another sequitur pass: %ldMB\n",
-            total_rules, unique_rules, total_size, compressed_len/1024.0/1024.0);
+    printf("total rules: %d, unique rules: %d, total size: %ld, another sequitur pass: %fMB\n",
+            total_rules, unique_rules, total_size, compressed_len*sizeof(int)/1024.0/1024.0);
 }
 
 /*
@@ -200,7 +204,7 @@ void sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_siz
     int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
 
     if(mpi_rank == 0) {
-        compress2(gathered_grammars, mpi_size);
+        compress2(path, gathered_grammars, mpi_size);
         //compress_gathered_grammars(path, gathered_grammars, len);
         myfree(gathered_grammars, sizeof(int)*len);
     }

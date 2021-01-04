@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include "pilgrim_sequitur.h"
 #include "pilgrim_utils.h"
 #include "mpi.h"
@@ -60,6 +61,7 @@ int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, size_t* len_s
     size_t len = 0;
     int *local_grammar = serialize_grammar(grammar, &len);
 
+
     /*
     unsigned char hash[33];
     pilgrim_sha256((const unsigned char*)local_grammar, sizeof(int)*len, hash);
@@ -99,7 +101,7 @@ void compress2(const char* path, int *gathered, int world_size) {
     int rank = 0;
     int *ptr = gathered;
     int total_rules = 0;
-    size_t total_size;
+    size_t total_size = 0;
     while(rank < world_size) {
         int rules = *ptr;
         total_rules += rules;
@@ -123,7 +125,7 @@ void compress2(const char* path, int *gathered, int world_size) {
                 entry->count = 0;
                 memcpy(entry->key, ptr, entry->key_len);
                 HASH_ADD_KEYPTR(hh, rules_table, entry->key, entry->key_len, entry);
-                total_size += entry->key_len;
+                total_size += (entry->key_len);
             }
 
             ptr += symbols;
@@ -141,7 +143,7 @@ void compress2(const char* path, int *gathered, int world_size) {
         for(int i = 0; i < r->key_len/sizeof(int); i++) {
             int symbol_id = ptr[i];
             if(symbol_id < 0)
-                symbol_id = 10000 + (-symbol_id);
+                symbol_id = 100000 + (-symbol_id);
 
             append_terminal(&grammar, symbol_id);
 
@@ -155,13 +157,18 @@ void compress2(const char* path, int *gathered, int world_size) {
     int* compressed_grammar = serialize_grammar(&grammar, &compressed_len);
     sequitur_cleanup(&grammar);
 
+    errno = 0;
     FILE* f = fopen(path, "wb");
-    fwrite(compressed_grammar, sizeof(int), compressed_len, f);
-    fclose(f);
+    if(f) {
+        fwrite(compressed_grammar, sizeof(int), compressed_len, f);
+        fclose(f);
+    } else {
+        printf("Open file: %s failed, errno: %d!\n", path, errno);
+    }
     myfree(compressed_grammar, sizeof(int)*compressed_len);
 
-    printf("total rules: %d, unique rules: %d, total size: %ld, another sequitur pass: %fMB\n",
-            total_rules, unique_rules, total_size, compressed_len*sizeof(int)/1024.0/1024.0);
+    printf("total rules: %d, unique rules: %d, total size: %fMB, another sequitur pass: %fMB\n",
+            total_rules, unique_rules, total_size/1024.0/1024.0, compressed_len*sizeof(int)/1024.0/1024.0);
 }
 
 /*

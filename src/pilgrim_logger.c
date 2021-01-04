@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <math.h>
+#include <unistd.h>
 
 #include "pilgrim.h"
 #include "pilgrim_sequitur.h"
@@ -14,6 +15,13 @@
 #include "utlist.h"
 #include "uthash.h"
 #include "mpi.h"
+
+
+#define OUTPUT_DIR              "pilgrim-logs"
+char GRAMMAR_OUTPUT_PATH[256];
+char FUNCS_OUTPUT_PATH[256];
+char METADATA_OUTPUT_PATH[256];
+
 
 #define TIME_RESOLUTION 0.000001
 
@@ -177,8 +185,9 @@ void* gather_function_entries(size_t *len_sum) {
     }
 
     void *gathered = NULL;
-    if(__logger.rank == 0)
+    if(__logger.rank == 0) {
         gathered = pilgrim_malloc(*len_sum);
+    }
 
     PMPI_Gatherv(local, len_local, MPI_BYTE, gathered, recvcounts, displs, MPI_BYTE, 0, MPI_COMM_WORLD);
 
@@ -273,9 +282,14 @@ int* write_to_file() {
         compressed = compress_gathered_function_entries(gathered, &compressed_len);
         pilgrim_free(gathered, len);
 
-        FILE *trace_file = fopen("./logs/funcs.dat", "wb");
-        fwrite(compressed, compressed_len, 1, trace_file);
-        fclose(trace_file);
+        errno = 0;
+        FILE *trace_file = fopen(FUNCS_OUTPUT_PATH, "wb");
+        if(trace_file) {
+            fwrite(compressed, 1, compressed_len, trace_file);
+            fclose(trace_file);
+        } else {
+            printf("Open file: %s failed, errno: %d\n", FUNCS_OUTPUT_PATH, errno);
+        }
     }
 
     // 3. Broadcast the compssed function table to all ranks
@@ -286,6 +300,7 @@ int* write_to_file() {
 
     // 4. Update function entry's terminal id
     RecordHash* compressed_table = deserialize_function_entries(compressed);
+
 
     int *update_terminal_id = pilgrim_malloc(sizeof(int) * current_terminal_id);
     RecordHash *entry, *tmp, *res;
@@ -378,15 +393,22 @@ void logger_init(int rank, int nprocs) {
     __logger.hash_head = NULL;          // Must be NULL initialized
     __logger.offset_list = NULL;
 
+    // Set the output paths in advance because
+    // application may change the cwd duration execution
+    char cwd[256] = {0};
+    getcwd(cwd, 256);
+    sprintf(METADATA_OUTPUT_PATH, "%s/%s/pilgrim.mt", cwd, OUTPUT_DIR);
+    sprintf(GRAMMAR_OUTPUT_PATH,  "%s/%s/grammars.dat", cwd, OUTPUT_DIR);
+    sprintf(FUNCS_OUTPUT_PATH,    "%s/%s/funcs.dat", cwd, OUTPUT_DIR);
 
     if(rank == 0) {
-        mkdir("logs", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        mkdir(OUTPUT_DIR, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     }
     PMPI_Barrier(MPI_COMM_WORLD);
 
     // Global metadata, include compression mode, time resolution
     if (rank == 0) {
-        FILE* global_metafh = fopen("logs/pilgrim.mt", "wb");
+        FILE* global_metafh = fopen(METADATA_OUTPUT_PATH, "wb");
         GlobalMetadata global_metadata= {
             .time_resolution = TIME_RESOLUTION,
             .ranks = nprocs,
@@ -444,8 +466,9 @@ void logger_exit() {
 
     // 2. Merge and dump grammars
     sequitur_update(&(__logger.grammar), update_terminal_id);
-    sequitur_finalize("logs/grammar.dat", &(__logger.grammar));
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
+
+    sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
     //sequitur_finalize("logs/durations.dat", &(__logger.durations_grammar), NULL);
     //sequitur_finalize("logs/intervals.dat", &(__logger.intervals_grammar), NULL);
 

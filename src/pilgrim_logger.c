@@ -346,7 +346,7 @@ void write_record(Record record) {
     __logger.local_metadata.records_count++;
 
     // Compose key: (func_id, arguments)
-    // Compute key length first, not func_id is a short type
+    // Compute key length first, note func_id is a short type
     int i;
     int key_len = sizeof(record.func_id);
     for(i = 0; i < record.arg_count; i++)
@@ -452,7 +452,7 @@ void count_func_entries() {
             count[func_id]++;
 
             int args[5];
-            int arg_start = sizeof(int)*2 + sizeof(short);
+            int arg_start = sizeof(short);
             if(func_id == ID_MPI_Isend) {
                 memcpy(args, entry->key+arg_start, sizeof(args));
                 printf("buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d\n",

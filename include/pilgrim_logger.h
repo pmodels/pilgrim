@@ -1,5 +1,8 @@
 #ifndef _PILGRIM_LOG_FORMAT_H_
 #define _PILGRIM_LOG_FORMAT_H_
+#include <stdbool.h>
+#include "mpi.h"
+#include "uthash.h"
 
 typedef struct _Record {
     double tstart, tend;
@@ -19,6 +22,7 @@ typedef struct _LocalMetadata {
     int compressed_records;
 } LocalMetadata;
 
+
 typedef struct _GlobalMetadata {
     double time_resolution;
     int ranks;
@@ -28,11 +32,15 @@ typedef struct _GlobalMetadata {
 void logger_init(int rank, int nprocs);
 void logger_exit();
 void write_record(Record record);
-int* addr2id(const void *buffer);
 
 
-void** read_record_args(FILE*f, int func_id);
-void** read_record_args_special(FILE*f, int func_id);
+bool is_recording();
+void append_offset(MPI_Offset offset);
+
+
+
+void** read_record_args(int func_id, void* buff, int* nargs);
+void** read_record_args_special(int func_id, void* buff, int* nargs);
 
 
 #endif

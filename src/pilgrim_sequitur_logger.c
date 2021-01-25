@@ -167,8 +167,8 @@ void compress2(const char* path, int *gathered, int world_size) {
     }
     myfree(compressed_grammar, sizeof(int)*compressed_len);
 
-    printf("total rules: %d, unique rules: %d, total size: %fMB, another sequitur pass: %fMB\n",
-            total_rules, unique_rules, total_size/1024.0/1024.0, compressed_len*sizeof(int)/1024.0/1024.0);
+    printf("[pilgrim] total rules: %d, unique rules: %d, total size: %fMB, another sequitur pass: %.2f KB\n",
+            total_rules, unique_rules, total_size/1024.0/1024.0, compressed_len*sizeof(int)/1024.0);
 }
 
 /*

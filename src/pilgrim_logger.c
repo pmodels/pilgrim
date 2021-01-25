@@ -260,8 +260,6 @@ RecordHash* merge_function_entries() {
             }
 
             pilgrim_free(buf, size);
-            if(rank == 0)
-                printf("Recv from %d %ldbytes, add %d entries, total entries: %d\n", rank+gap/2, size, added, HASH_COUNT(merged_table));
 
         } else if((rank+gap/2) % gap ==0) {   // SENDER
 
@@ -307,10 +305,11 @@ int* dump_function_entries() {
         errno = 0;
         FILE *trace_file = fopen(FUNCS_OUTPUT_PATH, "wb");
         if(trace_file) {
+            printf("[pilgrim] FST Size: %.2f KB\n", merged_size/1024.0);
             fwrite(merged, 1, merged_size, trace_file);
             fclose(trace_file);
         } else {
-            printf("Open file: %s failed, errno: %d\n", FUNCS_OUTPUT_PATH, errno);
+            printf("[pilgrim] Open file: %s failed, errno: %d\n", FUNCS_OUTPUT_PATH, errno);
         }
         cleanup_function_entry_table(merged_table);
     }
@@ -326,7 +325,7 @@ int* dump_function_entries() {
         if(res)
             update_terminal_id[entry->terminal_id] = res->terminal_id;
         else
-            printf("%d Not possible! Not exist in merged table?\n", __logger.rank);
+            printf("[pilgrim] %d Not possible! Not exist in merged table?\n", __logger.rank);
     }
 
     cleanup_function_entry_table(merged_table);
@@ -473,8 +472,8 @@ void logger_exit() {
     uninstall_mem_hooks();
     __logger.recording = false;
 
-    printf("[Pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
-            HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
+    //printf("[pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
+    //        HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
 
     // 1. Dump loacl metadata and call signatures
     int* update_terminal_id = dump_function_entries();
@@ -488,7 +487,7 @@ void logger_exit() {
     //sequitur_finalize("logs/intervals.dat", &(__logger.intervals_grammar), NULL);
 
     // 3. Clean up all resources
-    //count_func_entries();
+    count_func_entries();
     cleanup_function_entry_table(__logger.hash_head);
     OffsetNode *elt, *tmp2;
     LL_FOREACH_SAFE(__logger.offset_list, elt, tmp2) {

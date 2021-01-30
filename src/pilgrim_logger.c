@@ -247,13 +247,17 @@ RecordHash* merge_function_entries() {
                 // Check to see if this function entry is already in the table
                 RecordHash *entry = NULL;
                 HASH_FIND(hh, merged_table, key, key_len, entry);
-                if(entry) {                         // Found, do nothing for now...
+
+                // Rank 0 needs to update terminal id to ensure
+                // everyone has unique terminal id
+                if(entry) {
                     pilgrim_free(key, key_len);
-                } else {                            // Not exist, add to hash table
+                    entry->terminal_id = terminal_id++;
+                } else {                                // Not exist, add to hash table
                     entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
                     entry->key = key;
                     entry->key_len = key_len;
-                    entry->terminal_id = terminal_id++; // only important for rank 0
+                    entry->terminal_id = terminal_id++;
                     HASH_ADD_KEYPTR(hh, merged_table, key, key_len, entry);
                     added++;
                 }

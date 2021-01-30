@@ -100,3 +100,4 @@ logs
 #src/pilgrim_wrappers.c
 #src/pilgrim_read_args.c
 pilgrim_reader
+pilgrim-logs

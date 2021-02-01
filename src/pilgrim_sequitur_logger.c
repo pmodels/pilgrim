@@ -81,8 +81,14 @@ int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, size_t* len_s
 }
 
 void compress_and_dump2(const char* path, int *gathered, size_t len) {
+    int start_rule_id = -1;
+    for(size_t i = 0; i < len; i++)
+        if(gathered[i] < start_rule_id)
+            start_rule_id = gathered[i];
+    start_rule_id--;
+
     Grammar grammar;
-    sequitur_init(&grammar);
+    sequitur_init_rule_id(&grammar, start_rule_id);
 
     for(size_t i = 0; i < len; i++)
         append_terminal(&grammar, gathered[i]);
@@ -96,6 +102,9 @@ void compress_and_dump2(const char* path, int *gathered, size_t len) {
     if(f) {
         printf("[pilgrim] Total size: %.2fKB, another sequitur pass: %.2fKB\n",
                 sizeof(int)*len/1024.0, sizeof(int)*compressed_len/1024.0);
+        fwrite(&start_rule_id, sizeof(int), 1, f);
+        fwrite(&len, sizeof(size_t), 1, f);
+        fwrite(&compressed_len, sizeof(size_t), 1, f);
         fwrite(compressed_grammar, sizeof(int), compressed_len, f);
         fclose(f);
     } else {

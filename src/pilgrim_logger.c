@@ -213,7 +213,6 @@ RecordHash* copy_function_entries(RecordHash* origin) {
 RecordHash* merge_function_entries() {
     int gap = 2;
     int rank = __logger.rank;
-    int terminal_id = 0;
 
     RecordHash* merged_table = copy_function_entries(__logger.hash_head);
 
@@ -221,12 +220,10 @@ RecordHash* merge_function_entries() {
         size_t size;
         void* buf;
         if(rank % gap == 0) {                 // RECEIVER
-
             PMPI_Recv(&size, sizeof(size), MPI_BYTE, rank+gap/2, gap, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             buf = pilgrim_malloc(size);
             PMPI_Recv(buf, size, MPI_BYTE, rank+gap/2, gap, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-            int added = 0;
             int entries, key_len;
             void *ptr = buf;
             memcpy(&entries, ptr, sizeof(int));
@@ -252,14 +249,11 @@ RecordHash* merge_function_entries() {
                 // everyone has unique terminal id
                 if(entry) {
                     pilgrim_free(key, key_len);
-                    entry->terminal_id = terminal_id++;
                 } else {                                // Not exist, add to hash table
                     entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
                     entry->key = key;
                     entry->key_len = key_len;
-                    entry->terminal_id = terminal_id++;
                     HASH_ADD_KEYPTR(hh, merged_table, key, key_len, entry);
-                    added++;
                 }
             }
 
@@ -277,6 +271,14 @@ RecordHash* merge_function_entries() {
         gap = gap * 2;
     }
 
+    // Update (re-assign) terminal id for all unique signatures
+    if(rank == 0) {
+        int terminal_id = 0;
+        RecordHash *entry, *tmp;
+        HASH_ITER(hh, merged_table, entry, tmp) {
+            entry->terminal_id = terminal_id++;
+        }
+    }
     return merged_table;
 }
 

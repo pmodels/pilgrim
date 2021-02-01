@@ -280,16 +280,20 @@ void sequitur_cleanup(Grammar *grammar) {
     grammar->rule_id = -1;
 }
 
-void sequitur_init(Grammar *grammar) {
+void sequitur_init_rule_id(Grammar *grammar, int start_rule_id) {
     grammar->digram_table = NULL;
     grammar->rules = NULL;
-    grammar->rule_id = -1;
+    grammar->rule_id = start_rule_id;
 
     PMPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     // Add the main rule: S, which will be the head of the rule list
     rule_put(&(grammar->rules), new_rule(grammar));
+}
+
+void sequitur_init(Grammar *grammar) {
+    sequitur_init_rule_id(grammar, -1);
 }
 
 void sequitur_update(Grammar *grammar, int *update_terminal_id) {

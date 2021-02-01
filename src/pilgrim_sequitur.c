@@ -254,7 +254,7 @@ void print_rules(Grammar *grammar) {
     printf("memory usage: %ldB, %ldB\n", memory_usage, (rules_count+symbols_count)*sizeof(Symbol)+80*HASH_COUNT(grammar.digram_table));
     */
 
-    printf("Rank: %d, Rules: %d, Symbols: %d\n", mpi_rank, rules_count, symbols_count);
+    printf("[pilgrim] Rank: %d, Rules: %d, Symbols: %d\n", mpi_rank, rules_count, symbols_count);
 }
 
 void sequitur_cleanup(Grammar *grammar) {
@@ -305,8 +305,8 @@ void sequitur_update(Grammar *grammar, int *update_terminal_id) {
 void sequitur_finalize(const char* output_path, Grammar *grammar) {
 
     if(mpi_rank == 0) {
-        print_rules(grammar);
-        //print_digrams();
+        // print_rules(grammar);
+        // print_digrams();
     }
 
     // Write grammars from all ranks to one file

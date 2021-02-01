@@ -80,6 +80,29 @@ int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, size_t* len_s
     return gathered_grammars;
 }
 
+void compress_and_dump2(const char* path, int *gathered, size_t len) {
+    Grammar grammar;
+    sequitur_init(&grammar);
+
+    for(size_t i = 0; i < len; i++)
+        append_terminal(&grammar, gathered[i]);
+
+    size_t compressed_len;
+    int* compressed_grammar = serialize_grammar(&grammar, &compressed_len);
+    sequitur_cleanup(&grammar);
+
+    errno = 0;
+    FILE* f = fopen(path, "wb");
+    if(f) {
+        printf("[pilgrim] Total size: %.2fKB, another sequitur pass: %.2fKB\n",
+                sizeof(int)*len/1024.0, sizeof(int)*compressed_len/1024.0);
+        fwrite(compressed_grammar, sizeof(int), compressed_len, f);
+        fclose(f);
+    } else {
+        printf("Open file: %s failed, errno: %d!\n", path, errno);
+    }
+}
+
 
 typedef struct RuleHash_t {
     void *key;
@@ -89,7 +112,7 @@ typedef struct RuleHash_t {
 } RuleHash;
 
 static RuleHash *rules_table;
-void compress2(const char* path, int *gathered, int world_size) {
+void compress_and_dump(const char* path, int *gathered, int world_size) {
     int rank = 0;
     int *ptr = gathered;
     int total_rules = 0;
@@ -123,7 +146,7 @@ void compress2(const char* path, int *gathered, int world_size) {
             ptr += symbols;
         }
         rank++;
-    }
+   }
     int unique_rules = HASH_COUNT(rules_table);
 
     Grammar grammar;
@@ -163,39 +186,6 @@ void compress2(const char* path, int *gathered, int world_size) {
             total_rules, unique_rules, total_size/1024.0/1024.0, compressed_len*sizeof(int)/1024.0);
 }
 
-/*
- * After collecting grammars from all ranks
- * Do a second Sequitur pass to generate a
- * grammar that represents all grammars.
- * This pass severs as inter-process compression
- * as many ranks should have similar grammar.
- */
-void compress_gathered_grammars(const char* path, int *gathered_grammars, size_t len) {
-    int max = 0;
-    for(size_t i = 0; i < len; i++)
-        if(gathered_grammars[i] > max)
-            max = gathered_grammars[i];
-
-    Grammar grammar;
-    sequitur_init(&grammar);
-    for(size_t i = 0; i < len; i++) {
-        int symbol_id = gathered_grammars[i];
-        if(symbol_id < 0)
-            symbol_id = (symbol_id * (-1)) + max;
-        append_terminal(&grammar, symbol_id);
-    }
-
-    size_t compressed_len;
-    int* compressed_grammar = serialize_grammar(&grammar, &compressed_len);
-    sequitur_cleanup(&grammar);
-
-    printf("%s: Original Total integers: %ld, Second Sequitor pass: %ld, max terminal id: %d\n", path, len, compressed_len, max);
-
-    FILE* f = fopen(path, "wb");
-    fwrite(compressed_grammar, sizeof(int), compressed_len, f);
-    fclose(f);
-    myfree(compressed_grammar, sizeof(int)*compressed_len);
-}
 
 void sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_size) {
     // gathered_grammars is NULL except rank 0
@@ -203,8 +193,8 @@ void sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_siz
     int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
 
     if(mpi_rank == 0) {
-        compress2(path, gathered_grammars, mpi_size);
-        //compress_gathered_grammars(path, gathered_grammars, len);
+        //compress_and_dump(path, gathered_grammars, mpi_size);
+        compress_and_dump2(path, gathered_grammars, len);
         myfree(gathered_grammars, sizeof(int)*len);
     }
 }

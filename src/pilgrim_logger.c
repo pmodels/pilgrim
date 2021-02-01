@@ -458,7 +458,7 @@ void count_func_entries() {
             int arg_start = sizeof(short);
             if(func_id == ID_MPI_Isend) {
                 memcpy(args, entry->key+arg_start, sizeof(args));
-                printf("buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d\n",
+                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d\n",
                         args[0], args[1], args[2], args[3], args[4]);
             }
         }
@@ -491,7 +491,7 @@ void logger_exit() {
     //sequitur_finalize("logs/intervals.dat", &(__logger.intervals_grammar), NULL);
 
     // 3. Clean up all resources
-    count_func_entries();
+    //count_func_entries();
     cleanup_function_entry_table(__logger.hash_head);
     OffsetNode *elt, *tmp2;
     LL_FOREACH_SAFE(__logger.offset_list, elt, tmp2) {

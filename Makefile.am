@@ -24,7 +24,7 @@ pilgrim_reader_SOURCES =
 AM_CPPFLAGS = -g -rdynamic
 AM_CFLAGS = -g -rdynamic
 
-libpilgrim_la_LDFLAGS = -lm -lssl -lcrypto -version-info @libpilgrim_so_version@
+libpilgrim_la_LDFLAGS = -lm -version-info @libpilgrim_so_version@
 
 include $(top_srcdir)/src/Makefile.mk
 include $(top_srcdir)/include/Makefile.mk

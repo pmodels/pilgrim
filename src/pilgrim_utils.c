@@ -26,7 +26,7 @@ void pilgrim_free(void *ptr, size_t size) {
 }
 
 void pilgrim_report_memory_status() {
-    printf("Current memory usage: %ld, Peak memory usage: %ld\n", memory_usage, peak_memory);
+    printf("[pilgrim] Current memory usage: %ld, Peak memory usage: %ld\n", memory_usage, peak_memory);
 }
 
 

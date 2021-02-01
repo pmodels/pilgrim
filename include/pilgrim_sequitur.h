@@ -41,7 +41,7 @@ typedef struct Symbol_t {           // utlist node, sizeof(Symbol) = 56
     int val;
     bool terminal;
 
-    // For terminal and non-termial this filed
+    // For terminal and non-termial this field
     // remembers the rule (Symbol of Rule Head type) they belong to
     struct Symbol_t *rule;
 
@@ -78,6 +78,7 @@ typedef struct Grammar_t {
  */
 Symbol* append_terminal(Grammar  *grammar, int val);
 void sequitur_init(Grammar *grammar);
+void sequitur_init_rule_id(Grammar *grammar, int start_rule_id);
 void sequitur_update(Grammar *grammar, int *update_terminal_id);
 void sequitur_finalize(const char* output_path, Grammar *grammar);
 void sequitur_cleanup(Grammar *grammar);

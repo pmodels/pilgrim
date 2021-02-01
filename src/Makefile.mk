@@ -16,4 +16,6 @@ libpilgrim_la_SOURCES += \
 
 
 pilgrim_reader_SOURCES += \
-	src/pilgrim_reader.c src/pilgrim_read_args.c src/pilgrim_read_args_special.c
+	src/pilgrim_reader.c src/pilgrim_read_args.c src/pilgrim_read_args_special.c \
+	src/dlmalloc.c
+

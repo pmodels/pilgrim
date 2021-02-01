@@ -43,7 +43,6 @@ int* serialize_grammar(Grammar *grammar, size_t *len) {
         DL_FOREACH(rule->rule_body, sym) {
             data[i++] = sym->val;       // rule id does not change
         }
-
     }
 
     *len = total_integers;
@@ -60,14 +59,6 @@ int* serialize_grammar(Grammar *grammar, size_t *len) {
 int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, size_t* len_sum) {
     size_t len = 0;
     int *local_grammar = serialize_grammar(grammar, &len);
-
-
-    /*
-    unsigned char hash[33];
-    pilgrim_sha256((const unsigned char*)local_grammar, sizeof(int)*len, hash);
-    char* str = base64encode(hash, 32);
-    printf("%d: %s\n", mpi_rank, str);
-    */
 
     int recvcounts[mpi_size], displs[mpi_size];
     PMPI_Gather(&len, 1, MPI_INT, recvcounts, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -88,6 +79,7 @@ int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, size_t* len_s
     myfree(local_grammar, len);
     return gathered_grammars;
 }
+
 
 typedef struct RuleHash_t {
     void *key;

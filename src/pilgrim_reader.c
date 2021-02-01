@@ -80,18 +80,16 @@ void read_signatures_table(char *directory) {
 
     char buff[100];
     for(int i = 0; i < entries; i++) {
+
         fread(&terminal, sizeof(int), 1, f);
         fread(&key_len, sizeof(int), 1, f);
 
         fread(&func_id, sizeof(short), 1, f);
-        fread(&duration, sizeof(int), 1, f);
-        fread(&interval, sizeof(int), 1, f);
-
-        fread(buff, 1, key_len-sizeof(short)-2*sizeof(int), f);
+        fread(buff, 1, key_len-sizeof(short), f);
 
         used[func_id] = 1;
-        //printf("terminal id: %d, func: %s, key len: %d\n", terminal, func_names[func_id], key_len);
         void** args = read_record_args(func_id, buff, &nargs);
+        printf("terminal id: %d, func: %s, key len: %d, nargs: %d\n", terminal, func_names[func_id], key_len, nargs);
         for(int j = 0; j < nargs; j++)
             free(args[j]);
         free(args);
@@ -120,8 +118,8 @@ int main(int argc, char** argv) {
     }
     */
 
-    read_grammars(directory, gm.ranks);
     read_signatures_table(directory);
+    //read_grammars(directory, gm.ranks);
 
     return 0;
 }

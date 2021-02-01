@@ -266,11 +266,21 @@ int MPI_Testall(int count, MPI_Request array_of_requests[], int *flag, MPI_Statu
 
     int indices[count];
     for(idx = 0; idx < count; idx++) indices[idx] = idx;
-    GET_STATUSES_INFO(count, indices, array_of_statuses);
-    void **args = assemble_args_list(3, &count, ids, flag);
-    int sizes[] = { sizeof(count), count*sizeof(int), sizeof(int) };
 
-    PILGRIM_TRACING_2(3, sizes, args);
+    int num_args;
+    if(*flag) {
+        num_args = 4;
+        GET_STATUSES_INFO(count, indices, array_of_statuses);
+        void **args = assemble_args_list(num_args, &count, ids, flag);
+        int sizes[] = { sizeof(count), count*sizeof(int), sizeof(int), sizeof(statuses_info)};
+        PILGRIM_TRACING_2(num_args, sizes, args);
+    } else {
+        num_args = 3;
+        void **args = assemble_args_list(num_args, &count, ids, flag);
+        int sizes[] = { sizeof(count), count*sizeof(int), sizeof(int) };
+        PILGRIM_TRACING_2(num_args, sizes, args);
+    }
+
     return 0;
 }
 

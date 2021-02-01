@@ -2,22 +2,8 @@
 # encoding: utf-8
 import pickle, os
 from codegen import MPIFunction, MPIArgument
+from instrument import filter_with_local_mpi_functions
 
-def filter_with_local_mpi_functions(funcs):
-    cleaned = {}
-
-    #os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
-    os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
-    f = open('/tmp/local_funcs.tmp', 'r')
-    for line in f.readlines():
-        func_name = line.strip().split('(')[0].split(' ')[1]
-        func_name = func_name.replace('PMPI_', 'MPI_')
-        if func_name in funcs:
-            cleaned[func_name] = funcs[func_name]
-    f.close()
-    os.system('rm /tmp/local_funcs.tmp')
-
-    return cleaned
 
 def arg_type_strip(type_str):
     t = type_str.replace('*', '').replace('[', '').replace(']', '').replace(' ', '').replace('const', '')
@@ -45,7 +31,6 @@ def handle_special_apis(func):
         return True
 
     return False
-
 
 def codegen_read_one_arg(func, i):
 
@@ -114,7 +99,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
         f.write('\t\tcase ID_%s:\n\t\t{\n' %name)
 
         if handle_special_apis(func):
-            f.write('\t\t\tread_record_args_special(func_id, buff, nargs);')
+            f.write('\t\t\targs = read_record_args_special(func_id, buff, nargs);')
         else:
             f.write('\t\t\targs = malloc(%d * sizeof(void*));' %len(func.arguments))
             f.write('\n\t\t\tpos = 0;')

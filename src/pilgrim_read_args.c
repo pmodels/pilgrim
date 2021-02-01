@@ -238,7 +238,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Testany:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_T_cvar_handle_alloc:
@@ -790,7 +790,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Request_free:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_File_read_all_end:
@@ -1581,7 +1581,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Finalize:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Type_create_hindexed_block:
@@ -2257,7 +2257,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Wait:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Type_create_hindexed:
@@ -4003,7 +4003,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Waitall:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Comm_delete_attr:
@@ -4023,7 +4023,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Testall:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Comm_create_errhandler:
@@ -4095,7 +4095,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Waitsome:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Win_lock_all:
@@ -4556,7 +4556,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Testsome:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Type_create_hvector:
@@ -4726,7 +4726,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Init_thread:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Win_fence:
@@ -5416,7 +5416,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Pcontrol:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_T_pvar_handle_free:
@@ -6389,7 +6389,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Startall:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_File_seek_shared:
@@ -7135,7 +7135,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Init:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Reduce_scatter:
@@ -7980,7 +7980,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Test:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_Request_get_status:
@@ -8004,7 +8004,7 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
 		}
 		case ID_MPI_Waitany:
 		{
-			read_record_args_special(func_id, buff, nargs);
+			args = read_record_args_special(func_id, buff, nargs);
 			break;
 		}
 		case ID_MPI_File_read_at_all_end:

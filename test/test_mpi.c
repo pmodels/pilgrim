@@ -17,8 +17,9 @@ int main(int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Barrier(MPI_COMM_WORLD);
 
-    //MPI_Allreduce(&world_size, &rank, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    //MPI_Allreduce(&rank, &world_size, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    int data, data2;
+    MPI_Allreduce(&data, &data2, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&data, &data2, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
     int outcount;
     int indices[2];
@@ -31,7 +32,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    int data;
     if(rank == 1) {
         for(int i = 0; i < 3; i++) {
             MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE, 999, MPI_COMM_WORLD, MPI_STATUS_IGNORE);

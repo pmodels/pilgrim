@@ -65,10 +65,10 @@ struct Logger __logger;
 
 void append_offset(MPI_Offset offset) {
     /*
-       OffsetNode *new_node = (OffsetNode*) pilgrim_malloc(sizeof(OffsetNode));
-       new_node->offset = offset;
-       LL_PREPEND(__logger.offset_list, new_node);
-       */
+    OffsetNode *new_node = (OffsetNode*) pilgrim_malloc(sizeof(OffsetNode));
+    new_node->offset = offset;
+    LL_PREPEND(__logger.offset_list, new_node);
+    */
 }
 
 bool is_recording() {
@@ -339,7 +339,7 @@ int* dump_function_entries() {
 }
 
 // Compose key: (func_id, arguments)
-void* compose_call_signature_key(Record *record, int *key_len) {
+void* compose_call_signature(Record *record, int *key_len) {
     // Compute key length first, note func_id is a short type
     int i;
     *key_len = sizeof(record->func_id);
@@ -373,7 +373,7 @@ void write_record(Record record) {
     __logger.local_metadata.records_count++;
 
     int key_len;
-    void *key = compose_call_signature_key(&record, &key_len);
+    void *key = compose_call_signature(&record, &key_len);
 
     double duration = record.tend - record.tstart;
     double interval = 0;
@@ -410,13 +410,13 @@ void write_record(Record record) {
      */
 }
 
-void logger_init(int rank, int nprocs) {
-    __logger.rank = rank;
-    __logger.nprocs = nprocs;
+void logger_init() {
+    __logger.rank = g_mpi_rank;
+    __logger.nprocs = g_mpi_size;
     __logger.local_metadata.tstart = pilgrim_wtime();
     __logger.local_metadata.records_count = 0;
     __logger.local_metadata.compressed_records = 0;
-    __logger.local_metadata.rank = rank;
+    __logger.local_metadata.rank = g_mpi_rank;
     __logger.hash_head = NULL;          // Must be NULL initialized
     __logger.offset_list = NULL;
 
@@ -428,17 +428,16 @@ void logger_init(int rank, int nprocs) {
     sprintf(GRAMMAR_OUTPUT_PATH,  "%s/%s/grammars.dat", cwd, OUTPUT_DIR);
     sprintf(FUNCS_OUTPUT_PATH,    "%s/%s/funcs.dat", cwd, OUTPUT_DIR);
 
-    if(rank == 0) {
+    if(__logger.rank == 0)
         mkdir(OUTPUT_DIR, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    }
     PMPI_Barrier(MPI_COMM_WORLD);
 
     // Global metadata, include compression mode, time resolution
-    if (rank == 0) {
+    if (__logger.rank == 0) {
         FILE* global_metafh = fopen(METADATA_OUTPUT_PATH, "wb");
         GlobalMetadata global_metadata= {
             .time_resolution = TIME_RESOLUTION,
-            .ranks = nprocs,
+            .ranks = g_mpi_size,
         };
         fwrite(&global_metadata, sizeof(GlobalMetadata), 1, global_metafh);
         fclose(global_metafh);

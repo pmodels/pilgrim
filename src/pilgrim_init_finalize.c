@@ -1,18 +1,16 @@
 #include <mpi.h>
 #include "pilgrim.h"
+
 // MPI_Init, MPI_Finalize are not implemented in pilgrim_warrper.c
 
-
-int rank;
-int nprocs;
 double tstart, tend, tmin, tmax;
 double elapsed_time;
 
 void pilgrim_init(int *argc, char ***argv) {
-    PMPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-    PMPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    PMPI_Comm_size(MPI_COMM_WORLD, &g_mpi_size);
+    PMPI_Comm_rank(MPI_COMM_WORLD, &g_mpi_rank);
 
-    logger_init(rank, nprocs);
+    logger_init();
     elapsed_time = pilgrim_wtime();
     tstart = pilgrim_wtime();
 
@@ -29,7 +27,7 @@ void pilgrim_exit() {
 
     PMPI_Reduce(&tstart, &tmin, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
     PMPI_Reduce(&tend , &tmax, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-    if (rank == 0)
+    if (g_mpi_rank == 0)
         printf("[Pilgrim] app elapsed time: %.2f, pilgrim fianlize time: %.2f\n", tmax-tmin, finalize_time);
 }
 

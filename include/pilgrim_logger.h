@@ -4,6 +4,11 @@
 #include "mpi.h"
 #include "uthash.h"
 
+// Global variables
+int g_mpi_rank;
+int g_mpi_size;
+
+
 typedef struct _Record {
     double tstart, tend;
     short func_id;              // 2 bytes function id
@@ -29,8 +34,9 @@ typedef struct _GlobalMetadata {
 } GlobalMetadata;
 
 
-void logger_init(int rank, int nprocs);
+void logger_init();
 void logger_exit();
+void* compose_call_signature(Record *record, int *key_len);
 void write_record(Record record);
 
 

@@ -100,14 +100,13 @@ def codegen_assemble_args(func):
         elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
         elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for rank-1/rank+1 as src or dest
-            line += "\tint %s_rank = self_rank - %s;\n" %(arg.name, arg.name)
+            line += "\tint %s_rank = g_mpi_rank - %s;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = -99999;\n" %(arg.name, arg.name)
             assemble_args.append( "&%s_rank" %arg.name )
         else:
             assemble_args.append( "&"+arg.name)
 
     if func.name == "MPI_Comm_rank":
-        line += "\tself_rank = *rank;\n"
         # For MPI_Comm_rank, we always set the last argument(output rank) to 0
         # So every process will have the same function signature.
         assemble_args[-1] = "&placeholder"
@@ -216,7 +215,6 @@ def generate_wrapper_file(funcs):
     f.write('#include <stdlib.h>\n')
     f.write('#include <string.h>\n')
     f.write('#include "pilgrim.h"\n')
-    f.write('static int self_rank;\n')
     f.write('static int placeholder = 0;\n')
 
     for name in funcs:

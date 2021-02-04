@@ -30,11 +30,6 @@ void pilgrim_report_memory_status() {
 
 inline double pilgrim_wtime()
 {
-    /*
-       struct timeval time;
-       gettimeofday(&time, 0);
-       return (time.tv_sec + ((double)time.tv_usec / 1000000));
-       */
     return PMPI_Wtime();
 }
 

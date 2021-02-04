@@ -76,9 +76,9 @@ def codegen_assemble_args(func):
                 if func.name == "MPI_Irecv" or func.name == "MPI_Recv_init":
                     assemble_args.append("request2id("+arg.name+", source, tag)")
                 else:
-                    assemble_args.append("request2id("+arg.name+", 0, 0)")
+                    assemble_args.append("MPI_OBJ_ID(MPI_Request, "+arg.name+")")
             else:
-                assemble_args.append("request2id(&"+arg.name+", 0, 0)")
+                assemble_args.append("MPI_OBJ_ID(MPI_Request, &"+arg.name+")")
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             line += "\tappend_offset(%s);\n" %(arg.name)
         elif 'MPI_Status*' in arg.type:

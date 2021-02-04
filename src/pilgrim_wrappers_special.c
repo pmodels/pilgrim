@@ -94,7 +94,7 @@ bool is_completed_idup_request(MPI_Request *req) {
                 status_info[1] = status->MPI_TAG;                   \
             req_id = &entry->req_node->id;                          \
         }                                                           \
-        free_request(req);                                          \
+        MPI_OBJ_RELEASE(MPI_Request, req);                          \
     }
 
 
@@ -113,7 +113,7 @@ bool is_completed_idup_request(MPI_Request *req) {
                 if(entry->any_tag)                                                                  \
                     statuses_info[idx*2+1] = statuses[idx].MPI_TAG;                                 \
             }                                                                                       \
-            free_request(&(old_reqs[iidx]));                                                        \
+            MPI_OBJ_RELEASE(MPI_Request, &(old_reqs[iidx]));                                        \
         }                                                                                           \
     }
 
@@ -128,8 +128,7 @@ bool is_completed_idup_request(MPI_Request *req) {
 
 
 int* get_request_id(MPI_Request* req) {
-    // 2nd and 3rd arguments do not matter if the request is already existed.
-    return request2id(req, 0, 0);
+    return MPI_OBJ_ID(MPI_Request, req);
 }
 
 
@@ -313,7 +312,7 @@ int MPI_Request_free(MPI_Request *request)
     int sizes[] = {sizeof(int)};
     PILGRIM_TRACING_1(int, MPI_Request_free, (request));
 
-    free_request(old_req);
+    MPI_OBJ_RELEASE(MPI_Request, request);
 
     PILGRIM_TRACING_2(1, sizes, args);
 }

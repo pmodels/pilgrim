@@ -126,7 +126,11 @@ int* request2id(MPI_Request *req, int source, int tag) {
     return &(entry->req_node->id);
 }
 
-void free_request(MPI_Request *req) {
+int* get_object_id_MPI_Request(MPI_Request *req) {
+    request2id(req, 0, 0);
+}
+
+void object_release_MPI_Request(MPI_Request *req) {
     RequestHash *entry = request_hash_entry(req);
     if(entry) {
         DL_APPEND(list_MPI_Request, entry->req_node);    // Add the id back to the free list

@@ -338,6 +338,27 @@ int* dump_function_entries() {
     return update_terminal_id;
 }
 
+// Compose key: (func_id, arguments)
+void* compose_call_signature_key(Record *record, int *key_len) {
+    // Compute key length first, note func_id is a short type
+    int i;
+    *key_len = sizeof(record->func_id);
+    for(i = 0; i < record->arg_count; i++)
+        *key_len += record->arg_sizes[i];
+
+    // Actually set the key
+    int pos = 0;
+    void *key = pilgrim_malloc(*key_len);
+    memcpy(key+pos, &(record->func_id), sizeof(record->func_id));
+    pos += sizeof(record->func_id);
+
+    for(i = 0; i < record->arg_count; i++) {
+        memcpy(key+pos, record->args[i], record->arg_sizes[i]);
+        pos += record->arg_sizes[i];
+    }
+
+    return key;
+}
 
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
@@ -348,25 +369,11 @@ void write_record(Record record) {
        record.tstart-__logger.local_metadata.tstart,
        record.tend-__logger.local_metadata.tstart, func_names[record.func_id]);
     */
+
     __logger.local_metadata.records_count++;
 
-    // Compose key: (func_id, arguments)
-    // Compute key length first, note func_id is a short type
-    int i;
-    int key_len = sizeof(record.func_id);
-    for(i = 0; i < record.arg_count; i++)
-        key_len += record.arg_sizes[i];
-
-    // Actually set the key
-    int pos = 0;
-    void *key = pilgrim_malloc(key_len);
-    memcpy(key+pos, &(record.func_id), sizeof(record.func_id));
-    pos += sizeof(record.func_id);
-
-    for(i = 0; i < record.arg_count; i++) {
-        memcpy(key+pos, record.args[i], record.arg_sizes[i]);
-        pos += record.arg_sizes[i];
-    }
+    int key_len;
+    void *key = compose_call_signature_key(&record, &key_len);
 
     double duration = record.tend - record.tstart;
     double interval = 0;
@@ -389,11 +396,11 @@ void write_record(Record record) {
 
     append_terminal(&(__logger.grammar), entry->terminal_id);
 
-
     /*
      * Durations and Intervals
      * Ignore them for now.
      *
+
      int dur_id = get_duration_id(duration);
      int interval_id = get_interval_id(interval);
      append_terminal(&(__logger.durations_grammar), dur_id);

@@ -100,7 +100,15 @@ typedef struct RequestHash_t {
 
 RequestHash* request_hash_entry(MPI_Request* request);
 int* request2id(MPI_Request* request, int source, int tag);
-void free_request(MPI_Request* request);
+
+/*
+ * Name the following functinos in a way that
+ * we can use the above defined MACROs:
+ *  - MPI_OBJ_ID(MPI_Comm, comm);
+ *  - MPI_OBJ_RELEASE(MPI_Comm, comm);
+ */
+int* get_object_id_MPI_Request(MPI_Request *request);
+void object_release_MPI_Request(MPI_Request* request);
 void object_cleanup_MPI_Request();
 
 

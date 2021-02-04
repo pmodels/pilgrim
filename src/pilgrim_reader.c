@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "pilgrim.h"
+#include "pilgrim_reader.h"
 #include "uthash.h"
 #include "dlmalloc-2.8.6.h"
 
@@ -13,11 +14,6 @@ typedef struct RuleHash_t {
     UT_hash_handle hh;
 } RuleHash;
 
-typedef struct FuncSignature_t {
-    short func_id;
-    int nargs;
-    void** args;
-} FuncSignature;
 
 static int rank;
 static int nprocs;
@@ -52,7 +48,11 @@ void print_rule(int rule_head, int* sym, int symbols) {
 }
 
 
-// Recursively decode rules
+/*
+ * First pass: decompress the inter-process compressed grammars
+ *
+ * Recursively decode rules
+ */
 int decode_rule(int* decompressed_symbols, int rule_id, int start_rule_id) {
     int advance = 0;
 
@@ -79,7 +79,10 @@ int decode_rule(int* decompressed_symbols, int rule_id, int start_rule_id) {
     return advance;
 }
 
-void decode_and_write(int rule_id, FILE *f, FuncSignature *funcs) {
+/**
+ * Second pass: for each rank, decode its grammar
+ */
+void decode_and_write(int rule_id, FILE *f, CallSignature *call_sigs) {
 
     RuleHash *rule;
     HASH_FIND_INT(rules_table, &rule_id, rule);
@@ -88,12 +91,24 @@ void decode_and_write(int rule_id, FILE *f, FuncSignature *funcs) {
 
         // Non-terminal, i.e., a rule
         if(sym < -1) {
-            decode_and_write(sym, f, funcs);
+            decode_and_write(sym, f, call_sigs);
         }
         // Terminal
         else {
-            short func_id = funcs[sym].func_id;
-            fprintf(f, "%s\n", func_names[func_id]);
+            CallSignature *cs = &(call_sigs[sym]);
+            fprintf(f, "%s(", func_names[cs->func_id]);
+            for(int j = 0; j < cs->arg_count; j++) {
+                if(cs->arg_sizes[j] == sizeof(int)) {
+                    fprintf(f, "%d", *((int*)cs->args[j]));
+                } else
+                    fprintf(f, "Hmm");
+
+                if(j != cs->arg_count - 1)
+                    fprintf(f, ", ");
+                else
+                    fprintf(f, ");\n");
+            }
+
         }
     }
 
@@ -110,7 +125,7 @@ void clean_rules_table() {
     rules_table = NULL;
 }
 
-void read_grammars(char *path, int total_ranks, FuncSignature* funcs) {
+void read_grammars(char *path, int total_ranks, CallSignature* funcs) {
     char grammar_file_path[256];
     sprintf(grammar_file_path, "%s/grammars.dat", path);
 
@@ -172,7 +187,7 @@ void read_grammars(char *path, int total_ranks, FuncSignature* funcs) {
     fclose(f);
 }
 
-FuncSignature* read_signatures_table(char *directory, int *num_funcs) {
+CallSignature* read_signatures_table(char *directory, int *num_funcs) {
     bool used[400] = {0};
 
     char path[256];
@@ -180,11 +195,11 @@ FuncSignature* read_signatures_table(char *directory, int *num_funcs) {
     FILE* f = fopen(path, "rb");
 
     short func_id;
-    int entries, key_len, terminal, duration, interval, nargs;
+    int entries, key_len, terminal, duration, interval;
     fread(&entries, sizeof(int), 1, f);
     *num_funcs = entries;
 
-    FuncSignature *funcs = malloc(sizeof(FuncSignature) * entries);
+    CallSignature *call_sigs = malloc(sizeof(CallSignature) * entries);
 
     char buff[100];
     for(int i = 0; i < entries; i++) {
@@ -195,10 +210,9 @@ FuncSignature* read_signatures_table(char *directory, int *num_funcs) {
         fread(&func_id, sizeof(short), 1, f);
         fread(buff, 1, key_len-sizeof(short), f);
 
-        assert(i == terminal);
-        funcs[i].args = read_record_args(func_id, buff, &nargs);
-        funcs[i].func_id = func_id;
-        funcs[i].nargs = nargs;
+        assert(terminal < entries);
+        call_sigs[terminal].func_id = func_id;
+        read_record_args(func_id, buff, &(call_sigs[terminal]));
 
         used[func_id] = 1;
     }
@@ -209,7 +223,7 @@ FuncSignature* read_signatures_table(char *directory, int *num_funcs) {
     }
 
     fclose(f);
-    return funcs;
+    return call_sigs;
 }
 
 int main(int argc, char** argv) {
@@ -228,15 +242,16 @@ int main(int argc, char** argv) {
     */
 
     int num_funcs;
-    FuncSignature *funcs = read_signatures_table(directory, &num_funcs);
-    read_grammars(directory, gm.ranks, funcs);
+    CallSignature *call_sigs = read_signatures_table(directory, &num_funcs);
+    read_grammars(directory, gm.ranks, call_sigs);
 
     for(int i = 0; i < num_funcs; i++) {
-        for(int j = 0; j < funcs[i].nargs; j++)
-            free(funcs[i].args[j]);
-        free(funcs[i].args);
+        for(int j = 0; j < call_sigs[i].arg_count; j++)
+            free(call_sigs[i].args[j]);
+        free(call_sigs[i].arg_sizes);
+        free(call_sigs[i].args);
     }
-    free(funcs);
+    free(call_sigs);
 
 
     return 0;

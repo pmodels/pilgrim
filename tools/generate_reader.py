@@ -44,19 +44,19 @@ def codegen_read_one_arg(func, i):
 
     lines = []
     if 'void' in arg.type:
-        lines.append('size = sizeof(int);')
+        lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
     elif 'MPI_Status' in arg.type:
-        lines.append('size = sizeof(int)*2;')
+        lines.append('cs->arg_sizes[%d] = sizeof(int)*2;' %i)
     elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
         pass
     elif is_mpi_object_arg(arg_type_strip(arg.type)):
         if "MPI_Comm" in arg.type :
-            lines.append('size = sizeof(MPI_Comm)+sizeof(int);')
+            lines.append('cs->arg_sizes[%d] = sizeof(MPI_Comm)+sizeof(int);' %i)
         else:
-            lines.append('size = sizeof(int);')
+            lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
     elif 'char*' in arg.type:
         if '**' not in arg.type and '[' not in arg.type:    # only consider one single string
-            lines.append('size = strlen(buff+pos)+1;')
+            lines.append('cs->arg_sizes[%d] = strlen(buff+pos)+1;' %i)
     elif '*' in arg.type or '[' in arg.type:
         fixed_type = arg_type_strip(arg.type)
         if arg.length:
@@ -64,16 +64,16 @@ def codegen_read_one_arg(func, i):
                 pass
             else:
                 idx = find_arg_idx(func, arg.length)
-                lines.append( 'length = *((int*) (args[%d]));' %idx )
-                lines.append( "size = length * sizeof(%s);" %fixed_type)
+                lines.append( 'length = *((int*) (cs->args[%d]));' %idx )
+                lines.append( "cs->arg_sizes[%d] = length * sizeof(%s);" %(i, fixed_type))
         else:
-            lines.append( "size = sizeof(%s);" %fixed_type )
+            lines.append( "cs->arg_sizes[%d] = sizeof(%s);" %(i, fixed_type) )
     else:
-        lines.append( "size = sizeof(%s);" %arg.type )
+        lines.append( "cs->arg_sizes[%d] = sizeof(%s);" %(i, arg.type) )
 
-    lines.append('args[%d] = calloc(size, 1);' %i)
-    lines.append('memcpy(args[%d], buff+pos, size);' %i)
-    lines.append('pos += size;')
+    lines.append('cs->args[%d] = calloc(cs->arg_sizes[%d], 1);' %(i,i))
+    lines.append('memcpy(cs->args[%d], buff+pos, cs->arg_sizes[%d]);' %(i,i))
+    lines.append('pos += cs->arg_sizes[%d];' %i)
     return lines
 
 
@@ -85,9 +85,9 @@ def generate_reader_file(funcs):
 #include <string.h>
 #include <mpi.h>
 #include "pilgrim.h"
-void** read_record_args(int func_id, void* buff, int* nargs) {
-    void **args;
-    int size, length, pos;
+#include "pilgrim_reader.h"
+void read_record_args(int func_id, void* buff, CallSignature* cs) {
+    int length, pos;
     size_t n;
     switch(func_id) {
 '''
@@ -99,18 +99,19 @@ void** read_record_args(int func_id, void* buff, int* nargs) {
         f.write('\t\tcase ID_%s:\n\t\t{\n' %name)
 
         if handle_special_apis(func):
-            f.write('\t\t\targs = read_record_args_special(func_id, buff, nargs);')
+            f.write('\t\t\tread_record_args_special(func_id, buff, cs);')
         else:
-            f.write('\t\t\targs = malloc(%d * sizeof(void*));' %len(func.arguments))
+            f.write('\t\t\tcs->arg_count = %d;' %len(func.arguments))
+            f.write('\n\t\t\tcs->arg_sizes = malloc(cs->arg_count * sizeof(int));')
+            f.write('\n\t\t\tcs->args = malloc(cs->arg_count * sizeof(void*));')
             f.write('\n\t\t\tpos = 0;')
-            f.write('\n\t\t\t*nargs = %d;' %len(func.arguments))
             for i in range(len(func.arguments)):
                 f.write('\n\t\t\t')
                 lines = codegen_read_one_arg(func, i)
                 f.write('\n\t\t\t'.join(lines))
         f.write('\n\t\t\tbreak;\n\t\t}\n')
 
-    f.write('\t}\n\treturn args;\n}\n')
+    f.write('\t}\n}\n')
     f.close()
 
 if __name__ == "__main__":

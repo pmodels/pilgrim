@@ -45,8 +45,4 @@ void append_offset(MPI_Offset offset);
 
 
 
-void** read_record_args(int func_id, void* buff, int* nargs);
-void** read_record_args_special(int func_id, void* buff, int* nargs);
-
-
 #endif

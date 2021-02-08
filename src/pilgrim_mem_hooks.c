@@ -61,7 +61,7 @@ void uninstall_mem_hooks() {
 
 // Symbolic representation of memory addresses
 int* addr2id(const void* buffer) {
-    //return &allocated_addr_id;
+    return &allocated_addr_id;
     AvlTree avl_node = avl_search(addr_tree, (intptr_t) buffer);
     if(avl_node == AVL_EMPTY) {
         // Not found in addr_tree suggests that this buffer is not dynamically allocated

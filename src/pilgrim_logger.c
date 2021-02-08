@@ -446,13 +446,27 @@ void count_func_entries() {
             memcpy(&func_id, entry->key, sizeof(short));
             count[func_id]++;
 
-            int args[5];
+            int args[8];
             int arg_start = sizeof(short);
             if(func_id == ID_MPI_Isend) {
                 memcpy(args, entry->key+arg_start, sizeof(args));
-                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d\n",
-                        args[0], args[1], args[2], args[3], args[4]);
+                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d, req: %d\n",
+                        args[0], args[1], args[2], args[3], args[4], args[7]);
             }
+            /*
+            if(func_id == ID_MPI_Waitsome) {
+                int incount, outcount;
+                memcpy(&incount, entry->key+arg_start, sizeof(int));
+                int *reqs = dlmalloc(sizeof(int) * incount);
+                memcpy(reqs, entry->key+arg_start+sizeof(int), sizeof(int)*incount);
+                memcpy(&outcount, entry->key+arg_start+sizeof(int)*(1+incount), sizeof(int));
+                printf("[pilgrim] Waitsome(intcount=%d, reqs:", incount);
+                for(int i = 0; i < incount; i++)
+                    printf("%d ", reqs[i]);
+                dlfree(reqs);
+                printf(", outcount: %d)\n", outcount);
+            }
+            */
         }
     }
 
@@ -483,7 +497,7 @@ void logger_exit() {
     //sequitur_finalize("logs/intervals.dat", &(__logger.intervals_grammar), NULL);
 
     // 3. Clean up all resources
-    //count_func_entries();
+    count_func_entries();
     cleanup_function_entry_table(__logger.hash_head);
     OffsetNode *elt, *tmp2;
     LL_FOREACH_SAFE(__logger.offset_list, elt, tmp2) {

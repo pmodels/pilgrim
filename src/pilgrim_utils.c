@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 #include <unistd.h>
 #include "pilgrim_utils.h"
 #include "dlmalloc-2.8.6.h"
@@ -44,6 +45,28 @@ inline void** assemble_args_list(int arg_count, ...) {
         args[i] = va_arg(valist, void*);
     va_end(valist);
     return args;
+}
+
+void* concat_function_args(short func_id, int arg_count, void** args, int* arg_sizes, int* key_len) {
+
+    // Compute key length first, note func_id is a short type
+    int i;
+    *key_len = sizeof(func_id);
+    for(i = 0; i < arg_count; i++)
+        *key_len += arg_sizes[i];
+
+    // Actually set the key
+    int pos = 0;
+    void *key = pilgrim_malloc(*key_len);
+    memcpy(key+pos, &func_id, sizeof(func_id));
+    pos += sizeof(func_id);
+
+    for(i = 0; i < arg_count; i++) {
+        memcpy(key+pos, args[i], arg_sizes[i]);
+        pos += arg_sizes[i];
+    }
+
+    return key;
 }
 
 int randint() {

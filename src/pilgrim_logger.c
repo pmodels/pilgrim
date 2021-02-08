@@ -340,24 +340,8 @@ int* dump_function_entries() {
 
 // Compose key: (func_id, arguments)
 void* compose_call_signature(Record *record, int *key_len) {
-    // Compute key length first, note func_id is a short type
-    int i;
-    *key_len = sizeof(record->func_id);
-    for(i = 0; i < record->arg_count; i++)
-        *key_len += record->arg_sizes[i];
-
-    // Actually set the key
-    int pos = 0;
-    void *key = pilgrim_malloc(*key_len);
-    memcpy(key+pos, &(record->func_id), sizeof(record->func_id));
-    pos += sizeof(record->func_id);
-
-    for(i = 0; i < record->arg_count; i++) {
-        memcpy(key+pos, record->args[i], record->arg_sizes[i]);
-        pos += record->arg_sizes[i];
-    }
-
-    return key;
+    return concat_function_args(record->func_id, record->arg_count,
+            record->args, record->arg_sizes, key_len);
 }
 
 void write_record(Record record) {

@@ -89,9 +89,18 @@ typedef struct RequestNode_t {
     struct RequestNode_t *next;
 } RequestNode;
 
+typedef struct RequestNodeHash_t {
+    void *key;  // call signature as the key for free id list
+    int key_len;
+    RequestNode* free_ids;
+    UT_hash_handle hh;
+} RequestNodeHash;
+
 typedef struct RequestHash_t {
     void *key;
     int key_len;
+    void *signature;
+    int signature_len;
     RequestNode* req_node;
     bool any_source;
     bool any_tag;
@@ -99,6 +108,7 @@ typedef struct RequestHash_t {
 } RequestHash;
 
 RequestHash* request_hash_entry(MPI_Request* request);
+int* create_request_id(MPI_Request *req, void* signature, int key_len);
 int* request2id(MPI_Request* request, int source, int tag);
 
 /*

@@ -2836,8 +2836,15 @@ int MPI_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int t
 	int dest_rank = g_mpi_rank - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = -99999;
 	MPI_Comm obj_1 = comm;
-	void **args = assemble_args_list(7, addr2id(buf), &count, MPI_OBJ_ID(MPI_Datatype, &obj_0), &dest_rank, &tag, MPI_OBJ_ID(MPI_Comm, &obj_1), MPI_OBJ_ID(MPI_Request, request));
+	//void **args = assemble_args_list(7, addr2id(buf), &count, MPI_OBJ_ID(MPI_Datatype, &obj_0), &dest_rank, &tag, MPI_OBJ_ID(MPI_Comm, &obj_1), MPI_OBJ_ID(MPI_Request, request));
+	//int sizes[] = { sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(MPI_Comm)+sizeof(int), sizeof(int) };
+	void **args = assemble_args_list(7, addr2id(buf), &count, MPI_OBJ_ID(MPI_Datatype, &obj_0), &dest_rank, &tag, MPI_OBJ_ID(MPI_Comm, &obj_1), NULL);
 	int sizes[] = { sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(MPI_Comm)+sizeof(int), sizeof(int) };
+
+    int key_len;
+    void *signature = concat_function_args(ID_MPI_Isend, 6, args, sizes, &key_len);
+    args[6] = create_request_id(request, signature, key_len);
+
 	PILGRIM_TRACING_2(7, sizes, args);
 }
 int MPI_T_pvar_reset(MPI_T_pvar_session session, MPI_T_pvar_handle handle)

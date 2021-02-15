@@ -17,15 +17,16 @@ int main(int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Barrier(MPI_COMM_WORLD);
 
-    int data, data2;
+    int data, data2, data3;
     MPI_Allreduce(&data, &data2, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(&data, &data2, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&data, &data3, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
+    int N = 1;
     int outcount;
     int indices[2];
     MPI_Request reqs[2];
     if(rank == 0) {
-        for(int i = 0; i < 3; i++) {
+        for(int i = 0; i < N; i++) {
             MPI_Isend(&rank, 1, MPI_INT, 1, 999, MPI_COMM_WORLD, &(reqs[0]));
             MPI_Isend(&rank, 1, MPI_INT, 1, 999, MPI_COMM_WORLD, &(reqs[1]));
             MPI_Waitsome(2, reqs, &outcount, indices, MPI_STATUSES_IGNORE);
@@ -33,7 +34,7 @@ int main(int argc, char *argv[]) {
     }
 
     if(rank == 1) {
-        for(int i = 0; i < 3; i++) {
+        for(int i = 0; i < N; i++) {
             MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE, 999, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE, 999, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }

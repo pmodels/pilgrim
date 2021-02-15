@@ -23,19 +23,27 @@ void read_record_args_special(int func_id, void* buff, CallSignature *cs) {
             //(int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[])
             cs->args = malloc(5 * sizeof(void*));
             cs->arg_sizes = malloc(5 * sizeof(int));
+            cs->arg_types = malloc(5 * sizeof(int));
+            cs->arg_directions = malloc(5 * sizeof(int));
             pos = 0;
 
             cs->arg_sizes[0] = sizeof(int);
+            cs->arg_types[0] = TYPE_INT;
+            cs->arg_directions[0] = DIRECTION_IN;
             cs->args[0] = malloc(cs->arg_sizes[0]);
             memcpy(cs->args[0], buff, cs->arg_sizes[0]);
             pos += cs->arg_sizes[0];
 
             cs->arg_sizes[1] = (*(int*)cs->args[0]) * sizeof(int);
+            cs->arg_types[1] = TYPE_NON_MPI;
+            cs->arg_directions[1] = DIRECTION_INOUT;
             cs->args[1] = malloc(cs->arg_sizes[1]);
             memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
             pos += cs->arg_sizes[1];
 
             cs->arg_sizes[2] = sizeof(int);
+            cs->arg_types[2] = TYPE_INT;
+            cs->arg_directions[2] = DIRECTION_OUT;
             cs->args[2] = malloc(cs->arg_sizes[2]);
             memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
             pos += cs->arg_sizes[2];
@@ -44,11 +52,15 @@ void read_record_args_special(int func_id, void* buff, CallSignature *cs) {
             if(outcount > 0) {
                 cs->arg_count = 5;
                 cs->arg_sizes[3] = outcount * sizeof(int);
+                cs->arg_types[3] = TYPE_NON_MPI;
+                cs->arg_directions[3] = DIRECTION_OUT;
                 cs->args[3] = malloc(cs->arg_sizes[3]);
                 memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
                 pos += cs->arg_sizes[3];
 
                 cs->arg_sizes[4] = outcount * 2 * sizeof(int);
+                cs->arg_types[4] = TYPE_NON_MPI;
+                cs->arg_directions[4] = DIRECTION_OUT;
                 cs->args[4] = malloc(cs->arg_sizes[4]);
                 memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
             } else {

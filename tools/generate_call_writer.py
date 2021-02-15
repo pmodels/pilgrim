@@ -12,7 +12,7 @@ def arg_type_strip(type_str):
 def is_mpi_object_arg(arg_type):
     # Do not include MPI_Status, MPI_Comm, and MPI_Offset
     mpi_objects = set([
-        "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win", "MPI_Request",
+        "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win", "MPI_Request"
         "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Comm"])
     if arg_type in mpi_objects:
         return True
@@ -32,9 +32,6 @@ def handle_special_apis(func):
 
     return False
 
-
-unique_types = set([])
-
 def codegen_read_one_arg(func, i):
 
     def find_arg_idx(func, arg_name):
@@ -43,19 +40,9 @@ def codegen_read_one_arg(func, i):
                 return idx
         return -1
 
-
-
     arg = func.arguments[i]
 
-    unique_types.add(arg_type_strip(arg.type))
-
     lines = []
-    if arg_type_strip(arg.type) == "int":
-        lines.append('cs->arg_types[%d] = TYPE_INT;' %i)
-    else:
-        lines.append('cs->arg_types[%d] = TYPE_NON_MPI;' %i)
-    lines.append('cs->arg_directions[%d] = DIRECTION_%s;' %(i, arg.direction))
-
     if 'void' in arg.type:
         lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
     elif 'MPI_Status' in arg.type:
@@ -67,7 +54,6 @@ def codegen_read_one_arg(func, i):
             lines.append('cs->arg_sizes[%d] = sizeof(MPI_Comm)+sizeof(int);' %i)
         else:
             lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
-        lines.append('cs->arg_types[%d] = TYPE_%s;' %(i, arg_type_strip(arg.type)))
     elif 'char*' in arg.type:
         if '**' not in arg.type and '[' not in arg.type:    # only consider one single string
             lines.append('cs->arg_sizes[%d] = strlen(buff+pos)+1;' %i)
@@ -91,8 +77,8 @@ def codegen_read_one_arg(func, i):
     return lines
 
 
-def generate_reader_file(funcs):
-    f = open('../src/pilgrim_read_args.c', 'w')
+def generate_call_writer_file(funcs):
+    f = open('../src/pilgrim_calls_writer.c', 'w')
     block = \
 '''/* This file is generated automatically. Do not change. */
 #include <stdlib.h>
@@ -100,10 +86,8 @@ def generate_reader_file(funcs):
 #include <mpi.h>
 #include "pilgrim.h"
 #include "pilgrim_reader.h"
-void read_record_args(int func_id, void* buff, CallSignature* cs) {
-    int length, pos;
-    size_t n;
-    switch(func_id) {
+void write_call(CallSignature *cs) {
+    switch(cs->func_id) {
 '''
     f.write(block)
 
@@ -113,12 +97,11 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
         f.write('\t\tcase ID_%s:\n\t\t{\n' %name)
 
         if handle_special_apis(func):
-            f.write('\t\t\tread_record_args_special(func_id, buff, cs);')
+            pass
+            #f.write('\t\t\tread_record_args_special(func_id, buff, cs);')
         else:
-            f.write('\t\t\tcs->arg_count = %d;' %len(func.arguments))
+            f.write('\t\t\t= %d;' %len(func.arguments))
             f.write('\n\t\t\tcs->arg_sizes = malloc(cs->arg_count * sizeof(int));')
-            f.write('\n\t\t\tcs->arg_types = malloc(cs->arg_count * sizeof(int));')
-            f.write('\n\t\t\tcs->arg_directions = malloc(cs->arg_count * sizeof(int));')
             f.write('\n\t\t\tcs->args = malloc(cs->arg_count * sizeof(void*));')
             f.write('\n\t\t\tpos = 0;')
             for i in range(len(func.arguments)):
@@ -137,6 +120,4 @@ if __name__ == "__main__":
 
     funcs = filter_with_local_mpi_functions(funcs)
 
-    generate_reader_file(funcs)
-    print(unique_types)
-    print(len(unique_types))
+    generate_call_writer_file(funcs)

@@ -14,10 +14,19 @@ typedef struct RuleHash_t {
     UT_hash_handle hh;
 } RuleHash;
 
+typedef struct VariablePool_t {
+    int value;
+    int id;
+    UT_hash_handle hh;
+} VariablePool;
+
 
 static int rank;
 static int nprocs;
 static RuleHash* rules_table;
+static VariablePool* variable_pools[15];    // One variable pool for each variable type
+static int variable_current_ids[15];
+
 
 
 void read_global_metadata(char* path, GlobalMetadata *gm) {
@@ -79,6 +88,47 @@ int decode_rule(int* decompressed_symbols, int rule_id, int start_rule_id) {
     return advance;
 }
 
+char* get_variable_name(CallSignature *cs, int i) {
+    int type = cs->arg_types[i];
+    int direction = cs->arg_directions[i];
+
+    char *name = calloc(sizeof(char), 20);
+    if(type == TYPE_NON_MPI) {
+        sprintf(name, "[Not Handled]");
+    } else if(type == TYPE_MPI_Comm) {
+        sprintf(name, "%s_0", TYPE_VAR_STR[type]);
+    } else {    // all other mpi objects with integer values
+        int value = *((int*)cs->args[i]);
+        VariablePool* var = NULL;
+        HASH_FIND_INT(variable_pools[type], &value, var);
+
+        assert(var);
+
+        if(direction == DIRECTION_IN)
+            sprintf(name, "%s_%d", TYPE_VAR_STR[type], var->id);
+        else
+            sprintf(name, "&%s_%d", TYPE_VAR_STR[type], var->id);
+    }
+
+    return name;
+}
+
+
+void write_call(FILE* f, CallSignature *cs) {
+    fprintf(f, "%s(", func_names[cs->func_id]);
+    for(int i = 0; i < cs->arg_count; i++) {
+        char* var = get_variable_name(cs, i);
+        fprintf(f, "%s", var);
+        free(var);
+
+        if(i != cs->arg_count - 1)
+            fprintf(f, ", ");
+        else
+            fprintf(f, ");\n");
+    }
+}
+
+
 /**
  * Second pass: for each rank, decode its grammar
  */
@@ -96,19 +146,7 @@ void decode_and_write(int rule_id, FILE *f, CallSignature *call_sigs) {
         // Terminal
         else {
             CallSignature *cs = &(call_sigs[sym]);
-            fprintf(f, "%s(", func_names[cs->func_id]);
-            for(int j = 0; j < cs->arg_count; j++) {
-                if(cs->arg_sizes[j] == sizeof(int)) {
-                    fprintf(f, "%d", *((int*)cs->args[j]));
-                } else
-                    fprintf(f, "Hmm");
-
-                if(j != cs->arg_count - 1)
-                    fprintf(f, ", ");
-                else
-                    fprintf(f, ");\n");
-            }
-
+            write_call(f, cs);
         }
     }
 
@@ -175,9 +213,16 @@ void read_grammars(char *path, int total_ranks, CallSignature* funcs) {
 
         // write out to this rank
         char output_path[256];
-        sprintf(output_path, "%s/%d.txt", path, rank);
-        FILE *fout = fopen(output_path, "w");
+        sprintf(output_path, "%s/main.c", path);
+        FILE *fout = fopen(output_path, "a");
+        fprintf(fout, "\n\n//======================================\n");
+        fprintf(fout, "// Code for Rank = %d\n", rank);
+        fprintf(fout, "//======================================\n");
+
+
         decode_and_write(-1, fout, funcs);
+        fprintf(fout, "//======================================\n");
+
         fclose(fout);
 
         clean_rules_table();
@@ -217,14 +262,64 @@ CallSignature* read_signatures_table(char *directory, int *num_funcs) {
         used[func_id] = 1;
     }
 
+    /*
     for(func_id = 0; func_id < 400; func_id++) {
         if(used[func_id])
-            printf("%s\n", func_names[func_id]);
+            printf("Func: %s\n", func_names[func_id]);
     }
+    */
 
     fclose(f);
     return call_sigs;
 }
+
+
+void write_init_variables(const char* path, CallSignature *call_sigs, int num_sigs) {
+
+    char output_path[256] = {0};
+    sprintf(output_path, "%s/main.c", path);
+    FILE *fout = fopen(output_path, "w");
+
+    bool comm_flag = false;
+
+    CallSignature *cs;
+    for(int i = 0; i < num_sigs; i++) {
+        cs = &(call_sigs[i]);
+        for(int j = 0; j < cs->arg_count; j++) {
+            int type = cs->arg_types[j];
+            int dir = cs->arg_directions[j];
+
+            if(type == TYPE_NON_MPI) {
+
+            } else if(type == TYPE_MPI_Comm) {
+                if(!comm_flag) {
+                    fprintf(fout, "%s %s_0 = MPI_COMM_WORLD;\n", TYPE_STR[type], TYPE_VAR_STR[type]);
+                    comm_flag = true;
+                }
+            } else {    // all types with interger values
+                int value = *((int*)cs->args[j]);
+
+                VariablePool* var = NULL;
+                HASH_FIND_INT(variable_pools[type], &value, var);
+
+                if(var == NULL) {
+                    var = malloc(sizeof(VariablePool));
+                    var->value = value;
+                    var->id = variable_current_ids[type]++;
+                    HASH_ADD_INT(variable_pools[type], value, var);
+
+                    if(dir == DIRECTION_IN)
+                        fprintf(fout, "%s %s_%d = %d;\n", TYPE_STR[type], TYPE_VAR_STR[type], var->id, value);
+                    else
+                        fprintf(fout, "%s %s_%d;\n", TYPE_STR[type], TYPE_VAR_STR[type], var->id);
+                }
+            }
+        }
+    }
+
+    fclose(fout);
+}
+
 
 int main(int argc, char** argv) {
     char *directory = argv[1];
@@ -241,14 +336,17 @@ int main(int argc, char** argv) {
     }
     */
 
-    int num_funcs;
-    CallSignature *call_sigs = read_signatures_table(directory, &num_funcs);
+    int num_sigs;
+    CallSignature *call_sigs = read_signatures_table(directory, &num_sigs);
+    write_init_variables(directory, call_sigs, num_sigs);
     read_grammars(directory, gm.ranks, call_sigs);
 
-    for(int i = 0; i < num_funcs; i++) {
+    for(int i = 0; i < num_sigs; i++) {
         for(int j = 0; j < call_sigs[i].arg_count; j++)
             free(call_sigs[i].args[j]);
         free(call_sigs[i].arg_sizes);
+        free(call_sigs[i].arg_types);
+        free(call_sigs[i].arg_directions);
         free(call_sigs[i].args);
     }
     free(call_sigs);

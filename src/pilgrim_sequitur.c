@@ -166,7 +166,7 @@ int check_digram(Grammar *grammar, Symbol *sym) {
     if(sym == NULL || sym->next == NULL || sym->next == sym)
         return 0;
 
-    Symbol *match = digram_get(grammar->digram_table, sym->val, sym->next->val);
+    Symbol *match = digram_get(grammar->digram_table, sym, sym->next);
 
     if(match == NULL) {
         // Case 1. new digram, put it in the table

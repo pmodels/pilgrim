@@ -5,6 +5,7 @@
 Symbol* new_symbol(int val, bool terminal, Symbol *rule_head) {
     Symbol* symbol = mymalloc(sizeof(Symbol));
     symbol->val = val;
+    symbol->exp = 1;
     symbol->terminal = terminal;
 
     symbol->ref = 0;

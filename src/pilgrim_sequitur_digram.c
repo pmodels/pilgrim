@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include "pilgrim_sequitur.h"
 
-#define DIGRAM_KEY_LEN sizeof(int)*2
+#define DIGRAM_KEY_LEN sizeof(int)*4
 
-void* build_digram_key(int v1, int v2) {
+void* build_digram_key(int v1, int exp1, int v2, int exp2) {
     void *key = mymalloc(DIGRAM_KEY_LEN);
     memcpy(key, &v1, sizeof(int));
-    memcpy(key+sizeof(int), &v2, sizeof(int));
+    memcpy(key+sizeof(int), &exp1, sizeof(int));
+    memcpy(key+sizeof(int)*2, &v2, sizeof(int));
+    memcpy(key+sizeof(int)*3, &exp2, sizeof(int));
     return key;
 }
 
@@ -17,9 +19,9 @@ void* build_digram_key(int v1, int v2) {
  * @param v1 The symbol value of the first symbol of the digram
  * @param v2 The symbol value of the second symbol of the digram
  */
-Symbol* digram_get(Digram *digram_table, int v1, int v2) {
+Symbol* digram_get(Digram *digram_table, Symbol* sym1, Symbol* sym2) {
 
-    void* key = build_digram_key(v1, v2);
+    void* key = build_digram_key(sym1->val, sym1->exp, sym2->val, sym2->exp);
 
     Digram *found;
     HASH_FIND(hh, digram_table, key, DIGRAM_KEY_LEN, found);
@@ -40,7 +42,7 @@ int digram_put(Digram **digram_table, Symbol *symbol) {
     if (symbol == NULL || symbol->next == NULL)
         return -1;
 
-    void* key = build_digram_key(symbol->val, symbol->next->val);
+    void* key = build_digram_key(symbol->val, symbol->exp, symbol->next->val, symbol->next->exp);
 
     Digram *found;
     HASH_FIND(hh, *digram_table, key, DIGRAM_KEY_LEN, found);
@@ -63,7 +65,7 @@ int digram_delete(Digram **digram_table, Symbol *symbol) {
     if(symbol == NULL || symbol->next == NULL)
         return 0;
 
-    void* key = build_digram_key(symbol->val, symbol->next->val);
+    void* key = build_digram_key(symbol->val, symbol->exp, symbol->next->val, symbol->next->exp);
 
     Digram *found;
     HASH_FIND(hh, *digram_table, key, DIGRAM_KEY_LEN, found);

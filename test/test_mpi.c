@@ -10,18 +10,25 @@ int main(int argc, char *argv[]) {
     int rank;
     int world_size;
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    //MPI_Barrier(MPI_COMM_WORLD);
+
+    /*
 
     int data, data2, data3;
     MPI_Allreduce(&data, &data2, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(&data, &data3, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
-    int N = 1;
+    int N = 3;
     int outcount;
     int indices[2];
     MPI_Request reqs[2];
@@ -39,6 +46,7 @@ int main(int argc, char *argv[]) {
             MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE, 999, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
     }
+    */
 
     MPI_Finalize();
 

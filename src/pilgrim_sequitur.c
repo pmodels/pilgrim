@@ -22,7 +22,7 @@ void myfree(void *ptr, size_t size) {
 }
 
 void delete_symbol(Symbol *sym) {
-    symbol_delete(sym->rule, sym);
+    symbol_delete(sym->rule, sym, true);
 }
 
 
@@ -70,7 +70,11 @@ void replace_digram(Grammar *grammar, Symbol *origin, Symbol *rule, bool delete_
     // Add a new symbol (replaced) after prev
     // may introduce another repeated digram that we need to check
     if( check_digram(grammar, prev) == 0) {
-        check_digram(grammar, replaced);
+        // it is possible that the 'replaced' symbol was deleted
+        // by the check digram function due to twins-removal rule
+        // if that's the case, we can not check the 'replaced'.
+        if(prev!=NULL && prev->next==replaced)
+            check_digram(grammar, replaced);
     }
 }
 
@@ -147,7 +151,7 @@ void process_match(Grammar *grammar, Symbol *this, Symbol *match) {
     // if is an non-terminal could be underutilized
     if(rule && rule->rule_body) {
         Symbol* tocheck = rule->rule_body->rule_head;
-        if(tocheck && tocheck->ref < 2) {
+        if(tocheck && tocheck->ref < 2 && tocheck->exp < 2) {
             #ifdef DEBUG
                 printf("rule utility:%d %d\n", tocheck->val, tocheck->ref);
             #endif
@@ -165,12 +169,14 @@ int check_digram(Grammar *grammar, Symbol *sym) {
 
     if(sym == NULL || sym->next == NULL || sym->next == sym)
         return 0;
+
     // First of all, check if digram is of form a^i a^j
     // If so, make it to a^(i+j)
     if(sym->val == sym->next->val) {
         digram_delete(&(grammar->digram_table), sym->prev);
-        sym->exp += sym->next->exp;
-        delete_symbol(sym->next);
+        sym->exp = sym->exp + sym->next->exp;
+        //delete_symbol(sym->next);
+        symbol_delete(sym->next->rule, sym->next, false);
         return check_digram(grammar, sym->prev);
     }
 
@@ -203,10 +209,13 @@ int check_digram(Grammar *grammar, Symbol *sym) {
 }
 
 Symbol* append_terminal(Grammar* grammar, int val) {
+
     Symbol *sym = new_symbol(val, 1, true, NULL);
 
     Symbol *main_rule = grammar->rules;
     Symbol *tail;
+
+
     if(main_rule->rule_body)
         tail = main_rule->rule_body->prev;  // Get the last symbol
     else

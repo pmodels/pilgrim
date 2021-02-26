@@ -10,22 +10,14 @@ int main(int argc, char *argv[]) {
     int rank;
     int world_size;
 
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Barrier(MPI_COMM_WORLD);
+    for(int i = 0; i < 4; i++) {
+        for(int j = 0; j < 2; j++) {
+            MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+            MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
 
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    //MPI_Barrier(MPI_COMM_WORLD);
-    //MPI_Barrier(MPI_COMM_WORLD);
 
     /*
 

@@ -25,7 +25,7 @@ Symbol* new_symbol(int val, int exp, bool terminal, Symbol *rule_head) {
  * `rule` of terminals and non-terminals point to the rule it belongs to
  *
  * rule_head of an non-terminal points to its corresponding rule
- *          and the rule_head filed in this case will be set beforing
+ *          and the rule_head filed in this case will be set before
  *          calling this function
  */
 void symbol_put(Symbol *rule, Symbol *pos, Symbol *sym) {
@@ -40,12 +40,13 @@ void symbol_put(Symbol *rule, Symbol *pos, Symbol *sym) {
     if(IS_NONTERMINAL(sym))
         rule_ref(sym->rule_head);
 }
-void symbol_delete(Symbol *rule, Symbol *sym) {
-    if(IS_NONTERMINAL(sym))
+void symbol_delete(Symbol *rule, Symbol *sym, bool deref) {
+    if(IS_NONTERMINAL(sym) && deref)
         rule_deref(sym->rule_head);
 
     DL_DELETE(rule->rule_body, sym);
     myfree(sym, sizeof(Symbol));
+    sym = NULL;
 }
 
 
@@ -73,6 +74,7 @@ void rule_put(Symbol **rules_head, Symbol *rule) {
 void rule_delete(Symbol **rules_head, Symbol *rule) {
     DL_DELETE(*rules_head, rule);
     myfree(rule, sizeof(Symbol));
+    rule = NULL;
 }
 
 void rule_ref(Symbol *rule) {

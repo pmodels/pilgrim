@@ -87,7 +87,7 @@ void sequitur_cleanup(Grammar *grammar);
 
 Symbol* new_symbol(int val, int exp, bool terminal, Symbol* rule_head);
 void symbol_put(Symbol *rule, Symbol *pos, Symbol *sym);
-void symbol_delete(Symbol *rule, Symbol *sym);
+void symbol_delete(Symbol *rule, Symbol *sym, bool deref);
 
 
 Symbol* digram_get(Digram *digram_table, Symbol* sym1, Symbol* sym2);

@@ -2,10 +2,10 @@
 #include "pilgrim_sequitur.h"
 
 
-Symbol* new_symbol(int val, bool terminal, Symbol *rule_head) {
+Symbol* new_symbol(int val, int exp, bool terminal, Symbol *rule_head) {
     Symbol* symbol = mymalloc(sizeof(Symbol));
     symbol->val = val;
-    symbol->exp = 1;
+    symbol->exp = exp;
     symbol->terminal = terminal;
 
     symbol->ref = 0;
@@ -53,7 +53,7 @@ void symbol_delete(Symbol *rule, Symbol *sym) {
  * New rule head symbol
  */
 Symbol* new_rule(Grammar *grammar) {
-    Symbol* rule = new_symbol(grammar->rule_id, false, NULL);
+    Symbol* rule = new_symbol(grammar->rule_id, 1, false, NULL);
     grammar->rule_id = grammar->rule_id - 1;
     return rule;
 }

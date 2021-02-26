@@ -85,7 +85,7 @@ void sequitur_finalize(const char* output_path, Grammar *grammar);
 void sequitur_cleanup(Grammar *grammar);
 
 
-Symbol* new_symbol(int val, bool terminal, Symbol* rule_head);
+Symbol* new_symbol(int val, int exp, bool terminal, Symbol* rule_head);
 void symbol_put(Symbol *rule, Symbol *pos, Symbol *sym);
 void symbol_delete(Symbol *rule, Symbol *sym);
 

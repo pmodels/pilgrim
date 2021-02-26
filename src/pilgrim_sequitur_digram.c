@@ -27,8 +27,9 @@ Symbol* digram_get(Digram *digram_table, Symbol* sym1, Symbol* sym2) {
     HASH_FIND(hh, digram_table, key, DIGRAM_KEY_LEN, found);
     myfree(key, DIGRAM_KEY_LEN);
 
-    if(found)
+    if(found) {
         return found->symbol;
+    }
     return NULL;
 }
 

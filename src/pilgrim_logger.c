@@ -311,7 +311,7 @@ int* dump_function_entries() {
         errno = 0;
         FILE *trace_file = fopen(FUNCS_OUTPUT_PATH, "wb");
         if(trace_file) {
-            printf("[pilgrim] FST Size: %.2fKB\n", merged_size/1024.0);
+            printf("[pilgrim] CST Size: %.2fKB\n", merged_size/1024.0);
             fwrite(merged, 1, merged_size, trace_file);
             fclose(trace_file);
         } else {

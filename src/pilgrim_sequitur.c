@@ -67,14 +67,19 @@ void replace_digram(Grammar *grammar, Symbol *origin, Symbol *rule, bool delete_
 
     symbol_put(origin_rule, prev, replaced);
 
+
     // Add a new symbol (replaced) after prev
     // may introduce another repeated digram that we need to check
     if( check_digram(grammar, prev) == 0) {
-        // it is possible that the 'replaced' symbol was deleted
-        // by the check digram function due to twins-removal rule
-        // if that's the case, we can not check the 'replaced'.
-        if(prev!=NULL && prev->next==replaced)
+        if(prev == NULL) {
             check_digram(grammar, replaced);
+        } else {
+            // it is possible that the 'replaced' symbol was deleted
+            // by the check digram function due to twins-removal rule
+            // if that's the case, we can not check the 'replaced'.
+            if(prev->next==replaced)
+                check_digram(grammar, replaced);
+        }
     }
 }
 
@@ -235,7 +240,7 @@ void print_digrams(Grammar *grammar) {
     HASH_ITER(hh, grammar->digram_table, digram, tmp) {
         int v1, v2;
         memcpy(&v1, digram->key, sizeof(int));
-        memcpy(&v2, digram->key+sizeof(int), sizeof(int));
+        memcpy(&v2, digram->key+sizeof(int)*2, sizeof(int));
 
         if(digram->symbol->rule)
             printf("digram(%d, %d, rule:%d): %d %d\n", v1, v2, digram->symbol->rule->val, digram->symbol->val, digram->symbol->next->val);
@@ -330,7 +335,7 @@ void sequitur_finalize(const char* output_path, Grammar *grammar) {
 
     if(mpi_rank == 0) {
         print_rules(grammar);
-        // print_digrams();
+        print_digrams(grammar);
     }
 
     // Write grammars from all ranks to one file

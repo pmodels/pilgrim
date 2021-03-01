@@ -29,7 +29,7 @@ int* serialize_grammar(Grammar *grammar, size_t *len) {
 
     DL_FOREACH(grammar->rules, rule) {
         DL_COUNT(rule->rule_body, sym, symbols_count);
-        total_integers += symbols_count;
+        total_integers += symbols_count*2;  // val and exp
     }
 
     int i = 0;
@@ -42,6 +42,7 @@ int* serialize_grammar(Grammar *grammar, size_t *len) {
 
         DL_FOREACH(rule->rule_body, sym) {
             data[i++] = sym->val;       // rule id does not change
+            data[i++] = sym->exp;
         }
     }
 
@@ -92,7 +93,7 @@ void compress_and_dump2(const char* path, int *gathered, size_t len) {
     sequitur_init_rule_id(&grammar, start_rule_id);
     for(size_t i = 0; i < len; i++)
         append_terminal(&grammar, gathered[i]);
-    print_rules(&grammar);
+    //print_rules(&grammar);
 
     size_t compressed_len;
     int* compressed_grammar = serialize_grammar(&grammar, &compressed_len);
@@ -120,81 +121,6 @@ typedef struct RuleHash_t {
     int count;
     UT_hash_handle hh;
 } RuleHash;
-
-static RuleHash *rules_table;
-void compress_and_dump(const char* path, int *gathered, int world_size) {
-    int rank = 0;
-    int *ptr = gathered;
-    int total_rules = 0;
-    size_t total_size = 0;
-    while(rank < world_size) {
-        int rules = *ptr;
-        total_rules += rules;
-        ptr++;
-
-        for(int i = 0; i < rules; i++) {
-            int rule_id = *ptr;
-            ptr++;
-
-            int symbols = *ptr;
-            ptr++;
-
-            RuleHash* entry;
-            HASH_FIND(hh, rules_table, ptr, sizeof(int)*symbols, entry);
-            if(entry) {
-                entry->count++;
-            } else {
-                entry = pilgrim_malloc(sizeof(RuleHash));
-                entry->key = pilgrim_malloc(sizeof(int) * symbols);
-                entry->key_len = sizeof(int) * symbols;
-                entry->count = 0;
-                memcpy(entry->key, ptr, entry->key_len);
-                HASH_ADD_KEYPTR(hh, rules_table, entry->key, entry->key_len, entry);
-                total_size += (entry->key_len);
-            }
-
-            ptr += symbols;
-        }
-        rank++;
-   }
-    int unique_rules = HASH_COUNT(rules_table);
-
-    Grammar grammar;
-    sequitur_init(&grammar);
-
-    RuleHash *r, *tmp;
-    HASH_ITER(hh, rules_table, r, tmp) {
-        ptr = (int*) r->key;
-        for(int i = 0; i < r->key_len/sizeof(int); i++) {
-            int symbol_id = ptr[i];
-            if(symbol_id < 0)
-                symbol_id = 100000 + (-symbol_id);
-
-            append_terminal(&grammar, symbol_id);
-
-        }
-        HASH_DEL(rules_table, r);
-        pilgrim_free(r->key, r->key_len);
-        pilgrim_free(r, sizeof(RuleHash));
-    }
-
-    size_t compressed_len;
-    int* compressed_grammar = serialize_grammar(&grammar, &compressed_len);
-    sequitur_cleanup(&grammar);
-
-    errno = 0;
-    FILE* f = fopen(path, "wb");
-    if(f) {
-        fwrite(compressed_grammar, sizeof(int), compressed_len, f);
-        fclose(f);
-    } else {
-        printf("Open file: %s failed, errno: %d!\n", path, errno);
-    }
-    myfree(compressed_grammar, sizeof(int)*compressed_len);
-
-    printf("[pilgrim] total rules: %d, unique rules: %d, total size: %fMB, another sequitur pass: %.2f KB\n",
-            total_rules, unique_rules, total_size/1024.0/1024.0, compressed_len*sizeof(int)/1024.0);
-}
 
 
 void sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_size) {

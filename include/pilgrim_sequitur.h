@@ -77,7 +77,7 @@ typedef struct Grammar_t {
  * Alls the rest are used internally for the Sequitur
  * algorithm implementation.
  */
-Symbol* append_terminal(Grammar  *grammar, int val);
+Symbol* append_terminal(Grammar *grammar, int val);
 void sequitur_init(Grammar *grammar);
 void sequitur_init_rule_id(Grammar *grammar, int start_rule_id);
 void sequitur_update(Grammar *grammar, int *update_terminal_id);

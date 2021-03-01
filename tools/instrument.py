@@ -102,6 +102,7 @@ def codegen_assemble_args(func):
         elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for rank-1/rank+1 as src or dest
             line += "\tint %s_rank = g_mpi_rank - %s;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = -99999;\n" %(arg.name, arg.name)
+            line += "\tif(%s == MPI_PROC_NULL) %s_rank = -88888;\n" %(arg.name, arg.name)
             assemble_args.append( "&%s_rank" %arg.name )
         else:
             assemble_args.append( "&"+arg.name)

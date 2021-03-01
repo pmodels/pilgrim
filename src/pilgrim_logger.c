@@ -282,6 +282,64 @@ RecordHash* merge_function_entries() {
     return merged_table;
 }
 
+void print_cst(RecordHash *cst) {
+    int count[400];
+    for(int i = 0; i < 400; i++)
+        count[i] = 0;
+
+    RecordHash *entry, *tmp;
+    HASH_ITER(hh, cst, entry, tmp) {
+        if(__logger.rank == 0) {
+            short func_id;
+            memcpy(&func_id, entry->key, sizeof(short));
+            count[func_id]++;
+
+            int args[8];
+            int arg_start = sizeof(short);
+            if(func_id == ID_MPI_Irecv) {
+                memcpy(args, entry->key+arg_start, sizeof(args));
+                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, source: %d, tag: %d, req: %d\n",
+                        args[0], args[1], args[2], args[3], args[4], args[7]);
+            }
+
+            /*
+            if(func_id == ID_MPI_Send) {
+                memcpy(args, entry->key+arg_start, sizeof(args));
+                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d\n",
+                        args[0], args[1], args[2], args[3], args[4]);
+            }
+            if(func_id == ID_MPI_Irecv) {
+                memcpy(args, entry->key+arg_start, sizeof(args));
+                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, source: %d, tag: %d, req: %d\n",
+                        args[0], args[1], args[2], args[3], args[4], args[7]);
+            }
+            if(func_id == ID_MPI_Isend) {
+                memcpy(args, entry->key+arg_start, sizeof(args));
+                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d, req: %d\n",
+                        args[0], args[1], args[2], args[3], args[4], args[7]);
+            }
+            if(func_id == ID_MPI_Waitsome) {
+                int incount, outcount;
+                memcpy(&incount, entry->key+arg_start, sizeof(int));
+                int *reqs = dlmalloc(sizeof(int) * incount);
+                memcpy(reqs, entry->key+arg_start+sizeof(int), sizeof(int)*incount);
+                memcpy(&outcount, entry->key+arg_start+sizeof(int)*(1+incount), sizeof(int));
+                printf("[pilgrim] Waitsome(intcount=%d, reqs:", incount);
+                for(int i = 0; i < incount; i++)
+                    printf("%d ", reqs[i]);
+                dlfree(reqs);
+                printf(", outcount: %d)\n", outcount);
+            }
+            */
+        }
+    }
+
+    for(int i = 0; i < 400; i++) {
+        if(count[i] > 0)
+            printf("Func: %s, count: %d\n", func_names[i], count[i]);
+    }
+}
+
 
 /**
  * Once we gathered function entries from every rank
@@ -317,6 +375,7 @@ int* dump_function_entries() {
         } else {
             printf("[pilgrim] Open file: %s failed, errno: %d\n", FUNCS_OUTPUT_PATH, errno);
         }
+        print_cst(merged_table);
         cleanup_function_entry_table(merged_table);
     }
 
@@ -434,47 +493,6 @@ void logger_init() {
     __logger.recording = true;
 }
 
-void count_func_entries() {
-    int count[400];
-    for(int i = 0; i < 400; i++)
-        count[i] = 0;
-
-    RecordHash *entry, *tmp;
-    HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        if(__logger.rank == 0) {
-            short func_id;
-            memcpy(&func_id, entry->key, sizeof(short));
-            count[func_id]++;
-
-            int args[8];
-            int arg_start = sizeof(short);
-            /*
-            if(func_id == ID_MPI_Isend) {
-                memcpy(args, entry->key+arg_start, sizeof(args));
-                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d, req: %d\n",
-                        args[0], args[1], args[2], args[3], args[4], args[7]);
-            }
-            if(func_id == ID_MPI_Waitsome) {
-                int incount, outcount;
-                memcpy(&incount, entry->key+arg_start, sizeof(int));
-                int *reqs = dlmalloc(sizeof(int) * incount);
-                memcpy(reqs, entry->key+arg_start+sizeof(int), sizeof(int)*incount);
-                memcpy(&outcount, entry->key+arg_start+sizeof(int)*(1+incount), sizeof(int));
-                printf("[pilgrim] Waitsome(intcount=%d, reqs:", incount);
-                for(int i = 0; i < incount; i++)
-                    printf("%d ", reqs[i]);
-                dlfree(reqs);
-                printf(", outcount: %d)\n", outcount);
-            }
-            */
-        }
-    }
-
-    for(int i = 0; i < 400; i++) {
-        if(count[i] > 0)
-            printf("Func: %s, count: %d\n", func_names[i], count[i]);
-    }
-}
 
 
 void logger_exit() {
@@ -497,7 +515,6 @@ void logger_exit() {
     //sequitur_finalize("logs/intervals.dat", &(__logger.intervals_grammar), NULL);
 
     // 3. Clean up all resources
-    // count_func_entries();
     cleanup_function_entry_table(__logger.hash_head);
     OffsetNode *elt, *tmp2;
     LL_FOREACH_SAFE(__logger.offset_list, elt, tmp2) {

@@ -87,11 +87,12 @@ void compress_and_dump2(const char* path, int *gathered, size_t len) {
             start_rule_id = gathered[i];
     start_rule_id--;
 
+    // run a second sequitur pass
     Grammar grammar;
     sequitur_init_rule_id(&grammar, start_rule_id);
-
     for(size_t i = 0; i < len; i++)
         append_terminal(&grammar, gathered[i]);
+    print_rules(&grammar);
 
     size_t compressed_len;
     int* compressed_grammar = serialize_grammar(&grammar, &compressed_len);
@@ -202,7 +203,6 @@ void sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_siz
     int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
 
     if(mpi_rank == 0) {
-        //compress_and_dump(path, gathered_grammars, mpi_size);
         compress_and_dump2(path, gathered_grammars, len);
         myfree(gathered_grammars, sizeof(int)*len);
     }

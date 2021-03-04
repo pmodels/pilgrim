@@ -81,7 +81,7 @@ int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, size_t* len_s
     return gathered_grammars;
 }
 
-void compress_and_dump2(const char* path, int *gathered, size_t len) {
+double compress_and_dump(const char* path, int *gathered, size_t len) {
     int start_rule_id = -1;
     for(size_t i = 0; i < len; i++)
         if(gathered[i] < start_rule_id)
@@ -103,7 +103,7 @@ void compress_and_dump2(const char* path, int *gathered, size_t len) {
     FILE* f = fopen(path, "wb");
     if(f) {
         printf("[pilgrim] Uncompressed grammar size: %.2fKB, another sequitur pass: %.2fKB\n",
-                sizeof(int)*len/1024.0, sizeof(int)*compressed_len/1024.0);
+                len/1024.0*sizeof(int), compressed_len/1024.0*sizeof(int));
         fwrite(&start_rule_id, sizeof(int), 1, f);
         fwrite(&len, sizeof(size_t), 1, f);
         fwrite(&compressed_len, sizeof(size_t), 1, f);
@@ -112,6 +112,8 @@ void compress_and_dump2(const char* path, int *gathered, size_t len) {
     } else {
         printf("Open file: %s failed, errno: %d!\n", path, errno);
     }
+
+    return (compressed_len/1024.0*sizeof(int));
 }
 
 
@@ -123,13 +125,17 @@ typedef struct RuleHash_t {
 } RuleHash;
 
 
-void sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_size) {
+double sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_size) {
+    double compressed_size = 0;
+
     // gathered_grammars is NULL except rank 0
     size_t len;
     int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
 
     if(mpi_rank == 0) {
-        compress_and_dump2(path, gathered_grammars, len);
+        compressed_size = compress_and_dump(path, gathered_grammars, len);
         myfree(gathered_grammars, sizeof(int)*len);
     }
+
+    return compressed_size;
 }

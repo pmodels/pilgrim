@@ -57,6 +57,9 @@ struct Logger {
     Grammar grammar;                // Context-free-grammar for the function calls
     Grammar durations_grammar;
     Grammar intervals_grammar;
+
+    double final_grammar_size;      // compressed grammar size (in KB)
+    double final_cst_size;          // compressed cst size (in KB)
 };
 
 // Global object to access the Logger fileds
@@ -363,13 +366,13 @@ int* dump_function_entries() {
     if(__logger.rank != 0)
         merged = pilgrim_malloc(merged_size);
     PMPI_Bcast(merged, merged_size, MPI_BYTE, 0, MPI_COMM_WORLD);
+    __logger.final_cst_size = merged_size / 1024.0;
 
     // 3. Rank 0 write the merged function table to the file
     if(__logger.rank == 0) {
         errno = 0;
         FILE *trace_file = fopen(FUNCS_OUTPUT_PATH, "wb");
         if(trace_file) {
-            printf("[pilgrim] CST Size: %.2fKB\n", merged_size/1024.0);
             fwrite(merged, 1, merged_size, trace_file);
             fclose(trace_file);
         } else {
@@ -503,14 +506,13 @@ void logger_exit() {
     //printf("[pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
     //        HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
 
-    // 1. Dump loacl metadata and call signatures
+    // 1. Inter-process compression of CSTs
     int* update_terminal_id = dump_function_entries();
-
-    // 2. Merge and dump grammars
     sequitur_update(&(__logger.grammar), update_terminal_id);
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
 
-    sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
+    // 2. Inter-process copmression of Grammars
+    __logger.final_grammar_size = sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
     //sequitur_finalize("logs/durations.dat", &(__logger.durations_grammar), NULL);
     //sequitur_finalize("logs/intervals.dat", &(__logger.intervals_grammar), NULL);
 
@@ -524,6 +526,13 @@ void logger_exit() {
 
     MPI_OBJ_CLEANUP_ALL();
 
-    if(__logger.rank == 0)
+
+    // Output statistics
+    if(__logger.rank == 0) {
         pilgrim_report_memory_status();
+
+        printf("[pilgrim] CST Size: %.2fKB, Grammar Size: %.2fKB\n", __logger.final_cst_size, __logger.final_grammar_size);
+    }
+
+
 }

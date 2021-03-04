@@ -81,7 +81,7 @@ Symbol* append_terminal(Grammar *grammar, int val);
 void sequitur_init(Grammar *grammar);
 void sequitur_init_rule_id(Grammar *grammar, int start_rule_id);
 void sequitur_update(Grammar *grammar, int *update_terminal_id);
-void sequitur_finalize(const char* output_path, Grammar *grammar);
+double sequitur_finalize(const char* output_path, Grammar *grammar);
 void sequitur_cleanup(Grammar *grammar);
 
 
@@ -106,7 +106,7 @@ int digram_delete(Digram **digram_table, Symbol *symbol);
 
 
 /* pilgrim_sequitur_logger.c */
-void sequitur_dump(const char *path, Grammar *grammar, int mpi_rank, int mpi_size);
+double sequitur_dump(const char *path, Grammar *grammar, int mpi_rank, int mpi_size);
 
 
 /* pilgrim_sequitur_utils.c */

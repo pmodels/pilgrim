@@ -268,14 +268,16 @@ void sequitur_update(Grammar *grammar, int *update_terminal_id) {
     }
 }
 
-void sequitur_finalize(const char* output_path, Grammar *grammar) {
+double sequitur_finalize(const char* output_path, Grammar *grammar) {
 
-    if(mpi_rank == 1) {
-        // print_rules(grammar);
+    if(mpi_rank == 0) {
+        //print_rules(grammar);
         // print_digrams(grammar);
     }
 
     // Write grammars from all ranks to one file
-    sequitur_dump(output_path, grammar, mpi_rank, mpi_size);
+    double compressed_size = sequitur_dump(output_path, grammar, mpi_rank, mpi_size);
     sequitur_cleanup(grammar);
+
+    return compressed_size;
 }

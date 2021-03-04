@@ -531,7 +531,8 @@ void logger_exit() {
     if(__logger.rank == 0) {
         pilgrim_report_memory_status();
 
-        printf("[pilgrim] CST Size: %.2fKB, Grammar Size: %.2fKB\n", __logger.final_cst_size, __logger.final_grammar_size);
+        printf("[pilgrim] CST Size: %.2fKB, Grammar Size: %.2fKB, Total: %.2fKB\n",
+                __logger.final_cst_size, __logger.final_grammar_size, __logger.final_cst_size + __logger.final_grammar_size);
     }
 
 

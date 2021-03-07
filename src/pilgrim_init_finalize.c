@@ -28,7 +28,7 @@ void pilgrim_exit() {
     PMPI_Reduce(&tstart, &tmin, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
     PMPI_Reduce(&tend , &tmax, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
     if (g_mpi_rank == 0)
-        printf("[Pilgrim] app elapsed time: %.2f, pilgrim fianlize time: %.2f\n", tmax-tmin, finalize_time);
+        printf("[pilgrim] app elapsed time: %.2f, pilgrim fianlize time: %.2f\n", tmax-tmin, finalize_time);
 }
 
 int MPI_Init(int *argc, char ***argv) {

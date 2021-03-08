@@ -62,7 +62,11 @@ void* concat_function_args(short func_id, int arg_count, void** args, int* arg_s
     pos += sizeof(func_id);
 
     for(i = 0; i < arg_count; i++) {
-        memcpy(key+pos, args[i], arg_sizes[i]);
+        if(args[i])
+            memcpy(key+pos, args[i], arg_sizes[i]);
+        else
+            memset(key+pos, 0, arg_sizes[i]);
+
         pos += arg_sizes[i];
     }
 

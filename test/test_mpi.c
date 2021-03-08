@@ -18,7 +18,6 @@ int main(int argc, char *argv[]) {
         MPI_Barrier(MPI_COMM_WORLD);
     }
 
-
     /*
 
     int data, data2, data3;

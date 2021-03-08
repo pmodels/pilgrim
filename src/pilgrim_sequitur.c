@@ -200,9 +200,9 @@ int check_digram(Grammar *grammar, Symbol *sym) {
 
 }
 
-Symbol* append_terminal(Grammar* grammar, int val) {
+Symbol* append_terminal(Grammar* grammar, int val, int exp) {
 
-    Symbol *sym = new_symbol(val, 1, true, NULL);
+    Symbol *sym = new_symbol(val, exp, true, NULL);
 
     Symbol *main_rule = grammar->rules;
     Symbol *tail;
@@ -271,7 +271,7 @@ void sequitur_update(Grammar *grammar, int *update_terminal_id) {
 double sequitur_finalize(const char* output_path, Grammar *grammar) {
 
     if(mpi_rank == 0) {
-        //print_rules(grammar);
+        // print_rules(grammar);
         // print_digrams(grammar);
     }
 

@@ -81,19 +81,37 @@ int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, size_t* len_s
     return gathered_grammars;
 }
 
-double compress_and_dump(const char* path, int *gathered, size_t len) {
-    int start_rule_id = -1;
-    for(size_t i = 0; i < len; i++)
-        if(gathered[i] < start_rule_id)
-            start_rule_id = gathered[i];
-    start_rule_id--;
+double compress_and_dump(const char* path, int mpi_size, int *gathered, size_t len) {
 
     // run a second sequitur pass
     Grammar grammar;
+    int start_rule_id = min_in_array(gathered, len)  -1;
     sequitur_init_rule_id(&grammar, start_rule_id);
-    for(size_t i = 0; i < len; i++)
-        append_terminal(&grammar, gathered[i]);
-    //print_rules(&grammar);
+
+
+    size_t i = 0;
+    int rules, rule_val, symbols, symbol_val, symbol_exp;
+    for(int rank = 0; rank < mpi_size; rank++) {
+        // Grammar of one rank
+        rules = gathered[i++];
+        append_terminal(&grammar, rules, 1);
+        // Each rule of this grammar
+        for(int rule_idx = 0; rule_idx < rules; rule_idx++) {
+            rule_val = gathered[i++];
+            symbols = gathered[i++];
+            append_terminal(&grammar, rule_val, 1);
+            append_terminal(&grammar, symbols, 1);
+            // All symbols of one rule
+            for(int sym_id = 0; sym_id < symbols; sym_id++) {
+                symbol_val = gathered[i++];
+                symbol_exp = gathered[i++];
+                append_terminal(&grammar, symbol_val, symbol_exp);
+            }
+        }
+    }
+
+    print_rules(&grammar);
+
 
     size_t compressed_len;
     int* compressed_grammar = serialize_grammar(&grammar, &compressed_len);
@@ -133,7 +151,7 @@ double sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_s
     int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
 
     if(mpi_rank == 0) {
-        compressed_size = compress_and_dump(path, gathered_grammars, len);
+        compressed_size = compress_and_dump(path, mpi_size, gathered_grammars, len);
         myfree(gathered_grammars, sizeof(int)*len);
     }
 

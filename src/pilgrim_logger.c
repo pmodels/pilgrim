@@ -440,7 +440,7 @@ void write_record(Record record) {
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }
 
-    append_terminal(&(__logger.grammar), entry->terminal_id);
+    append_terminal(&(__logger.grammar), entry->terminal_id, 1);
 
     /*
      * Durations and Intervals
@@ -449,8 +449,8 @@ void write_record(Record record) {
 
      int dur_id = get_duration_id(duration);
      int interval_id = get_interval_id(interval);
-     append_terminal(&(__logger.durations_grammar), dur_id);
-     append_terminal(&(__logger.intervals_grammar), interval_id);
+     append_terminal(&(__logger.durations_grammar), dur_id, 1);
+     append_terminal(&(__logger.intervals_grammar), interval_id, 1);
      if(__logger.rank == 0)
      printf("duration: %f, id: %d, interval: %f, id: %d\n", duration, dur_id, interval, interval_id);
      */

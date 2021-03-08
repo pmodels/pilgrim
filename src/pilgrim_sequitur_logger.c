@@ -110,7 +110,7 @@ double compress_and_dump(const char* path, int mpi_size, int *gathered, size_t l
         }
     }
 
-    print_rules(&grammar);
+    //print_rules(&grammar);
 
 
     size_t compressed_len;

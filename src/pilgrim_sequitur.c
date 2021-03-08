@@ -172,6 +172,7 @@ int check_digram(Grammar *grammar, Symbol *sym) {
         return check_digram(grammar, sym->prev);
     }
 
+
     Symbol *match = digram_get(grammar->digram_table, sym, sym->next);
 
     if(match == NULL) {
@@ -206,7 +207,6 @@ Symbol* append_terminal(Grammar* grammar, int val, int exp) {
 
     Symbol *main_rule = grammar->rules;
     Symbol *tail;
-
 
     if(main_rule->rule_body)
         tail = main_rule->rule_body->prev;  // Get the last symbol

@@ -297,15 +297,19 @@ void print_cst(RecordHash *cst) {
             memcpy(&func_id, entry->key, sizeof(short));
             count[func_id]++;
 
-            int args[8];
+            int args[6];
             int arg_start = sizeof(short);
+            /*
+            if(func_id == ID_MPI_Igatherv) {
+                memcpy(args, entry->key+arg_start, sizeof(args));
+                printf("[pilgrim] sendbuf: %d, sencount: %d, sendtype: %d, recvbuf: %d, recvconts: %d, displs: %d\n",
+                        args[0], args[1], args[2], args[3], args[4], args[5]);
+            }
             if(func_id == ID_MPI_Irecv) {
                 memcpy(args, entry->key+arg_start, sizeof(args));
                 printf("[pilgrim] buf id: %d, count: %d, datatype: %d, source: %d, tag: %d, req: %d\n",
                         args[0], args[1], args[2], args[3], args[4], args[7]);
             }
-
-            /*
             if(func_id == ID_MPI_Send) {
                 memcpy(args, entry->key+arg_start, sizeof(args));
                 printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d\n",

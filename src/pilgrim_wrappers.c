@@ -452,7 +452,14 @@ int MPI_Igatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void
 	MPI_Datatype obj_0 = sendtype;
 	MPI_Datatype obj_1 = recvtype;
 	MPI_Comm obj_2 = comm;
-	void **args = assemble_args_list(10, addr2id(sendbuf), &sendcount, MPI_OBJ_ID(MPI_Datatype, &obj_0), addr2id(recvbuf), recvcounts, displs, MPI_OBJ_ID(MPI_Datatype, &obj_1), &root, MPI_OBJ_ID(MPI_Comm, &obj_2), MPI_OBJ_ID(MPI_Request, request));
+
+    void **args;
+    if(g_mpi_rank == root) {
+	    args = assemble_args_list(10, addr2id(sendbuf), &sendcount, MPI_OBJ_ID(MPI_Datatype, &obj_0), addr2id(recvbuf), recvcounts, displs, MPI_OBJ_ID(MPI_Datatype, &obj_1), &root, MPI_OBJ_ID(MPI_Comm, &obj_2), MPI_OBJ_ID(MPI_Request, request));
+    }  else {
+	    args = assemble_args_list(10, addr2id(sendbuf), &sendcount, MPI_OBJ_ID(MPI_Datatype, &obj_0), addr2id(recvbuf), &placeholder, &placeholder, MPI_OBJ_ID(MPI_Datatype, &obj_1), &root, MPI_OBJ_ID(MPI_Comm, &obj_2), MPI_OBJ_ID(MPI_Request, request));
+    }
+
 	int sizes[] = { sizeof(int), sizeof(int), sizeof(int), sizeof(int), 1*sizeof(const int), 1*sizeof(const int), sizeof(int), sizeof(int), sizeof(MPI_Comm)+sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(10, sizes, args);
 }
@@ -1115,8 +1122,12 @@ int MPI_Neighbor_alltoallv(const void *sendbuf, const int sendcounts[], const in
 	MPI_Datatype obj_0 = sendtype;
 	MPI_Datatype obj_1 = recvtype;
 	MPI_Comm obj_2 = comm;
+
+    int len;
+    PMPI_Comm_size(comm, &len);
+
 	void **args = assemble_args_list(9, addr2id(sendbuf), sendcounts, sdispls, MPI_OBJ_ID(MPI_Datatype, &obj_0), addr2id(recvbuf), recvcounts, rdispls, MPI_OBJ_ID(MPI_Datatype, &obj_1), MPI_OBJ_ID(MPI_Comm, &obj_2));
-	int sizes[] = { sizeof(int), 1*sizeof(const int), 1*sizeof(const int), sizeof(int), sizeof(int), 1*sizeof(const int), 1*sizeof(const int), sizeof(int), sizeof(MPI_Comm)+sizeof(int) };
+	int sizes[] = { sizeof(int), len*sizeof(const int), len*sizeof(const int), sizeof(int), sizeof(int), 1*sizeof(const int), 1*sizeof(const int), sizeof(int), sizeof(MPI_Comm)+sizeof(int) };
 	PILGRIM_TRACING_2(9, sizes, args);
 }
 int MPI_Publish_name(const char *service_name, MPI_Info info, const char *port_name)
@@ -2338,6 +2349,7 @@ int MPI_File_seek_shared(MPI_File fh, MPI_Offset offset, int whence)
 	int sizes[] = { sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
+/*
 double MPI_Wtime(void)
 {
 	PILGRIM_TRACING_1(double, MPI_Wtime, ());
@@ -2345,6 +2357,7 @@ double MPI_Wtime(void)
 	int* sizes = NULL;
 	PILGRIM_TRACING_2(0, sizes, args);
 }
+*/
 int MPI_Add_error_class(int *errorclass)
 {
 	PILGRIM_TRACING_1(int, MPI_Add_error_class, (errorclass));

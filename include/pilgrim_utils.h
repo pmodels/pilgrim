@@ -15,6 +15,8 @@ void* concat_function_args(short func_id, int arg_count, void** args, int* arg_s
 
 int randint();
 
+int min_in_array(int* arr, size_t len);
+
 
 
 #endif

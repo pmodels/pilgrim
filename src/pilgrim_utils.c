@@ -77,3 +77,12 @@ int randint() {
     srand((unsigned) time(&t) + rank * pid);
     return rand();
 }
+
+int min_in_array(int* arr, size_t len) {
+    int min_val = arr[0];
+    for(int i = 1; i < len; i++) {
+        if(arr[i] < min_val)
+            min_val = arr[i];
+    }
+    return min_val;
+}

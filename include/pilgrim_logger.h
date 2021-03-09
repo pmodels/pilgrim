@@ -18,6 +18,18 @@ typedef struct _Record {
     int res;                    // result returned from the original function call
 } Record;
 
+// Entry in uthash
+// Call signature as Key
+// Terminal symbol as Val
+typedef struct RecordHash_t {
+    void *key;                      // func_id + arguments + duration, used as key
+    int key_len;
+    int rank;
+    int terminal_id;                // terminal id used for sequitur compression
+    double tstart;                  // last call's tstart
+    UT_hash_handle hh;
+} RecordHash;
+
 
 typedef struct _LocalMetadata {
     int rank;

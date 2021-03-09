@@ -12,30 +12,21 @@
 #include "pilgrim.h"
 #include "pilgrim_sequitur.h"
 #include "pilgrim_timings.h"
+#include "pilgrim_pattern_recognition.h"
 #include "utlist.h"
 #include "uthash.h"
 #include "mpi.h"
 
 
+#define TIME_RESOLUTION 0.000001
 #define OUTPUT_DIR              "pilgrim-logs"
 char GRAMMAR_OUTPUT_PATH[256];
 char FUNCS_OUTPUT_PATH[256];
 char METADATA_OUTPUT_PATH[256];
 
 
-#define TIME_RESOLUTION 0.000001
 
 static int current_terminal_id = 0;
-
-
-// Entry in uthash
-typedef struct RecordHash_t {
-    void *key;                      // func_id + arguments + duration, used as key
-    int key_len;
-    int terminal_id;                // terminal id used for sequitur compression
-    double tstart;                  // last call's tstart
-    UT_hash_handle hh;
-} RecordHash;
 
 
 typedef struct OffsetNode_t {
@@ -93,9 +84,9 @@ void cleanup_function_entry_table(RecordHash* table) {
  * Serialize the local function entries into
  * a contiguous memory space.
  * | number of entries |
- * | terminal id 1 | key len 1 | key 1 |
+ * | terminal id 1 | rank | key len 1 | key 1 |
  * ...
- * | terminal id N | key len N | key N |
+ * | terminal id N | rank | key len N | key N |
  *
  * @len: output, the length of this memory space
  * @return: the address of this memory space.
@@ -106,7 +97,7 @@ void* serialize_function_entries(RecordHash *table, size_t *len) {
 
     RecordHash *entry, *tmp;
     HASH_ITER(hh, table, entry, tmp) {
-        *len = *len + entry->key_len + sizeof(int)*2;
+        *len = *len + entry->key_len + sizeof(int)*3;
     }
 
     int count = HASH_COUNT(table);
@@ -119,6 +110,9 @@ void* serialize_function_entries(RecordHash *table, size_t *len) {
     HASH_ITER(hh, table, entry, tmp) {
 
         memcpy(ptr, &entry->terminal_id, sizeof(int));
+        ptr = ptr + sizeof(int);
+
+        memcpy(ptr, &entry->rank, sizeof(int));
         ptr = ptr + sizeof(int);
 
         memcpy(ptr, &entry->key_len, sizeof(int));
@@ -144,6 +138,9 @@ RecordHash* deserialize_function_entries(void *data) {
         entry = pilgrim_malloc(sizeof(RecordHash));
 
         memcpy( &(entry->terminal_id), ptr, sizeof(int) );
+        ptr += sizeof(int);
+
+        memcpy( &(entry->rank), ptr, sizeof(int) );
         ptr += sizeof(int);
 
         memcpy( &(entry->key_len), ptr, sizeof(int) );
@@ -206,6 +203,7 @@ RecordHash* copy_function_entries(RecordHash* origin) {
         new_entry = pilgrim_malloc(sizeof(RecordHash));
         new_entry->terminal_id = entry->terminal_id;
         new_entry->key_len = entry->key_len;
+        new_entry->rank = entry->rank;
         new_entry->key = pilgrim_malloc(entry->key_len);
         memcpy(new_entry->key, entry->key, entry->key_len);
         HASH_ADD_KEYPTR(hh, table, new_entry->key, new_entry->key_len, new_entry);
@@ -227,12 +225,16 @@ RecordHash* merge_function_entries() {
             buf = pilgrim_malloc(size);
             PMPI_Recv(buf, size, MPI_BYTE, rank+gap/2, gap, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-            int entries, key_len;
+            int cst_rank, entries, key_len;
             void *ptr = buf;
             memcpy(&entries, ptr, sizeof(int));
             ptr = ptr + sizeof(int);
             for(int i = 0; i < entries; i++) {
                 // skip 4 bytes terminal id
+                ptr = ptr + sizeof(int);
+
+                // 4 bytes rank 
+                memcpy(&cst_rank, ptr, sizeof(int));
                 ptr = ptr + sizeof(int);
 
                 // 4 bytes key length
@@ -256,6 +258,7 @@ RecordHash* merge_function_entries() {
                     entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
                     entry->key = key;
                     entry->key_len = key_len;
+                    entry->rank = cst_rank;
                     HASH_ADD_KEYPTR(hh, merged_table, key, key_len, entry);
                 }
             }
@@ -276,6 +279,7 @@ RecordHash* merge_function_entries() {
 
     // Update (re-assign) terminal id for all unique signatures
     if(rank == 0) {
+        //linear_regression(merged_table);
         int terminal_id = 0;
         RecordHash *entry, *tmp;
         HASH_ITER(hh, merged_table, entry, tmp) {
@@ -438,6 +442,7 @@ void write_record(Record record) {
         entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
         entry->key = key;
         entry->key_len = key_len;
+        entry->rank = __logger.rank;
         entry->tstart = record.tstart;
         entry->terminal_id = current_terminal_id;
         current_terminal_id++;

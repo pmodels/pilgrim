@@ -11,10 +11,12 @@ double pilgrim_wtime();
 /* Put many arguments (char *) in a list (char**) */
 void** assemble_args_list(int arg_count, ...);
 
+void* concat_function_args(short func_id, int arg_count, void** args, int* arg_sizes, int* key_len);
+
 int randint();
 
+int min_in_array(int* arr, size_t len);
 
-unsigned char* pilgrim_sha256(const unsigned char *d, unsigned long n, unsigned char *md);
-char *base64encode(const void *b64_encode_this, int encode_this_many_bytes);
+
 
 #endif

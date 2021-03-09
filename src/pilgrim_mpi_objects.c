@@ -87,6 +87,8 @@ MPI_OBJ_DEFINE(MPI_Message);
  */
 RequestHash *hash_MPI_Request;
 RequestNode *list_MPI_Request;
+RequestNodeHash *request_free_ids;
+
 static int invalid_request_id = -1;
 static int allocated_request_id = 0;
 
@@ -97,6 +99,43 @@ RequestHash* request_hash_entry(MPI_Request *req) {
     RequestHash *entry = NULL;
     HASH_FIND(hh, hash_MPI_Request, req, sizeof(MPI_Request), entry);
     return entry;
+}
+
+int* create_request_id(MPI_Request *req, void* signature, int signature_len) {
+    if(req==NULL || *req == MPI_REQUEST_NULL) {
+        return &invalid_request_id;
+    }
+
+    RequestHash* entry = pilgrim_malloc(sizeof(RequestHash));
+    entry->key = pilgrim_malloc(sizeof(MPI_Request));
+    memcpy(entry->key, req, sizeof(MPI_Request));
+    entry->key_len = sizeof(MPI_Request);
+    entry->signature = signature;
+    entry->signature_len = signature_len;
+    //entry->any_source = (source == MPI_ANY_SOURCE);
+    //entry->any_tag = (tag == MPI_ANY_TAG);
+    HASH_ADD_KEYPTR(hh, hash_MPI_Request, entry->key, entry->key_len, entry);
+
+    RequestNodeHash *ids_pool = NULL;
+    HASH_FIND(hh, request_free_ids, signature, signature_len, ids_pool);
+    if(ids_pool == NULL) {
+        ids_pool = pilgrim_malloc(sizeof(RequestNodeHash));
+        ids_pool->key = pilgrim_malloc(signature_len);
+        memcpy(ids_pool->key, signature, signature_len);
+        ids_pool->key_len = signature_len;
+        ids_pool->free_ids = NULL;
+        HASH_ADD_KEYPTR(hh, request_free_ids, ids_pool->key, signature_len, ids_pool);
+    }
+
+    entry->req_node = ids_pool->free_ids;               // get the first (head) free id
+    if(entry->req_node == NULL) {                       // free list is empty, create one according to allocated_request_id
+        entry->req_node = (RequestNode*) pilgrim_malloc(sizeof(RequestNode));
+        entry->req_node->id = allocated_request_id++;
+    } else {                                            // free list is not empty, get the first one and remove it from list
+        DL_DELETE(ids_pool->free_ids, entry->req_node);
+    }
+
+    return &(entry->req_node->id);
 }
 
 int* request2id(MPI_Request *req, int source, int tag) {
@@ -114,6 +153,9 @@ int* request2id(MPI_Request *req, int source, int tag) {
         entry->any_source = (source == MPI_ANY_SOURCE);
         entry->any_tag = (tag == MPI_ANY_TAG);
 
+        entry->signature = NULL;
+        entry->signature_len = 0;
+
         if(entry->req_node == NULL) {                       // free list is empty, create one according to allocated_request_id
             entry->req_node = (RequestNode*) pilgrim_malloc(sizeof(RequestNode));
             entry->req_node->id = allocated_request_id++;
@@ -126,12 +168,25 @@ int* request2id(MPI_Request *req, int source, int tag) {
     return &(entry->req_node->id);
 }
 
-void free_request(MPI_Request *req) {
+int* get_object_id_MPI_Request(MPI_Request *req) {
+    request2id(req, 0, 0);
+}
+
+void object_release_MPI_Request(MPI_Request *req) {
     RequestHash *entry = request_hash_entry(req);
     if(entry) {
-        DL_APPEND(list_MPI_Request, entry->req_node);    // Add the id back to the free list
         HASH_DEL(hash_MPI_Request, entry);
+
+        RequestNodeHash *ids_pool = NULL;
+        HASH_FIND(hh, request_free_ids, entry->signature, entry->signature_len, ids_pool);
+        if(ids_pool != NULL) {
+            DL_APPEND(ids_pool->free_ids, entry->req_node);    // Add the id back to the signature-specific free list
+        } else {
+            DL_APPEND(list_MPI_Request, entry->req_node);      // Add the id back to the universal free list
+        }
+
         pilgrim_free(entry->key, entry->key_len);
+        pilgrim_free(entry->signature, entry->signature_len);
         pilgrim_free(entry, sizeof(RequestHash));
     }
 }
@@ -141,11 +196,27 @@ void object_cleanup_MPI_Request() {
     HASH_ITER(hh, hash_MPI_Request, entry, tmp) {
         HASH_DEL(hash_MPI_Request, entry);
         pilgrim_free(entry->key, entry->key_len);
+        pilgrim_free(entry->signature, entry->signature_len);
         pilgrim_free(entry->req_node, sizeof(RequestNode));
         pilgrim_free(entry, sizeof(RequestHash));
     }
-    RequestNode *node, *tmp2;
-    DL_FOREACH_SAFE(list_MPI_Request, node, tmp2) {
+
+    RequestNodeHash *entry2, *tmp2;
+    RequestNode *node, *tmp3;
+
+    HASH_ITER(hh, request_free_ids, entry2, tmp2) {
+        HASH_DEL(request_free_ids, entry2);
+
+        DL_FOREACH_SAFE(entry2->free_ids, node, tmp3) {
+            DL_DELETE(entry2->free_ids, node);
+            pilgrim_free(node, sizeof(RequestNode));
+        }
+
+        pilgrim_free(entry2->key, entry2->key_len);
+        pilgrim_free(entry2, sizeof(RequestNodeHash));
+    }
+
+    DL_FOREACH_SAFE(list_MPI_Request, node, tmp3) {
         DL_DELETE(list_MPI_Request, node);
         pilgrim_free(node, sizeof(RequestNode));
     }

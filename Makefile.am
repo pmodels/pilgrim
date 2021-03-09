@@ -20,11 +20,14 @@ bin_PROGRAMS = pilgrim_reader
 
 libpilgrim_la_SOURCES =
 pilgrim_reader_SOURCES = 
+pilgrim_reader_CFLAGS = $(AM_CFLAGS)
+
 
 AM_CPPFLAGS = -g -rdynamic
 AM_CFLAGS = -g -rdynamic
 
-libpilgrim_la_LDFLAGS = -lm -lssl -lcrypto -version-info @libpilgrim_so_version@
+
+libpilgrim_la_LDFLAGS = -lm -version-info @libpilgrim_so_version@
 
 include $(top_srcdir)/src/Makefile.mk
 include $(top_srcdir)/include/Makefile.mk

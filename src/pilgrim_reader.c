@@ -1,12 +1,31 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "pilgrim.h"
+#include "pilgrim_reader.h"
+#include "uthash.h"
+#include "dlmalloc-2.8.6.h"
+
+typedef struct RuleHash_t {
+    int rule_id;
+    int *rule_body;
+    int symbols;        // how many symbols in the rule body
+    UT_hash_handle hh;
+} RuleHash;
+
+typedef struct VariablePool_t {
+    int value;
+    int id;
+    UT_hash_handle hh;
+} VariablePool;
 
 
-int rank;
-int nprocs;
-static int func_counter[400];
+static int rank;
+static int nprocs;
+static RuleHash* rules_table;
+static VariablePool* variable_pools[15];    // One variable pool for each variable type
+static int variable_current_ids[15];
 
 
 
@@ -37,37 +56,183 @@ void print_rule(int rule_head, int* sym, int symbols) {
     printf("\n");
 }
 
-void read_grammar(FILE *f) {
-    int rules;
-    fread(&rules, sizeof(int), 1, f);
-    printf("rules: %d\n", rules);
 
-    for(int i = 0; i < rules; i++) {
-        int rule_head, symbols, *sym;
+/*
+ * First pass: decompress the inter-process compressed grammars
+ *
+ * Recursively decode rules
+ */
+int decode_rule(int* decompressed_symbols, int rule_id, int start_rule_id) {
+    int advance = 0;
 
-        fread(&rule_head, sizeof(int), 1, f);
-        fread(&symbols, sizeof(int), 1, f);
+    RuleHash *rule;
+    HASH_FIND_INT(rules_table, &rule_id, rule);
 
-        sym = (int*) malloc(sizeof(int) * symbols);
-        fread(sym, sizeof(int), symbols, f);
-        //print_rule(rule_head, sym, symbols);
-        free(sym);
+    for(int i = 0; i < rule->symbols; i++) {
+        int sym = rule->rule_body[i];
+
+        // Non-terminal, i.e., a rule
+        if(sym < start_rule_id) {
+            int advanced = decode_rule(decompressed_symbols, sym, start_rule_id);
+            decompressed_symbols += advanced;
+            advance += advanced;
+        }
+        // Terminal
+        else {
+            *decompressed_symbols = sym;
+            decompressed_symbols++;
+            advance++;
+        }
+    }
+
+    return advance;
+}
+
+char* get_variable_name(CallSignature *cs, int i) {
+    int type = cs->arg_types[i];
+    int direction = cs->arg_directions[i];
+
+    char *name = calloc(sizeof(char), 20);
+    if(type == TYPE_NON_MPI) {
+        sprintf(name, "[Not Handled]");
+    } else if(type == TYPE_MPI_Comm) {
+        sprintf(name, "%s_0", TYPE_VAR_STR[type]);
+    } else {    // all other mpi objects with integer values
+        int value = *((int*)cs->args[i]);
+        VariablePool* var = NULL;
+        HASH_FIND_INT(variable_pools[type], &value, var);
+
+        assert(var);
+
+        if(direction == DIRECTION_IN)
+            sprintf(name, "%s_%d", TYPE_VAR_STR[type], var->id);
+        else
+            sprintf(name, "&%s_%d", TYPE_VAR_STR[type], var->id);
+    }
+
+    return name;
+}
+
+
+void write_call(FILE* f, CallSignature *cs) {
+    fprintf(f, "%s(", func_names[cs->func_id]);
+    for(int i = 0; i < cs->arg_count; i++) {
+        char* var = get_variable_name(cs, i);
+        fprintf(f, "%s", var);
+        free(var);
+
+        if(i != cs->arg_count - 1)
+            fprintf(f, ", ");
+        else
+            fprintf(f, ");\n");
     }
 }
 
-void read_grammars(char *path, int nprocs) {
+
+/**
+ * Second pass: for each rank, decode its grammar
+ */
+void decode_and_write(int rule_id, FILE *f, CallSignature *call_sigs) {
+
+    RuleHash *rule;
+    HASH_FIND_INT(rules_table, &rule_id, rule);
+    for(int i = 0; i < rule->symbols; i++) {
+        int sym = rule->rule_body[i];
+
+        // Non-terminal, i.e., a rule
+        if(sym < -1) {
+            decode_and_write(sym, f, call_sigs);
+        }
+        // Terminal
+        else {
+            CallSignature *cs = &(call_sigs[sym]);
+            write_call(f, cs);
+        }
+    }
+
+}
+
+
+void clean_rules_table() {
+    RuleHash *current, *tmp;
+    HASH_ITER(hh, rules_table, current, tmp) {
+        HASH_DEL(rules_table, current);
+        free(current->rule_body);
+        free(current);
+    }
+    rules_table = NULL;
+}
+
+void read_grammars(char *path, int total_ranks, CallSignature* funcs) {
     char grammar_file_path[256];
     sprintf(grammar_file_path, "%s/grammars.dat", path);
 
     FILE* f = fopen(grammar_file_path, "rb");
 
-    for(int i = 0; i < nprocs; i++)
-        read_grammar(f);
+    int start_rule_id, rules;
+    size_t before, after;
 
+    fread(&start_rule_id, sizeof(int), 1, f);
+    fread(&before, sizeof(size_t), 1, f);
+    fread(&after, sizeof(size_t), 1, f);
+    fread(&rules, sizeof(int), 1, f);
+
+    printf("Start_rule_id: %d, Before copmression: %ld, After compression: %ld, Rules: %d\n", start_rule_id, before, after, rules);
+
+    for(int i = 0; i < rules; i++) {
+        RuleHash *rule = malloc(sizeof(RuleHash));
+
+        fread(&(rule->rule_id), sizeof(int), 1, f);
+        fread(&(rule->symbols), sizeof(int), 1, f);
+
+        rule->rule_body = (int*) malloc(sizeof(int) * rule->symbols);
+        fread(rule->rule_body, sizeof(int), rule->symbols, f);
+
+        print_rule(rule->rule_id, rule->rule_body, rule->symbols);
+        HASH_ADD_INT(rules_table, rule_id, rule);
+    }
+
+    int *decompressed  = malloc(sizeof(int) * before);
+    decode_rule(decompressed, start_rule_id, start_rule_id);
+    clean_rules_table();
+
+    int pos = 0;
+    for(int rank = 0; rank < total_ranks; rank++) {
+        int rules = decompressed[pos++];
+
+        for(int j = 0; j < rules; j++) {
+            RuleHash *rule = malloc(sizeof(RuleHash));
+            rule->rule_id = decompressed[pos++];
+            rule->symbols = decompressed[pos++];
+            rule->rule_body = malloc(sizeof(int) * rule->symbols);
+            memcpy(rule->rule_body, &(decompressed[pos]), sizeof(int)*rule->symbols);
+            pos += (rule->symbols);
+            HASH_ADD_INT(rules_table, rule_id, rule);
+            printf("rank: %d ,add rule: %d, symbols: %d\n", rank, rule->rule_id, rule->symbols);
+        }
+
+        // write out to this rank
+        char output_path[256];
+        sprintf(output_path, "%s/main.c", path);
+        FILE *fout = fopen(output_path, "a");
+        fprintf(fout, "\n\n//======================================\n");
+        fprintf(fout, "// Code for Rank = %d\n", rank);
+        fprintf(fout, "//======================================\n");
+
+
+        decode_and_write(-1, fout, funcs);
+        fprintf(fout, "//======================================\n");
+
+        fclose(fout);
+
+        clean_rules_table();
+    }
+
+    free(decompressed);
     fclose(f);
 }
 
-void read_signatures_table(char *directory) {
+CallSignature* read_signatures_table(char *directory, int *num_funcs) {
     bool used[400] = {0};
 
     char path[256];
@@ -75,35 +240,86 @@ void read_signatures_table(char *directory) {
     FILE* f = fopen(path, "rb");
 
     short func_id;
-    int entries, key_len, terminal, duration, interval, nargs;
+    int entries, key_len, terminal, duration, interval;
     fread(&entries, sizeof(int), 1, f);
+    *num_funcs = entries;
+
+    CallSignature *call_sigs = malloc(sizeof(CallSignature) * entries);
 
     char buff[100];
     for(int i = 0; i < entries; i++) {
+
         fread(&terminal, sizeof(int), 1, f);
         fread(&key_len, sizeof(int), 1, f);
 
         fread(&func_id, sizeof(short), 1, f);
-        fread(&duration, sizeof(int), 1, f);
-        fread(&interval, sizeof(int), 1, f);
+        fread(buff, 1, key_len-sizeof(short), f);
 
-        fread(buff, 1, key_len-sizeof(short)-2*sizeof(int), f);
+        assert(terminal < entries);
+        call_sigs[terminal].func_id = func_id;
+        read_record_args(func_id, buff, &(call_sigs[terminal]));
 
         used[func_id] = 1;
-        //printf("terminal id: %d, func: %s, key len: %d\n", terminal, func_names[func_id], key_len);
-        void** args = read_record_args(func_id, buff, &nargs);
-        for(int j = 0; j < nargs; j++)
-            free(args[j]);
-        free(args);
     }
 
+    /*
     for(func_id = 0; func_id < 400; func_id++) {
         if(used[func_id])
-            printf("%s\n", func_names[func_id]);
+            printf("Func: %s\n", func_names[func_id]);
     }
+    */
 
     fclose(f);
+    return call_sigs;
 }
+
+
+void write_init_variables(const char* path, CallSignature *call_sigs, int num_sigs) {
+
+    char output_path[256] = {0};
+    sprintf(output_path, "%s/main.c", path);
+    FILE *fout = fopen(output_path, "w");
+
+    bool comm_flag = false;
+
+    CallSignature *cs;
+    for(int i = 0; i < num_sigs; i++) {
+        cs = &(call_sigs[i]);
+        for(int j = 0; j < cs->arg_count; j++) {
+            int type = cs->arg_types[j];
+            int dir = cs->arg_directions[j];
+
+            if(type == TYPE_NON_MPI) {
+
+            } else if(type == TYPE_MPI_Comm) {
+                if(!comm_flag) {
+                    fprintf(fout, "%s %s_0 = MPI_COMM_WORLD;\n", TYPE_STR[type], TYPE_VAR_STR[type]);
+                    comm_flag = true;
+                }
+            } else {    // all types with interger values
+                int value = *((int*)cs->args[j]);
+
+                VariablePool* var = NULL;
+                HASH_FIND_INT(variable_pools[type], &value, var);
+
+                if(var == NULL) {
+                    var = malloc(sizeof(VariablePool));
+                    var->value = value;
+                    var->id = variable_current_ids[type]++;
+                    HASH_ADD_INT(variable_pools[type], value, var);
+
+                    if(dir == DIRECTION_IN)
+                        fprintf(fout, "%s %s_%d = %d;\n", TYPE_STR[type], TYPE_VAR_STR[type], var->id, value);
+                    else
+                        fprintf(fout, "%s %s_%d;\n", TYPE_STR[type], TYPE_VAR_STR[type], var->id);
+                }
+            }
+        }
+    }
+
+    fclose(fout);
+}
+
 
 int main(int argc, char** argv) {
     char *directory = argv[1];
@@ -120,8 +336,21 @@ int main(int argc, char** argv) {
     }
     */
 
-    read_grammars(directory, gm.ranks);
-    read_signatures_table(directory);
+    int num_sigs;
+    CallSignature *call_sigs = read_signatures_table(directory, &num_sigs);
+    write_init_variables(directory, call_sigs, num_sigs);
+    read_grammars(directory, gm.ranks, call_sigs);
+
+    for(int i = 0; i < num_sigs; i++) {
+        for(int j = 0; j < call_sigs[i].arg_count; j++)
+            free(call_sigs[i].args[j]);
+        free(call_sigs[i].arg_sizes);
+        free(call_sigs[i].arg_types);
+        free(call_sigs[i].arg_directions);
+        free(call_sigs[i].args);
+    }
+    free(call_sigs);
+
 
     return 0;
 }

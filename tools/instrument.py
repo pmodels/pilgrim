@@ -6,8 +6,9 @@ from codegen import MPIFunction, MPIArgument
 def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
+    os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
-    os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
+    #os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
     for line in f.readlines():
         func_name = line.strip().split('(')[0].split(' ')[1]
@@ -75,9 +76,9 @@ def codegen_assemble_args(func):
                 if func.name == "MPI_Irecv" or func.name == "MPI_Recv_init":
                     assemble_args.append("request2id("+arg.name+", source, tag)")
                 else:
-                    assemble_args.append("request2id("+arg.name+", 0, 0)")
+                    assemble_args.append("MPI_OBJ_ID(MPI_Request, "+arg.name+")")
             else:
-                assemble_args.append("request2id(&"+arg.name+", 0, 0)")
+                assemble_args.append("MPI_OBJ_ID(MPI_Request, &"+arg.name+")")
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             line += "\tappend_offset(%s);\n" %(arg.name)
         elif 'MPI_Status*' in arg.type:
@@ -99,14 +100,14 @@ def codegen_assemble_args(func):
         elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
         elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for rank-1/rank+1 as src or dest
-            line += "\tint %s_rank = self_rank - %s;\n" %(arg.name, arg.name)
+            line += "\tint %s_rank = g_mpi_rank - %s;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = -99999;\n" %(arg.name, arg.name)
+            line += "\tif(%s == MPI_PROC_NULL) %s_rank = -88888;\n" %(arg.name, arg.name)
             assemble_args.append( "&%s_rank" %arg.name )
         else:
             assemble_args.append( "&"+arg.name)
 
     if func.name == "MPI_Comm_rank":
-        line += "\tself_rank = *rank;\n"
         # For MPI_Comm_rank, we always set the last argument(output rank) to 0
         # So every process will have the same function signature.
         assemble_args[-1] = "&placeholder"
@@ -215,7 +216,6 @@ def generate_wrapper_file(funcs):
     f.write('#include <stdlib.h>\n')
     f.write('#include <string.h>\n')
     f.write('#include "pilgrim.h"\n')
-    f.write('static int self_rank;\n')
     f.write('static int placeholder = 0;\n')
 
     for name in funcs:

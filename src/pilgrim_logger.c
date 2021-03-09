@@ -12,30 +12,21 @@
 #include "pilgrim.h"
 #include "pilgrim_sequitur.h"
 #include "pilgrim_timings.h"
+#include "pilgrim_pattern_recognition.h"
 #include "utlist.h"
 #include "uthash.h"
 #include "mpi.h"
 
 
+#define TIME_RESOLUTION 0.000001
 #define OUTPUT_DIR              "pilgrim-logs"
 char GRAMMAR_OUTPUT_PATH[256];
 char FUNCS_OUTPUT_PATH[256];
 char METADATA_OUTPUT_PATH[256];
 
 
-#define TIME_RESOLUTION 0.000001
 
 static int current_terminal_id = 0;
-
-
-// Entry in uthash
-typedef struct RecordHash_t {
-    void *key;                      // func_id + arguments + duration, used as key
-    int key_len;
-    int terminal_id;                // terminal id used for sequitur compression
-    double tstart;                  // last call's tstart
-    UT_hash_handle hh;
-} RecordHash;
 
 
 typedef struct OffsetNode_t {
@@ -57,6 +48,9 @@ struct Logger {
     Grammar grammar;                // Context-free-grammar for the function calls
     Grammar durations_grammar;
     Grammar intervals_grammar;
+
+    double final_grammar_size;      // compressed grammar size (in KB)
+    double final_cst_size;          // compressed cst size (in KB)
 };
 
 // Global object to access the Logger fileds
@@ -65,10 +59,10 @@ struct Logger __logger;
 
 void append_offset(MPI_Offset offset) {
     /*
-       OffsetNode *new_node = (OffsetNode*) pilgrim_malloc(sizeof(OffsetNode));
-       new_node->offset = offset;
-       LL_PREPEND(__logger.offset_list, new_node);
-       */
+    OffsetNode *new_node = (OffsetNode*) pilgrim_malloc(sizeof(OffsetNode));
+    new_node->offset = offset;
+    LL_PREPEND(__logger.offset_list, new_node);
+    */
 }
 
 bool is_recording() {
@@ -90,9 +84,9 @@ void cleanup_function_entry_table(RecordHash* table) {
  * Serialize the local function entries into
  * a contiguous memory space.
  * | number of entries |
- * | terminal id 1 | key len 1 | key 1 |
+ * | terminal id 1 | rank | key len 1 | key 1 |
  * ...
- * | terminal id N | key len N | key N |
+ * | terminal id N | rank | key len N | key N |
  *
  * @len: output, the length of this memory space
  * @return: the address of this memory space.
@@ -103,7 +97,7 @@ void* serialize_function_entries(RecordHash *table, size_t *len) {
 
     RecordHash *entry, *tmp;
     HASH_ITER(hh, table, entry, tmp) {
-        *len = *len + entry->key_len + sizeof(int)*2;
+        *len = *len + entry->key_len + sizeof(int)*3;
     }
 
     int count = HASH_COUNT(table);
@@ -116,6 +110,9 @@ void* serialize_function_entries(RecordHash *table, size_t *len) {
     HASH_ITER(hh, table, entry, tmp) {
 
         memcpy(ptr, &entry->terminal_id, sizeof(int));
+        ptr = ptr + sizeof(int);
+
+        memcpy(ptr, &entry->rank, sizeof(int));
         ptr = ptr + sizeof(int);
 
         memcpy(ptr, &entry->key_len, sizeof(int));
@@ -141,6 +138,9 @@ RecordHash* deserialize_function_entries(void *data) {
         entry = pilgrim_malloc(sizeof(RecordHash));
 
         memcpy( &(entry->terminal_id), ptr, sizeof(int) );
+        ptr += sizeof(int);
+
+        memcpy( &(entry->rank), ptr, sizeof(int) );
         ptr += sizeof(int);
 
         memcpy( &(entry->key_len), ptr, sizeof(int) );
@@ -203,6 +203,7 @@ RecordHash* copy_function_entries(RecordHash* origin) {
         new_entry = pilgrim_malloc(sizeof(RecordHash));
         new_entry->terminal_id = entry->terminal_id;
         new_entry->key_len = entry->key_len;
+        new_entry->rank = entry->rank;
         new_entry->key = pilgrim_malloc(entry->key_len);
         memcpy(new_entry->key, entry->key, entry->key_len);
         HASH_ADD_KEYPTR(hh, table, new_entry->key, new_entry->key_len, new_entry);
@@ -213,7 +214,6 @@ RecordHash* copy_function_entries(RecordHash* origin) {
 RecordHash* merge_function_entries() {
     int gap = 2;
     int rank = __logger.rank;
-    int terminal_id = 0;
 
     RecordHash* merged_table = copy_function_entries(__logger.hash_head);
 
@@ -221,18 +221,20 @@ RecordHash* merge_function_entries() {
         size_t size;
         void* buf;
         if(rank % gap == 0) {                 // RECEIVER
-
             PMPI_Recv(&size, sizeof(size), MPI_BYTE, rank+gap/2, gap, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             buf = pilgrim_malloc(size);
             PMPI_Recv(buf, size, MPI_BYTE, rank+gap/2, gap, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-            int added = 0;
-            int entries, key_len;
+            int cst_rank, entries, key_len;
             void *ptr = buf;
             memcpy(&entries, ptr, sizeof(int));
             ptr = ptr + sizeof(int);
             for(int i = 0; i < entries; i++) {
                 // skip 4 bytes terminal id
+                ptr = ptr + sizeof(int);
+
+                // 4 bytes rank 
+                memcpy(&cst_rank, ptr, sizeof(int));
                 ptr = ptr + sizeof(int);
 
                 // 4 bytes key length
@@ -247,21 +249,21 @@ RecordHash* merge_function_entries() {
                 // Check to see if this function entry is already in the table
                 RecordHash *entry = NULL;
                 HASH_FIND(hh, merged_table, key, key_len, entry);
-                if(entry) {                         // Found, do nothing for now...
+
+                // Rank 0 needs to update terminal id to ensure
+                // everyone has unique terminal id
+                if(entry) {
                     pilgrim_free(key, key_len);
-                } else {                            // Not exist, add to hash table
+                } else {                                // Not exist, add to hash table
                     entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
                     entry->key = key;
                     entry->key_len = key_len;
-                    entry->terminal_id = terminal_id++; // only important for rank 0
+                    entry->rank = cst_rank;
                     HASH_ADD_KEYPTR(hh, merged_table, key, key_len, entry);
-                    added++;
                 }
             }
 
             pilgrim_free(buf, size);
-            if(rank == 0)
-                printf("Recv from %d %ldbytes, add %d entries, total entries: %d\n", rank+gap/2, size, added, HASH_COUNT(merged_table));
 
         } else if((rank+gap/2) % gap ==0) {   // SENDER
 
@@ -275,7 +277,78 @@ RecordHash* merge_function_entries() {
         gap = gap * 2;
     }
 
+    // Update (re-assign) terminal id for all unique signatures
+    if(rank == 0) {
+        //linear_regression(merged_table);
+        int terminal_id = 0;
+        RecordHash *entry, *tmp;
+        HASH_ITER(hh, merged_table, entry, tmp) {
+            entry->terminal_id = terminal_id++;
+        }
+    }
     return merged_table;
+}
+
+void print_cst(RecordHash *cst) {
+    int count[400];
+    for(int i = 0; i < 400; i++)
+        count[i] = 0;
+
+    RecordHash *entry, *tmp;
+    HASH_ITER(hh, cst, entry, tmp) {
+        if(__logger.rank == 0) {
+            short func_id;
+            memcpy(&func_id, entry->key, sizeof(short));
+            count[func_id]++;
+
+            int args[6];
+            int arg_start = sizeof(short);
+            /*
+            if(func_id == ID_MPI_Igatherv) {
+                memcpy(args, entry->key+arg_start, sizeof(args));
+                printf("[pilgrim] sendbuf: %d, sencount: %d, sendtype: %d, recvbuf: %d, recvconts: %d, displs: %d\n",
+                        args[0], args[1], args[2], args[3], args[4], args[5]);
+            }
+            if(func_id == ID_MPI_Irecv) {
+                memcpy(args, entry->key+arg_start, sizeof(args));
+                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, source: %d, tag: %d, req: %d\n",
+                        args[0], args[1], args[2], args[3], args[4], args[7]);
+            }
+            if(func_id == ID_MPI_Send) {
+                memcpy(args, entry->key+arg_start, sizeof(args));
+                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d\n",
+                        args[0], args[1], args[2], args[3], args[4]);
+            }
+            if(func_id == ID_MPI_Irecv) {
+                memcpy(args, entry->key+arg_start, sizeof(args));
+                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, source: %d, tag: %d, req: %d\n",
+                        args[0], args[1], args[2], args[3], args[4], args[7]);
+            }
+            if(func_id == ID_MPI_Isend) {
+                memcpy(args, entry->key+arg_start, sizeof(args));
+                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d, req: %d\n",
+                        args[0], args[1], args[2], args[3], args[4], args[7]);
+            }
+            if(func_id == ID_MPI_Waitsome) {
+                int incount, outcount;
+                memcpy(&incount, entry->key+arg_start, sizeof(int));
+                int *reqs = dlmalloc(sizeof(int) * incount);
+                memcpy(reqs, entry->key+arg_start+sizeof(int), sizeof(int)*incount);
+                memcpy(&outcount, entry->key+arg_start+sizeof(int)*(1+incount), sizeof(int));
+                printf("[pilgrim] Waitsome(intcount=%d, reqs:", incount);
+                for(int i = 0; i < incount; i++)
+                    printf("%d ", reqs[i]);
+                dlfree(reqs);
+                printf(", outcount: %d)\n", outcount);
+            }
+            */
+        }
+    }
+
+    for(int i = 0; i < 400; i++) {
+        if(count[i] > 0)
+            printf("Func: %s, count: %d\n", func_names[i], count[i]);
+    }
 }
 
 
@@ -301,6 +374,7 @@ int* dump_function_entries() {
     if(__logger.rank != 0)
         merged = pilgrim_malloc(merged_size);
     PMPI_Bcast(merged, merged_size, MPI_BYTE, 0, MPI_COMM_WORLD);
+    __logger.final_cst_size = merged_size / 1024.0;
 
     // 3. Rank 0 write the merged function table to the file
     if(__logger.rank == 0) {
@@ -310,8 +384,9 @@ int* dump_function_entries() {
             fwrite(merged, 1, merged_size, trace_file);
             fclose(trace_file);
         } else {
-            printf("Open file: %s failed, errno: %d\n", FUNCS_OUTPUT_PATH, errno);
+            printf("[pilgrim] Open file: %s failed, errno: %d\n", FUNCS_OUTPUT_PATH, errno);
         }
+        print_cst(merged_table);
         cleanup_function_entry_table(merged_table);
     }
 
@@ -326,13 +401,18 @@ int* dump_function_entries() {
         if(res)
             update_terminal_id[entry->terminal_id] = res->terminal_id;
         else
-            printf("%d Not possible! Not exist in merged table?\n", __logger.rank);
+            printf("[pilgrim] %d Not possible! Not exist in merged table?\n", __logger.rank);
     }
 
     cleanup_function_entry_table(merged_table);
     return update_terminal_id;
 }
 
+// Compose key: (func_id, arguments)
+void* compose_call_signature(Record *record, int *key_len) {
+    return concat_function_args(record->func_id, record->arg_count,
+            record->args, record->arg_sizes, key_len);
+}
 
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
@@ -343,25 +423,11 @@ void write_record(Record record) {
        record.tstart-__logger.local_metadata.tstart,
        record.tend-__logger.local_metadata.tstart, func_names[record.func_id]);
     */
+
     __logger.local_metadata.records_count++;
 
-    // Compose key: (func_id, arguments)
-    // Compute key length first, note func_id is a short type
-    int i;
-    int key_len = sizeof(record.func_id);
-    for(i = 0; i < record.arg_count; i++)
-        key_len += record.arg_sizes[i];
-
-    // Actually set the key
-    int pos = 0;
-    void *key = pilgrim_malloc(key_len);
-    memcpy(key+pos, &(record.func_id), sizeof(record.func_id));
-    pos += sizeof(record.func_id);
-
-    for(i = 0; i < record.arg_count; i++) {
-        memcpy(key+pos, record.args[i], record.arg_sizes[i]);
-        pos += record.arg_sizes[i];
-    }
+    int key_len;
+    void *key = compose_call_signature(&record, &key_len);
 
     double duration = record.tend - record.tstart;
     double interval = 0;
@@ -376,35 +442,36 @@ void write_record(Record record) {
         entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
         entry->key = key;
         entry->key_len = key_len;
+        entry->rank = __logger.rank;
         entry->tstart = record.tstart;
         entry->terminal_id = current_terminal_id;
         current_terminal_id++;
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }
 
-    append_terminal(&(__logger.grammar), entry->terminal_id);
-
+    append_terminal(&(__logger.grammar), entry->terminal_id, 1);
 
     /*
      * Durations and Intervals
      * Ignore them for now.
      *
+
      int dur_id = get_duration_id(duration);
      int interval_id = get_interval_id(interval);
-     append_terminal(&(__logger.durations_grammar), dur_id);
-     append_terminal(&(__logger.intervals_grammar), interval_id);
+     append_terminal(&(__logger.durations_grammar), dur_id, 1);
+     append_terminal(&(__logger.intervals_grammar), interval_id, 1);
      if(__logger.rank == 0)
      printf("duration: %f, id: %d, interval: %f, id: %d\n", duration, dur_id, interval, interval_id);
      */
 }
 
-void logger_init(int rank, int nprocs) {
-    __logger.rank = rank;
-    __logger.nprocs = nprocs;
+void logger_init() {
+    __logger.rank = g_mpi_rank;
+    __logger.nprocs = g_mpi_size;
     __logger.local_metadata.tstart = pilgrim_wtime();
     __logger.local_metadata.records_count = 0;
     __logger.local_metadata.compressed_records = 0;
-    __logger.local_metadata.rank = rank;
+    __logger.local_metadata.rank = g_mpi_rank;
     __logger.hash_head = NULL;          // Must be NULL initialized
     __logger.offset_list = NULL;
 
@@ -416,17 +483,16 @@ void logger_init(int rank, int nprocs) {
     sprintf(GRAMMAR_OUTPUT_PATH,  "%s/%s/grammars.dat", cwd, OUTPUT_DIR);
     sprintf(FUNCS_OUTPUT_PATH,    "%s/%s/funcs.dat", cwd, OUTPUT_DIR);
 
-    if(rank == 0) {
+    if(__logger.rank == 0)
         mkdir(OUTPUT_DIR, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    }
     PMPI_Barrier(MPI_COMM_WORLD);
 
     // Global metadata, include compression mode, time resolution
-    if (rank == 0) {
+    if (__logger.rank == 0) {
         FILE* global_metafh = fopen(METADATA_OUTPUT_PATH, "wb");
         GlobalMetadata global_metadata= {
             .time_resolution = TIME_RESOLUTION,
-            .ranks = nprocs,
+            .ranks = g_mpi_size,
         };
         fwrite(&global_metadata, sizeof(GlobalMetadata), 1, global_metafh);
         fclose(global_metafh);
@@ -439,33 +505,6 @@ void logger_init(int rank, int nprocs) {
     __logger.recording = true;
 }
 
-void count_func_entries() {
-    int count[400];
-    for(int i = 0; i < 400; i++)
-        count[i] = 0;
-
-    RecordHash *entry, *tmp;
-    HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        if(__logger.rank == 0) {
-            short func_id;
-            memcpy(&func_id, entry->key, sizeof(short));
-            count[func_id]++;
-
-            int args[5];
-            int arg_start = sizeof(short);
-            if(func_id == ID_MPI_Isend) {
-                memcpy(args, entry->key+arg_start, sizeof(args));
-                printf("buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d\n",
-                        args[0], args[1], args[2], args[3], args[4]);
-            }
-        }
-    }
-
-    for(int i = 0; i < 400; i++) {
-        if(count[i] > 0)
-            printf("Func: %s, count: %d\n", func_names[i], count[i]);
-    }
-}
 
 
 void logger_exit() {
@@ -473,22 +512,20 @@ void logger_exit() {
     uninstall_mem_hooks();
     __logger.recording = false;
 
-    printf("[Pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
-            HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
+    //printf("[pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
+    //        HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
 
-    // 1. Dump loacl metadata and call signatures
+    // 1. Inter-process compression of CSTs
     int* update_terminal_id = dump_function_entries();
-
-    // 2. Merge and dump grammars
     sequitur_update(&(__logger.grammar), update_terminal_id);
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
 
-    sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
+    // 2. Inter-process copmression of Grammars
+    __logger.final_grammar_size = sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
     //sequitur_finalize("logs/durations.dat", &(__logger.durations_grammar), NULL);
     //sequitur_finalize("logs/intervals.dat", &(__logger.intervals_grammar), NULL);
 
     // 3. Clean up all resources
-    //count_func_entries();
     cleanup_function_entry_table(__logger.hash_head);
     OffsetNode *elt, *tmp2;
     LL_FOREACH_SAFE(__logger.offset_list, elt, tmp2) {
@@ -498,6 +535,14 @@ void logger_exit() {
 
     MPI_OBJ_CLEANUP_ALL();
 
-    if(__logger.rank == 0)
+
+    // Output statistics
+    if(__logger.rank == 0) {
         pilgrim_report_memory_status();
+
+        printf("[pilgrim] CST Size: %.2fKB, Grammar Size: %.2fKB, Total: %.2fKB\n",
+                __logger.final_cst_size, __logger.final_grammar_size, __logger.final_cst_size + __logger.final_grammar_size);
+    }
+
+
 }

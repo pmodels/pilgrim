@@ -3,83 +3,125 @@
 #include <string.h>
 #include <mpi.h>
 #include "pilgrim.h"
+#include "pilgrim_reader.h"
 
-void** read_record_args_special(int func_id, void* buff, int* nargs) {
-    void **args;
-    int size;
-    int length;
-    size_t n;
-    /*
+void read_record_args_special(int func_id, void* buff, CallSignature *cs) {
+    int pos;
     switch(func_id) {
         case ID_MPI_Pcontrol:
         {
-            args = malloc(1 * sizeof(void*));
-            args[0]  = malloc(sizeof(int));
-            fread(args[0], sizeof(int), 1, f);      // lelvel
+            cs->arg_count = 1;
+            cs->arg_sizes = malloc(cs->arg_count * sizeof(int));
+            cs->arg_sizes[0] = sizeof(int);
+            cs->args[0] = malloc(cs->arg_sizes[0]);
+            memcpy(cs->args[0], buff, cs->arg_sizes[0]);
             break;
         }
         case ID_MPI_Waitsome:
         case ID_MPI_Testsome:
         {
             //(int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[])
-            args = malloc(5 * sizeof(void*));
-            args[0] = malloc(sizeof(int));
-            fread(args[0], sizeof(int), 1, f);
+            cs->args = malloc(5 * sizeof(void*));
+            cs->arg_sizes = malloc(5 * sizeof(int));
+            cs->arg_types = malloc(5 * sizeof(int));
+            cs->arg_directions = malloc(5 * sizeof(int));
+            pos = 0;
 
-            size = (*(int*)args[0]) * sizeof(MPI_Request);
-            args[1] = malloc(size);
-            fread(args[1], size, 1, f);
+            cs->arg_sizes[0] = sizeof(int);
+            cs->arg_types[0] = TYPE_INT;
+            cs->arg_directions[0] = DIRECTION_IN;
+            cs->args[0] = malloc(cs->arg_sizes[0]);
+            memcpy(cs->args[0], buff, cs->arg_sizes[0]);
+            pos += cs->arg_sizes[0];
 
-            size = sizeof(int);
-            args[2] = malloc(size);
-            fread(args[2], size, 1, f);
+            cs->arg_sizes[1] = (*(int*)cs->args[0]) * sizeof(int);
+            cs->arg_types[1] = TYPE_NON_MPI;
+            cs->arg_directions[1] = DIRECTION_INOUT;
+            cs->args[1] = malloc(cs->arg_sizes[1]);
+            memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
+            pos += cs->arg_sizes[1];
 
-            size = (*(int*)args[2]) * sizeof(int);
-            args[3] = malloc(size);
-            fread(args[3], size, 1, f);
+            cs->arg_sizes[2] = sizeof(int);
+            cs->arg_types[2] = TYPE_INT;
+            cs->arg_directions[2] = DIRECTION_OUT;
+            cs->args[2] = malloc(cs->arg_sizes[2]);
+            memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
+            pos += cs->arg_sizes[2];
 
-            size = (*(int*)args[2]) * sizeof(MPI_Status);
-            args[4] = malloc(size);
-            fread(args[4], size, 1, f);
+            int outcount = (* (int*)cs->args[2]);
+            if(outcount > 0) {
+                cs->arg_count = 5;
+                cs->arg_sizes[3] = outcount * sizeof(int);
+                cs->arg_types[3] = TYPE_NON_MPI;
+                cs->arg_directions[3] = DIRECTION_OUT;
+                cs->args[3] = malloc(cs->arg_sizes[3]);
+                memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
+                pos += cs->arg_sizes[3];
+
+                cs->arg_sizes[4] = outcount * 2 * sizeof(int);
+                cs->arg_types[4] = TYPE_NON_MPI;
+                cs->arg_directions[4] = DIRECTION_OUT;
+                cs->args[4] = malloc(cs->arg_sizes[4]);
+                memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
+            } else {
+                cs->arg_count = 3;
+            }
             break;
         }
         case ID_MPI_Waitall:
         {
             //MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_statuses[])
-            args = malloc(3 * sizeof(void*));
-            args[0] = malloc(sizeof(int));
-            fread(args[0], sizeof(int), 1, f);
+            cs->arg_count = 3;
+            cs->args = malloc(cs->arg_count * sizeof(void*));
+            cs->arg_sizes = malloc(cs->arg_count * sizeof(int));
+            pos = 0;
 
-            size = (*(int*)args[0]) * sizeof(MPI_Request);
-            args[1] = malloc(size);
-            fread(args[1], size, 1, f);
+            cs->arg_sizes[0] = sizeof(int);
+            cs->args[0] = malloc(cs->arg_sizes[0]);
+            memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
+            pos += cs->arg_sizes[0];
 
-            size = (*(int*)args[0]) * sizeof(MPI_Status);
-            args[2] = malloc(size);
-            fread(args[2], size, 1, f);
+            cs->arg_sizes[1] = (*(int*)cs->args[0]) * sizeof(int);
+            cs->args[1] = malloc(cs->arg_sizes[1]);
+            memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
+            pos += cs->arg_sizes[1];
+
+            cs->arg_sizes[2] = (*(int*)cs->args[0]) * sizeof(int) * 2;
+            cs->args[2] = malloc(cs->arg_sizes[2]);
+            memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
             break;
         }
         case ID_MPI_Testall:
         {
             //MPI_Testall(int count, MPI_Request array_of_requests[], int *flag, MPI_Status array_of_statuses[])
-            args = malloc(4 * sizeof(void*));
-            args[0] = malloc(sizeof(int));
-            fread(args[0], sizeof(int), 1, f);
+            cs->args = malloc(4 * sizeof(void*));
+            pos = 0;
 
-            size = (*(int*)args[0]) * sizeof(MPI_Request);
-            args[1] = malloc(size);
-            fread(args[1], size, 1, f);
+            cs->arg_sizes[0] = sizeof(int);
+            cs->args[0] = malloc(cs->arg_sizes[0]);
+            memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
+            pos += cs->arg_sizes[0];
 
-            args[2] = malloc(sizeof(int));
-            fread(args[2], sizeof(int), 1, f);
+            cs->arg_sizes[1] = (*(int*)cs->args[0]) * sizeof(int);
+            cs->args[1] = malloc(cs->arg_sizes[1]);
+            memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
+            pos += cs->arg_sizes[1];
 
-            size = (*(int*)args[0]) * sizeof(MPI_Status);
-            args[3] = malloc(size);
-            fread(args[3], size, 1, f);
+            cs->arg_sizes[2] = sizeof(int);
+            cs->args[2] = malloc(cs->arg_sizes[2]);
+            memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
+            pos += cs->arg_sizes[2];
+
+            int flag = *((int*)cs->args[2]);
+            if(flag) {
+                cs->arg_count = 4;
+                cs->arg_sizes[3] = (*(int*)cs->args[0]) * sizeof(int) * 2;
+                cs->args[3] = malloc(cs->arg_sizes[3]);
+                memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
+            } else {
+                cs->arg_count = 3;
+            }
             break;
         }
     }
-    */
-
-    return args;
 }

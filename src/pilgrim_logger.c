@@ -17,10 +17,12 @@
 #include "uthash.h"
 #include "mpi.h"
 
+#define TIME_RESOLUTION (0.000001*100)
 
-#define TIME_RESOLUTION 0.000001
 #define OUTPUT_DIR              "pilgrim-logs"
 char GRAMMAR_OUTPUT_PATH[256];
+char INTERVALS_OUTPUT_PATH[256];
+char DURATIONS_OUTPUT_PATH[256];
 char FUNCS_OUTPUT_PATH[256];
 char METADATA_OUTPUT_PATH[256];
 
@@ -51,6 +53,8 @@ struct Logger {
 
     double final_grammar_size;      // compressed grammar size (in KB)
     double final_cst_size;          // compressed cst size (in KB)
+    double interval_grammar_size;   // compressed interval grammar size
+    double duration_grammar_size;   // compressed duration grammar size
 };
 
 // Global object to access the Logger fileds
@@ -430,39 +434,29 @@ void write_record(Record record) {
     void *key = compose_call_signature(&record, &key_len);
 
     double duration = record.tend - record.tstart;
-    double interval = 0;
+    int dur_id = get_duration_id(duration);
+    int interval = 0;
 
     RecordHash *entry = NULL;
     HASH_FIND(hh, __logger.hash_head, key, key_len, entry);
     if(entry) {                         // Found
-        interval = record.tstart - entry->tstart;
-        entry->tstart = record.tstart;
+        interval = (record.tstart - entry->ext_tstart) / TIME_RESOLUTION;
+        entry->ext_tstart += interval*TIME_RESOLUTION;
         pilgrim_free(key, key_len);
     } else {                            // Not exist, add to hash table
         entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
         entry->key = key;
         entry->key_len = key_len;
         entry->rank = __logger.rank;
-        entry->tstart = record.tstart;
+        entry->ext_tstart = record.tstart;
         entry->terminal_id = current_terminal_id;
         current_terminal_id++;
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }
 
     append_terminal(&(__logger.grammar), entry->terminal_id, 1);
-
-    /*
-     * Durations and Intervals
-     * Ignore them for now.
-     *
-
-     int dur_id = get_duration_id(duration);
-     int interval_id = get_interval_id(interval);
-     append_terminal(&(__logger.durations_grammar), dur_id, 1);
-     append_terminal(&(__logger.intervals_grammar), interval_id, 1);
-     if(__logger.rank == 0)
-     printf("duration: %f, id: %d, interval: %f, id: %d\n", duration, dur_id, interval, interval_id);
-     */
+    append_terminal(&(__logger.intervals_grammar), interval, 1);
+    append_terminal(&(__logger.durations_grammar), dur_id, 1);
 }
 
 void logger_init() {
@@ -481,6 +475,8 @@ void logger_init() {
     getcwd(cwd, 256);
     sprintf(METADATA_OUTPUT_PATH, "%s/%s/pilgrim.mt", cwd, OUTPUT_DIR);
     sprintf(GRAMMAR_OUTPUT_PATH,  "%s/%s/grammars.dat", cwd, OUTPUT_DIR);
+    sprintf(INTERVALS_OUTPUT_PATH,  "%s/%s/intervals.dat", cwd, OUTPUT_DIR);
+    sprintf(DURATIONS_OUTPUT_PATH,  "%s/%s/durations.dat", cwd, OUTPUT_DIR);
     sprintf(FUNCS_OUTPUT_PATH,    "%s/%s/funcs.dat", cwd, OUTPUT_DIR);
 
     if(__logger.rank == 0)
@@ -522,8 +518,8 @@ void logger_exit() {
 
     // 2. Inter-process copmression of Grammars
     __logger.final_grammar_size = sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
-    //sequitur_finalize("logs/durations.dat", &(__logger.durations_grammar), NULL);
-    //sequitur_finalize("logs/intervals.dat", &(__logger.intervals_grammar), NULL);
+    __logger.interval_grammar_size = sequitur_finalize(INTERVALS_OUTPUT_PATH, &(__logger.intervals_grammar));
+    __logger.duration_grammar_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
 
     // 3. Clean up all resources
     cleanup_function_entry_table(__logger.hash_head);
@@ -535,13 +531,13 @@ void logger_exit() {
 
     MPI_OBJ_CLEANUP_ALL();
 
-
     // Output statistics
     if(__logger.rank == 0) {
         pilgrim_report_memory_status();
-
         printf("[pilgrim] CST Size: %.2fKB, Grammar Size: %.2fKB, Total: %.2fKB\n",
                 __logger.final_cst_size, __logger.final_grammar_size, __logger.final_cst_size + __logger.final_grammar_size);
+        printf("[pilgrim] Duration Grammar Size: %.2fKB, Interval Grammar Size: %.2fKB\n",
+                __logger.duration_grammar_size, __logger.interval_grammar_size);
     }
 
 

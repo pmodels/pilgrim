@@ -26,7 +26,7 @@ typedef struct RecordHash_t {
     int key_len;
     int rank;
     int terminal_id;                // terminal id used for sequitur compression
-    double tstart;                  // last call's tstart
+    double ext_tstart;              // last call's extrapolated tstart
     UT_hash_handle hh;
 } RecordHash;
 
@@ -54,7 +54,6 @@ void write_record(Record record);
 
 bool is_recording();
 void append_offset(MPI_Offset offset);
-
 
 
 #endif

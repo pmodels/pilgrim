@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
     MPI_Cart_rank(cartcomm, north, &north_rank);
     MPI_Cart_rank(cartcomm, south, &south_rank);
 
-    printf("my rank: %d %d, coords: %d %d %d, top: %d, bottom: %d\n", rank, cart_rank, coords[0], coords[1], coords[2], top_rank, bottom_rank);
+    // printf("my rank: %d %d, coords: %d %d %d, top: %d, bottom: %d\n", rank, cart_rank, coords[0], coords[1], coords[2], top_rank, bottom_rank);
 
     // allocate communication buffers
     double *sbufnorth = (double*)calloc(1,bx*sizeof(double)); // send buffers
@@ -79,7 +79,8 @@ int main(int argc, char **argv) {
     double *rbuftop = (double*)calloc(1,bz*sizeof(double));
     double *rbufbottom = (double*)calloc(1,bz*sizeof(double));
 
-    for(int iter=0; iter<niters; ++iter) {
+    int iter;
+    for(iter=0; iter<niters; ++iter) {
         // Computation...
 
         // exchange data with neighbors

@@ -20,7 +20,7 @@ static IntervalHash *interval_table = NULL;
 int get_id(double val) {
     if(val==0)
         val = 0.000001;
-    double base = 1.1;
+    double base = 2.0;
     int res = log(val) / log(base);
     return res;
 }

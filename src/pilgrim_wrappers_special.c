@@ -89,9 +89,9 @@ bool is_completed_idup_request(MPI_Request *req) {
     if(flag) {                                                      \
         if(entry && status && status != MPI_STATUS_IGNORE) {        \
             if(entry->any_source)                                   \
-                status_info[0] = status->MPI_SOURCE;                \
+                status_info[0] = g_mpi_rank - status->MPI_SOURCE;   \
             if(entry->any_tag)                                      \
-                status_info[1] = status->MPI_TAG;                   \
+                status_info[1] = g_mpi_rank - status->MPI_TAG;      \
             req_id = &entry->req_node->id;                          \
         }                                                           \
         MPI_OBJ_RELEASE(MPI_Request, req);                          \
@@ -109,9 +109,9 @@ bool is_completed_idup_request(MPI_Request *req) {
             entry = request_hash_entry(&old_reqs[iidx]);                                            \
             if(entry && statuses && statuses != MPI_STATUSES_IGNORE) {                              \
                 if(entry->any_source)                                                               \
-                    statuses_info[idx*2+0] = statuses[idx].MPI_SOURCE;                              \
+                    statuses_info[idx*2+0] = g_mpi_rank-statuses[idx].MPI_SOURCE;                   \
                 if(entry->any_tag)                                                                  \
-                    statuses_info[idx*2+1] = statuses[idx].MPI_TAG;                                 \
+                    statuses_info[idx*2+1] = g_mpi_rank-statuses[idx].MPI_TAG;                      \
             }                                                                                       \
             MPI_OBJ_RELEASE(MPI_Request, &(old_reqs[iidx]));                                        \
         }                                                                                           \

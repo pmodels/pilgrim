@@ -3086,6 +3086,7 @@ int MPI_Ineighbor_alltoallv(const void *sendbuf, const int sendcounts[], const i
 	int sizes[] = { sizeof(int), len*sizeof(const int), len*sizeof(const int), sizeof(int), sizeof(int), len*sizeof(const int), len*sizeof(const int), sizeof(int), sizeof(MPI_Comm)+sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(10, sizes, args);
 }
+/*
 double MPI_Wtick(void)
 {
 	PILGRIM_TRACING_1(double, MPI_Wtick, ());
@@ -3093,6 +3094,7 @@ double MPI_Wtick(void)
 	int* sizes = NULL;
 	PILGRIM_TRACING_2(0, sizes, args);
 }
+*/
 int MPI_T_category_get_cvars(int cat_index, int len, int indices[])
 {
 	PILGRIM_TRACING_1(int, MPI_T_category_get_cvars, (cat_index, len, indices));

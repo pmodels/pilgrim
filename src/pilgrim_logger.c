@@ -495,8 +495,8 @@ void logger_init() {
     }
 
     sequitur_init(&(__logger.grammar));
-    sequitur_init(&(__logger.intervals_grammar));
-    sequitur_init(&(__logger.durations_grammar));
+    //sequitur_init(&(__logger.intervals_grammar));
+    //sequitur_init(&(__logger.durations_grammar));
     install_mem_hooks();
     __logger.recording = true;
 }
@@ -511,15 +511,25 @@ void logger_exit() {
     //printf("[pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
     //        HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
 
+    double t1, t2;
     // 1. Inter-process compression of CSTs
+
+    t1 = pilgrim_wtime();
     int* update_terminal_id = dump_function_entries();
     sequitur_update(&(__logger.grammar), update_terminal_id);
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
+    t2 = pilgrim_wtime();
+    if(__logger.rank == 0)
+        printf("CST inter-process compression time: %.2f\n", t2-t1);
 
     // 2. Inter-process copmression of Grammars
+    t1 = pilgrim_wtime();
     __logger.final_grammar_size = sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
-    __logger.interval_grammar_size = sequitur_finalize(INTERVALS_OUTPUT_PATH, &(__logger.intervals_grammar));
-    __logger.duration_grammar_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
+    //__logger.interval_grammar_size = sequitur_finalize(INTERVALS_OUTPUT_PATH, &(__logger.intervals_grammar));
+    //__logger.duration_grammar_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
+    t2 = pilgrim_wtime();
+    if(__logger.rank == 0)
+        printf("Grammar inter-process compression time: %.2f\n", t2-t1);
 
     // 3. Clean up all resources
     cleanup_function_entry_table(__logger.hash_head);

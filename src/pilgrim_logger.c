@@ -237,7 +237,7 @@ RecordHash* merge_function_entries() {
                 // skip 4 bytes terminal id
                 ptr = ptr + sizeof(int);
 
-                // 4 bytes rank 
+                // 4 bytes rank
                 memcpy(&cst_rank, ptr, sizeof(int));
                 ptr = ptr + sizeof(int);
 
@@ -455,8 +455,8 @@ void write_record(Record record) {
     }
 
     append_terminal(&(__logger.grammar), entry->terminal_id, 1);
-    append_terminal(&(__logger.intervals_grammar), interval, 1);
-    append_terminal(&(__logger.durations_grammar), dur_id, 1);
+    //append_terminal(&(__logger.intervals_grammar), interval, 1);
+    //append_terminal(&(__logger.durations_grammar), dur_id, 1);
 }
 
 void logger_init() {

@@ -61,7 +61,7 @@ void uninstall_mem_hooks() {
 
 // Symbolic representation of memory addresses
 int* addr2id(const void* buffer) {
-    //return &allocated_addr_id;
+    return &allocated_addr_id;
     AvlTree avl_node = avl_search(addr_tree, (intptr_t) buffer);
     if(avl_node == AVL_EMPTY) {
         // Not found in addr_tree suggests that this buffer is not dynamically allocated
@@ -92,6 +92,7 @@ int* addr2id(const void* buffer) {
 /**
  * Below are Wrappers for intercepting memory management calls.
  */
+/*
 void* malloc(size_t size) {
     if(!hook_installed)
         return dlmalloc(size);
@@ -182,3 +183,4 @@ void *memalign(size_t alignment, size_t size) {
 void *pvalloc(size_t size) {
     return dlpvalloc(size);
 }
+*/

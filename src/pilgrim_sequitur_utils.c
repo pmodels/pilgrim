@@ -2,20 +2,6 @@
 #include <stdlib.h>
 #include "pilgrim_sequitur.h"
 
-static size_t memory_usage = 0;
-static size_t peak_memory = 0;
-
-void* mymalloc(size_t size) {
-    memory_usage += size;
-    if(memory_usage > peak_memory)
-        peak_memory = memory_usage;
-    return dlmalloc(size);
-}
-void myfree(void *ptr, size_t size) {
-    memory_usage -= size;
-    dlfree(ptr);
-}
-
 
 void print_digrams(Grammar *grammar) {
     Digram *digram, *tmp;
@@ -60,7 +46,6 @@ void print_rules(Grammar *grammar) {
     printf("\n=======================\nNumber of rule: %d\n", rules_count);
     printf("Number of symbols: %d\n", symbols_count);
     printf("Number of Digrams: %d\n=======================\n", HASH_COUNT(grammar.digram_table));
-    printf("memory usage: %ldB, %ldB\n", memory_usage, (rules_count+symbols_count)*sizeof(Symbol)+80*HASH_COUNT(grammar.digram_table));
     */
     printf("[pilgrim] Rules: %d, Symbols: %d\n", rules_count, symbols_count);
 }

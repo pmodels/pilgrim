@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include "mpi.h"
 #include "pilgrim_sequitur.h"
-#include "dlmalloc-2.8.6.h"
 
 int mpi_rank, mpi_size;
 

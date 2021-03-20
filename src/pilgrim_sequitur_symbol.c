@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include "pilgrim_sequitur.h"
+#include "pilgrim_utils.h"
 
 
 Symbol* new_symbol(int val, int exp, bool terminal, Symbol *rule_head) {
-    Symbol* symbol = mymalloc(sizeof(Symbol));
+    Symbol* symbol = pilgrim_malloc(sizeof(Symbol));
     symbol->val = val;
     symbol->exp = exp;
     symbol->terminal = terminal;
@@ -45,7 +46,7 @@ void symbol_delete(Symbol *rule, Symbol *sym, bool deref) {
         rule_deref(sym->rule_head);
 
     DL_DELETE(rule->rule_body, sym);
-    myfree(sym, sizeof(Symbol));
+    pilgrim_free(sym, sizeof(Symbol));
     sym = NULL;
 }
 
@@ -73,7 +74,7 @@ void rule_put(Symbol **rules_head, Symbol *rule) {
  */
 void rule_delete(Symbol **rules_head, Symbol *rule) {
     DL_DELETE(*rules_head, rule);
-    myfree(rule, sizeof(Symbol));
+    pilgrim_free(rule, sizeof(Symbol));
     rule = NULL;
 }
 

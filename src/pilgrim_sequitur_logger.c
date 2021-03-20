@@ -180,10 +180,7 @@ double sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_s
 
     // gathered_grammars is NULL except rank 0
     size_t len;
-    double t1, t2;
-    t1 = pilgrim_wtime();
     int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
-    t2 = pilgrim_wtime();
 
     if(mpi_rank == 0) {
         compressed_size = compress_and_dump(path, gathered_grammars, len);

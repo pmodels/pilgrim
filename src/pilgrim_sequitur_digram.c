@@ -2,7 +2,6 @@
 #include "pilgrim_sequitur.h"
 #include "pilgrim_utils.h"
 
-#define DIGRAM_KEY_LEN sizeof(int)*4
 
 void* build_digram_key(int v1, int exp1, int v2, int exp2) {
     void *key = pilgrim_malloc(DIGRAM_KEY_LEN);

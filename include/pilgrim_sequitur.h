@@ -99,6 +99,7 @@ void rule_deref(Symbol *rule);
 
 
 /* pilgrim_sequitur_digram.c */
+#define DIGRAM_KEY_LEN sizeof(int)*4
 Symbol* digram_get(Digram *digram_table, Symbol* sym1, Symbol* sym2);
 int digram_put(Digram **digram_table, Symbol *symbol);
 int digram_delete(Digram **digram_table, Symbol *symbol);

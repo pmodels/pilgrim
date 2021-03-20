@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "mpi.h"
 #include "pilgrim_sequitur.h"
+#include "pilgrim_utils.h"
 
 int mpi_rank, mpi_size;
 
@@ -222,18 +223,18 @@ void sequitur_cleanup(Grammar *grammar) {
     Digram *digram, *tmp;
     HASH_ITER(hh, grammar->digram_table, digram, tmp) {
         HASH_DEL(grammar->digram_table, digram);
-        dlfree(digram->key);
-        dlfree(digram);
+        pilgrim_free(digram->key, DIGRAM_KEY_LEN);
+        pilgrim_free(digram, sizeof(Digram));
     }
 
     Symbol *rule, *sym, *tmp2, *tmp3;
     DL_FOREACH_SAFE(grammar->rules, rule, tmp2) {
         DL_FOREACH_SAFE(rule->rule_body, sym, tmp3) {
             DL_DELETE(rule->rule_body, sym);
-            dlfree(sym);
+            pilgrim_free(sym, sizeof(Symbol));
         }
         DL_DELETE(grammar->rules, rule);
-        dlfree(rule);
+        pilgrim_free(rule, sizeof(Symbol));
     }
 
     grammar->digram_table = NULL;
@@ -275,7 +276,8 @@ double sequitur_finalize(const char* output_path, Grammar *grammar) {
     }
 
     // Write grammars from all ranks to one file
-    double compressed_size = sequitur_dump(output_path, grammar, mpi_rank, mpi_size);
+    //double compressed_size = sequitur_dump(output_path, grammar, mpi_rank, mpi_size);
+    double compressed_size = 0;
     sequitur_cleanup(grammar);
 
     return compressed_size;

@@ -163,16 +163,9 @@ double compress_and_dump(const char* path, int* gathered, size_t len) {
         printf("Open file: %s failed, errno: %d!\n", path, errno);
     }
 
+    pilgrim_free(compressed_grammar, sizeof(int)*compressed_len);
     return (compressed_len/1024.0*sizeof(int));
 }
-
-
-typedef struct RuleHash_t {
-    void *key;
-    int key_len;
-    int count;
-    UT_hash_handle hh;
-} RuleHash;
 
 
 double sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_size) {

@@ -276,8 +276,7 @@ double sequitur_finalize(const char* output_path, Grammar *grammar) {
     }
 
     // Write grammars from all ranks to one file
-    //double compressed_size = sequitur_dump(output_path, grammar, mpi_rank, mpi_size);
-    double compressed_size = 0;
+    double compressed_size = sequitur_dump(output_path, grammar, mpi_rank, mpi_size);
     sequitur_cleanup(grammar);
 
     return compressed_size;

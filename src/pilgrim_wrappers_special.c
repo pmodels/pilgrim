@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pilgrim.h"
-#include "dlmalloc-2.8.6.h"
 
 static int invalid_request_id = -1;
 
@@ -31,9 +30,9 @@ void check_idup_request(MPI_Request *req) {
 
         add_mpi_comm_hash_entry(entry->newcomm, entry->id);
 
-        dlfree(entry->key);
-        dlfree(entry->newcomm);
-        dlfree(entry->ibcast_req);
+        pilgrim_free(entry->key, sizeof(MPI_Request));
+        pilgrim_free(entry->newcomm, sizeof(MPI_Comm));
+        pilgrim_free(entry->ibcast_req, sizeof(MPI_Request));
         HASH_DEL(idup_reqs_table, entry);
     }
 }
@@ -335,14 +334,14 @@ int MPI_Startall(int count, MPI_Request array_of_requests[])
 /*
 int MPI_Comm_idup(MPI_Comm comm, MPI_Comm *newcomm, MPI_Request *request)
 
-    IdupReqHash *entry = dlmalloc(sizeof(IdupReqHash));
+    IdupReqHash *entry = pilgrim_malloc(sizeof(IdupReqHash));
 
     // Use the output request as the key
-    entry->key = dlmalloc(sizeof(MPI_Request));
+    entry->key = pilgrim_malloc(sizeof(MPI_Request));
     memcpy(entry->key, request, sizeof(MPI_Request));
 
     // Store the newcomm
-    entry->newcomm = dlmalloc(sizeof(MPI_Comm));
+    entry->newcomm = pilgrim_malloc(sizeof(MPI_Comm));
     memcpy(entry->newcomm, newcomm, sizeof(MPI_Comm));
 
     int local_rank, global_rank;
@@ -350,13 +349,13 @@ int MPI_Comm_idup(MPI_Comm comm, MPI_Comm *newcomm, MPI_Request *request)
     PMPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
 
     // rank 0 decides the newcomm id
-    entry->id = dlmalloc(sizeof(MPI_Comm) + sizeof(int));
+    entry->id = pilgrim_malloc(sizeof(MPI_Comm) + sizeof(int));
     if(local_rank = 0) {
         memcpy(entry->id, newcomm, sizeof(MPI_Comm));
         memcpy(entry->id+sizeof(MPI_Comm), &global_rank, sizeof(int));
     }
 
-    entry->ibcast_req = dlmalloc(sizeof(MPI_Request));
+    entry->ibcast_req = pilgrim_malloc(sizeof(MPI_Request));
     PMPI_Ibcast(entry->id, sizeof(MPI_Comm)+sizeof(int), MPI_BYTE, 0, comm, entry->ibcast_req);
 
     HASH_ADD_KEYPTR(hh, idup_reqs_table, entry->key, sizeof(MPI_Request), entry);

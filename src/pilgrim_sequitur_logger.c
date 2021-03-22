@@ -102,7 +102,7 @@ int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, size_t* len_s
         }
     }
 
-    pilgrim_free(local_grammar, len);
+    pilgrim_free(local_grammar, sizeof(int)*len);
     return gathered_grammars;
 }
 
@@ -172,7 +172,7 @@ double sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_s
     double compressed_size = 0;
 
     // gathered_grammars is NULL except rank 0
-    size_t len;
+    size_t len = 0;
     int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
 
     if(mpi_rank == 0) {

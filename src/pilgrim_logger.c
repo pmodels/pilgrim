@@ -336,13 +336,13 @@ void print_cst(RecordHash *cst) {
             if(func_id == ID_MPI_Waitsome) {
                 int incount, outcount;
                 memcpy(&incount, entry->key+arg_start, sizeof(int));
-                int *reqs = dlmalloc(sizeof(int) * incount);
+                int *reqs = pilgrim_malloc(sizeof(int) * incount);
                 memcpy(reqs, entry->key+arg_start+sizeof(int), sizeof(int)*incount);
                 memcpy(&outcount, entry->key+arg_start+sizeof(int)*(1+incount), sizeof(int));
                 printf("[pilgrim] Waitsome(intcount=%d, reqs:", incount);
                 for(int i = 0; i < incount; i++)
                     printf("%d ", reqs[i]);
-                dlfree(reqs);
+                pilgrim_free(reqs, sizeof(int) * incount);
                 printf(", outcount: %d)\n", outcount);
             }
             */

@@ -10,7 +10,7 @@ static int invalid_request_id = -1;
 typedef struct IdupReqHash_t {
     void *key;              // idup_req
     MPI_Comm *newcomm;
-    void *id;
+    int id;
     bool idup_req_completed;
     MPI_Request *ibcast_req;
     UT_hash_handle hh;

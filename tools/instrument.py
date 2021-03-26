@@ -6,7 +6,8 @@ from codegen import MPIFunction, MPIArgument
 def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
-    os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
+    #os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
+    os.system('grep -E "PMPI" /usr/tce/packages/impi/impi-2018.0-intel-19.1.0/include/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
@@ -143,10 +144,11 @@ def codegen_sizeof_args(func):
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             continue
         elif is_mpi_object_arg(arg_type_strip(arg.type)):
-            if "MPI_Comm" in arg.type :
-                sizeof_args.append('sizeof(MPI_Comm)+sizeof(int)')
-            else:
-                sizeof_args.append('sizeof(int)')
+            # TODO , now communicator is is also locally unique, use one iteger to represent
+            #if "MPI_Comm" in arg.type :
+            #    sizeof_args.append('sizeof(MPI_Comm)+sizeof(int)')
+            #else:
+            sizeof_args.append('sizeof(int)')
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
             fixed_type = arg.type.split('[')[0].replace('*', '')

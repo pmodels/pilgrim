@@ -232,11 +232,20 @@ void object_cleanup_MPI_Request() {
  *
  */
 MPICommHash *hash_MPI_Comm = NULL;
-char predefined_comm_id[64];
-#define COMM_ID_LEN (sizeof(MPI_Comm)+sizeof(int))
 
+
+static int invalid_comm_id = -999;
+static int comm_null_id = -1;
+static int comm_world_id = -2;
+static int comm_self_id = -3;
+static int allocated_comm_id = 0;
 // Pick a unique name for newcomm
-void* comm2id(MPI_Comm *newcomm) {
+int comm2id(MPI_Comm *newcomm) {
+    int id = allocated_comm_id++;
+    return id;
+
+    /*
+     * The below code generates globally unique id.
     void *id = pilgrim_malloc(COMM_ID_LEN);
 
     int world_rank;
@@ -246,14 +255,16 @@ void* comm2id(MPI_Comm *newcomm) {
     memcpy(id+sizeof(MPI_Comm), &world_rank, sizeof(int));
 
     return id;
+    */
 }
 
-void add_mpi_comm_hash_entry(MPI_Comm *newcomm, void *id) {
+void* add_mpi_comm_hash_entry(MPI_Comm *newcomm, int id) {
     MPICommHash *entry = pilgrim_malloc(sizeof(MPICommHash));
     entry->key = pilgrim_malloc(sizeof(MPI_Comm));
     memcpy(entry->key, newcomm, sizeof(MPI_Comm));
     entry->id = id;
     HASH_ADD_KEYPTR(hh, hash_MPI_Comm, entry->key, sizeof(MPI_Comm), entry);
+    return &(entry->id);
 }
 
 
@@ -262,7 +273,7 @@ void* generate_intracomm_id(MPI_Comm *newcomm) {
     if((newcomm == NULL) || (*newcomm==MPI_COMM_NULL))
         return get_predefined_comm_id(MPI_COMM_NULL);
 
-    void *id;
+    int id;
     int rank, is_inter;
 
     // *newcomm might actually be an inter-communicator
@@ -277,18 +288,15 @@ void* generate_intracomm_id(MPI_Comm *newcomm) {
         PMPI_Intercomm_merge(*newcomm, 0, &intracomm);
 
     PMPI_Comm_rank(intracomm, &rank);
+
     if(rank == 0)
         id = comm2id(newcomm);
-    else
-        id = pilgrim_malloc(COMM_ID_LEN);
+    PMPI_Bcast(&id, 1, MPI_INT, 0, intracomm);
 
-    PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, intracomm);
     if(is_inter)
         PMPI_Comm_free(&intracomm);
 
-    add_mpi_comm_hash_entry(newcomm, id);
-
-    return id;
+    return add_mpi_comm_hash_entry(newcomm, id);
 }
 
 void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
@@ -299,7 +307,7 @@ void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
     int local_rank;
     PMPI_Comm_rank(*newcomm, &local_rank);
 
-    void *id;
+    int id;
 
     // Local rank 0 of two communicator exchange a random number
     // to decide who picks the unique name for the new communicator
@@ -312,30 +320,29 @@ void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
         // I will decide the unique id and send it to the other one
         if(sendbuf < recvbuf) {
             id = comm2id(newcomm);
-            PMPI_Send(id, 1, MPI_INT, 0, tag, *newcomm);
+            PMPI_Send(&id, 1, MPI_INT, 0, tag, *newcomm);
         } else if(sendbuf > recvbuf) {
-            id = pilgrim_malloc(COMM_ID_LEN);
-            PMPI_Recv(id, 1, MPI_INT, 0, tag, *newcomm, MPI_STATUS_IGNORE);
+            PMPI_Recv(&id, 1, MPI_INT, 0, tag, *newcomm, MPI_STATUS_IGNORE);
         } else {
             // Very unlikely
             abort();
         }
     } else {
         // all non-rank 0 processes in the two local communicators
-        id = pilgrim_malloc(COMM_ID_LEN);
     }
 
-    PMPI_Bcast(id, COMM_ID_LEN, MPI_BYTE, 0, local_comm);
-    add_mpi_comm_hash_entry(newcomm, id);
-    return id;
+    PMPI_Bcast(&id, 1, MPI_INT, 0, local_comm);
+    return add_mpi_comm_hash_entry(newcomm, id);
 }
 
 void* get_predefined_comm_id(MPI_Comm comm) {
-    MPI_Comm mycomm = comm;
-    int tmp = 0;
-    memcpy(predefined_comm_id, &mycomm, sizeof(MPI_Comm));
-    memcpy(predefined_comm_id+sizeof(MPI_Comm), &tmp, sizeof(int));
-    return predefined_comm_id;
+    if(comm == MPI_COMM_NULL)
+        return &comm_null_id;
+    if(comm == MPI_COMM_WORLD)
+        return &comm_world_id;
+    if(comm == MPI_COMM_SELF)
+        return &comm_self_id;
+    return &invalid_comm_id;
 }
 
 /*
@@ -354,15 +361,13 @@ void* get_object_id_MPI_Comm(MPI_Comm *comm) {
     // otherwise, check for hash table
     MPICommHash *entry = NULL;
     HASH_FIND(hh, hash_MPI_Comm, comm, sizeof(MPI_Comm), entry);
-    if(entry && entry->id) {
-        return entry->id;
+    if(entry) {
+        return &entry->id;
     } else {
         // not possible
         if(!entry)
             printf("Not possible! cannot find MPI_Comm entry\n");
-        else
-            printf("Not possible! entry->id is NULL\n");
-        return comm2id(comm);
+        return &invalid_comm_id;
     }
 }
 void object_release_MPI_Comm(MPI_Comm *comm) {
@@ -374,7 +379,6 @@ void object_release_MPI_Comm(MPI_Comm *comm) {
     if(entry) {
         HASH_DEL(hash_MPI_Comm, entry);
         pilgrim_free(entry->key, sizeof(MPI_Comm));
-        pilgrim_free(entry->id, COMM_ID_LEN);
         pilgrim_free(entry, sizeof(MPICommHash));
     }
 }
@@ -384,7 +388,6 @@ void object_cleanup_MPI_Comm() {
     HASH_ITER(hh, hash_MPI_Comm, entry, tmp) {
         HASH_DEL(hash_MPI_Comm, entry);
         pilgrim_free(entry->key, sizeof(MPI_Comm));
-        pilgrim_free(entry->id, COMM_ID_LEN);
         pilgrim_free(entry, sizeof(MPICommHash));
     }
 }

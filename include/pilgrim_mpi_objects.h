@@ -130,11 +130,11 @@ void object_cleanup_MPI_Request();
  */
 typedef struct MPICommHash_t {
     void *key;
-    void* id;           // (newcomm, global rank of newcomm's rank 0)
+    int id;                     // (newcomm, global rank of newcomm's rank 0)
     UT_hash_handle hh;
 } MPICommHash;
 
-void add_mpi_comm_hash_entry(MPI_Comm *newcomm, void *id);
+void* add_mpi_comm_hash_entry(MPI_Comm *newcomm, int id);
 void* generate_intracomm_id(MPI_Comm *newcomm);
 void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag);
 void* get_predefined_comm_id(MPI_Comm comm);

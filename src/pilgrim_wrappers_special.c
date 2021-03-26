@@ -121,12 +121,12 @@ bool is_completed_idup_request(MPI_Request *req) {
     int idx;                                                                                        \
     MPI_Request old_reqs[count];                                                                    \
     for(idx = 0; idx < count; idx++) {                                                              \
-        ids[idx] = *( get_request_id( &(array_of_requests[idx]) ) );                                \
+        ids[idx] = get_request_id( &(array_of_requests[idx]) );                                     \
         memcpy( &old_reqs[idx],  &array_of_requests[idx], sizeof(MPI_Request));                     \
     }
 
 
-int* get_request_id(MPI_Request* req) {
+int get_request_id(MPI_Request* req) {
     return MPI_OBJ_ID(MPI_Request, req);
 }
 
@@ -307,7 +307,9 @@ int MPI_Request_free(MPI_Request *request)
 {
     MPI_Request *old_req = request;
 
-    void **args = assemble_args_list(1, get_request_id(request));
+    int id = get_request_id(request);
+
+    void **args = assemble_args_list(1, &id);
     int sizes[] = {sizeof(int)};
     PILGRIM_TRACING_1(int, MPI_Request_free, (request));
 
@@ -321,7 +323,7 @@ int MPI_Startall(int count, MPI_Request array_of_requests[])
     int ids[count];
     int idx;
     for (idx = 0; idx < count; idx++)
-        ids[idx] = *( get_request_id(&array_of_requests[idx]) );
+        ids[idx] = get_request_id(&array_of_requests[idx]);
 
     PILGRIM_TRACING_1(int, MPI_Startall, (count, array_of_requests));
 

@@ -33,7 +33,7 @@
     MPI_OBJ_NODE_STRUCT(Type);                                          \
     MPI_OBJ_HASH_STRUCT(Type);                                          \
     ObjHash_##Type* get_hash_entry_##Type(const Type *obj);             \
-    int* get_object_id_##Type(const Type *obj);                         \
+    int  get_object_id_##Type(const Type *obj);                         \
     void object_release_##Type(const Type *obj);                        \
     void object_cleanup_##Type();
 
@@ -108,8 +108,8 @@ typedef struct RequestHash_t {
 } RequestHash;
 
 RequestHash* request_hash_entry(MPI_Request* request);
-int* create_request_id(MPI_Request *req, void* signature, int key_len);
-int* request2id(MPI_Request* request, int source, int tag);
+int create_request_id(MPI_Request *req, void* signature, int key_len);
+int request2id(MPI_Request* request, int source, int tag);
 
 /*
  * Name the following functinos in a way that
@@ -117,7 +117,7 @@ int* request2id(MPI_Request* request, int source, int tag);
  *  - MPI_OBJ_ID(MPI_Comm, comm);
  *  - MPI_OBJ_RELEASE(MPI_Comm, comm);
  */
-int* get_object_id_MPI_Request(MPI_Request *request);
+int  get_object_id_MPI_Request(MPI_Request *request);
 void object_release_MPI_Request(MPI_Request* request);
 void object_cleanup_MPI_Request();
 
@@ -134,10 +134,10 @@ typedef struct MPICommHash_t {
     UT_hash_handle hh;
 } MPICommHash;
 
-void* add_mpi_comm_hash_entry(MPI_Comm *newcomm, int id);
-void* generate_intracomm_id(MPI_Comm *newcomm);
-void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag);
-void* get_predefined_comm_id(MPI_Comm comm);
+void add_mpi_comm_hash_entry(MPI_Comm *newcomm, int id);
+int generate_intracomm_id(MPI_Comm *newcomm);
+int generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag);
+int get_predefined_comm_id(MPI_Comm comm);
 
 /*
  * Name the following functinos in a way that
@@ -145,7 +145,7 @@ void* get_predefined_comm_id(MPI_Comm comm);
  *  - MPI_OBJ_ID(MPI_Comm, comm);
  *  - MPI_OBJ_RELEASE(MPI_Comm, comm);
  */
-void* get_object_id_MPI_Comm(MPI_Comm *comm);
+int get_object_id_MPI_Comm(MPI_Comm *comm);
 void object_release_MPI_Comm(MPI_Comm *comm);
 void object_cleanup_MPI_Comm();
 

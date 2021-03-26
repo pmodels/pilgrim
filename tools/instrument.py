@@ -43,7 +43,7 @@ def is_mpi_object_arg(arg_type):
     # Do not include MPI_Request, MPI_Status, MPI_Comm, and MPI_Offset
     mpi_objects = set([
         "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win",
-        "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Comm"])
+        "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Comm", "MPI_Request"])
     if arg_type in mpi_objects:
         return True
     return False
@@ -72,14 +72,6 @@ def codegen_assemble_args(func):
     for arg in func.arguments:
         if 'void' in arg.type:                                  # void* buf
             assemble_args.append("addr2id("+arg.name+")")
-        elif 'MPI_Request' in arg.type:                         # Keep separately
-            if '*' in arg.type:
-                if func.name == "MPI_Irecv" or func.name == "MPI_Recv_init":
-                    assemble_args.append("request2id("+arg.name+", source, tag)")
-                else:
-                    assemble_args.append("MPI_OBJ_ID(MPI_Request, "+arg.name+")")
-            else:
-                assemble_args.append("MPI_OBJ_ID(MPI_Request, &"+arg.name+")")
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             line += "\tappend_offset(%s);\n" %(arg.name)
         elif 'MPI_Status*' in arg.type:
@@ -92,12 +84,17 @@ def codegen_assemble_args(func):
             elif "tag" in args_set:
                 line += "\tif(tag == MPI_ANY_TAG && status && status!=MPI_STATUS_IGNORE) status_arg[1] = status->MPI_TAG;\n"
         elif is_mpi_object_arg(arg_type_strip(arg.type)):
-            if '*' in arg.type or '[' in arg.type:
-                assemble_args.append("MPI_OBJ_ID(%s, %s)" %(arg_type_strip(arg.type), arg.name))
+            if 'MPI_Request' in arg.type and '*' in arg.type and (func.name == "MPI_Irecv" or func.name == "MPI_Recv_init"):
+                # Only these two functions need to stor "source, tag" information
+                line += "\tint obj_id_%d = request2id(%s, source, tag);\n" %(obj_count, arg.name)
             else:
-                line += "\t%s obj_%d = %s;\n" %(arg.type, obj_count, arg.name)
-                assemble_args.append("MPI_OBJ_ID(%s, &obj_%d)" %(arg.type, obj_count))
-                obj_count += 1
+                if '*' in arg.type or '[' in arg.type:
+                    line += "\tint obj_id_%d = MPI_OBJ_ID(%s, %s);\n" %(obj_count, arg_type_strip(arg.type), arg.name)
+                else:
+                    line += "\t%s obj_%d = %s;\n" %(arg.type, obj_count, arg.name)
+                    line += "\tint obj_id_%d = MPI_OBJ_ID(%s, &obj_%d);\n" %(obj_count, arg_type_strip(arg.type), obj_count)
+            assemble_args.append("&obj_id_%d" %obj_count)
+            obj_count += 1
         elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
         elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for rank-1/rank+1 as src or dest

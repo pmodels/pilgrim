@@ -16,9 +16,9 @@
         return entry;                                                   \
     }                                                                   \
                                                                         \
-    int* get_object_id_##Type(const Type *obj) {                        \
+    int get_object_id_##Type(const Type *obj) {                        \
         if(obj == NULL)                                                 \
-            return &invalid_##Type;                                     \
+            return invalid_##Type;                                     \
         ObjHash_##Type *entry = get_hash_entry_##Type(obj);             \
         /* if not exists in the hash table, then this should be the     \
          first time the object is created, need to add it to the        \
@@ -39,7 +39,7 @@
             }                                                           \
             HASH_ADD_KEYPTR(hh, hash_##Type, entry->key, sizeof(Type), entry); \
         }                                                               \
-        return &(entry->id_node->id);                                   \
+        return entry->id_node->id;                                      \
     }                                                                   \
                                                                         \
     void object_release_##Type(const Type *obj) {                       \
@@ -101,10 +101,9 @@ RequestHash* request_hash_entry(MPI_Request *req) {
     return entry;
 }
 
-int* create_request_id(MPI_Request *req, void* signature, int signature_len) {
-    if(req==NULL || *req == MPI_REQUEST_NULL) {
-        return &invalid_request_id;
-    }
+int create_request_id(MPI_Request *req, void* signature, int signature_len) {
+    if(req==NULL || *req == MPI_REQUEST_NULL)
+        return invalid_request_id;
 
     RequestHash* entry = pilgrim_malloc(sizeof(RequestHash));
     entry->key = pilgrim_malloc(sizeof(MPI_Request));
@@ -135,13 +134,12 @@ int* create_request_id(MPI_Request *req, void* signature, int signature_len) {
         DL_DELETE(ids_pool->free_ids, entry->req_node);
     }
 
-    return &(entry->req_node->id);
+    return entry->req_node->id;
 }
 
-int* request2id(MPI_Request *req, int source, int tag) {
-    if(req==NULL || *req == MPI_REQUEST_NULL) {
-        return &invalid_request_id;
-    }
+int request2id(MPI_Request *req, int source, int tag) {
+    if(req==NULL || *req == MPI_REQUEST_NULL)
+        return invalid_request_id;
 
     RequestHash *entry = request_hash_entry(req);
     if(entry == NULL) {
@@ -165,11 +163,11 @@ int* request2id(MPI_Request *req, int source, int tag) {
 
         HASH_ADD_KEYPTR(hh, hash_MPI_Request, entry->key, entry->key_len, entry);
     }
-    return &(entry->req_node->id);
+    return entry->req_node->id;
 }
 
-int* get_object_id_MPI_Request(MPI_Request *req) {
-    request2id(req, 0, 0);
+int get_object_id_MPI_Request(MPI_Request *req) {
+    return request2id(req, 0, 0);
 }
 
 void object_release_MPI_Request(MPI_Request *req) {
@@ -258,17 +256,16 @@ int comm2id(MPI_Comm *newcomm) {
     */
 }
 
-void* add_mpi_comm_hash_entry(MPI_Comm *newcomm, int id) {
+void add_mpi_comm_hash_entry(MPI_Comm *newcomm, int id) {
     MPICommHash *entry = pilgrim_malloc(sizeof(MPICommHash));
     entry->key = pilgrim_malloc(sizeof(MPI_Comm));
     memcpy(entry->key, newcomm, sizeof(MPI_Comm));
     entry->id = id;
     HASH_ADD_KEYPTR(hh, hash_MPI_Comm, entry->key, sizeof(MPI_Comm), entry);
-    return &(entry->id);
 }
 
 
-void* generate_intracomm_id(MPI_Comm *newcomm) {
+int generate_intracomm_id(MPI_Comm *newcomm) {
     // check for predefined comm
     if((newcomm == NULL) || (*newcomm==MPI_COMM_NULL))
         return get_predefined_comm_id(MPI_COMM_NULL);
@@ -296,10 +293,11 @@ void* generate_intracomm_id(MPI_Comm *newcomm) {
     if(is_inter)
         PMPI_Comm_free(&intracomm);
 
-    return add_mpi_comm_hash_entry(newcomm, id);
+    add_mpi_comm_hash_entry(newcomm, id);
+    return id;
 }
 
-void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
+int generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
     // check for predefined comm
     if((newcomm == NULL) || (*newcomm== MPI_COMM_NULL))
         return get_predefined_comm_id(MPI_COMM_NULL);
@@ -332,17 +330,18 @@ void* generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
     }
 
     PMPI_Bcast(&id, 1, MPI_INT, 0, local_comm);
-    return add_mpi_comm_hash_entry(newcomm, id);
+    add_mpi_comm_hash_entry(newcomm, id);
+    return id;
 }
 
-void* get_predefined_comm_id(MPI_Comm comm) {
+int get_predefined_comm_id(MPI_Comm comm) {
     if(comm == MPI_COMM_NULL)
-        return &comm_null_id;
+        return comm_null_id;
     if(comm == MPI_COMM_WORLD)
-        return &comm_world_id;
+        return comm_world_id;
     if(comm == MPI_COMM_SELF)
-        return &comm_self_id;
-    return &invalid_comm_id;
+        return comm_self_id;
+    return invalid_comm_id;
 }
 
 /*
@@ -351,7 +350,7 @@ void* get_predefined_comm_id(MPI_Comm comm) {
  *  - MPI_OBJ_ID(MPI_Comm, comm);
  *  - MPI_OBJ_RELEASE(MPI_Comm, comm);
  */
-void* get_object_id_MPI_Comm(MPI_Comm *comm) {
+int get_object_id_MPI_Comm(MPI_Comm *comm) {
     // check for predefined comm
     if((comm == NULL) || (*comm== MPI_COMM_NULL))
         return get_predefined_comm_id(MPI_COMM_NULL);
@@ -362,12 +361,12 @@ void* get_object_id_MPI_Comm(MPI_Comm *comm) {
     MPICommHash *entry = NULL;
     HASH_FIND(hh, hash_MPI_Comm, comm, sizeof(MPI_Comm), entry);
     if(entry) {
-        return &entry->id;
+        return entry->id;
     } else {
         // not possible
         if(!entry)
             printf("Not possible! cannot find MPI_Comm entry\n");
-        return &invalid_comm_id;
+        return invalid_comm_id;
     }
 }
 void object_release_MPI_Comm(MPI_Comm *comm) {

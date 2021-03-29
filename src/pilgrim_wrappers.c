@@ -2976,8 +2976,7 @@ int MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, 
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
 
-    int source_tag = tag;
-	int source_rank = source;
+	int source_rank = g_mpi_rank - source;
 	if(source == MPI_ANY_SOURCE) source_rank = -99999;
 	if(source == MPI_PROC_NULL) source_rank = -88888;
 
@@ -2989,7 +2988,7 @@ int MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, 
     //source_tag = 0;
     obj_id_2 = 0;
 
-	void **args = assemble_args_list(7, addr2id(buf), &count, &obj_id_0, &source_rank, &source_tag, &obj_id_1, &obj_id_2);
+	void **args = assemble_args_list(7, addr2id(buf), &count, &obj_id_0, &source_rank, &tag, &obj_id_1, &obj_id_2);
 	int sizes[] = { sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int) };
 
     int sig_len;

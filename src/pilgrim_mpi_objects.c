@@ -169,7 +169,7 @@ int request2id(MPI_Request *req, int source, int tag) {
 
 int get_object_id_MPI_Request(MPI_Request *req) {
     RequestHash *entry = request_hash_entry(req);
-    if(entry)
+    if(entry && entry->req_node)
         return entry->req_node->id;
     else
         return invalid_request_id;
@@ -182,10 +182,11 @@ void object_release_MPI_Request(MPI_Request *req) {
 
         RequestNodeHash *ids_pool = NULL;
         HASH_FIND(hh, request_free_ids, entry->signature, entry->signature_len, ids_pool);
-        if(ids_pool != NULL) {
-            DL_APPEND(ids_pool->free_ids, entry->req_node);    // Add the id back to the signature-specific free list
-        } else {
-            DL_APPEND(list_MPI_Request, entry->req_node);      // Add the id back to the universal free list
+        if(entry->req_node) {
+            if(ids_pool != NULL)
+                DL_APPEND(ids_pool->free_ids, entry->req_node);    // Add the id back to the signature-specific free list
+            else
+                DL_APPEND(list_MPI_Request, entry->req_node);      // Add the id back to the universal free list
         }
 
         pilgrim_free(entry->key, entry->key_len);

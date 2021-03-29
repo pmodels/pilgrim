@@ -83,15 +83,16 @@ bool is_completed_idup_request(MPI_Request *req) {
     entry = request_hash_entry(req);                                \
     int status_info[] = {0, 0};                                     \
     int req_id = invalid_request_id;                                \
-    if(entry)                                                       \
+    if(entry && entry->req_node)                                    \
         req_id = entry->req_node->id;                               \
+    else                                                            \
+        req_id = invalid_request_id;                                \
     if(flag) {                                                      \
         if(entry && status && status != MPI_STATUS_IGNORE) {        \
             if(entry->any_source)                                   \
                 status_info[0] = g_mpi_rank - status->MPI_SOURCE;   \
             if(entry->any_tag)                                      \
                 status_info[1] = g_mpi_rank - status->MPI_TAG;      \
-            req_id = entry->req_node->id;                           \
         }                                                           \
         MPI_OBJ_RELEASE(MPI_Request, req);                          \
     }
@@ -152,7 +153,7 @@ int MPI_Wait(MPI_Request *request, MPI_Status *status)
 
     GET_STATUS_INFO(&old_req, status, true);
     int sizes[] = {sizeof(int), sizeof(status_info)};
-    void **args = assemble_args_list(2, req_id, status_info);
+    void **args = assemble_args_list(2, &req_id, status_info);
 
     PILGRIM_TRACING_2(2, sizes, args);
 }

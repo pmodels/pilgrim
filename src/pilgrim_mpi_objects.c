@@ -104,6 +104,7 @@ RequestHash* request_hash_entry(MPI_Request *req) {
 int create_request_id(MPI_Request *req, void* signature, int signature_len) {
     if(req==NULL || *req == MPI_REQUEST_NULL)
         return invalid_request_id;
+    return invalid_request_id;
 
     RequestHash* entry = pilgrim_malloc(sizeof(RequestHash));
     entry->key = pilgrim_malloc(sizeof(MPI_Request));
@@ -167,7 +168,11 @@ int request2id(MPI_Request *req, int source, int tag) {
 }
 
 int get_object_id_MPI_Request(MPI_Request *req) {
-    return request2id(req, 0, 0);
+    RequestHash *entry = request_hash_entry(req);
+    if(entry)
+        return entry->req_node->id;
+    else
+        return invalid_request_id;
 }
 
 void object_release_MPI_Request(MPI_Request *req) {

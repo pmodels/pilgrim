@@ -35,7 +35,7 @@ typedef struct _LocalMetadata {
     int rank;
     double tstart;
     double tend;
-    int records_count;
+    unsigned long records_count;
     int compressed_records;
 } LocalMetadata;
 

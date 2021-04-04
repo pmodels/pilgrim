@@ -525,7 +525,7 @@ void logger_exit() {
     t2 = pilgrim_wtime();
     if(__logger.rank == 0) {
         printf("CST inter-process compression time: %.2f\n", t2-t1);
-        printf("[pilgrim] total mpi calls: %d *10e6\n", total_calls);
+        printf("[pilgrim] total mpi calls: %f *10e6\n", total_calls);
     }
 
     // 2. Inter-process copmression of Grammars

@@ -510,9 +510,9 @@ void logger_exit() {
 
     //printf("[pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
     //        HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
-    unsigned long local_calls = __logger.local_metadata.records_count;
-    unsigned long total_calls;
-    PMPI_Reduce(&local_calls, &total_calls, 1, MPI_UNSIGNED_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+    double local_calls = __logger.local_metadata.records_count/1000.0/1000.0;
+    double total_calls;
+    PMPI_Reduce(&local_calls, &total_calls, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
 
     double t1, t2;
@@ -525,7 +525,7 @@ void logger_exit() {
     t2 = pilgrim_wtime();
     if(__logger.rank == 0) {
         printf("CST inter-process compression time: %.2f\n", t2-t1);
-        printf("[pilgrim] total mpi calls: %d\n", total_calls);
+        printf("[pilgrim] total mpi calls: %d *10e6\n", total_calls);
     }
 
     // 2. Inter-process copmression of Grammars

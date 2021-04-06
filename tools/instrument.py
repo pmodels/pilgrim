@@ -12,11 +12,13 @@ def filter_with_local_mpi_functions(funcs):
     #os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
     for line in f.readlines():
+        if "#define" in line or "MPI_Fint" in line:
+            continue
+
         func_name = line.strip().split('(')[0].split(' ')[1]
         func_name = func_name.replace('PMPI_', 'MPI_')
         if func_name in funcs:
             cleaned[func_name] = funcs[func_name]
-            print(func_name)
     f.close()
     os.system('rm /tmp/local_funcs.tmp')
 
@@ -242,9 +244,10 @@ if __name__ == "__main__":
     f = open("./mpi_functions.pickle", 'r')
     funcs = pickle.load(f)
     f.close()
+    print("all: ", len(funcs))
 
     funcs = filter_with_local_mpi_functions(funcs)
-    print(len(funcs))
+    print("filtered: ", len(funcs))
 
     generate_function_id_file(funcs)
     generate_wrapper_file(funcs)

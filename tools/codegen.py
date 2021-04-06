@@ -54,18 +54,19 @@ class MPIFunction:
             tmp = func_block.split("(")[1].split(")")[0]
             for parameter in tmp.split(", "):
                 arg = MPIArgument()
-                arg.type =  parameter.split(' ')[0]
-                arg.name =  parameter.split(' ')[1]
+                arg.type =  parameter.split(' ')[-2]
+                arg.name =  parameter.split(' ')[-1]
                 if "*" in arg.name:
                     arg.name = arg.name.replace("*", "")
                     arg.type += "*"
                 self.arguments.append(arg)
 
             tmp = func_block.split(")")[1].split("{")[1]
-            arg.ret_type = tmp.split("}")[0]
+            self.ret_type = tmp.split("}")[0]
+            self.signature = func_block.split("}")[0].split(self.name)[1]
 
             # debug output
-            output_str = arg.ret_type + " " + self.name + ": "
+            output_str = self.ret_type + " " + self.name + ": "
             for arg in self.arguments:
                 output_str += arg.type + " " + arg.name + " " + arg.direction + " " + arg.length + ","
             #print output_str
@@ -180,7 +181,7 @@ def complete_mpi_functions(cnames_file, funcs):
                 funcs[name].update_argument_type(arg_names[idx], arg_type)
         else:
             # TODO why?
-            print "HUH???", ret_type, name, signature
+            #print "HUH???", ret_type, name, signature
             pass
 
     # Clean up funcs, remove those with on return types, etc.
@@ -192,7 +193,6 @@ def complete_mpi_functions(cnames_file, funcs):
     for name in wait_for_clean:
         funcs.pop(name, None)
 
-
 if __name__ == "__main__":
 
     MPI_STANDARD_DIR = sys.argv[1]
@@ -201,9 +201,11 @@ if __name__ == "__main__":
     funcs = initialize_mpi_functions(MPI_STANDARD_DIR)
     print(len(funcs))
 
+
     # Retrive the signature and argument type from "appLang-CNames.tex"
     # Not this file has to be generated in advance from mpi-standard directory by calling MAKE-APPLANG
     complete_mpi_functions(MPI_STANDARD_DIR+"/appLang-CNames.tex", funcs)
+    print(len(funcs))
 
     f = open('mpi_functions.pickle', 'w')
     pickle.dump(funcs, f)

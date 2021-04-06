@@ -27,6 +27,11 @@ typedef struct RecordHash_t {
     int rank;
     int terminal_id;                // terminal id used for sequitur compression
     double ext_tstart;              // last call's extrapolated tstart
+
+    double avg_duration;            // average duration
+    double std_duration;            // standard deviation of the duration
+    unsigned count;                 // Count of this call signature
+
     UT_hash_handle hh;
 } RecordHash;
 

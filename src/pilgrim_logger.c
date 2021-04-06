@@ -442,6 +442,9 @@ void write_record(Record record) {
     if(entry) {                         // Found
         interval = (record.tstart - entry->ext_tstart) / (record.tend-record.tstart);
         entry->ext_tstart += interval*(record.tend-record.tstart);
+        int c = entry->count;
+        entry->avg_duration = (entry->avg_duration*c+(record.tend-record.tstart))/(c+1);
+        entry->count++;
         pilgrim_free(key, key_len);
     } else {                            // Not exist, add to hash table
         entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
@@ -450,6 +453,10 @@ void write_record(Record record) {
         entry->rank = __logger.rank;
         entry->ext_tstart = record.tstart;
         entry->terminal_id = current_terminal_id;
+
+        entry->count = 0;
+        entry->avg_duration = record.tend - record.tstart;
+
         current_terminal_id++;
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }

@@ -6,8 +6,8 @@ from codegen import MPIFunction, MPIArgument
 def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
-    #os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
-    os.system('grep -E "PMPI" /usr/tce/packages/impi/impi-2018.0-intel-19.1.0/include/*.h > /tmp/local_funcs.tmp')
+    os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
+    #os.system('grep -E "PMPI" /usr/tce/packages/impi/impi-2018.0-intel-19.1.0/include/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
@@ -16,6 +16,7 @@ def filter_with_local_mpi_functions(funcs):
         func_name = func_name.replace('PMPI_', 'MPI_')
         if func_name in funcs:
             cleaned[func_name] = funcs[func_name]
+            print(func_name)
     f.close()
     os.system('rm /tmp/local_funcs.tmp')
 
@@ -99,8 +100,8 @@ def codegen_assemble_args(func):
             assemble_args.append(arg.name)      # its already the adress
         elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for rank-1/rank+1 as src or dest
             line += "\tint %s_rank = g_mpi_rank - %s;\n" %(arg.name, arg.name)
-            line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = -99999;\n" %(arg.name, arg.name)
-            line += "\tif(%s == MPI_PROC_NULL) %s_rank = -88888;\n" %(arg.name, arg.name)
+            line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = PILGRIM_MPI_ANY_SOURCE;\n" %(arg.name, arg.name)
+            line += "\tif(%s == MPI_PROC_NULL) %s_rank = PILGRIM_MPI_PROC_NULL;\n" %(arg.name, arg.name)
             assemble_args.append( "&%s_rank" %arg.name )
         else:
             assemble_args.append( "&"+arg.name)
@@ -165,7 +166,7 @@ def handle_special_apis(func):
     if func.name == "MPI_Init" or func.name == "MPI_Init_thread" or func.name == "MPI_Finalize":
         return True
 
-    # These are handled in pilgrim_init_pilgrim_wrappers_special.c
+    # These are handled in pilgrim_wrappers_special.c
     ignored = ["MPI_Wait", "MPI_Waitany", "MPI_Waitsome", "MPI_Waitall", "MPI_Request_free", "MPI_Startall",
                "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
 

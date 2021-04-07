@@ -12,36 +12,19 @@
 #include <stdint.h>
 #include "mpi.h"
 
-int mpi_rank, mpi_size;
-
-void rank2coor(int rank, int p, int *x, int *y, int *z) {
-    *z = rank / (p*p);
-    int res = rank % (p*p);
-    *y = res / p;
-    *x = res % p;
-}
-
-void coor2rank(int p, int x, int y, int z, int *rank) {
-    // periodic
-    x = (x+p) %p;
-    y = (y+p) %p;
-    z = (z+p) %p;
-    *rank = z*(p*p) + p*y + x;
-}
 
 int main(int argc, char **argv) {
     MPI_Init(&argc, &argv);
+    int rank, mpi_size;
     MPI_Comm comm = MPI_COMM_WORLD;
-    MPI_Comm_rank(comm, &mpi_rank);
+    MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &mpi_size);
-    int niters, p, bx, by, bz;
-    p = cbrt(mpi_size);
+    int niters, bx, by, bz;
 
-    // Assume p is the cube root of the number of processes
-    if (mpi_rank==0) {
+    if (rank==0) {
         // argument checking
         if(argc < 2) {
-            if(!mpi_rank) printf("usage: stencil_mpi <niters>\n");
+            if(!rank) printf("usage: stencil_mpi <niters>\n");
             MPI_Finalize();
             exit(1);
         }
@@ -49,23 +32,37 @@ int main(int argc, char **argv) {
     }
     MPI_Bcast(&niters, 1, MPI_INT, 0, comm);
 
-    bx = p*50;
-    by = p*50;
-    bz = p*50;
+    int dims[3] = {0, 0, 0};
+    int periods[3] = {1, 1, 1};
+    MPI_Comm cartcomm;
+    MPI_Dims_create(mpi_size, 3, dims);
+    MPI_Cart_create(MPI_COMM_WORLD, 3, dims, periods, 0, &cartcomm);
 
-    // my coor
-    int x, y, z;
-    rank2coor(mpi_rank, p, &x, &y, &z);
-    printf("%d %d %d %d\n", mpi_rank, x, y, z);
+    bx = dims[0]*50;
+    by = dims[1]*50;
+    bz = dims[2]*50;
 
-    // Get my neighbors rank
+    int cart_rank;
+    MPI_Comm_rank(cartcomm, &cart_rank);
+    int coords[3];
+    MPI_Cart_coords(cartcomm, cart_rank, 3, coords);
+
+    int top[3] = {coords[0], coords[1], coords[2]+1};
+    int bottom[3] = {coords[0], coords[1], coords[2]-1};
+    int west[3] = {coords[0]-1, coords[1], coords[2]};
+    int east[3] = {coords[0]+1, coords[1], coords[2]};
+    int north[3] = {coords[0], coords[1]+1, coords[2]};
+    int south[3] = {coords[0], coords[1]-1, coords[2]};
+
     int top_rank, bottom_rank, west_rank, east_rank, north_rank, south_rank;
-    coor2rank(p, x, y, z+1, &top_rank);
-    coor2rank(p, x, y, z-1, &bottom_rank);
-    coor2rank(p, x-1, y, z, &west_rank);
-    coor2rank(p, x+1, y, z, &east_rank);
-    coor2rank(p, x, y+1, z, &north_rank);
-    coor2rank(p, x, y-1, z, &south_rank);
+    MPI_Cart_rank(cartcomm, top, &top_rank);
+    MPI_Cart_rank(cartcomm, bottom, &bottom_rank);
+    MPI_Cart_rank(cartcomm, west, &west_rank);
+    MPI_Cart_rank(cartcomm, east, &east_rank);
+    MPI_Cart_rank(cartcomm, north, &north_rank);
+    MPI_Cart_rank(cartcomm, south, &south_rank);
+
+    // printf("my rank: %d %d, coords: %d %d %d, top: %d, bottom: %d\n", rank, cart_rank, coords[0], coords[1], coords[2], top_rank, bottom_rank);
 
     // allocate communication buffers
     double *sbufnorth = (double*)calloc(1,bx*sizeof(double)); // send buffers

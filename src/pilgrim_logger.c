@@ -17,8 +17,6 @@
 #include "uthash.h"
 #include "mpi.h"
 
-#define TIME_RESOLUTION (0.000001*100)
-
 #define OUTPUT_DIR              "pilgrim-logs"
 char GRAMMAR_OUTPUT_PATH[256];
 char INTERVALS_OUTPUT_PATH[256];
@@ -433,15 +431,9 @@ void write_record(Record record) {
     int key_len;
     void *key = compose_call_signature(&record, &key_len);
 
-    double duration = record.tend - record.tstart;
-    int dur_id = get_duration_id(duration);
-    int interval = 0;
-
     RecordHash *entry = NULL;
     HASH_FIND(hh, __logger.hash_head, key, key_len, entry);
     if(entry) {                         // Found
-        interval = (record.tstart - entry->ext_tstart) / (record.tend-record.tstart);
-        entry->ext_tstart += interval*(record.tend-record.tstart);
         int c = entry->count;
         entry->avg_duration = (entry->avg_duration*c+(record.tend-record.tstart))/(c+1);
         entry->count++;
@@ -451,19 +443,18 @@ void write_record(Record record) {
         entry->key = key;
         entry->key_len = key_len;
         entry->rank = __logger.rank;
-        entry->ext_tstart = record.tstart;
         entry->terminal_id = current_terminal_id;
-
         entry->count = 0;
-        entry->avg_duration = record.tend - record.tstart;
-
         current_terminal_id++;
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }
 
+    int interval_id, duration_id;
+    update_timings_info(entry, &record, &interval_id, &duration_id);
+
     append_terminal(&(__logger.grammar), entry->terminal_id, 1);
-    //append_terminal(&(__logger.intervals_grammar), interval, 1);
-    //append_terminal(&(__logger.durations_grammar), dur_id, 1);
+    //append_terminal(&(__logger.intervals_grammar), interval_id, 1);
+    //append_terminal(&(__logger.durations_grammar), duration_id, 1);
 }
 
 void logger_init() {

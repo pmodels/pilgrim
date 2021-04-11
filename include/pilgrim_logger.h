@@ -41,13 +41,13 @@ typedef struct _LocalMetadata {
     double tstart;
     double tend;
     unsigned long records_count;
-    int compressed_records;
 } LocalMetadata;
 
 
 typedef struct _GlobalMetadata {
     double time_resolution;
     int ranks;
+    int aggregated_timings;         // If aggreated (default) or non-aggregated timings are stored
 } GlobalMetadata;
 
 

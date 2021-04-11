@@ -53,6 +53,8 @@ struct Logger {
     double final_cst_size;          // compressed cst size (in KB)
     double interval_grammar_size;   // compressed interval grammar size
     double duration_grammar_size;   // compressed duration grammar size
+
+    bool aggregated_timings;        // if aggregated (default) or non-aggregated timings are stored
 };
 
 // Global object to access the Logger fileds
@@ -449,12 +451,19 @@ void write_record(Record record) {
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }
 
-    int interval_id, duration_id;
-    update_timings_info(entry, &record, &interval_id, &duration_id);
-
+    // Grow the MPI call grammar
     append_terminal(&(__logger.grammar), entry->terminal_id, 1);
-    //append_terminal(&(__logger.intervals_grammar), interval_id, 1);
-    //append_terminal(&(__logger.durations_grammar), duration_id, 1);
+
+    // Store timings infomraiton
+    if(__logger.aggregated_timings) {
+        store_aggregated_timing(entry, &record);
+    } else {
+        int interval_id, duration_id;
+        store_non_aggregated_timing(entry, &record, &interval_id, &duration_id);
+        append_terminal(&(__logger.intervals_grammar), interval_id, 1);
+        append_terminal(&(__logger.durations_grammar), duration_id, 1);
+    }
+
 }
 
 void logger_init() {
@@ -462,10 +471,16 @@ void logger_init() {
     __logger.nprocs = g_mpi_size;
     __logger.local_metadata.tstart = pilgrim_wtime();
     __logger.local_metadata.records_count = 0;
-    __logger.local_metadata.compressed_records = 0;
     __logger.local_metadata.rank = g_mpi_rank;
     __logger.hash_head = NULL;          // Must be NULL initialized
     __logger.offset_list = NULL;
+    __logger.aggregated_timings = true;
+
+    // Check if users want to store non-aggregated timings
+    char* at = NULL;
+    at = getenv("PILGRIM_AGGREGATED_TIMINGS");
+    if( at && atoi(at) == 0)
+        __logger.aggregated_timings = false;
 
     // Set the output paths in advance because
     // application may change the cwd duration execution
@@ -487,14 +502,17 @@ void logger_init() {
         GlobalMetadata global_metadata= {
             .time_resolution = TIME_RESOLUTION,
             .ranks = g_mpi_size,
+            .aggregated_timings = __logger.aggregated_timings,
         };
         fwrite(&global_metadata, sizeof(GlobalMetadata), 1, global_metafh);
         fclose(global_metafh);
     }
 
     sequitur_init(&(__logger.grammar));
-    sequitur_init(&(__logger.intervals_grammar));
-    sequitur_init(&(__logger.durations_grammar));
+    if(!__logger.aggregated_timings) {
+        sequitur_init(&(__logger.intervals_grammar));
+        sequitur_init(&(__logger.durations_grammar));
+    }
     install_mem_hooks();
     __logger.recording = true;
 }
@@ -529,8 +547,10 @@ void logger_exit() {
     // 2. Inter-process copmression of Grammars
     t1 = pilgrim_wtime();
     __logger.final_grammar_size = sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
-    __logger.interval_grammar_size = sequitur_finalize(INTERVALS_OUTPUT_PATH, &(__logger.intervals_grammar));
-    __logger.duration_grammar_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
+    if(!__logger.aggregated_timings) {
+        __logger.interval_grammar_size = sequitur_finalize(INTERVALS_OUTPUT_PATH, &(__logger.intervals_grammar));
+        __logger.duration_grammar_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
+    }
     t2 = pilgrim_wtime();
     if(__logger.rank == 0)
         printf("Grammar inter-process compression time: %.2f\n", t2-t1);
@@ -550,8 +570,9 @@ void logger_exit() {
         pilgrim_report_memory_status();
         printf("[pilgrim] CST Size: %.2fKB, Grammar Size: %.2fKB, Total: %.2fKB\n",
                 __logger.final_cst_size, __logger.final_grammar_size, __logger.final_cst_size + __logger.final_grammar_size);
-        printf("[pilgrim] Duration Grammar Size: %.2fKB, Interval Grammar Size: %.2fKB\n",
-                __logger.duration_grammar_size, __logger.interval_grammar_size);
+        if(!__logger.aggregated_timings)
+            printf("[pilgrim] Duration Grammar Size: %.2fKB, Interval Grammar Size: %.2fKB\n",
+                    __logger.duration_grammar_size, __logger.interval_grammar_size);
     }
 
 

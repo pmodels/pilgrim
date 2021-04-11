@@ -5,6 +5,7 @@
 
 #define TIME_RESOLUTION (0.000001*10)
 
-void update_timings_info(RecordHash* entry, Record* record, int* interval_id, int* duration_id);
+void store_aggregated_timing(RecordHash* entry, Record* record);
+void store_non_aggregated_timing(RecordHash* entry, Record* record, int* interval_id, int* duration_id);
 
 #endif

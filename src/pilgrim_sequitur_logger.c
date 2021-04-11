@@ -152,8 +152,8 @@ double compress_and_dump(const char* path, int* gathered, size_t len) {
     errno = 0;
     FILE* f = fopen(path, "wb");
     if(f) {
-        printf("[pilgrim] Uncompressed grammar size: %.2fKB, another sequitur pass: %.2fKB\n",
-                len/1024.0*sizeof(int), compressed_len/1024.0*sizeof(int));
+        //printf("[pilgrim] Uncompressed grammar size: %.2fKB, another sequitur pass: %.2fKB\n",
+        //        len/1024.0*sizeof(int), compressed_len/1024.0*sizeof(int));
         fwrite(&start_rule_id, sizeof(int), 1, f);
         fwrite(&len, sizeof(size_t), 1, f);
         fwrite(&compressed_len, sizeof(size_t), 1, f);

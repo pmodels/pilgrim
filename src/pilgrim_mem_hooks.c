@@ -61,7 +61,9 @@ void uninstall_mem_hooks() {
 
 // Symbolic representation of memory addresses
 int* addr2id(const void* buffer) {
+#ifndef MEMORY_POINTERS
     return &allocated_addr_id;
+#endif
     AvlTree avl_node = avl_search(addr_tree, (intptr_t) buffer);
     if(avl_node == AVL_EMPTY) {
         // Not found in addr_tree suggests that this buffer is not dynamically allocated
@@ -92,6 +94,7 @@ int* addr2id(const void* buffer) {
 /**
  * Below are Wrappers for intercepting memory management calls.
  */
+#ifdef MEMORY_POINTERS
 void* malloc(size_t size) {
     if(!hook_installed)
         return dlmalloc(size);
@@ -136,6 +139,8 @@ void* realloc(void *ptr, size_t size) {
     return new_ptr;
 }
 
+// Note that do not use printf() inside this funciton
+// as printf itself may allocate memory
 void free(void *ptr) {
     if(!hook_installed) {
         dlfree(ptr);
@@ -147,7 +152,6 @@ void free(void *ptr) {
     if(AVL_EMPTY == avl_node) {
         if(ptr != NULL) {
             // TODO: potential memory leak. why
-            //printf("Huh?? at free() wrapper?????? %p\n", ptr);
         }
     } else {
         if(avl_node->id_node)
@@ -182,3 +186,4 @@ void *memalign(size_t alignment, size_t size) {
 void *pvalloc(size_t size) {
     return dlpvalloc(size);
 }
+#endif

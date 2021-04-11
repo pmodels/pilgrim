@@ -35,19 +35,20 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(comm, &mpi_rank);
     MPI_Comm_size(comm, &mpi_size);
     int niters, p, bx, by, bz;
-    p = cbrt(mpi_size);
 
     // Assume p is the cube root of the number of processes
     if (mpi_rank==0) {
         // argument checking
-        if(argc < 2) {
-            if(!mpi_rank) printf("usage: stencil_mpi <niters>\n");
+        if(argc < 3) {
+            if(!mpi_rank) printf("usage: stencil_mpi <p> <niters>\n");
             MPI_Finalize();
             exit(1);
         }
-        niters = atoi(argv[1]);   // number of iterations
+        p = atoi(argv[1]);
+        niters = atoi(argv[2]);   // number of iterations
     }
     MPI_Bcast(&niters, 1, MPI_INT, 0, comm);
+    MPI_Bcast(&p, 1, MPI_INT, 0, comm);
 
     bx = p*50;
     by = p*50;
@@ -56,7 +57,6 @@ int main(int argc, char **argv) {
     // my coor
     int x, y, z;
     rank2coor(mpi_rank, p, &x, &y, &z);
-    printf("%d %d %d %d\n", mpi_rank, x, y, z);
 
     // Get my neighbors rank
     int top_rank, bottom_rank, west_rank, east_rank, north_rank, south_rank;

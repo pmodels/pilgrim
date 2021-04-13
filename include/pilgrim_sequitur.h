@@ -99,6 +99,7 @@ void rule_deref(Symbol *rule);
 
 
 /* pilgrim_sequitur_digram.c */
+#define DIGRAM_KEY_LEN sizeof(int)*4
 Symbol* digram_get(Digram *digram_table, Symbol* sym1, Symbol* sym2);
 int digram_put(Digram **digram_table, Symbol *symbol);
 int digram_delete(Digram **digram_table, Symbol *symbol);
@@ -108,14 +109,9 @@ int digram_delete(Digram **digram_table, Symbol *symbol);
 /* pilgrim_sequitur_logger.c */
 double sequitur_dump(const char *path, Grammar *grammar, int mpi_rank, int mpi_size);
 
-
 /* pilgrim_sequitur_utils.c */
-// malloc and free wrappers to monitor memory usage
-void* mymalloc(size_t size);
-void  myfree(void* ptr, size_t size);
 void  print_rules(Grammar *grammar);
 void  print_digrams(Grammar *grammar);
-
 
 
 #endif

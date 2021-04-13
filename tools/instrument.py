@@ -7,10 +7,14 @@ def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
     os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
+    #os.system('grep -E "PMPI" /usr/tce/packages/impi/impi-2018.0-intel-19.1.0/include/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
     for line in f.readlines():
+        if "#define" in line or "MPI_Fint" in line:
+            continue
+
         func_name = line.strip().split('(')[0].split(' ')[1]
         func_name = func_name.replace('PMPI_', 'MPI_')
         if func_name in funcs:
@@ -42,7 +46,7 @@ def is_mpi_object_arg(arg_type):
     # Do not include MPI_Request, MPI_Status, MPI_Comm, and MPI_Offset
     mpi_objects = set([
         "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win",
-        "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Comm"])
+        "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Comm", "MPI_Request"])
     if arg_type in mpi_objects:
         return True
     return False
@@ -71,14 +75,6 @@ def codegen_assemble_args(func):
     for arg in func.arguments:
         if 'void' in arg.type:                                  # void* buf
             assemble_args.append("addr2id("+arg.name+")")
-        elif 'MPI_Request' in arg.type:                         # Keep separately
-            if '*' in arg.type:
-                if func.name == "MPI_Irecv" or func.name == "MPI_Recv_init":
-                    assemble_args.append("request2id("+arg.name+", source, tag)")
-                else:
-                    assemble_args.append("MPI_OBJ_ID(MPI_Request, "+arg.name+")")
-            else:
-                assemble_args.append("MPI_OBJ_ID(MPI_Request, &"+arg.name+")")
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             line += "\tappend_offset(%s);\n" %(arg.name)
         elif 'MPI_Status*' in arg.type:
@@ -91,18 +87,23 @@ def codegen_assemble_args(func):
             elif "tag" in args_set:
                 line += "\tif(tag == MPI_ANY_TAG && status && status!=MPI_STATUS_IGNORE) status_arg[1] = status->MPI_TAG;\n"
         elif is_mpi_object_arg(arg_type_strip(arg.type)):
-            if '*' in arg.type or '[' in arg.type:
-                assemble_args.append("MPI_OBJ_ID(%s, %s)" %(arg_type_strip(arg.type), arg.name))
+            if 'MPI_Request' in arg.type and '*' in arg.type and (func.name == "MPI_Irecv" or func.name == "MPI_Recv_init"):
+                # Only these two functions need to stor "source, tag" information
+                line += "\tint obj_id_%d = request2id(%s, source, tag);\n" %(obj_count, arg.name)
             else:
-                line += "\t%s obj_%d = %s;\n" %(arg.type, obj_count, arg.name)
-                assemble_args.append("MPI_OBJ_ID(%s, &obj_%d)" %(arg.type, obj_count))
-                obj_count += 1
+                if '*' in arg.type or '[' in arg.type:
+                    line += "\tint obj_id_%d = MPI_OBJ_ID(%s, %s);\n" %(obj_count, arg_type_strip(arg.type), arg.name)
+                else:
+                    line += "\t%s obj_%d = %s;\n" %(arg.type, obj_count, arg.name)
+                    line += "\tint obj_id_%d = MPI_OBJ_ID(%s, &obj_%d);\n" %(obj_count, arg_type_strip(arg.type), obj_count)
+            assemble_args.append("&obj_id_%d" %obj_count)
+            obj_count += 1
         elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
         elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for rank-1/rank+1 as src or dest
             line += "\tint %s_rank = g_mpi_rank - %s;\n" %(arg.name, arg.name)
-            line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = -99999;\n" %(arg.name, arg.name)
-            line += "\tif(%s == MPI_PROC_NULL) %s_rank = -88888;\n" %(arg.name, arg.name)
+            line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = PILGRIM_MPI_ANY_SOURCE;\n" %(arg.name, arg.name)
+            line += "\tif(%s == MPI_PROC_NULL) %s_rank = PILGRIM_MPI_PROC_NULL;\n" %(arg.name, arg.name)
             assemble_args.append( "&%s_rank" %arg.name )
         else:
             assemble_args.append( "&"+arg.name)
@@ -143,10 +144,11 @@ def codegen_sizeof_args(func):
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             continue
         elif is_mpi_object_arg(arg_type_strip(arg.type)):
-            if "MPI_Comm" in arg.type :
-                sizeof_args.append('sizeof(MPI_Comm)+sizeof(int)')
-            else:
-                sizeof_args.append('sizeof(int)')
+            # TODO , now communicator is is also locally unique, use one iteger to represent
+            #if "MPI_Comm" in arg.type :
+            #    sizeof_args.append('sizeof(MPI_Comm)+sizeof(int)')
+            #else:
+            sizeof_args.append('sizeof(int)')
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
             fixed_type = arg.type.split('[')[0].replace('*', '')
@@ -166,7 +168,7 @@ def handle_special_apis(func):
     if func.name == "MPI_Init" or func.name == "MPI_Init_thread" or func.name == "MPI_Finalize":
         return True
 
-    # These are handled in pilgrim_init_pilgrim_wrappers_special.c
+    # These are handled in pilgrim_wrappers_special.c
     ignored = ["MPI_Wait", "MPI_Waitany", "MPI_Waitsome", "MPI_Waitall", "MPI_Request_free", "MPI_Startall",
                "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
 
@@ -242,9 +244,10 @@ if __name__ == "__main__":
     f = open("./mpi_functions.pickle", 'r')
     funcs = pickle.load(f)
     f.close()
+    print("all: ", len(funcs))
 
     funcs = filter_with_local_mpi_functions(funcs)
-    print(len(funcs))
+    print("filtered: ", len(funcs))
 
     generate_function_id_file(funcs)
     generate_wrapper_file(funcs)

@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pilgrim.h"
-#include "dlmalloc-2.8.6.h"
 
 static int invalid_request_id = -1;
 
@@ -11,7 +10,7 @@ static int invalid_request_id = -1;
 typedef struct IdupReqHash_t {
     void *key;              // idup_req
     MPI_Comm *newcomm;
-    void *id;
+    int id;
     bool idup_req_completed;
     MPI_Request *ibcast_req;
     UT_hash_handle hh;
@@ -31,9 +30,9 @@ void check_idup_request(MPI_Request *req) {
 
         add_mpi_comm_hash_entry(entry->newcomm, entry->id);
 
-        dlfree(entry->key);
-        dlfree(entry->newcomm);
-        dlfree(entry->ibcast_req);
+        pilgrim_free(entry->key, sizeof(MPI_Request));
+        pilgrim_free(entry->newcomm, sizeof(MPI_Comm));
+        pilgrim_free(entry->ibcast_req, sizeof(MPI_Request));
         HASH_DEL(idup_reqs_table, entry);
     }
 }
@@ -83,16 +82,17 @@ bool is_completed_idup_request(MPI_Request *req) {
     RequestHash* entry = NULL;                                      \
     entry = request_hash_entry(req);                                \
     int status_info[] = {0, 0};                                     \
-    int *req_id = &invalid_request_id;                              \
-    if(entry)                                                       \
-        req_id = &entry->req_node->id;                              \
+    int req_id = invalid_request_id;                                \
+    if(entry && entry->req_node)                                    \
+        req_id = entry->req_node->id;                               \
+    else                                                            \
+        req_id = invalid_request_id;                                \
     if(flag) {                                                      \
         if(entry && status && status != MPI_STATUS_IGNORE) {        \
             if(entry->any_source)                                   \
-                status_info[0] = status->MPI_SOURCE;                \
+                status_info[0] = g_mpi_rank - status->MPI_SOURCE;   \
             if(entry->any_tag)                                      \
-                status_info[1] = status->MPI_TAG;                   \
-            req_id = &entry->req_node->id;                          \
+                status_info[1] = g_mpi_rank - status->MPI_TAG;      \
         }                                                           \
         MPI_OBJ_RELEASE(MPI_Request, req);                          \
     }
@@ -109,9 +109,9 @@ bool is_completed_idup_request(MPI_Request *req) {
             entry = request_hash_entry(&old_reqs[iidx]);                                            \
             if(entry && statuses && statuses != MPI_STATUSES_IGNORE) {                              \
                 if(entry->any_source)                                                               \
-                    statuses_info[idx*2+0] = statuses[idx].MPI_SOURCE;                              \
+                    statuses_info[idx*2+0] = g_mpi_rank-statuses[idx].MPI_SOURCE;                   \
                 if(entry->any_tag)                                                                  \
-                    statuses_info[idx*2+1] = statuses[idx].MPI_TAG;                                 \
+                    statuses_info[idx*2+1] = g_mpi_rank-statuses[idx].MPI_TAG;                      \
             }                                                                                       \
             MPI_OBJ_RELEASE(MPI_Request, &(old_reqs[iidx]));                                        \
         }                                                                                           \
@@ -122,12 +122,12 @@ bool is_completed_idup_request(MPI_Request *req) {
     int idx;                                                                                        \
     MPI_Request old_reqs[count];                                                                    \
     for(idx = 0; idx < count; idx++) {                                                              \
-        ids[idx] = *( get_request_id( &(array_of_requests[idx]) ) );                                \
+        ids[idx] = get_request_id( &(array_of_requests[idx]) );                                     \
         memcpy( &old_reqs[idx],  &array_of_requests[idx], sizeof(MPI_Request));                     \
     }
 
 
-int* get_request_id(MPI_Request* req) {
+int get_request_id(MPI_Request* req) {
     return MPI_OBJ_ID(MPI_Request, req);
 }
 
@@ -153,7 +153,7 @@ int MPI_Wait(MPI_Request *request, MPI_Status *status)
 
     GET_STATUS_INFO(&old_req, status, true);
     int sizes[] = {sizeof(int), sizeof(status_info)};
-    void **args = assemble_args_list(2, req_id, status_info);
+    void **args = assemble_args_list(2, &req_id, status_info);
 
     PILGRIM_TRACING_2(2, sizes, args);
 }
@@ -218,7 +218,6 @@ int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_
     GET_STATUSES_INFO(count, indices, array_of_statuses);
     void **args = assemble_args_list(3, &count, ids, statuses_info);
     int sizes[] = { sizeof(count), count*sizeof(int), sizeof(statuses_info)};
-
     PILGRIM_TRACING_2(3, sizes, args);
 }
 
@@ -308,7 +307,9 @@ int MPI_Request_free(MPI_Request *request)
 {
     MPI_Request *old_req = request;
 
-    void **args = assemble_args_list(1, get_request_id(request));
+    int id = get_request_id(request);
+
+    void **args = assemble_args_list(1, &id);
     int sizes[] = {sizeof(int)};
     PILGRIM_TRACING_1(int, MPI_Request_free, (request));
 
@@ -322,7 +323,7 @@ int MPI_Startall(int count, MPI_Request array_of_requests[])
     int ids[count];
     int idx;
     for (idx = 0; idx < count; idx++)
-        ids[idx] = *( get_request_id(&array_of_requests[idx]) );
+        ids[idx] = get_request_id(&array_of_requests[idx]);
 
     PILGRIM_TRACING_1(int, MPI_Startall, (count, array_of_requests));
 
@@ -335,14 +336,14 @@ int MPI_Startall(int count, MPI_Request array_of_requests[])
 /*
 int MPI_Comm_idup(MPI_Comm comm, MPI_Comm *newcomm, MPI_Request *request)
 
-    IdupReqHash *entry = dlmalloc(sizeof(IdupReqHash));
+    IdupReqHash *entry = pilgrim_malloc(sizeof(IdupReqHash));
 
     // Use the output request as the key
-    entry->key = dlmalloc(sizeof(MPI_Request));
+    entry->key = pilgrim_malloc(sizeof(MPI_Request));
     memcpy(entry->key, request, sizeof(MPI_Request));
 
     // Store the newcomm
-    entry->newcomm = dlmalloc(sizeof(MPI_Comm));
+    entry->newcomm = pilgrim_malloc(sizeof(MPI_Comm));
     memcpy(entry->newcomm, newcomm, sizeof(MPI_Comm));
 
     int local_rank, global_rank;
@@ -350,13 +351,13 @@ int MPI_Comm_idup(MPI_Comm comm, MPI_Comm *newcomm, MPI_Request *request)
     PMPI_Comm_rank(MPI_COMM_WORLD, &global_rank);
 
     // rank 0 decides the newcomm id
-    entry->id = dlmalloc(sizeof(MPI_Comm) + sizeof(int));
+    entry->id = pilgrim_malloc(sizeof(MPI_Comm) + sizeof(int));
     if(local_rank = 0) {
         memcpy(entry->id, newcomm, sizeof(MPI_Comm));
         memcpy(entry->id+sizeof(MPI_Comm), &global_rank, sizeof(int));
     }
 
-    entry->ibcast_req = dlmalloc(sizeof(MPI_Request));
+    entry->ibcast_req = pilgrim_malloc(sizeof(MPI_Request));
     PMPI_Ibcast(entry->id, sizeof(MPI_Comm)+sizeof(int), MPI_BYTE, 0, comm, entry->ibcast_req);
 
     HASH_ADD_KEYPTR(hh, idup_reqs_table, entry->key, sizeof(MPI_Request), entry);

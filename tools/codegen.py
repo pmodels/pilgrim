@@ -23,6 +23,7 @@ class MPIFunction:
             name = name.split('\"')[0]
             self.name = name
 
+
             # arguments
             parameters = func_block.split('parameter(\"')
             for parameter in parameters[1:]:
@@ -39,20 +40,37 @@ class MPIFunction:
                     arg.length = '*'.join( length.split(',') ).replace('\"', '')
                 elif 'length=' in parameter:
                     length = parameter.split('length=\"')[1].split('\"')[0]
-                    if length == '*':
-                        print(self.name, arg.name)
 
                     arg.length = '' if length == '*' else length
-                # TODO for OUT only array arguments, we can not infer the length from MPI standard.
+                # For OUT only array arguments, we can not infer the length from MPI standard.
                 # Need to do it manually.
-
                 self.arguments.append(arg)
 
+        # c2f and f2c functions
+        if "mpiemptybindidx" in func_block:
+            func_block = func_block.replace("mpiemptybindidx{", "")
+            func_block = func_block.replace("~", " ")
+            self.name = func_block.split("(")[0]
+            tmp = func_block.split("(")[1].split(")")[0]
+            for parameter in tmp.split(", "):
+                arg = MPIArgument()
+                arg.type =  parameter.split(' ')[-2]
+                arg.name =  parameter.split(' ')[-1]
+                if "*" in arg.name:
+                    arg.name = arg.name.replace("*", "")
+                    arg.type += "*"
+                self.arguments.append(arg)
+
+            tmp = func_block.split(")")[1].split("{")[1]
+            self.ret_type = tmp.split("}")[0]
+            self.signature = func_block.split("}")[0].split(self.name)[1]
+
             # debug output
-            output_str = self.name
+            output_str = self.ret_type + " " + self.name + ": "
             for arg in self.arguments:
-                output_str += arg.type + "  " + arg.name + " " + arg.direction + " " + arg.length + ";"
+                output_str += arg.type + " " + arg.name + " " + arg.direction + " " + arg.length + ","
             #print output_str
+
     def update_argument_type(self, arg_name, arg_type):
         for arg in self.arguments:
             if arg_name == arg.name:
@@ -75,6 +93,7 @@ def initialize_mpi_functions(MPI_STANDARD_DIR):
             if "begin{mpi-binding}" in line:
                 in_block = True
                 func_block = ""
+
             if "end{mpi-binding}" in line:
                 in_block = False
                 func_blocks.append(func_block)
@@ -82,9 +101,14 @@ def initialize_mpi_functions(MPI_STANDARD_DIR):
             if in_block and line.strip() and "begin{" not in line:
                 func_block += line.replace('\'', '\"')
 
+            # For c2f and f2c functions
+            if line.startswith("\mpiemptybindidx"):
+                func_blocks.append( line.replace('\\', '') )
+
     funcs = {}
     for func_block in func_blocks:
         func = MPIFunction(func_block)
+
         if func.name:
             funcs[func.name] = func
 
@@ -125,8 +149,8 @@ def complete_mpi_functions(cnames_file, funcs):
     for line in lines:
         line = line.strip().replace('ldots', '...')
 
-        # TODO: \mpiemptynodix
-        if not line.startswith('\mpibind'): continue
+        if not (line.startswith('\mpibind') or line.startswith('\mpiemptybindNOidx')):
+            continue
 
         name, ret_type, signature= "", "", ""
 
@@ -144,6 +168,9 @@ def complete_mpi_functions(cnames_file, funcs):
             name = line.split(' ')[1].split('(')[0]
             ret_type = line.split(' ')[0]
             signature = '(' + line.split('(')[1]
+        elif line.startswith('\mpiemptybindNOidx{'):
+            # nothing needs change for c2f and f2c functions
+            pass
 
         arg_types, arg_names = parse_args(signature)
 
@@ -154,7 +181,7 @@ def complete_mpi_functions(cnames_file, funcs):
                 funcs[name].update_argument_type(arg_names[idx], arg_type)
         else:
             # TODO why?
-            #print ret_type, name, signature
+            #print "HUH???", ret_type, name, signature
             pass
 
     # Clean up funcs, remove those with on return types, etc.
@@ -166,17 +193,19 @@ def complete_mpi_functions(cnames_file, funcs):
     for name in wait_for_clean:
         funcs.pop(name, None)
 
-
 if __name__ == "__main__":
 
     MPI_STANDARD_DIR = sys.argv[1]
 
     # This does not give the function signature and argument type
     funcs = initialize_mpi_functions(MPI_STANDARD_DIR)
+    print(len(funcs))
+
 
     # Retrive the signature and argument type from "appLang-CNames.tex"
     # Not this file has to be generated in advance from mpi-standard directory by calling MAKE-APPLANG
     complete_mpi_functions(MPI_STANDARD_DIR+"/appLang-CNames.tex", funcs)
+    print(len(funcs))
 
     f = open('mpi_functions.pickle', 'w')
     pickle.dump(funcs, f)

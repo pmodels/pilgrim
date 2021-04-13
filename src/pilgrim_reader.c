@@ -46,7 +46,7 @@ void read_local_metadata(char* path, int rank, LocalMetadata *lm) {
     fread(lm, sizeof(LocalMetadata), 1, fh);
     fclose(fh);
 
-    printf("rank: %d, tstart: %f, tend: %f, records: %d\n", lm->rank, lm->tstart, lm->tend, lm->records_count);
+    printf("rank: %d, tstart: %f, tend: %f, records: %ld\n", lm->rank, lm->tstart, lm->tend, lm->records_count);
 }
 
 void print_rule(int rule_head, int* sym, int symbols) {

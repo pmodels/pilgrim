@@ -7,7 +7,16 @@
 #include "pilgrim_utils.h"
 #include "pilgrim_mem_hooks.h"
 #include "pilgrim_mpi_objects.h"
-#include "dlmalloc-2.8.6.h"
+
+
+// Some constant integers for parameters are have pre-defined values
+#define PILGRIM_MPI_ANY_SOURCE -99999
+#define PILGRIM_MPI_ANY_TAG    -99998
+#define PILGRIM_MPI_PROC_NULL  -99997
+#define PILGRIM_EQUAL_MYRANK   -99996
+
+
+
 
 
 // First call the original function and stores the elapsed time, func id, etc
@@ -33,20 +42,21 @@
         .arg_count = record_arg_count,                                                  \
         .arg_sizes = record_arg_sizes,                                                  \
     };                                                                                  \
-    record.args = dlmalloc(sizeof(void*) * record_arg_count);                             \
+    record.args = pilgrim_malloc(sizeof(void*) * record_arg_count);                     \
     int i;                                                                              \
     for(i = 0; i < record_arg_count; i++) {                                             \
-        record.args[i] = dlmalloc(record_arg_sizes[i]);                                   \
+        record.args[i] = pilgrim_malloc(record_arg_sizes[i]);                           \
         if(record_args[i])                                                              \
             memcpy(record.args[i], record_args[i], record_arg_sizes[i]);                \
         else                                                                            \
             memset(record.args[i], 0, record_arg_sizes[i]);                             \
     }                                                                                   \
+    pilgrim_free(record_args, sizeof(void*) * record_arg_count);                        \
     write_record(record);                                                               \
                                                                                         \
     for(i = 0; i < record_arg_count; i++)                                               \
-        dlfree(record.args[i]);                                                           \
-    dlfree(record.args);                                                                  \
+        pilgrim_free(record.args[i], record_arg_sizes[i]);                              \
+    pilgrim_free(record.args, sizeof(void*) * record_arg_count);                        \
                                                                                         \
     return res;
 

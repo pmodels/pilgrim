@@ -17,10 +17,10 @@
 #include "uthash.h"
 #include "mpi.h"
 
-
-#define TIME_RESOLUTION 0.000001
 #define OUTPUT_DIR              "pilgrim-logs"
 char GRAMMAR_OUTPUT_PATH[256];
+char INTERVALS_OUTPUT_PATH[256];
+char DURATIONS_OUTPUT_PATH[256];
 char FUNCS_OUTPUT_PATH[256];
 char METADATA_OUTPUT_PATH[256];
 
@@ -51,6 +51,10 @@ struct Logger {
 
     double final_grammar_size;      // compressed grammar size (in KB)
     double final_cst_size;          // compressed cst size (in KB)
+    double interval_grammar_size;   // compressed interval grammar size
+    double duration_grammar_size;   // compressed duration grammar size
+
+    bool aggregated_timings;        // if aggregated (default) or non-aggregated timings are stored
 };
 
 // Global object to access the Logger fileds
@@ -233,7 +237,7 @@ RecordHash* merge_function_entries() {
                 // skip 4 bytes terminal id
                 ptr = ptr + sizeof(int);
 
-                // 4 bytes rank 
+                // 4 bytes rank
                 memcpy(&cst_rank, ptr, sizeof(int));
                 ptr = ptr + sizeof(int);
 
@@ -301,18 +305,18 @@ void print_cst(RecordHash *cst) {
             memcpy(&func_id, entry->key, sizeof(short));
             count[func_id]++;
 
-            int args[6];
+            int args[7];
             int arg_start = sizeof(short);
             /*
+            if(func_id == ID_MPI_Irecv) {
+                memcpy(args, entry->key+arg_start, sizeof(args));
+                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, source: %d, tag: %d, comm: %d, req: %d\n",
+                        args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+            }
             if(func_id == ID_MPI_Igatherv) {
                 memcpy(args, entry->key+arg_start, sizeof(args));
                 printf("[pilgrim] sendbuf: %d, sencount: %d, sendtype: %d, recvbuf: %d, recvconts: %d, displs: %d\n",
                         args[0], args[1], args[2], args[3], args[4], args[5]);
-            }
-            if(func_id == ID_MPI_Irecv) {
-                memcpy(args, entry->key+arg_start, sizeof(args));
-                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, source: %d, tag: %d, req: %d\n",
-                        args[0], args[1], args[2], args[3], args[4], args[7]);
             }
             if(func_id == ID_MPI_Send) {
                 memcpy(args, entry->key+arg_start, sizeof(args));
@@ -332,13 +336,13 @@ void print_cst(RecordHash *cst) {
             if(func_id == ID_MPI_Waitsome) {
                 int incount, outcount;
                 memcpy(&incount, entry->key+arg_start, sizeof(int));
-                int *reqs = dlmalloc(sizeof(int) * incount);
+                int *reqs = pilgrim_malloc(sizeof(int) * incount);
                 memcpy(reqs, entry->key+arg_start+sizeof(int), sizeof(int)*incount);
                 memcpy(&outcount, entry->key+arg_start+sizeof(int)*(1+incount), sizeof(int));
                 printf("[pilgrim] Waitsome(intcount=%d, reqs:", incount);
                 for(int i = 0; i < incount; i++)
                     printf("%d ", reqs[i]);
-                dlfree(reqs);
+                pilgrim_free(reqs, sizeof(int) * incount);
                 printf(", outcount: %d)\n", outcount);
             }
             */
@@ -429,40 +433,37 @@ void write_record(Record record) {
     int key_len;
     void *key = compose_call_signature(&record, &key_len);
 
-    double duration = record.tend - record.tstart;
-    double interval = 0;
-
     RecordHash *entry = NULL;
     HASH_FIND(hh, __logger.hash_head, key, key_len, entry);
     if(entry) {                         // Found
-        interval = record.tstart - entry->tstart;
-        entry->tstart = record.tstart;
+        int c = entry->count;
+        entry->avg_duration = (entry->avg_duration*c+(record.tend-record.tstart))/(c+1);
+        entry->count++;
         pilgrim_free(key, key_len);
     } else {                            // Not exist, add to hash table
         entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
         entry->key = key;
         entry->key_len = key_len;
         entry->rank = __logger.rank;
-        entry->tstart = record.tstart;
         entry->terminal_id = current_terminal_id;
+        entry->count = 0;
         current_terminal_id++;
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
     }
 
+    // Grow the MPI call grammar
     append_terminal(&(__logger.grammar), entry->terminal_id, 1);
 
-    /*
-     * Durations and Intervals
-     * Ignore them for now.
-     *
+    // Store timings infomraiton
+    if(__logger.aggregated_timings) {
+        store_aggregated_timing(entry, &record);
+    } else {
+        int interval_id, duration_id;
+        store_non_aggregated_timing(entry, &record, &interval_id, &duration_id);
+        append_terminal(&(__logger.intervals_grammar), interval_id, 1);
+        append_terminal(&(__logger.durations_grammar), duration_id, 1);
+    }
 
-     int dur_id = get_duration_id(duration);
-     int interval_id = get_interval_id(interval);
-     append_terminal(&(__logger.durations_grammar), dur_id, 1);
-     append_terminal(&(__logger.intervals_grammar), interval_id, 1);
-     if(__logger.rank == 0)
-     printf("duration: %f, id: %d, interval: %f, id: %d\n", duration, dur_id, interval, interval_id);
-     */
 }
 
 void logger_init() {
@@ -470,10 +471,16 @@ void logger_init() {
     __logger.nprocs = g_mpi_size;
     __logger.local_metadata.tstart = pilgrim_wtime();
     __logger.local_metadata.records_count = 0;
-    __logger.local_metadata.compressed_records = 0;
     __logger.local_metadata.rank = g_mpi_rank;
     __logger.hash_head = NULL;          // Must be NULL initialized
     __logger.offset_list = NULL;
+    __logger.aggregated_timings = true;
+
+    // Check if users want to store non-aggregated timings
+    char* at = NULL;
+    at = getenv("PILGRIM_AGGREGATED_TIMINGS");
+    if( at && atoi(at) == 0)
+        __logger.aggregated_timings = false;
 
     // Set the output paths in advance because
     // application may change the cwd duration execution
@@ -481,6 +488,8 @@ void logger_init() {
     getcwd(cwd, 256);
     sprintf(METADATA_OUTPUT_PATH, "%s/%s/pilgrim.mt", cwd, OUTPUT_DIR);
     sprintf(GRAMMAR_OUTPUT_PATH,  "%s/%s/grammars.dat", cwd, OUTPUT_DIR);
+    sprintf(INTERVALS_OUTPUT_PATH,  "%s/%s/intervals.dat", cwd, OUTPUT_DIR);
+    sprintf(DURATIONS_OUTPUT_PATH,  "%s/%s/durations.dat", cwd, OUTPUT_DIR);
     sprintf(FUNCS_OUTPUT_PATH,    "%s/%s/funcs.dat", cwd, OUTPUT_DIR);
 
     if(__logger.rank == 0)
@@ -493,14 +502,17 @@ void logger_init() {
         GlobalMetadata global_metadata= {
             .time_resolution = TIME_RESOLUTION,
             .ranks = g_mpi_size,
+            .aggregated_timings = __logger.aggregated_timings,
         };
         fwrite(&global_metadata, sizeof(GlobalMetadata), 1, global_metafh);
         fclose(global_metafh);
     }
 
     sequitur_init(&(__logger.grammar));
-    sequitur_init(&(__logger.intervals_grammar));
-    sequitur_init(&(__logger.durations_grammar));
+    if(!__logger.aggregated_timings) {
+        sequitur_init(&(__logger.intervals_grammar));
+        sequitur_init(&(__logger.durations_grammar));
+    }
     install_mem_hooks();
     __logger.recording = true;
 }
@@ -514,16 +526,34 @@ void logger_exit() {
 
     //printf("[pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
     //        HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
+    double local_calls = __logger.local_metadata.records_count/1000.0/1000.0;
+    double total_calls;
+    PMPI_Reduce(&local_calls, &total_calls, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
+
+    double t1, t2;
     // 1. Inter-process compression of CSTs
+
+    t1 = pilgrim_wtime();
     int* update_terminal_id = dump_function_entries();
     sequitur_update(&(__logger.grammar), update_terminal_id);
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
+    t2 = pilgrim_wtime();
+    if(__logger.rank == 0) {
+        printf("CST inter-process compression time: %.2f\n", t2-t1);
+        printf("[pilgrim] total mpi calls: %f *10e6\n", total_calls);
+    }
 
     // 2. Inter-process copmression of Grammars
+    t1 = pilgrim_wtime();
     __logger.final_grammar_size = sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
-    //sequitur_finalize("logs/durations.dat", &(__logger.durations_grammar), NULL);
-    //sequitur_finalize("logs/intervals.dat", &(__logger.intervals_grammar), NULL);
+    if(!__logger.aggregated_timings) {
+        __logger.interval_grammar_size = sequitur_finalize(INTERVALS_OUTPUT_PATH, &(__logger.intervals_grammar));
+        __logger.duration_grammar_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
+    }
+    t2 = pilgrim_wtime();
+    if(__logger.rank == 0)
+        printf("Grammar inter-process compression time: %.2f\n", t2-t1);
 
     // 3. Clean up all resources
     cleanup_function_entry_table(__logger.hash_head);
@@ -535,13 +565,14 @@ void logger_exit() {
 
     MPI_OBJ_CLEANUP_ALL();
 
-
     // Output statistics
     if(__logger.rank == 0) {
         pilgrim_report_memory_status();
-
         printf("[pilgrim] CST Size: %.2fKB, Grammar Size: %.2fKB, Total: %.2fKB\n",
                 __logger.final_cst_size, __logger.final_grammar_size, __logger.final_cst_size + __logger.final_grammar_size);
+        if(!__logger.aggregated_timings)
+            printf("[pilgrim] Duration Grammar Size: %.2fKB, Interval Grammar Size: %.2fKB\n",
+                    __logger.duration_grammar_size, __logger.interval_grammar_size);
     }
 
 

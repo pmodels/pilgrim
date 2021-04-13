@@ -1,6 +1,6 @@
-# pilgrim
+# Pilgrim
 
-MPI Tracing Library
+A scalable and (near) lossless MPI Tracing library
 
 ## Install
 ```bash
@@ -13,7 +13,7 @@ make install prefix=`pwd`   // install to the current directory
 
 ## Usage
 ```bash
-LD_PRELOAD=/PATH/TO/pilgrim/lib/libpilgrim.so mpirun -np N ./your_app
+mpirun -np N -env LD_PRELOAD /PATH/TO/pilgrim/lib/libpilgrim.so ./your_app
 ```
 
 mpirun can be replaced with your job scheduler, e.g., srun.

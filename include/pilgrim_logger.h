@@ -26,7 +26,12 @@ typedef struct RecordHash_t {
     int key_len;
     int rank;
     int terminal_id;                // terminal id used for sequitur compression
-    double tstart;                  // last call's tstart
+    double ext_tstart;              // last call's extrapolated tstart
+
+    double avg_duration;            // average duration
+    double std_duration;            // standard deviation of the duration
+    unsigned count;                 // Count of this call signature
+
     UT_hash_handle hh;
 } RecordHash;
 
@@ -35,14 +40,14 @@ typedef struct _LocalMetadata {
     int rank;
     double tstart;
     double tend;
-    int records_count;
-    int compressed_records;
+    unsigned long records_count;
 } LocalMetadata;
 
 
 typedef struct _GlobalMetadata {
     double time_resolution;
     int ranks;
+    int aggregated_timings;         // If aggreated (default) or non-aggregated timings are stored
 } GlobalMetadata;
 
 
@@ -54,7 +59,6 @@ void write_record(Record record);
 
 bool is_recording();
 void append_offset(MPI_Offset offset);
-
 
 
 #endif

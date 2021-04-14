@@ -161,45 +161,6 @@ RecordHash* deserialize_function_entries(void *data) {
 }
 
 
-
-
-/**
- * Collect function signatures from all ranks
- * Will be compressed and write out later.
- *
- * @len_sum: output, the length of all function entries.
- * @return: gathered function entries in a contiguous memory space
- */
-void* gather_function_entries(size_t *len_sum) {
-    size_t len_local_tmp = 0;
-    void *local = NULL;
-    local = serialize_function_entries(__logger.hash_head, &len_local_tmp);
-    int len_local = (int)len_local_tmp;
-
-    int recvcounts[__logger.nprocs], displs[__logger.nprocs];
-
-    // Gahter the length from other ranks
-    PMPI_Gather(&len_local, 1, MPI_INT, recvcounts, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-    *len_sum = 0;
-    displs[0] = 0;
-    *len_sum = recvcounts[0];
-    for(int i = 1; i < __logger.nprocs; i++) {
-        *len_sum += recvcounts[i];
-        displs[i] = displs[i-1] + recvcounts[i-1];
-    }
-
-    void *gathered = NULL;
-    if(__logger.rank == 0) {
-        gathered = pilgrim_malloc(*len_sum);
-    }
-
-    PMPI_Gatherv(local, len_local, MPI_BYTE, gathered, recvcounts, displs, MPI_BYTE, 0, MPI_COMM_WORLD);
-
-    pilgrim_free(local, len_local);
-    return gathered;
-}
-
 RecordHash* copy_function_entries(RecordHash* origin) {
     RecordHash* table = NULL;
     RecordHash *entry, *tmp, *new_entry;
@@ -215,19 +176,48 @@ RecordHash* copy_function_entries(RecordHash* origin) {
     return table;
 }
 
+/**
+ * Inter-process compression for CSTs
+ *
+ * Log(P) phases pair-wise merge algorithm
+ *
+ * Hypercube like communication pattern, i.e., one dimension at a time.
+ * The sends of each phase will not participate in the following phases.
+ *
+ * 8 ranks example:
+ * phase 0: 011 --> 010
+ * phase 0: 111 --> 110
+ * phase 0: 001 --> 000
+ * phase 0: 101 --> 100
+ * phase 1: 110 --> 010
+ * phase 1: 100 --> 100
+ * phase 2: 010 --> 000
+ *
+ */
 RecordHash* merge_function_entries() {
-    int gap = 2;
-    int rank = __logger.rank;
+    int my_rank = __logger.rank;
+    int other_rank;
+    int mask = 1;
+    bool done = false;
+    int phases = ceil(log2(__logger.nprocs));
 
     RecordHash* merged_table = copy_function_entries(__logger.hash_head);
 
-    while(gap <= __logger.nprocs) {
+    for(int k = 0; k < phases; k++, mask*=2) {
+        if(done) break;
+
+        other_rank = my_rank ^ mask;     // other_rank = my_rank XOR 2^k
+
+        if(other_rank >= __logger.nprocs) continue;
+
         size_t size;
         void* buf;
-        if(rank % gap == 0) {                 // RECEIVER
-            PMPI_Recv(&size, sizeof(size), MPI_BYTE, rank+gap/2, gap, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+        // bigger ranks send to smaller ranks
+        if(my_rank < other_rank) {
+            PMPI_Recv(&size, sizeof(size), MPI_BYTE, other_rank, mask, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             buf = pilgrim_malloc(size);
-            PMPI_Recv(buf, size, MPI_BYTE, rank+gap/2, gap, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            PMPI_Recv(buf, size, MPI_BYTE, other_rank, mask, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
             int cst_rank, entries, key_len;
             void *ptr = buf;
@@ -253,9 +243,6 @@ RecordHash* merge_function_entries() {
                 // Check to see if this function entry is already in the table
                 RecordHash *entry = NULL;
                 HASH_FIND(hh, merged_table, key, key_len, entry);
-
-                // Rank 0 needs to update terminal id to ensure
-                // everyone has unique terminal id
                 if(entry) {
                     pilgrim_free(key, key_len);
                 } else {                                // Not exist, add to hash table
@@ -266,23 +253,21 @@ RecordHash* merge_function_entries() {
                     HASH_ADD_KEYPTR(hh, merged_table, key, key_len, entry);
                 }
             }
-
             pilgrim_free(buf, size);
 
-        } else if((rank+gap/2) % gap ==0) {   // SENDER
-
+        } else {   // SENDER
             buf = serialize_function_entries(merged_table, &size);
-            PMPI_Send(&size, sizeof(size), MPI_BYTE, rank-gap/2, gap, MPI_COMM_WORLD);
-            PMPI_Send(buf, size, MPI_BYTE, rank-gap/2, gap, MPI_COMM_WORLD);
+            PMPI_Send(&size, sizeof(size), MPI_BYTE, other_rank, mask, MPI_COMM_WORLD);
+            PMPI_Send(buf, size, MPI_BYTE, other_rank, mask, MPI_COMM_WORLD);
             pilgrim_free(buf, size);
 
-        } else {                              // DO NOTHING
+            done = true;
         }
-        gap = gap * 2;
     }
 
+    // Eventually the root (rank 0) will get the fully merged CST
     // Update (re-assign) terminal id for all unique signatures
-    if(rank == 0) {
+    if(my_rank == 0) {
         //linear_regression(merged_table);
         int terminal_id = 0;
         RecordHash *entry, *tmp;

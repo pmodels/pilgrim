@@ -68,7 +68,8 @@ typedef struct Digram_t {           // uthash node, sizesof(Digram) = 72
 typedef struct Grammar_t {
     Symbol *rules;
     Digram *digram_table;
-    int rule_id;                    // current_rule id, a negative number start from -1
+    int start_rule_id;              // first rule id, normally is -1
+    int rule_id;                    // current_rule id, a negative number start from 'start_rule_id'
 } Grammar;
 
 

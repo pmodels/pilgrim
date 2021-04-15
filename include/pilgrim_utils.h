@@ -8,7 +8,7 @@ void pilgrim_report_memory_status();
 
 double pilgrim_wtime();
 
-/* Put many arguments (char *) in a list (char**) */
+/* Put multiple arguments (char *) in a list (char**) */
 void** assemble_args_list(int arg_count, ...);
 
 void* concat_function_args(short func_id, int arg_count, void** args, int* arg_sizes, int* key_len);
@@ -17,6 +17,14 @@ int randint();
 
 int min_in_array(int* arr, size_t len);
 
-
+/**
+ * We provide these functions to replace the one
+ * included in <math.h> Becuase some math.h functions
+ * cause Pilgrim hang.
+ *
+ * Not sure why, potentially due to Intel MKL multi-threading?
+ */
+double pilgrim_log2(int val);
+int pilgrim_ceil(double val);
 
 #endif

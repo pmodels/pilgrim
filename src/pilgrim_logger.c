@@ -199,7 +199,8 @@ RecordHash* merge_function_entries() {
     int other_rank;
     int mask = 1;
     bool done = false;
-    int phases = ceil(log2(__logger.nprocs));
+
+    int phases = pilgrim_ceil(pilgrim_log2(__logger.nprocs));
 
     RecordHash* merged_table = copy_function_entries(__logger.hash_head);
 
@@ -260,7 +261,7 @@ RecordHash* merge_function_entries() {
             PMPI_Send(&size, sizeof(size), MPI_BYTE, other_rank, mask, MPI_COMM_WORLD);
             PMPI_Send(buf, size, MPI_BYTE, other_rank, mask, MPI_COMM_WORLD);
             pilgrim_free(buf, size);
-
+            //printf("phase: %d/%d, %d sends to %d\n", k, phases, my_rank, other_rank);
             done = true;
         }
     }

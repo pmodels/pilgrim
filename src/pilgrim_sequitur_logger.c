@@ -65,6 +65,7 @@ int* serialize_grammar(Grammar *grammar, int *integers) {
  * Inter-process compression of CFGs
  *
  * Grammar* lg [in]: local grammar
+ * return: a compressed grammar.
  */
 Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size) {
     int integers = 0;

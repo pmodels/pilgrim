@@ -41,18 +41,18 @@ struct Logger {
     bool recording;                 // set to true only after initialization
     LocalMetadata local_metadata;   // local metadata information
 
-    RecordHash *hash_head;          // head of function entries hash table
+    RecordHash *hash_head;          // head of CST hash table
 
     OffsetNode *offset_list;        // List of MPI_Offset
 
-    Grammar grammar;                // Context-free-grammar for the function calls
+    Grammar grammar;                // Context-free-grammar for the MPI calls
     Grammar durations_grammar;
     Grammar intervals_grammar;
 
     double final_grammar_size;      // compressed grammar size (in KB)
     double final_cst_size;          // compressed cst size (in KB)
-    double interval_grammar_size;   // compressed interval grammar size
-    double duration_grammar_size;   // compressed duration grammar size
+    double interval_grammar_size;   // compressed interval grammar size (in KB)
+    double duration_grammar_size;   // compressed duration grammar size (in KB)
 
     bool aggregated_timings;        // if aggregated (default) or non-aggregated timings are stored
 };
@@ -73,7 +73,8 @@ bool is_recording() {
     return __logger.recording;
 }
 
-void cleanup_function_entry_table(RecordHash* table) {
+
+void cleanup_cst(RecordHash* table) {
     RecordHash *entry, *tmp;
     HASH_ITER(hh, table, entry, tmp) {
         HASH_DEL(table, entry);
@@ -85,7 +86,7 @@ void cleanup_function_entry_table(RecordHash* table) {
 
 
 /**
- * Serialize the local function entries into
+ * Serialize the local CST into
  * a contiguous memory space.
  * | number of entries |
  * | terminal id 1 | rank | key len 1 | key 1 |
@@ -96,7 +97,7 @@ void cleanup_function_entry_table(RecordHash* table) {
  * @return: the address of this memory space.
  *
  */
-void* serialize_function_entries(RecordHash *table, size_t *len) {
+void* serialize_cst(RecordHash *table, size_t *len) {
     *len = sizeof(int);
 
     RecordHash *entry, *tmp;
@@ -131,7 +132,7 @@ void* serialize_function_entries(RecordHash *table, size_t *len) {
 
 // Caller need to be sure that data containts no duplicated keys
 // We don't check it when inserting entries into the hash table.
-RecordHash* deserialize_function_entries(void *data) {
+RecordHash* deserialize_cst(void *data) {
     int num;
     memcpy(&num, data, sizeof(int));
 
@@ -161,7 +162,7 @@ RecordHash* deserialize_function_entries(void *data) {
 }
 
 
-RecordHash* copy_function_entries(RecordHash* origin) {
+RecordHash* copy_cst(RecordHash* origin) {
     RecordHash* table = NULL;
     RecordHash *entry, *tmp, *new_entry;
     HASH_ITER(hh, origin, entry, tmp) {
@@ -194,7 +195,7 @@ RecordHash* copy_function_entries(RecordHash* origin) {
  * phase 2: 010 --> 000
  *
  */
-RecordHash* merge_function_entries() {
+RecordHash* compress_csts() {
     int my_rank = __logger.rank;
     int other_rank;
     int mask = 1;
@@ -202,7 +203,7 @@ RecordHash* merge_function_entries() {
 
     int phases = pilgrim_ceil(pilgrim_log2(__logger.nprocs));
 
-    RecordHash* merged_table = copy_function_entries(__logger.hash_head);
+    RecordHash* merged_table = copy_cst(__logger.hash_head);
 
     for(int k = 0; k < phases; k++, mask*=2) {
         if(done) break;
@@ -257,7 +258,7 @@ RecordHash* merge_function_entries() {
             pilgrim_free(buf, size);
 
         } else {   // SENDER
-            buf = serialize_function_entries(merged_table, &size);
+            buf = serialize_cst(merged_table, &size);
             PMPI_Send(&size, sizeof(size), MPI_BYTE, other_rank, mask, MPI_COMM_WORLD);
             PMPI_Send(buf, size, MPI_BYTE, other_rank, mask, MPI_COMM_WORLD);
             pilgrim_free(buf, size);
@@ -347,18 +348,18 @@ void print_cst(RecordHash *cst) {
  * we merge them by inserting them into one hash table
  *
  */
-int* dump_function_entries() {
+int* dump_cst() {
     // 1. Collect function entries from all ranks
     // Eventually, rank 0 will have the fully merged table.
-    RecordHash* merged_table = merge_function_entries();
+    RecordHash* merged_table = compress_csts();
 
     // 2. Broadcast the merged function table to all ranks
     size_t merged_size;
     void *merged;
     if(__logger.rank !=0 )
-        cleanup_function_entry_table(merged_table);
+        cleanup_cst(merged_table);
     else
-        merged = serialize_function_entries(merged_table, &merged_size);
+        merged = serialize_cst(merged_table, &merged_size);
 
     PMPI_Bcast(&merged_size, sizeof(merged_size), MPI_BYTE, 0, MPI_COMM_WORLD);
     if(__logger.rank != 0)
@@ -377,11 +378,11 @@ int* dump_function_entries() {
             printf("[pilgrim] Open file: %s failed, errno: %d\n", FUNCS_OUTPUT_PATH, errno);
         }
         print_cst(merged_table);
-        cleanup_function_entry_table(merged_table);
+        cleanup_cst(merged_table);
     }
 
     // 4. Update function entry's terminal id
-    merged_table = deserialize_function_entries(merged);
+    merged_table = deserialize_cst(merged);
     pilgrim_free(merged, merged_size);
 
     int *update_terminal_id = pilgrim_malloc(sizeof(int) * current_terminal_id);
@@ -394,7 +395,7 @@ int* dump_function_entries() {
             printf("[pilgrim] %d Not possible! Not exist in merged table?\n", __logger.rank);
     }
 
-    cleanup_function_entry_table(merged_table);
+    cleanup_cst(merged_table);
     return update_terminal_id;
 }
 
@@ -518,13 +519,14 @@ void logger_exit() {
 
 
     double t1, t2;
-    // 1. Inter-process compression of CSTs
 
+    // 1. Inter-process compression of CSTs
     t1 = pilgrim_wtime();
-    int* update_terminal_id = dump_function_entries();
+    int* update_terminal_id = dump_cst();
     sequitur_update(&(__logger.grammar), update_terminal_id);
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
     t2 = pilgrim_wtime();
+
     if(__logger.rank == 0) {
         printf("CST inter-process compression time: %.2f\n", t2-t1);
         printf("[pilgrim] total mpi calls: %f *10e6\n", total_calls);
@@ -542,7 +544,7 @@ void logger_exit() {
         printf("Grammar inter-process compression time: %.2f\n", t2-t1);
 
     // 3. Clean up all resources
-    cleanup_function_entry_table(__logger.hash_head);
+    cleanup_cst(__logger.hash_head);
     OffsetNode *elt, *tmp2;
     LL_FOREACH_SAFE(__logger.offset_list, elt, tmp2) {
         LL_DELETE(__logger.offset_list, elt);

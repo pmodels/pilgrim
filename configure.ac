@@ -112,9 +112,8 @@ if test "${enable_debug}" != "no" ; then
     PAC_APPEND_FLAG([-g],[CFLAGS])
 fi
 
-PAC_APPEND_FLAG([-DMEMORY_POINTERS], [CFLAGS])
 AC_ARG_ENABLE([pointers], AS_HELP_STRING([--enable-pointers], [Enabel intercepting and storing pointers]))
-if test "${enable_debug}" != "no" ; then
+if test "${enable_pointers}" != "no" ; then
     PAC_APPEND_FLAG([-DMEMORY_POINTERS], [CFLAGS])
 fi
 

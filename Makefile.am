@@ -27,6 +27,7 @@ AM_CPPFLAGS = -g -rdynamic
 AM_CFLAGS = -g -rdynamic
 
 
+
 libpilgrim_la_LDFLAGS = -lm -version-info @libpilgrim_so_version@
 
 include $(top_srcdir)/src/Makefile.mk

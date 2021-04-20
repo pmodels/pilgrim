@@ -7,12 +7,14 @@
 #include "uthash.h"
 
 typedef struct UniqueGrammar_t {
-    void *key;
+    int ugi;                // unique grammar id
+    void *key;              // serialized grammar stream as key
     int count;
     UT_hash_handle hh;
 } UniqueGrammar;
 
 static UniqueGrammar *unique_grammars;
+static int current_ugi = 0;
 
 /**
  * Store the Grammer in an integer array
@@ -26,7 +28,7 @@ static UniqueGrammar *unique_grammars;
  * @return: return the array, need to be freed by the caller
  *
  */
-int* serialize_grammar(Grammar *grammar, size_t *len) {
+int* serialize_grammar(Grammar *grammar, int *integers) {
 
     int total_integers = 1, symbols_count = 0, rules_count = 0;
 
@@ -54,131 +56,128 @@ int* serialize_grammar(Grammar *grammar, size_t *len) {
         }
     }
 
-    *len = total_integers;
+    *integers = total_integers;
     return data;
 }
 
 
 /**
- * Use MPI to gather grammars from all ranks
+ * Inter-process compression of CFGs
  *
- * @total_len: output parameter, is length of the returned grammar (interger array)
- * @return: gathered grammars in a 1D integer array
+ * Grammar* lg [in]: local grammar
+ * return: a compressed grammar.
  */
-int* gather_grammars(Grammar *grammar, int mpi_rank, int mpi_size, size_t* len_sum) {
-    size_t len = 0;
-    int *local_grammar = serialize_grammar(grammar, &len);
+Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size) {
+    int integers = 0;
+    int *local_grammar = serialize_grammar(lg, &integers);
 
     int recvcounts[mpi_size], displs[mpi_size];
-    PMPI_Gather(&len, 1, MPI_INT, recvcounts, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
+    PMPI_Gather(&integers, 1, MPI_INT, recvcounts, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     displs[0] = 0;
-    *len_sum = recvcounts[0];
+    size_t gathered_integers = recvcounts[0];
     for(int i = 1; i < mpi_size;i++) {
-        *len_sum += recvcounts[i];
+        gathered_integers += recvcounts[i];
         displs[i] = displs[i-1] + recvcounts[i-1];
     }
 
     int *gathered_grammars = NULL;
     if(mpi_rank == 0)
-        gathered_grammars = pilgrim_malloc(sizeof(int) * (*len_sum));
+        gathered_grammars = pilgrim_malloc(sizeof(int) * gathered_integers);
 
-    PMPI_Gatherv(local_grammar, len, MPI_INT, gathered_grammars, recvcounts, displs, MPI_INT, 0, MPI_COMM_WORLD);
+    PMPI_Gatherv(local_grammar, integers, MPI_INT, gathered_grammars, recvcounts, displs, MPI_INT, 0, MPI_COMM_WORLD);
+    pilgrim_free(local_grammar, sizeof(int)*integers);
 
-    if(mpi_rank == 0) {
-        for(int i = 0; i < mpi_size; i++) {
-            int* key = gathered_grammars+displs[i];
-            int key_len = recvcounts[i] * sizeof(int);
-            UniqueGrammar *entry = NULL;
-            HASH_FIND(hh, unique_grammars, key, key_len, entry);
-            if(entry)
-                entry->count++;
-            else {
-                entry = pilgrim_malloc(sizeof(UniqueGrammar));
-                entry->key = key;   // use the existing memory, do not copy it
-                HASH_ADD_KEYPTR(hh, unique_grammars, entry->key, key_len, entry);
+    if(mpi_rank !=0) return NULL;
+
+    // Run a final Sequitur pass to compress the gathered grammars
+    Grammar *grammar = pilgrim_malloc(sizeof(Grammar));
+    grammar->start_rule_id = min_in_array(gathered_grammars, gathered_integers)  -1;
+    sequitur_init_rule_id(grammar, grammar->start_rule_id);
+    int rules, rule_val, symbols, symbol_val, symbol_exp;
+
+    // Go through each rank's grammar
+    for(int i = 0; i < mpi_size; i++) {
+
+        // Serialized grammar of rank i
+        int* g = gathered_grammars + displs[i];
+        int g_len = recvcounts[i] * sizeof(int);
+
+        UniqueGrammar *entry = NULL;
+        HASH_FIND(hh, unique_grammars, g, g_len, entry);
+
+        if(entry) {
+            entry->count++;
+
+            // A duplicated grammar, only need to store its id
+            append_terminal(grammar, entry->ugi, 1);
+        } else {
+            entry = pilgrim_malloc(sizeof(UniqueGrammar));
+            entry->ugi = current_ugi++;
+            entry->key = g;   // use the existing memory, do not copy it
+            HASH_ADD_KEYPTR(hh, unique_grammars, entry->key, g_len, entry);
+
+            // A unseen grammar, fully store it.
+            int k = 0;
+            rules = g[k++];
+            append_terminal(grammar, entry->ugi, 1);
+            append_terminal(grammar, rules, 1);
+
+            for(int rule_idx = 0; rule_idx < rules; rule_idx++) {
+                rule_val = g[k++];
+                symbols = g[k++];
+                append_terminal(grammar, rule_val, 1);
+                append_terminal(grammar, symbols, 1);
+                for(int sym_id = 0; sym_id < symbols; sym_id++) {
+                    symbol_val = g[k++];
+                    symbol_exp = g[k++];
+                    append_terminal(grammar, symbol_val, symbol_exp);
+                }
             }
         }
-    }
+    } // end of for loop
 
-    pilgrim_free(local_grammar, sizeof(int)*len);
-    return gathered_grammars;
-}
-
-double compress_and_dump(const char* path, int* gathered, size_t len) {
+    // Clean up the hash table, and gathered grammars
     int num_unique_grammars = HASH_COUNT(unique_grammars);
     printf("[pilgrim] unique grammars: %d\n", num_unique_grammars);
 
-    // run a second sequitur pass
-    Grammar grammar;
-    int start_rule_id = min_in_array(gathered, len)  -1;
-    sequitur_init_rule_id(&grammar, start_rule_id);
-
-    int rules, rule_val, symbols, symbol_val, symbol_exp;
-
     UniqueGrammar *ug, *tmp;
     HASH_ITER(hh, unique_grammars, ug, tmp) {
-        int *data = (int*) ug->key;
-
-        int i = 0;
-        rules = data[i++];
-        append_terminal(&grammar, rules, 1);
-
-        for(int rule_idx = 0; rule_idx < rules; rule_idx++) {
-            rule_val = data[i++];
-            symbols = data[i++];
-            append_terminal(&grammar, rule_val, 1);
-            append_terminal(&grammar, symbols, 1);
-            // All symbols of one rule
-            for(int sym_id = 0; sym_id < symbols; sym_id++) {
-                symbol_val = data[i++];
-                symbol_exp = data[i++];
-                append_terminal(&grammar, symbol_val, symbol_exp);
-            }
-        }
-
         HASH_DEL(unique_grammars, ug);
-        // No need to free ug->key, it will be freed later.
         pilgrim_free(ug, sizeof(UniqueGrammar));
     }
+    pilgrim_free(gathered_grammars, gathered_integers*sizeof(int));
 
-    //print_rules(&grammar);
-
-    size_t compressed_len;
-    int* compressed_grammar = serialize_grammar(&grammar, &compressed_len);
-    sequitur_cleanup(&grammar);
-
-    errno = 0;
-    FILE* f = fopen(path, "wb");
-    if(f) {
-        //printf("[pilgrim] Uncompressed grammar size: %.2fKB, another sequitur pass: %.2fKB\n",
-        //        len/1024.0*sizeof(int), compressed_len/1024.0*sizeof(int));
-        fwrite(&start_rule_id, sizeof(int), 1, f);
-        fwrite(&len, sizeof(size_t), 1, f);
-        fwrite(&compressed_len, sizeof(size_t), 1, f);
-        fwrite(compressed_grammar, sizeof(int), compressed_len, f);
-        fclose(f);
-    } else {
-        printf("Open file: %s failed, errno: %d!\n", path, errno);
-    }
-
-    pilgrim_free(compressed_grammar, sizeof(int)*compressed_len);
-    return (compressed_len/1024.0*sizeof(int));
+    return grammar;
 }
 
 
-double sequitur_dump(const char* path, Grammar *grammar, int mpi_rank, int mpi_size) {
-    double compressed_size = 0;
+// Return the size of compressed grammar in KB
+double sequitur_dump(const char* path, Grammar *local_grammar, int mpi_rank, int mpi_size) {
+    int compressed_integers = 0;
 
-    // gathered_grammars is NULL except rank 0
+    // Compressed grammar is NULL except rank 0
     size_t len = 0;
-    int *gathered_grammars = gather_grammars(grammar, mpi_rank, mpi_size, &len);
+    Grammar *grammar = compress_grammars(local_grammar, mpi_rank, mpi_size);
 
+    // Serialize the compressed grammar and write it to file
     if(mpi_rank == 0) {
-        compressed_size = compress_and_dump(path, gathered_grammars, len);
-        pilgrim_free(gathered_grammars, sizeof(int)*len);
+        int* compressed_grammar = serialize_grammar(grammar, &compressed_integers);
+
+        errno = 0;
+        FILE* f = fopen(path, "wb");
+        if(f) {
+            fwrite(&(grammar->start_rule_id), sizeof(int), 1, f);
+            fwrite(compressed_grammar, sizeof(int), compressed_integers, f);
+            fclose(f);
+        } else {
+            printf("Open file: %s failed, errno: %d!\n", path, errno);
+        }
+
+        sequitur_cleanup(grammar);
+        pilgrim_free(grammar, sizeof(Grammar));
+        pilgrim_free(compressed_grammar, compressed_integers*sizeof(int));
     }
 
-    return compressed_size;
+    return (compressed_integers/1024.0*sizeof(int));
 }

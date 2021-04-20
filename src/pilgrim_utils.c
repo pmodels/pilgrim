@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <math.h>
 #include <string.h>
 #include <unistd.h>
 #include "pilgrim_utils.h"
@@ -89,4 +90,14 @@ int min_in_array(int* arr, size_t len) {
             min_val = arr[i];
     }
     return min_val;
+}
+
+double pilgrim_log2(int val) {
+    return log(val)/log(2);
+}
+
+int pilgrim_ceil(double val) {
+    int tmp = (int) val;
+    if(val > tmp)
+        return tmp + 1;
 }

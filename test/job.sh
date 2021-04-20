@@ -17,14 +17,15 @@ for p in 2 4 8
 do
     procs=$(( $p * $p * $p ))
     echo "[pilgrim CHEN]" $procs
-    mpirun -np $procs -env LD_PRELOAD /g/g90/wang116/sources/pilgrim/.libs/libpilgrim.so ./3d.out $p 10
+    #mpirun -np $procs -env LD_PRELOAD /g/g90/wang116/sources/pilgrim/.libs/libpilgrim.so ./3d.out $p 10
+    mpirun -np $procs -env LD_PRELOAD /g/g90/wang116/sources/pilgrim/.libs/libpilgrim.so ./a.out
 done
 
 
-for p in 2 4 8 16
-do
-    procs=$(( $p * $p ))
-    echo "[pilgrim CHEN]" $procs
-    mpirun -np $procs -env LD_PRELOAD /g/g90/wang116/sources/pilgrim/.libs/libpilgrim.so ./2d.out $p $p 10
-done
+#for p in 2 4 8 16
+#do
+#    procs=$(( $p * $p ))
+#    echo "[pilgrim CHEN]" $procs
+#    mpirun -np $procs -env LD_PRELOAD /g/g90/wang116/sources/pilgrim/.libs/libpilgrim.so ./2d.out $p $p 10
+#done
 

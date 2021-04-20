@@ -151,6 +151,7 @@ RecordHash* deserialize_cst(void *data) {
         memcpy( &(entry->key_len), ptr, sizeof(int) );
         ptr += sizeof(int);
 
+
         entry->key = pilgrim_malloc(entry->key_len);
         memcpy( entry->key, ptr, entry->key_len );
         ptr += entry->key_len;
@@ -262,7 +263,6 @@ RecordHash* compress_csts() {
             PMPI_Send(&size, sizeof(size), MPI_BYTE, other_rank, mask, MPI_COMM_WORLD);
             PMPI_Send(buf, size, MPI_BYTE, other_rank, mask, MPI_COMM_WORLD);
             pilgrim_free(buf, size);
-            //printf("phase: %d/%d, %d sends to %d\n", k, phases, my_rank, other_rank);
             done = true;
         }
     }
@@ -276,6 +276,8 @@ RecordHash* compress_csts() {
         HASH_ITER(hh, merged_table, entry, tmp) {
             entry->terminal_id = terminal_id++;
         }
+    } else {
+        cleanup_cst(merged_table);
     }
     return merged_table;
 }
@@ -349,53 +351,56 @@ void print_cst(RecordHash *cst) {
  *
  */
 int* dump_cst() {
-    // 1. Collect function entries from all ranks
-    // Eventually, rank 0 will have the fully merged table.
-    RecordHash* merged_table = compress_csts();
+    // 1. Inter-process copmression for CSTs
+    // Eventually, rank 0 will have the compressed table.
+    RecordHash* compressed_cst = compress_csts();
 
-    // 2. Broadcast the merged function table to all ranks
-    size_t merged_size;
-    void *merged;
-    if(__logger.rank !=0 )
-        cleanup_cst(merged_table);
-    else
-        merged = serialize_cst(merged_table, &merged_size);
+    // 2. Broadcast the merged CST to all ranks
+    size_t cst_stream_size;
+    void *cst_stream;
 
-    PMPI_Bcast(&merged_size, sizeof(merged_size), MPI_BYTE, 0, MPI_COMM_WORLD);
-    if(__logger.rank != 0)
-        merged = pilgrim_malloc(merged_size);
-    PMPI_Bcast(merged, merged_size, MPI_BYTE, 0, MPI_COMM_WORLD);
-    __logger.final_cst_size = merged_size / 1024.0;
-
-    // 3. Rank 0 write the merged function table to the file
     if(__logger.rank == 0) {
+        cst_stream = serialize_cst(compressed_cst, &cst_stream_size);
+        PMPI_Bcast(&cst_stream_size, sizeof(cst_stream_size), MPI_BYTE, 0, MPI_COMM_WORLD);
+        PMPI_Bcast(cst_stream, cst_stream_size, MPI_BYTE, 0, MPI_COMM_WORLD);
+
+        // 3. Rank 0 write out the compressed CST
         errno = 0;
         FILE *trace_file = fopen(FUNCS_OUTPUT_PATH, "wb");
         if(trace_file) {
-            fwrite(merged, 1, merged_size, trace_file);
+            fwrite(cst_stream, 1, cst_stream_size, trace_file);
             fclose(trace_file);
         } else {
             printf("[pilgrim] Open file: %s failed, errno: %d\n", FUNCS_OUTPUT_PATH, errno);
         }
-        print_cst(merged_table);
-        cleanup_cst(merged_table);
+        print_cst(compressed_cst);
+
+    } else {
+        PMPI_Bcast(&cst_stream_size, sizeof(cst_stream_size), MPI_BYTE, 0, MPI_COMM_WORLD);
+        cst_stream = pilgrim_malloc(cst_stream_size);
+        PMPI_Bcast(cst_stream, cst_stream_size, MPI_BYTE, 0, MPI_COMM_WORLD);
+
+        // 3. Other rank get the compressed cst stream from rank 0
+        // then convert it to the CST
+        compressed_cst = deserialize_cst(cst_stream);
     }
 
-    // 4. Update function entry's terminal id
-    merged_table = deserialize_cst(merged);
-    pilgrim_free(merged, merged_size);
+    __logger.final_cst_size = cst_stream_size / 1024.0;
 
+
+    // 4. Update function entry's terminal id
     int *update_terminal_id = pilgrim_malloc(sizeof(int) * current_terminal_id);
     RecordHash *entry, *tmp, *res;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        HASH_FIND(hh, merged_table, entry->key, entry->key_len, res);
+        HASH_FIND(hh, compressed_cst, entry->key, entry->key_len, res);
         if(res)
             update_terminal_id[entry->terminal_id] = res->terminal_id;
         else
             printf("[pilgrim] %d Not possible! Not exist in merged table?\n", __logger.rank);
     }
 
-    cleanup_cst(merged_table);
+    cleanup_cst(compressed_cst);
+    pilgrim_free(cst_stream, cst_stream_size);
     return update_terminal_id;
 }
 
@@ -432,10 +437,9 @@ void write_record(Record record) {
         entry->key = key;
         entry->key_len = key_len;
         entry->rank = __logger.rank;
-        entry->terminal_id = current_terminal_id;
+        entry->terminal_id = current_terminal_id++;
         entry->count = 0;
-        current_terminal_id++;
-        HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
+        HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, entry->key_len, entry);
     }
 
     // Grow the MPI call grammar
@@ -450,7 +454,6 @@ void write_record(Record record) {
         append_terminal(&(__logger.intervals_grammar), interval_id, 1);
         append_terminal(&(__logger.durations_grammar), duration_id, 1);
     }
-
 }
 
 void logger_init() {
@@ -505,7 +508,6 @@ void logger_init() {
 }
 
 
-
 void logger_exit() {
 
     uninstall_mem_hooks();
@@ -516,7 +518,6 @@ void logger_exit() {
     double local_calls = __logger.local_metadata.records_count/1000.0/1000.0;
     double total_calls;
     PMPI_Reduce(&local_calls, &total_calls, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-
 
     double t1, t2;
 
@@ -562,6 +563,4 @@ void logger_exit() {
             printf("[pilgrim] Duration Grammar Size: %.2fKB, Interval Grammar Size: %.2fKB\n",
                     __logger.duration_grammar_size, __logger.interval_grammar_size);
     }
-
-
 }

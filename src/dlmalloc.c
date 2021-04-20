@@ -587,6 +587,10 @@ MAX_RELEASE_CHECK_RATE   default: 4095 unless not HAVE_MMAP
 /* The maximum possible size_t value has all bits set */
 #define MAX_SIZE_T           (~(size_t)0)
 
+// CHEN: here we need to guarantee the thread-safety
+// otherwise, Pilgrim can crash on large scale runs.
+#define USE_LOCKS 1
+
 #ifndef USE_LOCKS /* ensure true if spin or recursive locks set */
 #define USE_LOCKS  ((defined(USE_SPIN_LOCKS) && USE_SPIN_LOCKS != 0) || \
                     (defined(USE_RECURSIVE_LOCKS) && USE_RECURSIVE_LOCKS != 0))

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <pthread.h>
 #include "pilgrim_utils.h"
 #include "pilgrim_mem_hooks.h"
 #include "pilgrim_addr_avl.h"
@@ -11,27 +12,13 @@
 #include "uthash.h"
 #include "utlist.h"
 
-typedef struct PointerEntry_t {
-    void *key;
-    UT_hash_handle hh;
-} PointerEntry;
-PointerEntry *pointers_table;
 
 AvlTree addr_tree;
 AddrIdNode *addr_id_list;               // free list of addr ids
 static bool hook_installed = false;
 static int allocated_addr_id = 0;
 
-
-void add_pointer_entry(void *ptr) {
-    PointerEntry *find;
-    HASH_FIND_PTR(pointers_table, &ptr, find);
-    if(find == NULL) {
-        find = pilgrim_malloc(sizeof(PointerEntry));
-        find->key = ptr;
-        HASH_ADD_PTR(pointers_table, key, find);
-    }
-}
+pthread_mutex_t avl_lock = PTHREAD_MUTEX_INITIALIZER;
 
 
 // Three public available function in .h
@@ -39,7 +26,6 @@ void install_mem_hooks() {
     hook_installed = true;
     addr_tree = NULL;
     addr_id_list = NULL;
-    pointers_table = NULL;
 }
 
 void uninstall_mem_hooks() {
@@ -51,12 +37,6 @@ void uninstall_mem_hooks() {
         DL_DELETE(addr_id_list, node);
         pilgrim_free(node, sizeof(AddrIdNode));
     }
-
-    PointerEntry *entry, *tmp2;
-    HASH_ITER(hh, pointers_table, entry, tmp2) {
-        HASH_DEL(pointers_table, entry);
-        pilgrim_free(entry, sizeof(PointerEntry));
-    }
 }
 
 // Symbolic representation of memory addresses
@@ -64,6 +44,8 @@ int* addr2id(const void* buffer) {
 #ifndef MEMORY_POINTERS
     return &allocated_addr_id;
 #endif
+    return &allocated_addr_id;
+
     AvlTree avl_node = avl_search(addr_tree, (intptr_t) buffer);
     if(avl_node == AVL_EMPTY) {
         // Not found in addr_tree suggests that this buffer is not dynamically allocated
@@ -101,9 +83,10 @@ void* malloc(size_t size) {
 
     void* ptr = dlmalloc(size);
 
+    pthread_mutex_lock(&avl_lock);
     avl_insert(&addr_tree, (intptr_t)ptr, size, true);
+    pthread_mutex_unlock(&avl_lock);
 
-    add_pointer_entry(ptr);
     return ptr;
 }
 
@@ -113,9 +96,10 @@ void* calloc(size_t nitems, size_t size) {
 
     void *ptr = dlcalloc(nitems, size);
 
+    pthread_mutex_lock(&avl_lock);
     avl_insert(&addr_tree, (intptr_t)ptr, size*nitems, true);
+    pthread_mutex_unlock(&avl_lock);
 
-    add_pointer_entry(ptr);
     return ptr;
 }
 
@@ -126,6 +110,7 @@ void* realloc(void *ptr, size_t size) {
 
     void *new_ptr = dlrealloc(ptr, size);
 
+    pthread_mutex_lock(&avl_lock);
     if(new_ptr == ptr) {
         AvlTree t = avl_search(addr_tree, (intptr_t)ptr);
         if(t != AVL_EMPTY) {
@@ -134,8 +119,9 @@ void* realloc(void *ptr, size_t size) {
     } else {
         avl_delete(&addr_tree, (intptr_t)ptr);
         avl_insert(&addr_tree, (intptr_t)new_ptr, size, true);
-        add_pointer_entry(new_ptr);
     }
+    pthread_mutex_unlock(&avl_lock);
+
     return new_ptr;
 }
 
@@ -147,6 +133,7 @@ void free(void *ptr) {
         return;
     }
 
+    pthread_mutex_lock(&avl_lock);
     AvlTree avl_node = avl_search(addr_tree, (intptr_t)ptr);
 
     if(AVL_EMPTY == avl_node) {
@@ -156,19 +143,12 @@ void free(void *ptr) {
     } else {
         if(avl_node->id_node)
             DL_APPEND(addr_id_list, avl_node->id_node);
-        //bool heap = avl_node->heap && (avl_node->addr==(intptr_t)ptr);
+        bool heap = avl_node->heap && (avl_node->addr==(intptr_t)ptr);
         avl_delete(&addr_tree, (intptr_t)ptr);
-        //if(heap)
-        //    dlfree(ptr);
+        if(heap)
+            dlfree(ptr);
     }
-
-    PointerEntry *d = NULL;
-    HASH_FIND_PTR(pointers_table, &ptr, d);
-    if(d) {
-        HASH_DEL(pointers_table, d);
-        pilgrim_free(d, sizeof(PointerEntry));
-        dlfree(ptr);
-    }
+    pthread_mutex_unlock(&avl_lock);
 }
 
 int posix_memalign(void **memptr, size_t alignment, size_t size) {
@@ -186,4 +166,17 @@ void *memalign(size_t alignment, size_t size) {
 void *pvalloc(size_t size) {
     return dlpvalloc(size);
 }
+
+struct mallinfo mallinfo(void) {
+    return dlmallinfo();
+}
+
+int malloc_trim(size_t pad) {
+    return dlmalloc_trim(pad);
+}
+
+int mallopt(int param, int value) {
+    return dlmallopt(param, value);
+}
+
 #endif

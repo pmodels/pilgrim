@@ -509,7 +509,6 @@ void logger_init() {
 
 
 void logger_exit() {
-
     uninstall_mem_hooks();
     __logger.recording = false;
 

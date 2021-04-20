@@ -101,6 +101,7 @@ RequestHash* request_hash_entry(MPI_Request *req) {
     return entry;
 }
 
+/*
 int create_request_id(MPI_Request *req, void* signature, int signature_len) {
     if(req==NULL || *req == MPI_REQUEST_NULL)
         return invalid_request_id;
@@ -137,6 +138,7 @@ int create_request_id(MPI_Request *req, void* signature, int signature_len) {
 
     return entry->req_node->id;
 }
+*/
 
 int request2id(MPI_Request *req, int source, int tag) {
     if(req==NULL || *req == MPI_REQUEST_NULL)

@@ -9,7 +9,6 @@ typedef struct AddrIdNode_t {
     struct AddrIdNode_t *next;
 } AddrIdNode;
 
-
 typedef struct AvlNode_t {
     struct AvlNode_t *child[2];  // left and right
 
@@ -27,27 +26,47 @@ typedef struct AvlNode_t *AvlTree;
 /* empty avl tree is just a null pointer */
 #define AVL_EMPTY (0)
 
-/* free a tree */
-void avl_destroy(AvlTree t);
 
-/* return the height of a tree */
-int avl_get_height(AvlTree t);
+/*
+ *  =============================================
+ *  The following three functions:
+ *  avl_search, avl_insert, avl_delete
+ *  may be invoked concurrently (just like malloc/free)
+ *  So, they need to be thread-safe, otherwise
+ *  Pilgrim may crash occasionally.
+ *  ============================================
+ */
 
-/* return nonzero if key is present in tree */
+
+/*
+ * Search for an allocated memory buffer
+ */
 AvlTree avl_search(AvlTree t, intptr_t addr);
 
-/* insert a new element into a tree */
-/* note *t is actual tree */
+/*
+ * Insert a new memory buffer when allocated/reallocated
+ * bool heap: indicate if this memory buffer is allocated on heap
+ */
 AvlTree avl_insert(AvlTree *t, intptr_t addr, size_t size, bool heap);
+
+/*
+ * Delete a memory buffer when freed
+ */
+void avl_delete(AvlTree *t, intptr_t addr);
+
+
+
+void avl_destroy(AvlTree t);
+
+/* print all keys of the tree in order */
+void avl_print_keys(AvlTree t);
 
 /* run sanity checks on tree (for debugging) */
 /* assert will fail if heights are wrong */
 void avl_sanity_check(AvlTree t);
 
-/* print all keys of the tree in order */
-void avl_print_keys(AvlTree t);
-
-void avl_delete(AvlTree *t, intptr_t addr);
+/* return the height of a tree */
+int avl_get_height(AvlTree t);
 
 /* delete and return minimum value in a tree */
 AvlTree avl_delete_min(AvlTree *t);

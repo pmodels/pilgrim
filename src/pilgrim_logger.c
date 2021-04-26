@@ -514,7 +514,8 @@ void logger_exit() {
 
     //printf("[pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
     //        HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
-    double local_calls = __logger.local_metadata.records_count/1000.0/1000.0;
+    //double local_calls = __logger.local_metadata.records_count/1000.0/1000.0;
+    double local_calls = __logger.local_metadata.records_count;
     double total_calls;
     PMPI_Reduce(&local_calls, &total_calls, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 

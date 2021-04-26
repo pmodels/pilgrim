@@ -44,4 +44,5 @@ void store_non_aggregated_timing(RecordHash* entry, Record* record, int *interva
     entry->ext_tstart += interval_i * TIME_RESOLUTION;
     *interval_id = get_bin_id(interval_i);
     *duration_id = get_bin_id(duration_i);
+    printf("duration: %fus, duration_i: %d, bin: %d\n", duration/microseconds, duration_i, duration_id);
 }

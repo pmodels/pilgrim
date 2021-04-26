@@ -3,7 +3,8 @@
 
 #include "pilgrim_logger.h"
 
-#define TIME_RESOLUTION (0.000001*10)
+#define microseconds    (0.000001)
+#define TIME_RESOLUTION (10*microseconds)
 
 void store_aggregated_timing(RecordHash* entry, Record* record);
 void store_non_aggregated_timing(RecordHash* entry, Record* record, int* interval_id, int* duration_id);

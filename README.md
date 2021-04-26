@@ -15,6 +15,8 @@ make install prefix=`pwd`   // install to the current directory
 ```bash
 mpirun -np N -env LD_PRELOAD /PATH/TO/pilgrim/lib/libpilgrim.so ./your_app
 ```
+mpirun can be replaced with your job scheduler, e.g., srun.
+
 
 ## Environment Variables
 
@@ -26,4 +28,4 @@ mpirun -np N -env LD_PRELOAD /PATH/TO/pilgrim/lib/libpilgrim.so ./your_app
 
 
 
-mpirun can be replaced with your job scheduler, e.g., srun.
+

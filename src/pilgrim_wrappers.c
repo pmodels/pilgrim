@@ -2774,6 +2774,7 @@ int MPI_File_seek_shared(MPI_File fh, MPI_Offset offset, int whence)
 	int sizes[] = { sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
+/*
 double MPI_Wtime(void)
 {
 	PILGRIM_TRACING_1(double, MPI_Wtime, ());
@@ -2781,6 +2782,7 @@ double MPI_Wtime(void)
 	int* sizes = NULL;
 	PILGRIM_TRACING_2(0, sizes, args);
 }
+*/
 int MPI_Add_error_class(int *errorclass)
 {
 	PILGRIM_TRACING_1(int, MPI_Add_error_class, (errorclass));
@@ -3648,6 +3650,7 @@ int MPI_Ineighbor_alltoallv(const void *sendbuf, const int sendcounts[], const i
 	int sizes[] = { sizeof(int), 1*sizeof(const int), 1*sizeof(const int), sizeof(int), sizeof(int), 1*sizeof(const int), 1*sizeof(const int), sizeof(int), sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(10, sizes, args);
 }
+/*
 double MPI_Wtick(void)
 {
 	PILGRIM_TRACING_1(double, MPI_Wtick, ());
@@ -3655,6 +3658,7 @@ double MPI_Wtick(void)
 	int* sizes = NULL;
 	PILGRIM_TRACING_2(0, sizes, args);
 }
+*/
 int MPI_T_category_get_cvars(int cat_index, int len, int indices[])
 {
 	PILGRIM_TRACING_1(int, MPI_T_category_get_cvars, (cat_index, len, indices));

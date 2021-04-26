@@ -38,11 +38,17 @@ void store_aggregated_timing(RecordHash* entry, Record* record) {
  * If required, we can also store non-aggregated timing information
  */
 void store_non_aggregated_timing(RecordHash* entry, Record* record, int *interval_id, int* duration_id) {
-    double duration = record->tend - record->tstart;
-    int interval_i = (record->tstart - entry->ext_tstart) / TIME_RESOLUTION;
+    double duration = record->tend - record->tstart;        // in seconds
+    double interval = record->tstart - entry->ext_tstart;   // in seconds
     int duration_i = duration / TIME_RESOLUTION;
-    entry->ext_tstart += interval_i * TIME_RESOLUTION;
-    *interval_id = get_bin_id(interval_i);
+    int interval_i = interval / TIME_RESOLUTION;
+
     *duration_id = get_bin_id(duration_i);
-    printf("duration: %fus, duration_i: %d, bin: %d\n", duration/microseconds, duration_i, duration_id);
+    *interval_id = get_bin_id(interval_i);
+
+    entry->ext_tstart += interval_i * TIME_RESOLUTION;
+    //if(entry->rank == 0) {
+        //printf("func: %s, duration: %fus, duration_i: %d, bin: %d\n", func_names[record->func_id], duration/microseconds, duration_i, *duration_id);
+        //printf("func: %s, interval: %fus, interval_i: %d, bin: %d\n", func_names[record->func_id], interval/microseconds, interval_i, *interval_id);
+    //}
 }

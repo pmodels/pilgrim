@@ -171,6 +171,9 @@ int request2id(MPI_Request *req, int source, int tag) {
 
 int get_object_id_MPI_Request(MPI_Request *req) {
     RequestHash *entry = request_hash_entry(req);
+    if(!entry)
+        return request2id(req, 0, 0);
+
     if(entry && entry->req_node)
         return entry->req_node->id;
     else

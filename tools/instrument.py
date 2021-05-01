@@ -172,6 +172,10 @@ def handle_special_apis(func):
     ignored = ["MPI_Wait", "MPI_Waitany", "MPI_Waitsome", "MPI_Waitall", "MPI_Request_free", "MPI_Startall",
                "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
 
+    # These two do not required by the standard to have their PMPI counterpart
+    # So we don't trace them
+    ignored += ["MPI_Wtime", "MPI_Wtick"]
+
     if func.name in ignored:
         return True
 

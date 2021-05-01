@@ -40,17 +40,24 @@ void uninstall_mem_hooks() {
 }
 
 // Symbolic representation of memory addresses
-int* addr2id(const void* buffer) {
+// buf_id [out]: memory buffer symbolic id
+// offset [out]: the offset withint the memory buffer
+void addr2id(const void* buffer, size_t *buf_id, size_t *offset, size_t *size) {
 #ifndef MEMORY_POINTERS
-    return &allocated_addr_id;
+    // Users do not need memory pointers, simply return 0
+    *buf_id = 0;
+    *offset = 0;
+    *size = 0;
+    return;
 #endif
-    return &allocated_addr_id;
+
+    pthread_mutex_lock(&avl_lock);
 
     AvlTree avl_node = avl_search(addr_tree, (intptr_t) buffer);
     if(avl_node == AVL_EMPTY) {
-        // Not found in addr_tree suggests that this buffer is not dynamically allocated
+        // Not found in addr_tree indicates that this buffer is not dynamically allocated
         // Maybe a stack buffer so we don't know excatly the size
-        // We assume it as a 1 byte memory area.
+        // We assume it is 1 byte memory area.
         avl_node = avl_insert(&addr_tree, (intptr_t)buffer, 1, false);
     }
 
@@ -70,7 +77,10 @@ int* addr2id(const void* buffer) {
         }
     }
 
-    return &(avl_node->id_node->id);
+    *buf_id = avl_node->id_node->id;
+    *offset = ((intptr_t)buffer) - avl_node->addr;
+    *size = avl_node->size;
+    pthread_mutex_unlock(&avl_lock);
 }
 
 /**

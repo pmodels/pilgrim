@@ -67,7 +67,7 @@ int* serialize_grammar(Grammar *grammar, int *integers) {
  * Grammar* lg [in]: local grammar
  * return: a compressed grammar.
  */
-Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size) {
+Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size, size_t *uncompressed_integers) {
     int integers = 0;
     int *local_grammar = serialize_grammar(lg, &integers);
 
@@ -80,6 +80,7 @@ Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size) {
         gathered_integers += recvcounts[i];
         displs[i] = displs[i-1] + recvcounts[i-1];
     }
+    *uncompressed_integers = gathered_integers;
 
     int *gathered_grammars = NULL;
     if(mpi_rank == 0)
@@ -110,7 +111,7 @@ Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size) {
             entry->count++;
 
             // A duplicated grammar, only need to store its id
-            append_terminal(grammar, entry->ugi, 1);
+            //append_terminal(grammar, entry->ugi, 1);
         } else {
             entry = pilgrim_malloc(sizeof(UniqueGrammar));
             entry->ugi = current_ugi++;
@@ -120,7 +121,7 @@ Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size) {
             // A unseen grammar, fully store it.
             int k = 0;
             rules = g[k++];
-            append_terminal(grammar, entry->ugi, 1);
+            //append_terminal(grammar, entry->ugi, 1);
             append_terminal(grammar, rules, 1);
 
             for(int rule_idx = 0; rule_idx < rules; rule_idx++) {
@@ -157,8 +158,8 @@ double sequitur_dump(const char* path, Grammar *local_grammar, int mpi_rank, int
     int compressed_integers = 0;
 
     // Compressed grammar is NULL except rank 0
-    size_t len = 0;
-    Grammar *grammar = compress_grammars(local_grammar, mpi_rank, mpi_size);
+    size_t uncompressed_integers = 0;
+    Grammar *grammar = compress_grammars(local_grammar, mpi_rank, mpi_size, &uncompressed_integers);
 
     // Serialize the compressed grammar and write it to file
     if(mpi_rank == 0) {
@@ -168,6 +169,7 @@ double sequitur_dump(const char* path, Grammar *local_grammar, int mpi_rank, int
         FILE* f = fopen(path, "wb");
         if(f) {
             fwrite(&(grammar->start_rule_id), sizeof(int), 1, f);
+            fwrite(&uncompressed_integers, sizeof(size_t), 1, f);
             fwrite(compressed_grammar, sizeof(int), compressed_integers, f);
             fclose(f);
         } else {

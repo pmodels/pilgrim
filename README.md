@@ -7,9 +7,14 @@ A scalable and (near) lossless MPI Tracing library
 cd /PATH/TO/pilgrim
 ./autogen.sh
 ./configure
+# Memory pointer (void*) type parameters are not stored by default.
+# To enable it, use ./configure --enable-pointers 
 make
 make install prefix=`pwd`   // install to the current directory
 ```
+
+
+
 
 ## Usage
 ```bash

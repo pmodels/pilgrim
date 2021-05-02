@@ -25,7 +25,7 @@ static inline int get_bin_id(double val) {
 /*
  * By default, keep only aggregated timing inofrmation
  */
-void store_aggregated_timing(RecordHash* entry, Record* record) {
+void handle_aggregated_timing(RecordHash* entry, Record* record) {
     double duration = record->tend - record->tstart;
     double t = (duration - entry->avg_duration);
     unsigned previous_count = entry->count - 1;
@@ -37,7 +37,7 @@ void store_aggregated_timing(RecordHash* entry, Record* record) {
 /*
  * If required, we can also store non-aggregated timing information
  */
-void store_non_aggregated_timing(RecordHash* entry, Record* record, int *interval_id, int* duration_id) {
+void handle_non_aggregated_timing(RecordHash* entry, Record* record, int *interval_id, int* duration_id) {
     double duration = record->tend - record->tstart;        // in seconds
     double interval = record->tstart - entry->ext_tstart;   // in seconds
     int duration_i = duration / TIME_RESOLUTION;
@@ -45,19 +45,13 @@ void store_non_aggregated_timing(RecordHash* entry, Record* record, int *interva
 
     *duration_id = get_bin_id(duration_i);
     *interval_id = get_bin_id(interval_i);
-
-    entry->ext_tstart += interval_i * TIME_RESOLUTION;
-    //if(entry->rank == 0) {
-        //printf("func: %s, duration: %fus, duration_i: %d, bin: %d\n", func_names[record->func_id], duration/microseconds, duration_i, *duration_id);
-        //printf("func: %s, interval: %fus, interval_i: %d, bin: %d\n", func_names[record->func_id], interval/microseconds, interval_i, *interval_id);
-    //}
 }
 
 /**
  * We can also store lossless timing
  * Later, we can use external compressor tool like fzip to compress it
  */
-void store_lossless_timing(RecordHash *entry, Record* record, double *duration, double *interval) {
+void handle_lossless_timing(RecordHash *entry, Record* record, double *duration, double *interval) {
     *duration = record->tend - record->tstart;        // in seconds
     *interval = record->tstart - entry->ext_tstart;   // in seconds
     entry->ext_tstart = record->tstart;

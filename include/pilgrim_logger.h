@@ -37,11 +37,12 @@ typedef struct RecordHash_t {
     double ext_tstart;              // last call's extrapolated tstart
 
     // statistics information
+    // for aggregated timing mode
     double avg_duration;            // average duration
     double std_duration;            // standard deviation of the duration
     unsigned count;                 // count of this call signature
 
-    // Lossless timing
+    // Lossless timing mode
     TimingNode *intervals;
     TimingNode *durations;
 
@@ -60,7 +61,7 @@ typedef struct _LocalMetadata {
 typedef struct _GlobalMetadata {
     double time_resolution;
     int ranks;
-    int aggregated_timings;         // If aggreated (default) or non-aggregated timings are stored
+    int timing_mode;
 } GlobalMetadata;
 
 

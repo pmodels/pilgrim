@@ -573,9 +573,6 @@ void logger_exit() {
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
     cst_compression_time = pilgrim_wtime() - cst_compression_time;
 
-    if(__logger.rank == 0) {
-    }
-
     // 2. Inter-process copmression of Grammars
     cfg_compression_time = pilgrim_wtime();
     __logger.final_grammar_size = sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
@@ -584,11 +581,6 @@ void logger_exit() {
         __logger.duration_grammar_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
     }
     cfg_compression_time = pilgrim_wtime();
-    if(__logger.rank == 0) {
-        printf("CST inter-process compression time: %.2f\n", cst_compression_time);
-        printf("[pilgrim] total mpi calls: %f *10e6\n", total_calls);
-        printf("Grammar inter-process compression time: %.2f\n", cfg_compression_time);
-    }
 
     // 2.5 Write out lossless timing, one file per rank
     write_lossless_timings();
@@ -606,10 +598,14 @@ void logger_exit() {
     // Output statistics
     if(__logger.rank == 0) {
         pilgrim_report_memory_status();
-        printf("[pilgrim] CST Size: %.2fKB, Grammar Size: %.2fKB, Total: %.2fKB\n",
+
+        printf("[pilgrim] Total mpi calls: %f *10e6\n", total_calls);
+        printf("[pilgrim] CST inter-process compression time: %.2f\n", cst_compression_time);
+        printf("[pilgrim] CFG inter-process compression time: %.2f\n", cfg_compression_time);
+        printf("[pilgrim] CST Size: %.2fKB, CFG Size: %.2fKB, Total: %.2fKB\n",
                 __logger.final_cst_size, __logger.final_grammar_size, __logger.final_cst_size + __logger.final_grammar_size);
         if(__logger.timing_mode == TIMING_MODE_NONAGGREGATED)
-            printf("[pilgrim] Duration Grammar Size: %.2fKB, Interval Grammar Size: %.2fKB\n",
+            printf("[pilgrim] Duration CFG Size: %.2fKB, Interval CFG Size: %.2fKB\n",
                     __logger.duration_grammar_size, __logger.interval_grammar_size);
     }
 }

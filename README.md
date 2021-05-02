@@ -27,9 +27,9 @@ mpirun can be replaced with your job scheduler, e.g., srun.
 
 **PILGRIM_TIMING_MODE**: 0, 1, 2
 
-0: store aggregated timing infomration, i.e., average duration for each call signature
+0: Store aggregated timing infomration, i.e., average duration for each call signature
 
-1: store non-aggregated timing infomration, i.e., lossy duration and interval for each call. We use context-free-grammars to compress them.
+1: Store non-aggregated timing infomration, i.e., lossy duration and interval for each call. We use context-free-grammars to compress them.
 
 2: Store lossless timing information. In this mode, we write to a single file a list of durations or intervals per call signature in a lossless manner.
 

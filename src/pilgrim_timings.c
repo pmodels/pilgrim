@@ -52,3 +52,13 @@ void store_non_aggregated_timing(RecordHash* entry, Record* record, int *interva
         //printf("func: %s, interval: %fus, interval_i: %d, bin: %d\n", func_names[record->func_id], interval/microseconds, interval_i, *interval_id);
     //}
 }
+
+/**
+ * We can also store lossless timing
+ * Later, we can use external compressor tool like fzip to compress it
+ */
+void store_lossless_timing(RecordHash *entry, Record* record, double *duration, double *interval) {
+    *duration = record->tend - record->tstart;        // in seconds
+    *interval = record->tstart - entry->ext_tstart;   // in seconds
+    entry->ext_tstart = record->tstart;
+}

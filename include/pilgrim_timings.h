@@ -8,5 +8,6 @@
 
 void store_aggregated_timing(RecordHash* entry, Record* record);
 void store_non_aggregated_timing(RecordHash* entry, Record* record, int* interval_id, int* duration_id);
+void store_lossless_timing(RecordHash* entry, Record* record, double* duration, double* interval);
 
 #endif

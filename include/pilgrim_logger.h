@@ -8,6 +8,12 @@
 int g_mpi_rank;
 int g_mpi_size;
 
+// Store a list of lossless duration or interval
+typedef struct TimingNode_t {
+    double val;
+    struct TimingNode_t *next;
+} TimingNode;
+
 
 typedef struct _Record {
     double tstart, tend;
@@ -18,19 +24,26 @@ typedef struct _Record {
     int res;                    // result returned from the original function call
 } Record;
 
-// Entry in uthash
-// Call signature as Key
-// Terminal symbol as Val
+/*
+ * Entry of the Call Signature Table
+ * key: call signature
+ */
 typedef struct RecordHash_t {
-    void *key;                      // func_id + arguments + duration, used as key
+    void *key;                      // [func_id + arguments] as key
     int key_len;
+
     int rank;
     int terminal_id;                // terminal id used for sequitur compression
     double ext_tstart;              // last call's extrapolated tstart
 
+    // statistics information
     double avg_duration;            // average duration
     double std_duration;            // standard deviation of the duration
-    unsigned count;                 // Count of this call signature
+    unsigned count;                 // count of this call signature
+
+    // Lossless timing
+    TimingNode *intervals;
+    TimingNode *durations;
 
     UT_hash_handle hh;
 } RecordHash;

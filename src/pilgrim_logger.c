@@ -76,10 +76,41 @@ void cleanup_cst(RecordHash* table) {
     RecordHash *entry, *tmp;
     HASH_ITER(hh, table, entry, tmp) {
         HASH_DEL(table, entry);
+
+        TimingNode *elt, *tmp2;
+        LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
+            LL_DELETE(entry->durations,  elt);
+            pilgrim_free(elt, sizeof(TimingNode));
+        }
+        LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
+            LL_DELETE(entry->intervals,  elt);
+            pilgrim_free(elt, sizeof(TimingNode));
+        }
+
         pilgrim_free(entry->key, entry->key_len);
         pilgrim_free(entry, sizeof(RecordHash));
     }
     table = NULL;
+}
+
+void write_lossless_timings() {
+
+    char fpath[256] = {0};
+    sprintf(fpath, "./pilgrim-logs/timings-%d", __logger.rank);
+    FILE* f = fopen(fpath, "w");
+
+    RecordHash *entry, *tmp;
+    HASH_ITER(hh, __logger.hash_head, entry, tmp) {
+        TimingNode *elt, *tmp2;
+        LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
+            fwrite(&(elt->val), sizeof(double), 1, f);
+        }
+        LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
+            fwrite(&(elt->val), sizeof(double), 1, f);
+        }
+    }
+
+    fclose(f);
 }
 
 
@@ -154,6 +185,8 @@ RecordHash* deserialize_cst(void *data) {
         memcpy( entry->key, ptr, entry->key_len );
         ptr += entry->key_len;
 
+        entry->durations = NULL;
+        entry->intervals = NULL;
         HASH_ADD_KEYPTR(hh, table, entry->key, entry->key_len, entry);
     }
 
@@ -170,6 +203,8 @@ RecordHash* copy_cst(RecordHash* origin) {
         new_entry->key_len = entry->key_len;
         new_entry->rank = entry->rank;
         new_entry->key = pilgrim_malloc(entry->key_len);
+        new_entry->durations = NULL;
+        new_entry->intervals = NULL;
         memcpy(new_entry->key, entry->key, entry->key_len);
         HASH_ADD_KEYPTR(hh, table, new_entry->key, new_entry->key_len, new_entry);
     }
@@ -251,6 +286,8 @@ RecordHash* compress_csts() {
                     entry->key = key;
                     entry->key_len = key_len;
                     entry->rank = cst_rank;
+                    entry->durations = NULL;
+                    entry->intervals = NULL;
                     HASH_ADD_KEYPTR(hh, merged_table, key, key_len, entry);
                 }
             }
@@ -438,21 +475,34 @@ void write_record(Record record) {
         entry->terminal_id = current_terminal_id++;
         entry->count = 0;
         entry->ext_tstart = record.tstart;
+
+        // TODO check if we need to store lossless info
+        entry->durations = NULL;
+        entry->intervals = NULL;
+
         HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, entry->key_len, entry);
     }
-
-    // Grow the MPI call grammar
-    append_terminal(&(__logger.grammar), entry->terminal_id, 1);
 
     // Store timings infomraiton
     if(__logger.aggregated_timings) {
         store_aggregated_timing(entry, &record);
     } else {
+        /*
+         *  TODO uncomment this
         int interval_id, duration_id;
         store_non_aggregated_timing(entry, &record, &interval_id, &duration_id);
         append_terminal(&(__logger.intervals_grammar), interval_id, 1);
         append_terminal(&(__logger.durations_grammar), duration_id, 1);
+        */
+        TimingNode *dur_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
+        TimingNode *int_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
+        store_lossless_timing(entry, &record, &(dur_node->val), &(int_node->val));
+        LL_PREPEND(entry->durations, dur_node);
+        LL_PREPEND(entry->intervals, int_node);
     }
+
+    // Grow the MPI call grammar
+    append_terminal(&(__logger.grammar), entry->terminal_id, 1);
 }
 
 void logger_init() {
@@ -541,6 +591,9 @@ void logger_exit() {
     t2 = pilgrim_wtime();
     if(__logger.rank == 0)
         printf("Grammar inter-process compression time: %.2f\n", t2-t1);
+
+    // 2.5 Write out lossless timing, one file per rank
+    write_lossless_timings();
 
     // 3. Clean up all resources
     cleanup_cst(__logger.hash_head);

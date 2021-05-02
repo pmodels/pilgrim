@@ -48,8 +48,8 @@ struct Logger {
 
     double final_grammar_size;      // compressed grammar size (in KB)
     double final_cst_size;          // compressed cst size (in KB)
-    double interval_grammar_size;   // compressed interval grammar size (in KB)
-    double duration_grammar_size;   // compressed duration grammar size (in KB)
+    double durations_file_size;     // compressed (or lossless) durations file size (in KB)
+    double intervals_file_size;     // compressed (or lossless) intervals file size (in KB)
 
     int timing_mode;                // 0: aggregated (default); 1: non-aggregated 2: lossless
 };
@@ -91,27 +91,6 @@ void cleanup_cst(RecordHash* table) {
     }
     table = NULL;
 }
-
-void write_lossless_timings() {
-
-    char fpath[256] = {0};
-    sprintf(fpath, "./pilgrim-logs/timings-%d", __logger.rank);
-    FILE* f = fopen(fpath, "w");
-
-    RecordHash *entry, *tmp;
-    HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        TimingNode *elt, *tmp2;
-        LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
-            fwrite(&(elt->val), sizeof(double), 1, f);
-        }
-        LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
-            fwrite(&(elt->val), sizeof(double), 1, f);
-        }
-    }
-
-    fclose(f);
-}
-
 
 /**
  * Serialize the local CST into
@@ -577,13 +556,14 @@ void logger_exit() {
     cfg_compression_time = pilgrim_wtime();
     __logger.final_grammar_size = sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
     if(__logger.timing_mode == TIMING_MODE_NONAGGREGATED) {
-        __logger.interval_grammar_size = sequitur_finalize(INTERVALS_OUTPUT_PATH, &(__logger.intervals_grammar));
-        __logger.duration_grammar_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
+        __logger.durations_file_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
+        __logger.intervals_file_size = sequitur_finalize(INTERVALS_OUTPUT_PATH, &(__logger.intervals_grammar));
     }
-    cfg_compression_time = pilgrim_wtime();
+    cfg_compression_time = pilgrim_wtime() - cfg_compression_time;
 
     // 2.5 Write out lossless timing, one file per rank
-    write_lossless_timings();
+    if(__logger.timing_mode == TIMING_MODE_LOSSLESS)
+        write_lossless_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
 
     // 3. Clean up all resources
     cleanup_cst(__logger.hash_head);
@@ -605,7 +585,7 @@ void logger_exit() {
         printf("[pilgrim] CST Size: %.2fKB, CFG Size: %.2fKB, Total: %.2fKB\n",
                 __logger.final_cst_size, __logger.final_grammar_size, __logger.final_cst_size + __logger.final_grammar_size);
         if(__logger.timing_mode == TIMING_MODE_NONAGGREGATED)
-            printf("[pilgrim] Duration CFG Size: %.2fKB, Interval CFG Size: %.2fKB\n",
-                    __logger.duration_grammar_size, __logger.interval_grammar_size);
+            printf("[pilgrim] Durations File Size: %.2fKB, Intervals File Size: %.2fKB\n",
+                    __logger.durations_file_size, __logger.intervals_file_size);
     }
 }

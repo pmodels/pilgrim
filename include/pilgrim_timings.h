@@ -14,4 +14,6 @@ void handle_aggregated_timing(RecordHash* entry, Record* record);
 void handle_non_aggregated_timing(RecordHash* entry, Record* record, int* interval_id, int* duration_id);
 void handle_lossless_timing(RecordHash* entry, Record* record, double* duration, double* interval);
 
+void write_lossless_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path);
+
 #endif

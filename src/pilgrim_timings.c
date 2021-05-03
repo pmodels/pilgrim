@@ -15,7 +15,7 @@ static inline int min(int a, int b) {
 static inline int get_bin_id(double val) {
     if(val==0)
         val = 0.000001;
-    double base = 1.2;
+    double base = 1.1;
     int id = log(val) / log(base);
     if(id < 0) id = -id;
     id = min(999999, id);
@@ -37,7 +37,7 @@ void handle_aggregated_timing(RecordHash* entry, Record* record) {
 /*
  * If required, we can also store non-aggregated timing information
  */
-void handle_non_aggregated_timing(RecordHash* entry, Record* record, int *interval_id, int* duration_id) {
+void handle_non_aggregated_timing(RecordHash* entry, Record* record, int *duration_id, int* interval_id) {
     double duration = record->tend - record->tstart;        // in seconds
     double interval = record->tstart - entry->ext_tstart;   // in seconds
     int duration_i = duration / TIME_RESOLUTION;

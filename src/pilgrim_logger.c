@@ -465,8 +465,8 @@ void write_record(Record record) {
     if(__logger.timing_mode == TIMING_MODE_AGGREGATED) {
         handle_aggregated_timing(entry, &record);
     } else if(__logger.timing_mode == TIMING_MODE_NONAGGREGATED) {
-        int interval_id, duration_id;
-        handle_non_aggregated_timing(entry, &record, &interval_id, &duration_id);
+        int duration_id, interval_id;
+        handle_non_aggregated_timing(entry, &record, &duration_id, &interval_id);
         append_terminal(&(__logger.intervals_grammar), interval_id, 1);
         append_terminal(&(__logger.durations_grammar), duration_id, 1);
     } else if(__logger.timing_mode == TIMING_MODE_LOSSLESS) {

@@ -27,8 +27,6 @@ static RuleHash* rules_table;
 static VariablePool* variable_pools[15];    // One variable pool for each variable type
 static int variable_current_ids[15];
 
-
-
 void read_global_metadata(char* path, GlobalMetadata *gm) {
     char global_metadata_path[256];
     sprintf(global_metadata_path, "%s/pilgrim.mt", path);
@@ -341,7 +339,6 @@ int main(int argc, char** argv) {
     CallSignature *call_sigs = read_cst(directory, &num_sigs);
     write_init_variables(directory, call_sigs, num_sigs);
     read_cfg(directory, gm.ranks, call_sigs);
-
 
     for(int i = 0; i < num_sigs; i++) {
         for(int j = 0; j < call_sigs[i].arg_count; j++)

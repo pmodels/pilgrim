@@ -103,8 +103,9 @@ void write_lossless_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* d
     displs[0] = 0;
     for(int i = 1; i < mpi_size; i++) {
         global_total += recv_counts[i];
-        displs[i] = recv_counts[i-1];
+        displs[i] = displs[i-1] + recv_counts[i-1];
     }
+
 
     if(mpi_rank == 0) {
         global_durations = pilgrim_malloc(sizeof(double)*global_total);

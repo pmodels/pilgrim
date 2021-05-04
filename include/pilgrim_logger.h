@@ -7,6 +7,8 @@
 // Global variables
 int g_mpi_rank;
 int g_mpi_size;
+double g_program_start_time;
+
 
 // Store a list of lossless duration or interval
 typedef struct TimingNode_t {

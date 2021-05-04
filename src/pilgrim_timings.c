@@ -49,12 +49,11 @@ void handle_non_aggregated_timing(RecordHash* entry, Record* record, int *durati
 
 /**
  * We can also store lossless timing
- * Later, we can use external compressor tool like fzip to compress it
+ * Later, we can use external compressor tool like fpzip to compress it
  */
 void handle_lossless_timing(RecordHash *entry, Record* record, double *duration, double *interval) {
     *duration = record->tend - record->tstart;        // in seconds
-    *interval = record->tstart - entry->ext_tstart;   // in seconds
-    entry->ext_tstart = record->tstart;
+    *interval = record->tstart;                       // for interval, we just start abs tstart
 }
 
 void write_to_file(char* duration_path, char* interval_path, double* durations, double* intervals, int total) {

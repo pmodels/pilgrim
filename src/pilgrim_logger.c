@@ -482,9 +482,10 @@ void write_record(Record record) {
 }
 
 void logger_init() {
+    g_program_start_time = pilgrim_wtime();
     __logger.rank = g_mpi_rank;
     __logger.nprocs = g_mpi_size;
-    __logger.local_metadata.tstart = pilgrim_wtime();
+    __logger.local_metadata.tstart = g_program_start_time;
     __logger.local_metadata.records_count = 0;
     __logger.local_metadata.rank = g_mpi_rank;
     __logger.hash_head = NULL;          // Must be NULL initialized

@@ -159,19 +159,15 @@ avl_insert(AvlTree *t, intptr_t addr, size_t size, bool heap)
         (*t)->id_node = NULL;      // id is assigned only when used in MPI calls
 
         (*t)->height = 1;
-
         /* done */
         return (*t);
     } else if(addr == (*t)->addr) {
-        //printf("Not possible!\n");
         /* nothing to do */
         return (*t);
     } else {
         /* do the insert in subtree */
         AvlTree new_node = avl_insert(&(*t)->child[addr > (*t)->addr], addr, size, heap);
-
         avl_rebalance(t);
-
         return new_node;
     }
 }

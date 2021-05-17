@@ -71,10 +71,13 @@ def codegen_assemble_args(func):
     line = ""
     assemble_args = []
     args_set = set( [arg.name for arg in func.arguments] )
-    obj_count = 0
+    obj_count, buffer_count = 0, 0
     for arg in func.arguments:
         if 'void' in arg.type:                                  # void* buf
-            assemble_args.append("addr2id("+arg.name+")")
+            line += "\tsize_t buf_id_%d[3];\n" %buffer_count
+            line += "\taddr2id(%s, &buf_id_%d[0], &buf_id_%d[1],  &buf_id_%d[2]);\n" %(arg.name, buffer_count, buffer_count, buffer_count)
+            assemble_args.append("buf_id_%d" %buffer_count)
+            buffer_count+=1;
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             line += "\tappend_offset(%s);\n" %(arg.name)
         elif 'MPI_Status*' in arg.type:
@@ -133,7 +136,7 @@ def codegen_sizeof_args(func):
     sizeof_args = []
     for arg in func.arguments:
         if 'void' in arg.type:
-            sizeof_args.append('sizeof(int)')
+            sizeof_args.append('sizeof(size_t)*3')         # symbolic id, offset and size of the buffer
         elif 'char*' in arg.type:
             if '**' not in arg.type and '[' not in arg.type:        # only consider one single string
                 sizeof_args.append('strlen(%s)+1' %arg.name)
@@ -171,6 +174,10 @@ def handle_special_apis(func):
     # These are handled in pilgrim_wrappers_special.c
     ignored = ["MPI_Wait", "MPI_Waitany", "MPI_Waitsome", "MPI_Waitall", "MPI_Request_free", "MPI_Startall",
                "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
+
+    # These two do not required by the standard to have their PMPI counterpart
+    # So we don't trace them
+    ignored += ["MPI_Wtime", "MPI_Wtick"]
 
     if func.name in ignored:
         return True

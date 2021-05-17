@@ -2,21 +2,8 @@
 # encoding: utf-8
 import pickle, os
 from codegen import MPIFunction, MPIArgument
-from instrument import filter_with_local_mpi_functions
+from instrument import arg_type_strip, is_mpi_object_arg, filter_with_local_mpi_functions
 
-
-def arg_type_strip(type_str):
-    t = type_str.replace('*', '').replace('[', '').replace(']', '').replace(' ', '').replace('const', '')
-    return t;
-
-def is_mpi_object_arg(arg_type):
-    # Do not include MPI_Status, MPI_Comm, and MPI_Offset
-    mpi_objects = set([
-        "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win", "MPI_Request",
-        "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Comm"])
-    if arg_type in mpi_objects:
-        return True
-    return False
 
 def handle_special_apis(func):
     # These are handled in pilgrim_init_finalize.c
@@ -57,16 +44,13 @@ def codegen_read_one_arg(func, i):
     lines.append('cs->arg_directions[%d] = DIRECTION_%s;' %(i, arg.direction))
 
     if 'void' in arg.type:
-        lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
+        lines.append('cs->arg_sizes[%d] = 3*sizeof(size_t);' %i)
     elif 'MPI_Status' in arg.type:
         lines.append('cs->arg_sizes[%d] = sizeof(int)*2;' %i)
     elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
         pass
     elif is_mpi_object_arg(arg_type_strip(arg.type)):
-        if "MPI_Comm" in arg.type :
-            lines.append('cs->arg_sizes[%d] = sizeof(MPI_Comm)+sizeof(int);' %i)
-        else:
-            lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
+        lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
         lines.append('cs->arg_types[%d] = TYPE_%s;' %(i, arg_type_strip(arg.type)))
     elif 'char*' in arg.type:
         if '**' not in arg.type and '[' not in arg.type:    # only consider one single string

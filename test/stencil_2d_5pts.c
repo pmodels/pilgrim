@@ -38,9 +38,8 @@ int main(int argc, char **argv) {
         energy = 1;               // energy to be injected
 
         n = 50*py;
-        if(py % px !=0)
+        if((py % px !=0) || (px*py != p))
             MPI_Abort(comm, 0);
-
 
         // distribute arguments
         int args[5] = {n, energy, niters, px,  py};

@@ -17,17 +17,14 @@
 #include "uthash.h"
 #include "mpi.h"
 
-#define OUTPUT_DIR              "pilgrim-logs"
+#define OUTPUT_DIR                  "pilgrim-logs"
 char GRAMMAR_OUTPUT_PATH[256];
 char INTERVALS_OUTPUT_PATH[256];
 char DURATIONS_OUTPUT_PATH[256];
 char FUNCS_OUTPUT_PATH[256];
 char METADATA_OUTPUT_PATH[256];
 
-
-
 static int current_terminal_id = 0;
-
 
 typedef struct OffsetNode_t {
     MPI_Offset offset;              // could be offset or size.
@@ -51,10 +48,10 @@ struct Logger {
 
     double final_grammar_size;      // compressed grammar size (in KB)
     double final_cst_size;          // compressed cst size (in KB)
-    double interval_grammar_size;   // compressed interval grammar size (in KB)
-    double duration_grammar_size;   // compressed duration grammar size (in KB)
+    double durations_file_size;     // compressed (or lossless) durations file size (in KB)
+    double intervals_file_size;     // compressed (or lossless) intervals file size (in KB)
 
-    bool aggregated_timings;        // if aggregated (default) or non-aggregated timings are stored
+    int timing_mode;                // 0: aggregated (default); 1: non-aggregated 2: lossless
 };
 
 // Global object to access the Logger fileds
@@ -78,12 +75,22 @@ void cleanup_cst(RecordHash* table) {
     RecordHash *entry, *tmp;
     HASH_ITER(hh, table, entry, tmp) {
         HASH_DEL(table, entry);
+
+        TimingNode *elt, *tmp2;
+        LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
+            LL_DELETE(entry->durations,  elt);
+            pilgrim_free(elt, sizeof(TimingNode));
+        }
+        LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
+            LL_DELETE(entry->intervals,  elt);
+            pilgrim_free(elt, sizeof(TimingNode));
+        }
+
         pilgrim_free(entry->key, entry->key_len);
         pilgrim_free(entry, sizeof(RecordHash));
     }
     table = NULL;
 }
-
 
 /**
  * Serialize the local CST into
@@ -151,10 +158,13 @@ RecordHash* deserialize_cst(void *data) {
         memcpy( &(entry->key_len), ptr, sizeof(int) );
         ptr += sizeof(int);
 
+
         entry->key = pilgrim_malloc(entry->key_len);
         memcpy( entry->key, ptr, entry->key_len );
         ptr += entry->key_len;
 
+        entry->durations = NULL;
+        entry->intervals = NULL;
         HASH_ADD_KEYPTR(hh, table, entry->key, entry->key_len, entry);
     }
 
@@ -171,6 +181,8 @@ RecordHash* copy_cst(RecordHash* origin) {
         new_entry->key_len = entry->key_len;
         new_entry->rank = entry->rank;
         new_entry->key = pilgrim_malloc(entry->key_len);
+        new_entry->durations = NULL;
+        new_entry->intervals = NULL;
         memcpy(new_entry->key, entry->key, entry->key_len);
         HASH_ADD_KEYPTR(hh, table, new_entry->key, new_entry->key_len, new_entry);
     }
@@ -252,6 +264,8 @@ RecordHash* compress_csts() {
                     entry->key = key;
                     entry->key_len = key_len;
                     entry->rank = cst_rank;
+                    entry->durations = NULL;
+                    entry->intervals = NULL;
                     HASH_ADD_KEYPTR(hh, merged_table, key, key_len, entry);
                 }
             }
@@ -262,7 +276,6 @@ RecordHash* compress_csts() {
             PMPI_Send(&size, sizeof(size), MPI_BYTE, other_rank, mask, MPI_COMM_WORLD);
             PMPI_Send(buf, size, MPI_BYTE, other_rank, mask, MPI_COMM_WORLD);
             pilgrim_free(buf, size);
-            //printf("phase: %d/%d, %d sends to %d\n", k, phases, my_rank, other_rank);
             done = true;
         }
     }
@@ -276,6 +289,8 @@ RecordHash* compress_csts() {
         HASH_ITER(hh, merged_table, entry, tmp) {
             entry->terminal_id = terminal_id++;
         }
+    } else {
+        cleanup_cst(merged_table);
     }
     return merged_table;
 }
@@ -349,53 +364,56 @@ void print_cst(RecordHash *cst) {
  *
  */
 int* dump_cst() {
-    // 1. Collect function entries from all ranks
-    // Eventually, rank 0 will have the fully merged table.
-    RecordHash* merged_table = compress_csts();
+    // 1. Inter-process copmression for CSTs
+    // Eventually, rank 0 will have the compressed table.
+    RecordHash* compressed_cst = compress_csts();
 
-    // 2. Broadcast the merged function table to all ranks
-    size_t merged_size;
-    void *merged;
-    if(__logger.rank !=0 )
-        cleanup_cst(merged_table);
-    else
-        merged = serialize_cst(merged_table, &merged_size);
+    // 2. Broadcast the merged CST to all ranks
+    size_t cst_stream_size;
+    void *cst_stream;
 
-    PMPI_Bcast(&merged_size, sizeof(merged_size), MPI_BYTE, 0, MPI_COMM_WORLD);
-    if(__logger.rank != 0)
-        merged = pilgrim_malloc(merged_size);
-    PMPI_Bcast(merged, merged_size, MPI_BYTE, 0, MPI_COMM_WORLD);
-    __logger.final_cst_size = merged_size / 1024.0;
-
-    // 3. Rank 0 write the merged function table to the file
     if(__logger.rank == 0) {
+        cst_stream = serialize_cst(compressed_cst, &cst_stream_size);
+        PMPI_Bcast(&cst_stream_size, sizeof(cst_stream_size), MPI_BYTE, 0, MPI_COMM_WORLD);
+        PMPI_Bcast(cst_stream, cst_stream_size, MPI_BYTE, 0, MPI_COMM_WORLD);
+
+        // 3. Rank 0 write out the compressed CST
         errno = 0;
         FILE *trace_file = fopen(FUNCS_OUTPUT_PATH, "wb");
         if(trace_file) {
-            fwrite(merged, 1, merged_size, trace_file);
+            fwrite(cst_stream, 1, cst_stream_size, trace_file);
             fclose(trace_file);
         } else {
             printf("[pilgrim] Open file: %s failed, errno: %d\n", FUNCS_OUTPUT_PATH, errno);
         }
-        print_cst(merged_table);
-        cleanup_cst(merged_table);
+        print_cst(compressed_cst);
+
+    } else {
+        PMPI_Bcast(&cst_stream_size, sizeof(cst_stream_size), MPI_BYTE, 0, MPI_COMM_WORLD);
+        cst_stream = pilgrim_malloc(cst_stream_size);
+        PMPI_Bcast(cst_stream, cst_stream_size, MPI_BYTE, 0, MPI_COMM_WORLD);
+
+        // 3. Other rank get the compressed cst stream from rank 0
+        // then convert it to the CST
+        compressed_cst = deserialize_cst(cst_stream);
     }
 
-    // 4. Update function entry's terminal id
-    merged_table = deserialize_cst(merged);
-    pilgrim_free(merged, merged_size);
+    __logger.final_cst_size = cst_stream_size / 1024.0;
 
+
+    // 4. Update function entry's terminal id
     int *update_terminal_id = pilgrim_malloc(sizeof(int) * current_terminal_id);
     RecordHash *entry, *tmp, *res;
     HASH_ITER(hh, __logger.hash_head, entry, tmp) {
-        HASH_FIND(hh, merged_table, entry->key, entry->key_len, res);
+        HASH_FIND(hh, compressed_cst, entry->key, entry->key_len, res);
         if(res)
             update_terminal_id[entry->terminal_id] = res->terminal_id;
         else
             printf("[pilgrim] %d Not possible! Not exist in merged table?\n", __logger.rank);
     }
 
-    cleanup_cst(merged_table);
+    cleanup_cst(compressed_cst);
+    pilgrim_free(cst_stream, cst_stream_size);
     return update_terminal_id;
 }
 
@@ -432,42 +450,53 @@ void write_record(Record record) {
         entry->key = key;
         entry->key_len = key_len;
         entry->rank = __logger.rank;
-        entry->terminal_id = current_terminal_id;
+        entry->terminal_id = current_terminal_id++;
         entry->count = 0;
-        current_terminal_id++;
-        HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, key_len, entry);
+        entry->ext_tstart = record.tstart;
+
+        // TODO check if we need to store lossless info
+        entry->durations = NULL;
+        entry->intervals = NULL;
+
+        HASH_ADD_KEYPTR(hh, __logger.hash_head, entry->key, entry->key_len, entry);
+    }
+
+    // Store timings infomraiton
+    if(__logger.timing_mode == TIMING_MODE_AGGREGATED) {
+        handle_aggregated_timing(entry, &record);
+    } else if(__logger.timing_mode == TIMING_MODE_NONAGGREGATED) {
+        int duration_id, interval_id;
+        handle_non_aggregated_timing(entry, &record, &duration_id, &interval_id);
+        append_terminal(&(__logger.intervals_grammar), interval_id, 1);
+        append_terminal(&(__logger.durations_grammar), duration_id, 1);
+    } else if(__logger.timing_mode == TIMING_MODE_LOSSLESS) {
+        TimingNode *dur_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
+        TimingNode *int_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
+        handle_lossless_timing(entry, &record, &(dur_node->val), &(int_node->val));
+        LL_PREPEND(entry->durations, dur_node);
+        LL_PREPEND(entry->intervals, int_node);
     }
 
     // Grow the MPI call grammar
     append_terminal(&(__logger.grammar), entry->terminal_id, 1);
-
-    // Store timings infomraiton
-    if(__logger.aggregated_timings) {
-        store_aggregated_timing(entry, &record);
-    } else {
-        int interval_id, duration_id;
-        store_non_aggregated_timing(entry, &record, &interval_id, &duration_id);
-        append_terminal(&(__logger.intervals_grammar), interval_id, 1);
-        append_terminal(&(__logger.durations_grammar), duration_id, 1);
-    }
-
 }
 
 void logger_init() {
+    g_program_start_time = pilgrim_wtime();
     __logger.rank = g_mpi_rank;
     __logger.nprocs = g_mpi_size;
-    __logger.local_metadata.tstart = pilgrim_wtime();
+    __logger.local_metadata.tstart = g_program_start_time;
     __logger.local_metadata.records_count = 0;
     __logger.local_metadata.rank = g_mpi_rank;
     __logger.hash_head = NULL;          // Must be NULL initialized
     __logger.offset_list = NULL;
-    __logger.aggregated_timings = true;
+    __logger.timing_mode = TIMING_MODE_AGGREGATED;
 
     // Check if users want to store non-aggregated timings
-    char* at = NULL;
-    at = getenv("PILGRIM_AGGREGATED_TIMINGS");
-    if( at && atoi(at) == 0)
-        __logger.aggregated_timings = false;
+    char* tm = NULL;
+    tm  = getenv("PILGRIM_TIMING_MODE");
+    if(tm)
+        __logger.timing_mode = atoi(tm);
 
     // Set the output paths in advance because
     // application may change the cwd duration execution
@@ -489,14 +518,14 @@ void logger_init() {
         GlobalMetadata global_metadata= {
             .time_resolution = TIME_RESOLUTION,
             .ranks = g_mpi_size,
-            .aggregated_timings = __logger.aggregated_timings,
+            .timing_mode = __logger.timing_mode,
         };
         fwrite(&global_metadata, sizeof(GlobalMetadata), 1, global_metafh);
         fclose(global_metafh);
     }
 
     sequitur_init(&(__logger.grammar));
-    if(!__logger.aggregated_timings) {
+    if(__logger.timing_mode == TIMING_MODE_NONAGGREGATED) {
         sequitur_init(&(__logger.intervals_grammar));
         sequitur_init(&(__logger.durations_grammar));
     }
@@ -505,9 +534,7 @@ void logger_init() {
 }
 
 
-
 void logger_exit() {
-
     uninstall_mem_hooks();
     __logger.recording = false;
 
@@ -517,31 +544,27 @@ void logger_exit() {
     double total_calls;
     PMPI_Reduce(&local_calls, &total_calls, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-
-    double t1, t2;
+    double cst_compression_time, cfg_compression_time;
 
     // 1. Inter-process compression of CSTs
-    t1 = pilgrim_wtime();
+    cst_compression_time = pilgrim_wtime();
     int* update_terminal_id = dump_cst();
     sequitur_update(&(__logger.grammar), update_terminal_id);
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
-    t2 = pilgrim_wtime();
-
-    if(__logger.rank == 0) {
-        printf("CST inter-process compression time: %.2f\n", t2-t1);
-        printf("[pilgrim] total mpi calls: %f *10e6\n", total_calls);
-    }
+    cst_compression_time = pilgrim_wtime() - cst_compression_time;
 
     // 2. Inter-process copmression of Grammars
-    t1 = pilgrim_wtime();
+    cfg_compression_time = pilgrim_wtime();
     __logger.final_grammar_size = sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
-    if(!__logger.aggregated_timings) {
-        __logger.interval_grammar_size = sequitur_finalize(INTERVALS_OUTPUT_PATH, &(__logger.intervals_grammar));
-        __logger.duration_grammar_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
+    if(__logger.timing_mode == TIMING_MODE_NONAGGREGATED) {
+        __logger.durations_file_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
+        __logger.intervals_file_size = sequitur_finalize(INTERVALS_OUTPUT_PATH, &(__logger.intervals_grammar));
     }
-    t2 = pilgrim_wtime();
-    if(__logger.rank == 0)
-        printf("Grammar inter-process compression time: %.2f\n", t2-t1);
+    cfg_compression_time = pilgrim_wtime() - cfg_compression_time;
+
+    // 2.5 Write out lossless timing, one file per rank
+    if(__logger.timing_mode == TIMING_MODE_LOSSLESS)
+        write_lossless_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
 
     // 3. Clean up all resources
     cleanup_cst(__logger.hash_head);
@@ -556,12 +579,14 @@ void logger_exit() {
     // Output statistics
     if(__logger.rank == 0) {
         pilgrim_report_memory_status();
-        printf("[pilgrim] CST Size: %.2fKB, Grammar Size: %.2fKB, Total: %.2fKB\n",
+
+        printf("[pilgrim] Total mpi calls: %f *10e6\n", total_calls);
+        printf("[pilgrim] CST inter-process compression time: %.2f\n", cst_compression_time);
+        printf("[pilgrim] CFG inter-process compression time: %.2f\n", cfg_compression_time);
+        printf("[pilgrim] CST Size: %.2fKB, CFG Size: %.2fKB, Total: %.2fKB\n",
                 __logger.final_cst_size, __logger.final_grammar_size, __logger.final_cst_size + __logger.final_grammar_size);
-        if(!__logger.aggregated_timings)
-            printf("[pilgrim] Duration Grammar Size: %.2fKB, Interval Grammar Size: %.2fKB\n",
-                    __logger.duration_grammar_size, __logger.interval_grammar_size);
+        if(__logger.timing_mode == TIMING_MODE_NONAGGREGATED)
+            printf("[pilgrim] Durations File Size: %.2fKB, Intervals File Size: %.2fKB\n",
+                    __logger.durations_file_size, __logger.intervals_file_size);
     }
-
-
 }

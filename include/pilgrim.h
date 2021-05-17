@@ -27,9 +27,9 @@
         return res;                                                                     \
     }                                                                                   \
     short func_id = ID_##func;                                                          \
-    double tstart = pilgrim_wtime();                                                    \
+    double tstart = pilgrim_wtime() - g_program_start_time;                             \
     ret_type res = P##func func_args;                                                   \
-    double tend = pilgrim_wtime();
+    double tend = pilgrim_wtime() - g_program_start_time;
 
 // Then store every in a Record structure and write it to log
 // Copy the arguments in case the application freed/modified the memory

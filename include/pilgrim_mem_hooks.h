@@ -10,6 +10,6 @@ static void   (*real_free)(void *ptr);
 
 void install_mem_hooks();
 void uninstall_mem_hooks();
-int* addr2id(const void *buffer);
+void addr2id(const void *buffer, size_t* buf_id, size_t* offset, size_t *size);
 
 #endif

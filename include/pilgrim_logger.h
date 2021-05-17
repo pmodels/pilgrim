@@ -36,7 +36,8 @@ typedef struct RecordHash_t {
 
     int rank;
     int terminal_id;                // terminal id used for sequitur compression
-    double ext_tstart;              // last call's extrapolated tstart
+    double tstart;                  // last call's tstart
+    double ext_tstart;              // last call's extrapolated tstart, used by non-aggregated timing mdoe
 
     // statistics information
     // for aggregated timing mode

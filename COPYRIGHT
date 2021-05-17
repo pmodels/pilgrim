@@ -1,7 +1,7 @@
-                   Copyright (C) 2020, UChicago Argonne, LLC
+                   Copyright (C) 2021, UChicago Argonne, LLC
                              All Rights Reserved
                             Software Name: Pilgrim
-                      By: Argonne National Laboratory
+      By: Argonne National Laboratory, University of Illinois Urbana-Champaign
 
                              OPEN SOURCE LICENSE
 
@@ -13,10 +13,9 @@ modification, are permitted provided that the following conditions are met:
 
 2. Redistributions in binary form must reproduce the above copyright
    notice, this list of conditions and the following disclaimer in the
-   documentation and/or other materials provided with the
-   distribution.
+   documentation and/or other materials provided with the distribution.
 
-3. Neither the names of the copyright holder nor the names of its
+3. Neither the name of the copyright holder nor the names of its
    contributors may be used to endorse or promote products derived
    from this software without specific prior written permission.
 

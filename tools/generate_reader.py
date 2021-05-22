@@ -76,7 +76,7 @@ def codegen_read_one_arg(func, i):
 
 
 def generate_reader_file(funcs):
-    f = open('../src/pilgrim_read_args.c', 'w')
+    f = open('../src/decoder/pilgrim_read_args.c', 'w')
     block = \
 '''/* This file is generated automatically. Do not change. */
 #include <stdlib.h>

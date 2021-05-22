@@ -8,7 +8,7 @@
 #define TIMING_MODE_LOSSLESS        2
 
 #define microseconds    (0.000001)
-#define TIME_RESOLUTION (10*microseconds)
+#define TIME_RESOLUTION (1*microseconds)
 
 void handle_aggregated_timing(RecordHash* entry, Record* record);
 void handle_non_aggregated_timing(RecordHash* entry, Record* record, int* duration_id, int* interval_id);

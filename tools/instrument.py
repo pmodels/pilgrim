@@ -200,8 +200,10 @@ def handle_mpi_comm_creation(func, f):
         f.write("\tgenerate_intercomm_id(%s, %s, 0);\n" %(func.arguments[-3].name, func.arguments[-2].name))
 
 def generate_wrapper_file(funcs):
+    import re
+
     def signature(func, f):
-        line = func.ret_type + " " + func.name + func.signature + "\n"
+        line = func.ret_type + " my_" + func.name + func.signature + "\n"
         f.write(line + '{\n')
 
     def phase_one(func, f):
@@ -212,6 +214,27 @@ def generate_wrapper_file(funcs):
 
     def phase_two(num_args, f):
         f.write('\tPILGRIM_TRACING_2(%d, sizes, args);\n}\n' %num_args)
+
+    def actual_wrapper(func, f):
+        arg_names = []
+        for arg in func.arguments:
+            arg_names.append(arg.name)
+        actual_call = "my_" + func.name + "(" + ", ".join(arg_names)+");"
+
+        # C wrapper
+        line = func.ret_type + " " + func.name + func.signature
+        f.write(line + ' { return ' + actual_call + " }\n")
+
+        # Fortran wrappers
+        #print(func.signature)
+        fortran_sig = re.sub(r'MPI_[^ ]* \*', "MPI_Fint *", func.signature)
+        #print(fortran_sig)
+        fortran_sig = fortran_sig.replace(")", ", MPI_Fint *ierr)")
+        f.write("extern void " + func.name.upper() + fortran_sig + "{ " + actual_call + "}\n")
+        f.write("extern void " + func.name.lower() + fortran_sig + "{ " + actual_call + "}\n")
+        f.write("extern void " + func.name.lower() + "_" + fortran_sig + "{ "+actual_call + "}\n")
+        f.write("extern void " + func.name.lower() + "__" + fortran_sig + "{ "+actual_call + "}\n")
+
 
     def logging(func, f):
         line, num_args = codegen_assemble_args(func)
@@ -243,6 +266,7 @@ def generate_wrapper_file(funcs):
             handle_mpi_comm_creation(func, f)
             num_args = logging(func, f)
         phase_two(num_args, f)
+        actual_wrapper(func, f)
 
     f.close()
 

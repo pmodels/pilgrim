@@ -67,14 +67,14 @@ void handle_non_aggregated_timing(RecordHash* entry, Record* record, int *durati
     rel_err = err / duration;
     if(rel_err > max_duration_rel_err && err > 10*TIME_RESOLUTION) {
         max_duration_rel_err = rel_err;
-        printf("duration, err: %.6f, re_err:%.3f\n", err, rel_err);
+        //printf("duration, err: %.6f, re_err:%.3f\n", err, rel_err);
     }
 
     err = abs(saved_interval - (record->tstart - entry->tstart));
     rel_err = err / duration;
     if(rel_err > max_interval_rel_err && err > 10*TIME_RESOLUTION) {
         max_interval_rel_err = rel_err;
-        printf("interval %d, err: %.6f, re_err:%.3f\n", *interval_id, err, rel_err);
+        //printf("interval %d, err: %.6f, re_err:%.3f\n", *interval_id, err, rel_err);
     }
 
     entry->tstart = record->tstart;

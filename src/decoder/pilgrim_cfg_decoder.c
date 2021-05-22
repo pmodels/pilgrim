@@ -59,7 +59,9 @@ void print_rule(RuleHash *rule) {
  *
  * Recursively decode rules
  */
-void decode_rule(int* decompressed_symbols, int *pos, int rule_id, int start_rule_id) {
+int decode_rule(int* decompressed_symbols, int rule_id, int start_rule_id) {
+    int advance = 0;
+
     RuleHash *rule;
     HASH_FIND_INT(rules_table, &rule_id, rule);
 
@@ -68,16 +70,23 @@ void decode_rule(int* decompressed_symbols, int *pos, int rule_id, int start_rul
         int sym_exp = rule->rule_body[2*i+1];
         // Non-terminal, i.e., a rule
         if(sym_val < start_rule_id) {
-            for(int j = 0; j < sym_exp; j++)
-                decode_rule(decompressed_symbols, pos, sym_val, start_rule_id);
+            for(int j = 0; j < sym_exp; j++) {
+                int advanced = decode_rule(decompressed_symbols, sym_val, start_rule_id);
+                decompressed_symbols += advanced;
+                advance += advanced;
+            }
         }
         // Terminal
         else {
-            decompressed_symbols[*pos]= sym_val;
-            decompressed_symbols[*pos+1] = sym_exp;
-            *pos = *pos + 2;
+            *decompressed_symbols = sym_val;
+            decompressed_symbols++;
+            *decompressed_symbols = sym_exp;
+            decompressed_symbols++;
+            advance += 2;
         }
     }
+
+    return advance;
 }
 
 char* get_variable_name(CallSignature *cs, int i) {
@@ -89,7 +98,7 @@ char* get_variable_name(CallSignature *cs, int i) {
         sprintf(name, "[Not Handled]");
     } else if(type == TYPE_MPI_Comm) {
         sprintf(name, "%s_0", TYPE_VAR_STR[type]);
-    } else {    // all other (basic data types or mpi objects) with integer values
+    } else {    // all other mpi objects with integer values
         int value = *((int*)cs->args[i]);
         VariablePool* var = NULL;
         HASH_FIND_INT(variable_pools[type], &value, var);
@@ -179,16 +188,15 @@ void read_cfg(char *path, int total_ranks, CallSignature* funcs) {
         rule->rule_body = (int*) malloc(sizeof(int)*rule->symbols*2);
         fread(rule->rule_body, sizeof(int), rule->symbols*2, f);
 
-        //print_rule(rule);
+        print_rule(rule);
         HASH_ADD_INT(rules_table, rule_id, rule);
     }
 
     int *decompressed  = malloc(sizeof(int) * uncompressed_integers);
-    int pos = 0;
-    decode_rule(decompressed, &pos, start_rule_id, start_rule_id);
+    decode_rule(decompressed, start_rule_id, start_rule_id);
     clean_rules_table();
 
-    pos = 0;
+    int pos = 0;
     for(int rank = 0; rank < total_ranks; rank++) {
 
         int rules = decompressed[pos++];
@@ -202,8 +210,9 @@ void read_cfg(char *path, int total_ranks, CallSignature* funcs) {
 
             rule->symbols = decompressed[pos++];
             pos++;  // skip exp
-            //printf("rank: %d, add rule: %d, symbols: %d\n", rank, rule->rule_id, rule->symbols);
+            printf("rank: %d, add rule: %d, symbols: %d\n", rank, rule->rule_id, rule->symbols);
 
+            rule->rule_body = malloc(sizeof(int)*rule->symbols*2);
             rule->rule_body = malloc(2*sizeof(int)*rule->symbols);
             memcpy(rule->rule_body, &(decompressed[pos]), 2*sizeof(int)*rule->symbols);
             pos += (rule->symbols)*2;
@@ -211,15 +220,17 @@ void read_cfg(char *path, int total_ranks, CallSignature* funcs) {
         }
 
         // write out to this rank
-        char output_path[256] = {0};
+        /*
+        char output_path[256];
         sprintf(output_path, "%s/main.c", path);
         FILE *fout = fopen(output_path, "a");
         fprintf(fout, "\n\n//======================================\n");
         fprintf(fout, "// Code for Rank = %d\n", rank);
         fprintf(fout, "//======================================\n");
-        decode_and_write(-1, fout, funcs);
+        //decode_and_write(-1, fout, funcs);
         fprintf(fout, "//======================================\n");
         fclose(fout);
+        */
 
         clean_rules_table();
     }

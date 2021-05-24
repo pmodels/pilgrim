@@ -231,6 +231,7 @@ def generate_wrapper_file(funcs):
         fortran_sig = fortran_sig.replace(' int ', " MPI_Fint ")
         fortran_sig = fortran_sig.replace('MPI_Fint ', "MPI_Fint *")
         fortran_sig = fortran_sig.replace('MPI_Fint **', "MPI_Fint *")
+        fortran_sig = fortran_sig.replace('(void)', "()")
 
         before_call = ""
         arg_names = []
@@ -241,7 +242,7 @@ def generate_wrapper_file(funcs):
             elif is_mpi_object_arg(arg.type):
                 arg_names.append("P%s_f2c(*%s)" %(arg.type, arg.name))
             else:
-                if "*" not in arg.type:
+                if "*" not in arg.type and '[]' not in arg.type:
                     arg_names.append("*"+arg.name)
                 else:
                     arg_names.append(arg.name)
@@ -249,7 +250,10 @@ def generate_wrapper_file(funcs):
         actual_call = "my_" + func.name + "(" + ", ".join(arg_names)+");"
         actual_call = actual_call.replace("PMPI_Datatype_f2c", "PMPI_Type_f2c")
 
-        fortran_sig = fortran_sig.replace(")", ", MPI_Fint *ierr)")
+        if fortran_sig == "()":
+            fortran_sig = "(MPI_Fint *ierr)"
+        else:
+            fortran_sig = fortran_sig.replace(")", ", MPI_Fint *ierr)")
         #f.write("extern void " + func.name.upper() + fortran_sig + "{ " + before_call+actual_call + "}\n")
         #f.write("extern void " + func.name.lower() + fortran_sig + "{ " + before_call+actual_call + "}\n")
         f.write("extern void " + func.name.lower() + "_" + fortran_sig + "{ "+before_call+actual_call + "}\n")

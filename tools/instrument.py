@@ -231,6 +231,7 @@ def generate_wrapper_file(funcs):
         fortran_sig = fortran_sig.replace(' int ', " MPI_Fint ")
         fortran_sig = fortran_sig.replace('MPI_Fint ', "MPI_Fint *")
         fortran_sig = fortran_sig.replace('MPI_Fint **', "MPI_Fint *")
+        fortran_sig = fortran_sig.replace('[]', "")
         fortran_sig = fortran_sig.replace('(void)', "()")
 
         before_call = ""

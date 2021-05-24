@@ -226,14 +226,34 @@ def generate_wrapper_file(funcs):
         f.write(line + ' { return ' + actual_call + " }\n")
 
         # Fortran wrappers
-        #print(func.signature)
-        fortran_sig = re.sub(r'MPI_[^ ]* \*', "MPI_Fint *", func.signature)
-        #print(fortran_sig)
+        fortran_sig = re.sub(r'MPI_[^ ]* ', "MPI_Fint ", func.signature)
+        fortran_sig = fortran_sig.replace('(int ', " (MPI_Fint ")
+        fortran_sig = fortran_sig.replace(' int ', " MPI_Fint ")
+        fortran_sig = fortran_sig.replace('MPI_Fint ', "MPI_Fint *")
+        fortran_sig = fortran_sig.replace('MPI_Fint **', "MPI_Fint *")
+
+        before_call = ""
+        arg_names = []
+        for arg in func.arguments:
+            if "MPI_Status" in arg.type:
+                before_call = "PMPI_Status_f2c(%s, &g_c_status);" %(arg.name)
+                arg_names.append("&g_c_status")
+            elif is_mpi_object_arg(arg.type):
+                arg_names.append("P%s_f2c(*%s)" %(arg.type, arg.name))
+            else:
+                if "*" not in arg.type:
+                    arg_names.append("*"+arg.name)
+                else:
+                    arg_names.append(arg.name)
+
+        actual_call = "my_" + func.name + "(" + ", ".join(arg_names)+");"
+        actual_call = actual_call.replace("PMPI_Datatype_f2c", "PMPI_Type_f2c")
+
         fortran_sig = fortran_sig.replace(")", ", MPI_Fint *ierr)")
-        f.write("extern void " + func.name.upper() + fortran_sig + "{ " + actual_call + "}\n")
-        f.write("extern void " + func.name.lower() + fortran_sig + "{ " + actual_call + "}\n")
-        f.write("extern void " + func.name.lower() + "_" + fortran_sig + "{ "+actual_call + "}\n")
-        f.write("extern void " + func.name.lower() + "__" + fortran_sig + "{ "+actual_call + "}\n")
+        #f.write("extern void " + func.name.upper() + fortran_sig + "{ " + before_call+actual_call + "}\n")
+        #f.write("extern void " + func.name.lower() + fortran_sig + "{ " + before_call+actual_call + "}\n")
+        f.write("extern void " + func.name.lower() + "_" + fortran_sig + "{ "+before_call+actual_call + "}\n")
+        #f.write("extern void " + func.name.lower() + "__" + fortran_sig + "{ "+before_call+actual_call + "}\n")
 
 
     def logging(func, f):
@@ -249,6 +269,7 @@ def generate_wrapper_file(funcs):
     f.write('#include <string.h>\n')
     f.write('#include "pilgrim.h"\n')
     f.write('static int placeholder = 0;\n')
+    f.write('MPI_Status g_c_status;\n')
 
     for name in funcs:
         func = funcs[name]

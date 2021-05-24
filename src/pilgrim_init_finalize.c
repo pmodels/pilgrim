@@ -44,6 +44,11 @@ int MPI_Init(int *argc, char ***argv) {
     return res;
 }
 
+extern void MPI_INIT(MPI_Fint * ierr) { PMPI_Init(0, NULL); pilgrim_init(0, NULL);}
+extern void mpi_init(MPI_Fint * ierr) { PMPI_Init(0, NULL); pilgrim_init(0, NULL); }
+extern void mpi_init_(MPI_Fint * ierr) { PMPI_Init(0, NULL); pilgrim_init(0, NULL); }
+extern void mpi_init__(MPI_Fint * ierr) { PMPI_Init(0, NULL); pilgrim_init(0, NULL); }
+
 int MPI_Init_thread(int *argc, char ***argv, int required, int *provided) {
     int res = PMPI_Init_thread(argc, argv, required, provided);
     pilgrim_init(argc, argv);
@@ -54,3 +59,8 @@ int MPI_Finalize(void) {
     pilgrim_exit();
     return PMPI_Finalize();
 }
+
+extern void MPI_FINAZLIE(MPI_Fint * ierr) { pilgrim_exit(); PMPI_Finalize(); }
+extern void mpi_FINALIZE(MPI_Fint * ierr) { pilgrim_exit(); PMPI_Finalize(); }
+extern void mpi_finalize_(MPI_Fint * ierr) { pilgrim_exit(); PMPI_Finalize(); }
+extern void mpi_finalize__(MPI_Fint * ierr) { pilgrim_exit(); PMPI_Finalize(); }

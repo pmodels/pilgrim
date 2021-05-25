@@ -74,9 +74,9 @@ def codegen_assemble_args(func):
     obj_count, buffer_count = 0, 0
     for arg in func.arguments:
         if 'void' in arg.type:                                  # void* buf
-            line += "\tsize_t buf_id_%d[3];\n" %buffer_count
-            line += "\taddr2id(%s, &buf_id_%d[0], &buf_id_%d[1],  &buf_id_%d[2]);\n" %(arg.name, buffer_count, buffer_count, buffer_count)
-            assemble_args.append("buf_id_%d" %buffer_count)
+            line += "\tMemPtrAttr mem_attr_%d;\n" %buffer_count
+            line += "\taddr2id(%s, &mem_attr_%d);\n" %(arg.name, buffer_count)
+            assemble_args.append("mem_attr_%d" %buffer_count)
             buffer_count+=1;
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             line += "\tappend_offset(%s);\n" %(arg.name)
@@ -136,7 +136,7 @@ def codegen_sizeof_args(func):
     sizeof_args = []
     for arg in func.arguments:
         if 'void' in arg.type:
-            sizeof_args.append('sizeof(size_t)*3')         # symbolic id, offset and size of the buffer
+            sizeof_args.append('sizeof(MemPtrAttr)')                # memory buffer
         elif 'char*' in arg.type:
             if '**' not in arg.type and '[' not in arg.type:        # only consider one single string
                 sizeof_args.append('strlen(%s)+1' %arg.name)

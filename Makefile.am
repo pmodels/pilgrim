@@ -30,9 +30,7 @@ pilgrim_decompressor_CFLAGS = $(AM_CFLAGS)
 AM_CPPFLAGS = -g -rdynamic
 AM_CFLAGS = -g -rdynamic
 
-
-
-libpilgrim_la_LDFLAGS = -lm -version-info @libpilgrim_so_version@
+libpilgrim_la_LDFLAGS = -lcuda -lcudart -lm -version-info @libpilgrim_so_version@
 
 include $(top_srcdir)/src/Makefile.mk
 include $(top_srcdir)/src/decoder/Makefile.mk

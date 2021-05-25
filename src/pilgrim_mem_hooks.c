@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <cuda.h>
+#include <cuda_runtime.h>
 #include "pilgrim_utils.h"
 #include "pilgrim_mem_hooks.h"
 #include "pilgrim_addr_avl.h"
@@ -12,8 +14,9 @@
 #include "uthash.h"
 #include "utlist.h"
 
+AvlTree cpu_addr_tree;
+AvlTree gpu_addr_tree;
 
-AvlTree addr_tree;
 AddrIdNode *addr_id_list;               // free list of addr ids
 static bool hook_installed = false;
 static int allocated_addr_id = 0;
@@ -24,13 +27,15 @@ pthread_mutex_t avl_lock = PTHREAD_MUTEX_INITIALIZER;
 // Three public available function in .h
 void install_mem_hooks() {
     hook_installed = true;
-    addr_tree = NULL;
+    cpu_addr_tree = NULL;
+    gpu_addr_tree = NULL;
     addr_id_list = NULL;
 }
 
 void uninstall_mem_hooks() {
     hook_installed = false;
-    avl_destroy(addr_tree);
+    avl_destroy(cpu_addr_tree);
+    avl_destroy(gpu_addr_tree);
 
     AddrIdNode *node, *tmp;
     DL_FOREACH_SAFE(addr_id_list, node, tmp) {
@@ -40,25 +45,36 @@ void uninstall_mem_hooks() {
 }
 
 // Symbolic representation of memory addresses
-// buf_id [out]: memory buffer symbolic id
-// offset [out]: the offset withint the memory buffer
-void addr2id(const void* buffer, size_t *buf_id, size_t *offset, size_t *size) {
+void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
+    mem_attr->id = 0;
+    mem_attr->offset = 0;
+    mem_attr->size = 0;
+    mem_attr->type = 0;
+    mem_attr->device = -1;
+    return;
+
+// Users do not want to track memory pointers
 #ifndef MEMORY_POINTERS
-    // Users do not need memory pointers, simply return 0
-    *buf_id = 0;
-    *offset = 0;
-    *size = 0;
     return;
 #endif
 
-    pthread_mutex_lock(&avl_lock);
+    struct cudaPointerAttributes attr;
+    cudaPointerGetAttributes(&attr, buffer);
+    mem_attr->type = attr.memoryType;
+    mem_attr->device = attr.device;
 
-    AvlTree avl_node = avl_search(addr_tree, (intptr_t) buffer);
+    pthread_mutex_lock(&avl_lock);
+    AvlTree avl_node;
+    if(mem_attr->type == 0)      // unregistered memory, which is allocated using malloc()
+        avl_node = avl_search(cpu_addr_tree, (intptr_t) buffer);
+    else
+        avl_node = avl_search(gpu_addr_tree, (intptr_t) buffer);
+
     if(avl_node == AVL_EMPTY) {
         // Not found in addr_tree indicates that this buffer is not dynamically allocated
         // Maybe a stack buffer so we don't know excatly the size
         // We assume it is 1 byte memory area.
-        avl_node = avl_insert(&addr_tree, (intptr_t)buffer, 1, false);
+        avl_node = avl_insert(&cpu_addr_tree, (intptr_t)buffer, 1, false);
     }
 
     // Two possible cases:
@@ -77,11 +93,38 @@ void addr2id(const void* buffer, size_t *buf_id, size_t *offset, size_t *size) {
         }
     }
 
-    *buf_id = avl_node->id_node->id;
-    *offset = ((intptr_t)buffer) - avl_node->addr;
-    *size = avl_node->size;
+    mem_attr->id = avl_node->id_node->id;
+    mem_attr->offset = ((intptr_t)buffer) - avl_node->addr;
+    mem_attr->size = avl_node->size;
     pthread_mutex_unlock(&avl_lock);
 }
+
+// Thread safe insert/delete from addr tree
+void safe_insert_addr(AvlTree *addr_tree, void* ptr, size_t size) {
+    pthread_mutex_lock(&avl_lock);
+    avl_insert(addr_tree, (intptr_t)ptr, size, true);
+    pthread_mutex_unlock(&avl_lock);
+}
+
+void safe_delete_addr(AvlTree *addr_tree, void* ptr) {
+    pthread_mutex_lock(&avl_lock);
+    AvlTree avl_node = avl_search(*addr_tree, (intptr_t)ptr);
+
+    if(AVL_EMPTY == avl_node) {
+        if(ptr != NULL) {
+            // TODO: potential memory leak. why
+        }
+    } else {
+        if(avl_node->id_node)
+            DL_APPEND(addr_id_list, avl_node->id_node);
+        bool heap = avl_node->heap && (avl_node->addr==(intptr_t)ptr);
+        avl_delete(addr_tree, (intptr_t)ptr);
+        if(heap)
+            dlfree(ptr);
+    }
+    pthread_mutex_unlock(&avl_lock);
+}
+
 
 /**
  * Below are Wrappers for intercepting memory management calls.
@@ -92,11 +135,7 @@ void* malloc(size_t size) {
         return dlmalloc(size);
 
     void* ptr = dlmalloc(size);
-
-    pthread_mutex_lock(&avl_lock);
-    avl_insert(&addr_tree, (intptr_t)ptr, size, true);
-    pthread_mutex_unlock(&avl_lock);
-
+    safe_insert_addr(&cpu_addr_tree, ptr, size);
     return ptr;
 }
 
@@ -105,16 +144,11 @@ void* calloc(size_t nitems, size_t size) {
         return dlcalloc(nitems, size);
 
     void *ptr = dlcalloc(nitems, size);
-
-    pthread_mutex_lock(&avl_lock);
-    avl_insert(&addr_tree, (intptr_t)ptr, size*nitems, true);
-    pthread_mutex_unlock(&avl_lock);
-
+    safe_insert_addr(&cpu_addr_tree, ptr, size*nitems);
     return ptr;
 }
 
 void* realloc(void *ptr, size_t size) {
-
     if(!hook_installed)
         return dlrealloc(ptr, size);
 
@@ -122,13 +156,13 @@ void* realloc(void *ptr, size_t size) {
 
     pthread_mutex_lock(&avl_lock);
     if(new_ptr == ptr) {
-        AvlTree t = avl_search(addr_tree, (intptr_t)ptr);
+        AvlTree t = avl_search(cpu_addr_tree, (intptr_t)ptr);
         if(t != AVL_EMPTY) {
             t->size = size;
         }
     } else {
-        avl_delete(&addr_tree, (intptr_t)ptr);
-        avl_insert(&addr_tree, (intptr_t)new_ptr, size, true);
+        avl_delete(&cpu_addr_tree, (intptr_t)ptr);
+        avl_insert(&cpu_addr_tree, (intptr_t)new_ptr, size, true);
     }
     pthread_mutex_unlock(&avl_lock);
 
@@ -142,23 +176,7 @@ void free(void *ptr) {
         dlfree(ptr);
         return;
     }
-
-    pthread_mutex_lock(&avl_lock);
-    AvlTree avl_node = avl_search(addr_tree, (intptr_t)ptr);
-
-    if(AVL_EMPTY == avl_node) {
-        if(ptr != NULL) {
-            // TODO: potential memory leak. why
-        }
-    } else {
-        if(avl_node->id_node)
-            DL_APPEND(addr_id_list, avl_node->id_node);
-        bool heap = avl_node->heap && (avl_node->addr==(intptr_t)ptr);
-        avl_delete(&addr_tree, (intptr_t)ptr);
-        if(heap)
-            dlfree(ptr);
-    }
-    pthread_mutex_unlock(&avl_lock);
+    safe_delete_addr(&cpu_addr_tree, ptr);
 }
 
 int posix_memalign(void **memptr, size_t alignment, size_t size) {
@@ -187,6 +205,42 @@ int malloc_trim(size_t pad) {
 
 int mallopt(int param, int value) {
     return dlmallopt(param, value);
+}
+
+// ----------------------------------------------------------
+// Trap CUDA memory operations
+// ----------------------------------------------------------
+
+#define MAP_OR_FAIL(func)                                                   \
+    if (!(__real_##func)) {                                                 \
+        __real_##func = dlsym(RTLD_NEXT, #func);                            \
+        if (!(__real_##func)) {                                             \
+            printf("Pilgrim failed to map symbol: %s\n", #func);            \
+        }                                                                   \
+    }
+#define PILGRIM_FORWARD_DECL(ret, name, args) ret (*__real_##name) args;
+#define PILGRIM_REAL_CALL(func) __real_##func
+
+PILGRIM_FORWARD_DECL(cudaError_t, cudaMalloc, (void** devPtr, size_t size))
+PILGRIM_FORWARD_DECL(cudaError_t, cudaFree, (void* devPtr))
+
+cudaError_t cudaMalloc(void** devPtr, size_t size) {
+    MAP_OR_FAIL(cudaMalloc);
+    if(!hook_installed)
+        return PILGRIM_REAL_CALL(cudaMalloc)(devPtr, size);
+
+    cudaError_t err = PILGRIM_REAL_CALL(cudaMalloc)(devPtr, size);
+    safe_insert_addr(&gpu_addr_tree, devPtr, size);
+    return err;
+}
+
+cudaError_t cudaFree(void* devPtr) {
+    MAP_OR_FAIL(cudaFree);
+    if(!hook_installed)
+        return PILGRIM_REAL_CALL(cudaFree)(devPtr);
+
+    safe_delete_addr(&gpu_addr_tree, devPtr);
+    return PILGRIM_REAL_CALL(cudaFree)(devPtr);
 }
 
 #endif

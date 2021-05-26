@@ -76,7 +76,7 @@ def codegen_assemble_args(func):
         if 'void' in arg.type:                                  # void* buf
             line += "\tMemPtrAttr mem_attr_%d;\n" %buffer_count
             line += "\taddr2id(%s, &mem_attr_%d);\n" %(arg.name, buffer_count)
-            assemble_args.append("mem_attr_%d" %buffer_count)
+            assemble_args.append("&mem_attr_%d" %buffer_count)
             buffer_count+=1;
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             line += "\tappend_offset(%s);\n" %(arg.name)

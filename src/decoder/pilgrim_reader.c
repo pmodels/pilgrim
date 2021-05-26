@@ -155,79 +155,7 @@ void clean_rules_table() {
     rules_table = NULL;
 }
 
-void read_cfg(char *path, int total_ranks, CallSignature* funcs) {
-    printf("\nRead CFG\n");
-    char grammar_file_path[256];
-    sprintf(grammar_file_path, "%s/grammars.dat", path);
-
-    FILE* f = fopen(grammar_file_path, "rb");
-
-    int start_rule_id, rules;
-    size_t uncompressed_integers;
-    fread(&start_rule_id, sizeof(int), 1, f);
-    fread(&uncompressed_integers, sizeof(size_t), 1, f);
-    fread(&rules, sizeof(int), 1, f);
-
-    printf("Start_rule_id: %d, Rules: %d, Uncompressed integers: %ld\n", start_rule_id, rules, uncompressed_integers);
-
-    for(int i = 0; i < rules; i++) {
-        RuleHash *rule = malloc(sizeof(RuleHash));
-
-        fread(&(rule->rule_id), sizeof(int), 1, f);
-        fread(&(rule->symbols), sizeof(int), 1, f);
-
-        rule->rule_body = (int*) malloc(sizeof(int)*rule->symbols*2);
-        fread(rule->rule_body, sizeof(int), rule->symbols*2, f);
-
-        //print_rule(rule);
-        HASH_ADD_INT(rules_table, rule_id, rule);
-    }
-
-    int *decompressed  = malloc(sizeof(int) * uncompressed_integers);
-    int pos = 0;
-    decode_rule(decompressed, &pos, start_rule_id, start_rule_id);
-    clean_rules_table();
-
-    pos = 0;
-    for(int rank = 0; rank < total_ranks; rank++) {
-
-        int rules = decompressed[pos++];
-        pos++;      // skip exp
-
-        for(int j = 0; j < rules; j++) {
-            RuleHash *rule = malloc(sizeof(RuleHash));
-
-            rule->rule_id = decompressed[pos++];
-            pos++;  // skip exp
-
-            rule->symbols = decompressed[pos++];
-            pos++;  // skip exp
-            //printf("rank: %d, add rule: %d, symbols: %d\n", rank, rule->rule_id, rule->symbols);
-
-            rule->rule_body = malloc(2*sizeof(int)*rule->symbols);
-            memcpy(rule->rule_body, &(decompressed[pos]), 2*sizeof(int)*rule->symbols);
-            pos += (rule->symbols)*2;
-            HASH_ADD_INT(rules_table, rule_id, rule);
-        }
-
-        // write out to this rank
-        char output_path[256] = {0};
-        sprintf(output_path, "%s/main.c", path);
-        FILE *fout = fopen(output_path, "a");
-        fprintf(fout, "\n\n//======================================\n");
-        fprintf(fout, "// Code for Rank = %d\n", rank);
-        fprintf(fout, "//======================================\n");
-        decode_and_write(-1, fout, funcs);
-        fprintf(fout, "//======================================\n");
-        fclose(fout);
-
-        clean_rules_table();
-    }
-
-    fclose(f);
-    free(decompressed);
-}
-
+/*
 CallSignature* read_cst(char *directory, int *num_funcs) {
     printf("\nRead CST\n");
     char path[256];
@@ -261,6 +189,7 @@ CallSignature* read_cst(char *directory, int *num_funcs) {
     fclose(f);
     return call_sigs;
 }
+*/
 
 
 void write_init_variables(const char* path, CallSignature *call_sigs, int num_sigs) {
@@ -324,6 +253,7 @@ int main(int argc, char** argv) {
     }
     */
 
+    /*
     int num_sigs;
     CallSignature *call_sigs = read_cst(directory, &num_sigs);
     write_init_variables(directory, call_sigs, num_sigs);
@@ -338,7 +268,6 @@ int main(int argc, char** argv) {
         free(call_sigs[i].args);
     }
     free(call_sigs);
-
-
+    */
     return 0;
 }

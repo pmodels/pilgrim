@@ -59,6 +59,9 @@ static char* TYPE_VAR_STR[] = {
 #define DIRECTION_INOUT     2
 
 
+int** read_cfg(char* cfg_path, int nprocs, int* num_symbols);
+CallSignature* read_cst(char* cst_path, int *num_sigs);
+
 void read_record_args(int func_id, void* buff, CallSignature *cs);
 void read_record_args_special(int func_id, void* buff, CallSignature *cs);
 

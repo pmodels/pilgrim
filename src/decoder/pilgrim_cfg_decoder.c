@@ -20,7 +20,6 @@ typedef struct VariablePool_t {
     UT_hash_handle hh;
 } VariablePool;
 
-
 static int rank;
 static int nprocs;
 static RuleHash* rules_table;

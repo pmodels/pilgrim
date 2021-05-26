@@ -5,6 +5,10 @@
 
 AM_CPPFLAGS += -I$(top_srcdir)/src
 
-pilgrim_decompressor_SOURCES += \
-	src/test/pilgrim_decompressor.c src/dlmalloc.c
-pilgrim_decompressor_LDFLAGS = -lm
+pilgrim2text_SOURCES += \
+	src/test/pilgrim_to_text.c \
+	src/test/pilgrim_cfg_decoder.c src/test/pilgrim_cst_decoder.c \
+	src/decoder/pilgrim_read_args.c src/decoder/pilgrim_read_args_special.c \
+	src/dlmalloc.c
+
+##pilgrim2text_LDFLAGS = -lm

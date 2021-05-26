@@ -58,13 +58,15 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
     return;
 #endif
 
+    AvlTree avl_node;
+
+#ifdef CUDA_POINTERS
     struct cudaPointerAttributes attr;
     cudaPointerGetAttributes(&attr, buffer);
     mem_attr->type = attr.memoryType;
     mem_attr->device = attr.device;
 
     pthread_mutex_lock(&avl_lock);
-    AvlTree avl_node;
     if(mem_attr->type == 0)      // unregistered memory, which is allocated using malloc()
         avl_node = avl_search(cpu_addr_tree, (intptr_t) buffer);
     else
@@ -76,6 +78,9 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
         // We assume it is 1 byte memory area.
         avl_node = avl_insert(&cpu_addr_tree, (intptr_t)buffer, 1, false);
     }
+#else
+    avl_node = avl_search(cpu_addr_tree, (intptr_t) buffer);
+#endif
 
     // Two possible cases:
     // 1. New created avl_node
@@ -210,6 +215,7 @@ int mallopt(int param, int value) {
 // ----------------------------------------------------------
 // Trap CUDA memory operations
 // ----------------------------------------------------------
+#ifdef CUDA_POINTERS
 
 #define MAP_OR_FAIL(func)                                                   \
     if (!(__real_##func)) {                                                 \
@@ -222,6 +228,10 @@ int mallopt(int param, int value) {
 #define PILGRIM_REAL_CALL(func) __real_##func
 
 PILGRIM_FORWARD_DECL(cudaError_t, cudaMalloc, (void** devPtr, size_t size))
+PILGRIM_FORWARD_DECL(cudaError_t, cudaHostAlloc, (void** ptr, size_t size, unsigned int flags))
+PILGRIM_FORWARD_DECL(cudaError_t, cudaMallocHost, (void** ptr, size_t size))
+PILGRIM_FORWARD_DECL(cudaError_t, cudaMallocManaged, (void** devPtr, size_t size, unsigned int flags))
+PILGRIM_FORWARD_DECL(cudaError_t, cudaMallocPitch, (void** devPtr, size_t* pitch, size_t width, size_t height))
 PILGRIM_FORWARD_DECL(cudaError_t, cudaFree, (void* devPtr))
 
 cudaError_t cudaMalloc(void** devPtr, size_t size) {
@@ -231,6 +241,42 @@ cudaError_t cudaMalloc(void** devPtr, size_t size) {
 
     cudaError_t err = PILGRIM_REAL_CALL(cudaMalloc)(devPtr, size);
     safe_insert_addr(&gpu_addr_tree, devPtr, size);
+    return err;
+}
+cudaError_t cudaHostAlloc(void** ptr, size_t size, unsigned int flags) {
+    MAP_OR_FAIL(cudaHostAlloc);
+    if(!hook_installed)
+        return PILGRIM_REAL_CALL(cudaHostAlloc)(ptr, size);
+
+    cudaError_t err = PILGRIM_REAL_CALL(cudaHostAlloc)(ptr, size);
+    safe_insert_addr(&cpu_addr_tree, ptr, size);
+    return err;
+}
+cudaError_t cudaMallocHost(void** ptr, size_t size) {
+    MAP_OR_FAIL(cudaMallocHost);
+    if(!hook_installed)
+        return PILGRIM_REAL_CALL(cudaMallocHost)(ptr, size);
+
+    cudaError_t err = PILGRIM_REAL_CALL(cudaMallocHost)(ptr, size);
+    safe_insert_addr(&cpu_addr_tree, ptr, size);
+    return err;
+}
+cudaError_t cudaMallocManaged( void** devPtr, size_t size, unsigned int flags) {
+    MAP_OR_FAIL(cudaMallocManaged);
+    if(!hook_installed)
+        return PILGRIM_REAL_CALL(cudaMallocManaged)(devPtr, size, flags);
+
+    cudaError_t err = PILGRIM_REAL_CALL(cudaMallocManaged)(devPtr, size, flags);
+    safe_insert_addr(&gpu_addr_tree, devPtr, size);
+    return err;
+}
+cudaError_t cudaMallocPitch(void** devPtr, size_t* pitch, size_t width, size_t height) {
+    MAP_OR_FAIL(cudaMallocPitch);
+    if(!hook_installed)
+        return PILGRIM_REAL_CALL(cudaMallocPitch)(devPtr, pitch, width, height);
+
+    cudaError_t err = PILGRIM_REAL_CALL(cudaMallocPitch)(devPtr, pitch, width, height);
+    safe_insert_addr(&gpu_addr_tree, devPtr, (*pith)*height);
     return err;
 }
 
@@ -243,4 +289,5 @@ cudaError_t cudaFree(void* devPtr) {
     return PILGRIM_REAL_CALL(cudaFree)(devPtr);
 }
 
-#endif
+#endif      // CUDA_POINTERS
+#endif      // MEMORY_POINTERS

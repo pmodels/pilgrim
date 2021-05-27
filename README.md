@@ -7,8 +7,14 @@ A scalable and (near) lossless MPI Tracing library
 cd /PATH/TO/pilgrim
 ./autogen.sh
 ./configure
-# Memory pointer (void*) type parameters are not stored by default.
-# To enable it, use ./configure --enable-pointers 
+
+# Memory pointer (void*) type parameters are stored by default.
+# To disable it, use ./configure --enable-pointers=no
+
+# Pilgrim can also intercepts CUDA memory operations to track
+# memory buffer locations, e.g., GPU device number.
+# To enable this feature, use ./configure --enable-cuda
+
 make
 make install prefix=`pwd`   // install to the current directory
 ```

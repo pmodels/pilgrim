@@ -54,7 +54,6 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
     mem_attr->size = 0;
     mem_attr->type = 0;
     mem_attr->device = -1;
-    return;
 
 // Users do not want to track memory pointers
 #ifndef MEMORY_POINTERS
@@ -74,6 +73,9 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
         avl_node = avl_search(cpu_addr_tree, (intptr_t) buffer);
     else
         avl_node = avl_search(gpu_addr_tree, (intptr_t) buffer);
+#else
+    avl_node = avl_search(cpu_addr_tree, (intptr_t) buffer);
+#endif
 
     if(avl_node == AVL_EMPTY) {
         // Not found in addr_tree indicates that this buffer is not dynamically allocated
@@ -81,9 +83,6 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
         // We assume it is 1 byte memory area.
         avl_node = avl_insert(&cpu_addr_tree, (intptr_t)buffer, 1, false);
     }
-#else
-    avl_node = avl_search(cpu_addr_tree, (intptr_t) buffer);
-#endif
 
     // Two possible cases:
     // 1. New created avl_node

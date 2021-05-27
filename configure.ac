@@ -117,6 +117,12 @@ if test "${enable_pointers}" != "no" ; then
     PAC_APPEND_FLAG([-DMEMORY_POINTERS], [CFLAGS])
 fi
 
+AC_ARG_ENABLE([cuda], AS_HELP_STRING([--enable-cuda], [Enabel intercepting cuda memory calls and storing device locations]),,[enable_cuda=no])
+if test "${enable_cuda}" == "yes" ; then
+    PAC_APPEND_FLAG([-DCUDA_POINTERS], [CFLAGS])
+    PAC_APPEND_FLAG([-lcuda -lcudart], [LDFLAGS])
+fi
+
 
 
 

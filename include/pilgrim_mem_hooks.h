@@ -6,7 +6,7 @@ typedef struct MemPtrAttr_t {
     size_t offset;
     size_t size;
     char type;          // memory location, retrived cudaPointerGetAttributes()
-    int device;         // if on gpu, device id of the gpu, retrived cudaPointerGetAttributes()
+    char device;         // if on gpu, device id of the gpu, retrived cudaPointerGetAttributes()
 } MemPtrAttr;
 
 /*

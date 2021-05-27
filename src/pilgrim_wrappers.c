@@ -337,9 +337,12 @@ int my_MPI_Comm_split_type(MPI_Comm comm, int split_type, int key, MPI_Info info
 	MPI_Info obj_1 = info;
 	int obj_id_1 = MPI_OBJ_ID(MPI_Info, &obj_1);
 	int obj_id_2 = MPI_OBJ_ID(MPI_Comm, newcomm);
-	void **args = assemble_args_list(5, &obj_id_0, &split_type, &key, &obj_id_1, &obj_id_2);
-	int sizes[] = { sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int) };
-	PILGRIM_TRACING_2(5, sizes, args);
+	//void **args = assemble_args_list(5, &obj_id_0, &split_type, &key, &obj_id_1, &obj_id_2);
+	//int sizes[] = { sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int) };
+	//PILGRIM_TRACING_2(5, sizes, args);
+	void **args = assemble_args_list(1, &obj_id_0);
+	int sizes[] = { sizeof(int) };
+	PILGRIM_TRACING_2(1, sizes, args);
 }
 int MPI_Comm_split_type(MPI_Comm comm, int split_type, int key, MPI_Info info, MPI_Comm *newcomm) { return my_MPI_Comm_split_type(comm, split_type, key, info, newcomm); }
 extern void mpi_comm_split_type_(MPI_Fint *comm, MPI_Fint *split_type, MPI_Fint *key, MPI_Fint *info, MPI_Fint *newcomm, MPI_Fint *ierr){ my_MPI_Comm_split_type(PMPI_Comm_f2c(*comm), *split_type, *key, PMPI_Info_f2c(*info), newcomm);}

@@ -15,6 +15,7 @@ libtool
 src/.deps/
 src/.dirstamp
 src/test/.dirstamp
+.dirstamp
 
 /m4/ar-lib
 /m4/compile

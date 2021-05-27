@@ -5,14 +5,17 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <cuda.h>
-#include <cuda_runtime.h>
 #include "pilgrim_utils.h"
 #include "pilgrim_mem_hooks.h"
 #include "pilgrim_addr_avl.h"
 #include "dlmalloc-2.8.6.h"
 #include "uthash.h"
 #include "utlist.h"
+
+#ifdef CUDA_POINTERS
+#include <cuda.h>
+#include <cuda_runtime.h>
+#endif
 
 AvlTree cpu_addr_tree;
 AvlTree gpu_addr_tree;

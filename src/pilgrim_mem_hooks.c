@@ -248,9 +248,9 @@ cudaError_t cudaMalloc(void** devPtr, size_t size) {
 cudaError_t cudaHostAlloc(void** ptr, size_t size, unsigned int flags) {
     MAP_OR_FAIL(cudaHostAlloc);
     if(!hook_installed)
-        return PILGRIM_REAL_CALL(cudaHostAlloc)(ptr, size);
+        return PILGRIM_REAL_CALL(cudaHostAlloc)(ptr, size, flags);
 
-    cudaError_t err = PILGRIM_REAL_CALL(cudaHostAlloc)(ptr, size);
+    cudaError_t err = PILGRIM_REAL_CALL(cudaHostAlloc)(ptr, size, flags);
     safe_insert_addr(&cpu_addr_tree, ptr, size);
     return err;
 }
@@ -278,7 +278,7 @@ cudaError_t cudaMallocPitch(void** devPtr, size_t* pitch, size_t width, size_t h
         return PILGRIM_REAL_CALL(cudaMallocPitch)(devPtr, pitch, width, height);
 
     cudaError_t err = PILGRIM_REAL_CALL(cudaMallocPitch)(devPtr, pitch, width, height);
-    safe_insert_addr(&gpu_addr_tree, devPtr, (*pith)*height);
+    safe_insert_addr(&gpu_addr_tree, devPtr, (*pitch)*height);
     return err;
 }
 

@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
 #include "pilgrim_mpi_objects.h"
 #include "pilgrim_utils.h"
 

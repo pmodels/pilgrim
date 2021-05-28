@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
 #ifndef _PILGRIM_MEM_HOOKS_H_
 #define _PILGRIM_MEM_HOOKS_H_
 

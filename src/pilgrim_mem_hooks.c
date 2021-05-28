@@ -54,6 +54,7 @@ void uninstall_mem_hooks() {
 
 // Symbolic representation of memory addresses
 void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
+    memset(mem_attr, 0, sizeof(MemPtrAttr)); // in cast the padding area has random content
     mem_attr->id = 0;
     mem_attr->offset = 0;
     mem_attr->size = 0;
@@ -64,6 +65,7 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
 #ifndef MEMORY_POINTERS
     return;
 #endif
+    printf("should never reach here!");
 
     AvlTree avl_node;
 

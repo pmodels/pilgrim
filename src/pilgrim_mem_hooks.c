@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
 #define _GNU_SOURCE
 #include <dlfcn.h>
 #include <stdlib.h>

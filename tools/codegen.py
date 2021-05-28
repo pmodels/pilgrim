@@ -1,3 +1,8 @@
+##
+## Copyright (C) by Argonne National Laboratory
+##     See COPYRIGHT in top-level directory
+##
+
 #!/usr/bin/env python
 # encoding: utf-8
 import os, glob, sys,re

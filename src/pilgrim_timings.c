@@ -1,5 +1,6 @@
-/**
- * Interval ID and Duration ID stored in the key
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
  */
 #include <math.h>
 #include <limits.h>

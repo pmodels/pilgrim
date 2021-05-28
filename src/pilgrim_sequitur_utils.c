@@ -1,7 +1,11 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "pilgrim_sequitur.h"
-
 
 void print_digrams(Grammar *grammar) {
     Digram *digram, *tmp;

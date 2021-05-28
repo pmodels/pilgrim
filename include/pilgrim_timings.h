@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
 #ifndef _PILGRIM_TIMINGS_H_
 #define _PILGRIM_TIMINGS_H_
 

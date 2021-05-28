@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>

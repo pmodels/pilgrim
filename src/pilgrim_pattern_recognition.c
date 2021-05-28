@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
 #include "uthash.h"
 #include "pilgrim.h"
 
@@ -25,7 +30,7 @@ void compress_isend(RecordHash *record) {
     PatternHash* entry = NULL;
     HASH_FIND(hh, isend_pattern_table, args, sizeof(args), entry);
     if(entry) {
-        // first time here, now we have two entries 
+        // first time here, now we have two entries
         // so we can compute a and b.
         if(entry->first) {
             int x1 = record->rank;
@@ -44,7 +49,7 @@ void compress_isend(RecordHash *record) {
         // in future again.
         else {
             if(!entry->failed)
-                entry->failed = (entry->a*record->rank+entry->b != val); 
+                entry->failed = (entry->a*record->rank+entry->b != val);
         }
     } else {
         entry = pilgrim_malloc(sizeof(PatternHash));

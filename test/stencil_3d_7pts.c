@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 2021 Chen Wang. All rights reserved.
- *
- * Author(s): Chen Wang <chenw5@illinois.edu>
- *
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
  */
 
 #include <math.h>

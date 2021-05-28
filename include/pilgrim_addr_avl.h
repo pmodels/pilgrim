@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
 #ifndef _PILGRIM_ADDR_AVL_H
 #define _PILGRIM_ADDR_AVL_H
 #include <stdbool.h>

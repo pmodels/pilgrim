@@ -8,8 +8,9 @@ cd /PATH/TO/pilgrim
 ./autogen.sh
 ./configure
 
-# Memory pointer (void*) type parameters are stored by default.
-# To disable it, use ./configure --enable-pointers=no
+# Pilgrim can track memory buffer allocations
+# and store memory pointer (void*) type parameters.
+# To enable it, use ./configure --enable-pointers
 
 # Pilgrim can also intercepts CUDA memory operations to track
 # memory buffer locations, e.g., GPU device number.

@@ -65,7 +65,6 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
 #ifndef MEMORY_POINTERS
     return;
 #endif
-    printf("should never reach here!");
 
     AvlTree avl_node;
 

@@ -203,7 +203,7 @@ def generate_wrapper_file(funcs):
     import re
 
     def signature(func, f):
-        line = func.ret_type + " my_" + func.name + func.signature + "\n"
+        line = func.ret_type + " imp_" + func.name + func.signature + "\n"
         f.write(line + '{\n')
 
     def phase_one(func, f):
@@ -219,7 +219,7 @@ def generate_wrapper_file(funcs):
         arg_names = []
         for arg in func.arguments:
             arg_names.append(arg.name)
-        actual_call = "my_" + func.name + "(" + ", ".join(arg_names)+");"
+        actual_call = "imp_" + func.name + "(" + ", ".join(arg_names)+");"
 
         # C wrapper
         line = func.ret_type + " " + func.name + func.signature
@@ -248,7 +248,7 @@ def generate_wrapper_file(funcs):
                 else:
                     arg_names.append(arg.name)
 
-        actual_call = "my_" + func.name + "(" + ", ".join(arg_names)+");"
+        actual_call = "imp_" + func.name + "(" + ", ".join(arg_names)+");"
         actual_call = actual_call.replace("PMPI_Datatype_f2c", "PMPI_Type_f2c")
 
         if fortran_sig == "()":

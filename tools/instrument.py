@@ -32,6 +32,7 @@ def filter_with_local_mpi_functions(funcs):
 
 def generate_function_id_file(funcs):
     function_id_file = open('../include/pilgrim_func_ids.h', 'w')
+    function_id_file.write("/*\n * Copyright (C) by Argonne National Laboratory\n *     See COPYRIGHT in top-level directory\n */\n")
     function_id_file.write('/* This file is generated automatically, please do not change! */\n')
     function_id_file.write('#ifndef _PILGRIM_FUNC_IDS_H_\n#define _PILGRIM_FUNC_IDS_H_\n')
     idx = 0
@@ -54,6 +55,12 @@ def is_mpi_object_arg(arg_type):
         "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Comm", "MPI_Request"])
     if arg_type in mpi_objects:
         return True
+    return False
+
+def is_fortran_mpi_object(arg_type):
+    if "MPI_" in arg_type and "MPI_Offset" not in arg_type \
+        and "MPI_Aint" not in arg_type and "MPI_Count" not in arg_type:
+            return True
     return False
 
 # Return if this funciton is used to free a MPI object
@@ -230,7 +237,33 @@ def generate_wrapper_file(funcs):
         line = func.ret_type + " " + func.name + func.signature
         f.write(line + ' { return ' + actual_call + " }\n")
 
+        # TODO ignore MPI_T_ functions for Fortran
+        if "MPI_T_" in func.name:
+            return
+
         # Fortran wrappers
+        fortran_sig = "("
+        for arg in func.arguments:
+            type_str = arg.type
+            name_str = arg.name
+            if is_fortran_mpi_object(arg.type):
+                type_str = "MPI_Fint*"
+                name_str = name_str.replace("[]", "")
+            if "[][]" in arg.type:      # [][3]
+                type_str = type_str.replace("[][]", "")
+                name_str = name_str + "[][3]"
+            elif "[]" in arg.type:
+                type_str = type_str.replace("[]", "")
+                name_str = name_str + "[]"
+
+            fortran_sig += type_str + " " +  name_str + ", "
+
+        if fortran_sig == "(":
+            fortran_sig = "()"
+        else:
+            fortran_sig = fortran_sig[0:-2] + ")"
+
+        '''
         fortran_sig = re.sub(r'MPI_[^ ]* ', "MPI_Fint ", func.signature)
         fortran_sig = fortran_sig.replace('(int ', " (MPI_Fint ")
         fortran_sig = fortran_sig.replace(' int ', " MPI_Fint ")
@@ -238,23 +271,27 @@ def generate_wrapper_file(funcs):
         fortran_sig = fortran_sig.replace('MPI_Fint **', "MPI_Fint *")
         fortran_sig = fortran_sig.replace('[]', "")
         fortran_sig = fortran_sig.replace('(void)', "()")
+        '''
 
         before_call = ""
         arg_names = []
         for arg in func.arguments:
-            if "MPI_Status" in arg.type:
-                before_call = "PMPI_Status_f2c(%s, &g_c_status);" %(arg.name)
-                arg_names.append("&g_c_status")
-            elif is_mpi_object_arg(arg.type):
-                arg_names.append("P%s_f2c(*%s)" %(arg.type, arg.name))
-            else:
-                if "*" not in arg.type and '[]' not in arg.type:
-                    arg_names.append("*"+arg.name)
+            t = arg.type.replace("*", "").replace(" ","").replace("[]","").replace("const", "")
+            if is_fortran_mpi_object(arg.type):
+                if "*" in arg.type or "[]" in arg.type:
+                    arg_names.append("(%s*)%s" %(t, arg.name))
                 else:
-                    arg_names.append(arg.name)
+                    if "MPI_Status" == t:
+                        before_call = "PMPI_Status_f2c(%s, &g_c_status);" %(arg.name)
+                        arg_names.append("&g_c_status")
+                    elif "MPI_Datatype" == t:
+                        arg_names.append("PMPI_Type_f2c(*%s)" %arg.name)
+                    else:
+                        arg_names.append("P%s_f2c(*%s)" %(t, arg.name))
+            else:
+                arg_names.append(arg.name)
 
         actual_call = "imp_" + func.name + "(" + ", ".join(arg_names)+");"
-        actual_call = actual_call.replace("PMPI_Datatype_f2c", "PMPI_Type_f2c")
 
         if fortran_sig == "()":
             fortran_sig = "(MPI_Fint *ierr)"
@@ -273,6 +310,7 @@ def generate_wrapper_file(funcs):
         return num_args
 
     f = open('../src/pilgrim_wrappers.c', 'w')
+    f.write("/*\n * Copyright (C) by Argonne National Laboratory\n *     See COPYRIGHT in top-level directory\n */\n")
     f.write('#include <mpi.h>\n')
     f.write('#include <stdarg.h>\n')
     f.write('#include <stdlib.h>\n')

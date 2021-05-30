@@ -1,0 +1,104 @@
+#       runtime parameters, nxb = nyb = nzb = 64
+#       128^3 grid, gamma = 7/5
+
+xmax            = 1.
+xmin            = 0.
+ymax            = 1.
+ymin            = 0.
+zmax            = 1.
+zmin            = 0.
+
+basenm          = "driventurb_3d_"
+
+restart         = .false.
+
+
+useParticles= .false.
+
+plot_grid_var_1 = "mvrt"
+
+gamma           = 1.4
+
+cfl             = 0.5
+nend = 1000
+tmax            = 10000000
+
+xl_boundary_type      = "periodic"
+xr_boundary_type      = "periodic"
+yl_boundary_type      = "periodic"
+yr_boundary_type      = "periodic"
+zl_boundary_type      = "periodic"
+zr_boundary_type      = "periodic"
+
+st_stirmax           = 25.1327
+st_stirmin           =  6.2832
+st_energy            =  5.E-6
+st_decay             =  0.5
+st_freq              = 1
+eintSwitch          = 0.
+
+dtinit = 1.e-5
+dtmin = 1.e-12    # This parameter must be << minimum timestep
+                  #  in order to avoid numerical instability
+
+smallt = 1.e-15
+smalle = 1.e-10
+
+#   AMR refinement parameters
+#lrefine_max = 6
+#refine_var_1 = "dens"
+
+#These parameters below are only necessary for the Uniform Grid
+
+iProcs = 8
+jProcs = 8
+kProcs = 64
+meshCopyCount = 1
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+
+#FIXEDBLOCKSIZE mode ::
+# When using fixed blocksize, iGridSize etc are redundant in
+# runtime parameters. These quantities are calculated as 
+# iGridSize = NXB*iprocs
+# jGridSize = NYB*jprocs
+# kGridSize = NZB*kprocs
+
+#NONFIXEDBLOCKSIZE mode ::
+# iGridSize etc must be specified. They constitute the global
+# number of grid points in the physical domain without taking 
+# the guard cell into account. The local blocksize is calculated
+# as iGridSize/iprocs  etc.
+ 
+ 
+## -------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE UNSPLIT HYDRO SOLVER               ##
+#	I. INTERPOLATION SCHEME:
+order		= 2      # Interpolation order (first/second/third/fifth order)
+slopeLimiter    = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting	= .true. # Characteristic limiting vs. Primitive limiting
+
+use_avisc	= .false. # use artificial viscosity (originally for PPM)
+#cvisc		= 0.1     # coefficient for artificial viscosity
+use_flattening	= .false. # use flattening (dissipative) (originally for PPM)
+use_steepening	= .false. # use contact steepening (originally for PPM)
+use_upwindTVD	= .false. # use upwind biased TVD slope for PPM (need nguard=6)
+
+#	II. RIEMANN SOLVERS:
+RiemannSolver	= "Roe"       # Roe, HLL, HLLC, LLF, Marquina
+entropy         = .false.     # Entropy fix for the Roe solver
+
+#	III. STRONG SHOCK HANDELING SCHEME:
+shockDetect	= .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##
+
+## ---------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE SUPER-TIME-STEPPING (STS) ALGORITHM  ##
+##  NOTE: For details on using STS runtime parameters, please     ##
+##        refer to user's guide (Driver chapter).                 ##
+useSTS                  = .false.
+nstepTotalSTS           = 5
+nuSTS                   = 0.2
+## ---------------------------------------------------------------##

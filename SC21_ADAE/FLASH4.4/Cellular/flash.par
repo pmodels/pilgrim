@@ -1,0 +1,189 @@
+# flash file for a 1d, 2d, or 3d cellular detonation of carbon
+# [source/Simulation/SimulationMain/Cellular]
+
+# Klaus asks for convertToConserved 11/27/2007
+convertToConsvdInMeshInterp = .true.
+
+# max and min levels of refinement
+# 5 levels puts about 10 mesh points per burning length scale, and is about 
+# as crude a mesh as one dares to go. in 3d this is the most refinement
+# levels i've run with. in 2d the most i've run it with is 8 levels in 2d, 
+# which makes some really great pictures.
+
+lrefine_max = 3      # was 5
+lrefine_min = 1
+
+# refine on the pressure and density
+refine_var_1 = "pres"
+refine_var_2 = "dens"
+refine_var_3 = "none"
+refine_var_4 = "none"
+
+# refine on the temperature too
+#refine_var_1 = "pres"
+#refine_var_2 = "dens"
+#refine_var_3 = "temp"
+#refine_var_4 = "none"
+
+# names of files
+basenm   = "cellular_"
+log_file = "cellular.log"
+stats_file = "cellular.dat"
+
+
+# for starting a new run
+restart  = .false.
+checkpointFileNumber = 0
+plotFileNumber = 0
+
+# specify the plot variables
+plot_var_1 = "pres"
+plot_var_2 = "si28"
+
+# for restarting an old one
+#restart  = .true.
+#checkpointFileNumber = 57
+#plotFileNumber = 125
+
+
+# dump checkpoint files every checkpointFileIntervalTime seconds
+checkpointFileIntervalTime   = 1.0e-9    # every ten nanoseconds
+#checkpointFileIntervalStep   = 1
+
+# dump plot files every plotFileIntervalTime seconds
+#plotFileIntervalTime    = 0.25e-9
+plotFileIntervalTime    = 1.0e8
+
+# go for nend steps or tmax seconds, whichever comes first
+nend = 1000
+#tmax     = 2.0E-9   #get two files # want to run to 100 nanoseconds
+tmax     = 2.0E2   #get two files # want to run to 100 nanoseconds
+
+
+
+# initial and minimum in nanoseconds
+dtinit = 1.0e-16
+dtmin = 1.0e-20
+
+# for fine time slices, you may want to limit the timestep
+#dtmax = 0.0125e-9
+
+
+# cfl limit, ni56 burner cutoff, artificial viscosity, smallest density
+# allowed, and smallest temperature allowed
+cfl = .8
+nuclearNI56Max = 1.0
+cvisc = 0.1
+smlrho = 1.e-2
+smallt = 1.e5
+
+
+# choose integration method 1 = bader-deuflhard, 2 = rosenbrock
+# rosenbrock is faster under some circumstances.
+# until i test it some more, i'll stick with the bader-deuflhard.
+odeStepper = 1
+
+# choose linear algebra package 1 = ma28, 2 = gift
+# gift is faster under some circumstances, and this problem
+# satisfies those conditions. either package will get the right answer.
+algebra = 2
+
+# control when the burner is called, dont call it in the cold stuff
+nuclearTempMin = 2.1e8
+nuclearTempMax = 1.0e12 
+nuclearDensMin = 1.0e-10
+nuclearDensMax = 1.0e14
+
+
+# set the composition
+xhe4 = 0.0
+xc12 = 1.0
+xo16 = 0.0
+
+
+# upstream fuel conditions for pure carbon
+tempAmbient   = 2.0e8
+rhoAmbient = 1.0e7
+velxAmbient   = 0.0e0
+
+
+# these are the fuel conditions, for a self-sustained detonation
+# at the upstream conditions, just after the shock has passed
+# these values from /f1/fxt/flam/cjdet/cjdet.exe
+tempPerturb   = 4.423e9
+rhoPerturb = 4.236e7
+velxPerturb   = 2.876E+08
+
+
+# seed the density perturbations with white-noise
+noiseAmplitude = 1.0e-2
+noiseDistance = 5.0
+
+
+# physical domain
+xmin = 0.0
+xmax = 256.   #128.
+ymin = 0.0
+ymax = 12.8
+zmin = 0.0
+zmax = 12.8
+
+
+# put 20 blocks in the x-direction, this will give square grids
+nblockx = 20   #10
+nblocky = 1
+nblockz = 1
+
+
+# apply the jump conditions below a distance of radiusPerturb
+radiusPerturb = 25.6
+xCenterPerturb = 0.
+yCenterPerturb = 0.
+zCenterPerturb = 0.
+usePseudo1d = .true.
+
+
+
+# cartesian geometry
+geometry = "cartesian"
+
+# reflecting east and west boundaries
+xl_boundary_type = "reflect"
+xr_boundary_type = "reflect"
+
+# periodix north and south boundaries
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+
+# periodic up and down boundaries
+zl_boundary_type = "periodic"
+zr_boundary_type = "periodic"
+
+
+# no gravity, but do burn
+useBurn = .true.
+useShockBurn = .true.
+
+
+# eos options
+eintSwitch     = 1.e-4
+eos_coulombMult = 0
+
+## -------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE UNSPLIT HYDRO SOLVER               ##
+#       I. INTERPOLATION SCHEME:
+order           = 3      # Interpolation order (First/Second/Third order)
+slopeLimiter    = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting    = .true. # Characteristic limiting vs. Primitive limiting
+use_steepening	= .true. # Contact Steepening for Third order PPM
+
+#       II. RIEMANN SOLVERS:
+RiemannSolver   = "ROE"       # Roe, HLL, HLLC, LF
+entropy		= .true.      # entropy fix for the Roe solver
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+EOSforRiemann	= .false.     # Call EoS for Riemann solves
+
+#       III. STRONG SHOCK HANDELING SCHEME:
+shockDetect     = .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##

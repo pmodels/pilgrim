@@ -1,0 +1,481 @@
+SLURM_NODELIST=catalyst321
+LMOD_FAMILY_COMPILER_VERSION=19.1.0
+MKLROOT=/usr/tce/packages/mkl/mkl-2020.0/compilers_and_libraries/linux/mkl
+HDF5_1_8_HOME=/g/g90/USER/softwares/library/hdf5-1.8.20/build-impi-2018
+SLURM_JOB_NAME=hello
+MANPATH=/usr/tce/packages/impi/impi-2018.0-intel-19.1.0/man:/usr/tce/packages/intel/intel-19.1.0/man/common:/usr/tce/packages/cmake/cmake-3.14.5/share/man:/usr/tce/man:/usr/share/lmod/lmod/share/man:/usr/tce/packages/dotkit/dotkit/man:/usr/man:/usr/share/man:/usr/local/man:/usr/X11R6/man:/usr/lib64/mvapich/default/man
+SLURMD_NODENAME=catalyst321
+SLURM_TOPOLOGY_ADDR=catalyst321
+HOSTNAME=catalyst321
+GUESTFISH_INIT=\e[1;34m
+_ModuleTable003_=bC8xOS4xLjAiLFsibG9hZE9yZGVyIl09NSxwcm9wVD17fSxbInN0YWNrRGVwdGgiXT0wLFsic3RhdHVzIl09ImFjdGl2ZSIsWyJ1c2VyTmFtZSJdPSJpbnRlbC8xOS4xLjAiLH0sbWtsPXtbImZuIl09Ii91c3IvdGNlL21vZHVsZWZpbGVzL0NvcmUvbWtsLzIwMjAuMC5sdWEiLFsiZnVsbE5hbWUiXT0ibWtsLzIwMjAuMCIsWyJsb2FkT3JkZXIiXT00LHByb3BUPXt9LFsic3RhY2tEZXB0aCJdPTAsWyJzdGF0dXMiXT0iYWN0aXZlIixbInVzZXJOYW1lIl09Im1rbC8yMDIwLjAiLH0sdGV4bGl2ZT17WyJmbiJdPSIvdXNyL3RjZS9tb2R1bGVmaWxlcy9Db3JlL3RleGxpdmUvMjAxNi5sdWEiLFsiZnVsbE5hbWUiXT0idGV4bGl2ZS8yMDE2IixbImxvYWRPcmRlciJdPTEscHJvcFQ9
+SLURM_PRIO_PROCESS=0
+SLURM_NODE_ALIASES=(null)
+INTEL_LICENSE_FILE=/usr/tce/packages/intel/intel-19.1.0/compilers_and_libraries_2020.0.166/linux/Licenses/license.client.intel.lic
+I_MPI_F77=/usr/tce/packages/intel/intel-19.1.0/bin/ifort
+SHELL=/bin/bash
+TERM=xterm-256color
+__LMOD_REF_COUNT_MODULEPATH=/usr/tce/modulefiles/MPI/intel/19.1.0/impi/2018.0:1;/usr/tce/modulefiles/Compiler/intel/19.1.0:1;/collab/usr/global/tools/modulefiles/toss_3_x86_64_ib/Core:1;/usr/tce/modulefiles/Core:1;/usr/apps/modulefiles:1;/usr/share/modulefiles/Linux:1;/usr/share/modulefiles/Core:1;/usr/share/lmod/lmod/modulefiles/Core:1
+SLURM_JOB_QOS=Added as default
+HISTSIZE=1000
+WISECONFIGDIR=/usr/share/wise2/
+LMOD_ROOT=/usr/share/lmod
+SLURM_TOPOLOGY_ADDR_PATTERN=node
+SSH_CLIENT=99.21.104.63 56168 22
+TMPDIR=/var/tmp/USER
+MODULEPATH_ROOT=/usr/share/modulefiles
+LMOD_SYSTEM_DEFAULT_MODULES=StdEnv
+CONDA_SHLVL=0
+LIBRARY_PATH=/usr/tce/packages/mkl/mkl-2020.0/compilers_and_libraries/linux/mkl/lib/intel64
+FPATH=/usr/share/lmod/lmod/init/ksh_funcs
+LMOD_PKG=/usr/share/lmod/lmod
+LIBRECORDER=/g/g90/USER/sources/Recorder/install/lib/librecorder.so
+QTDIR=/usr/lib64/qt-3.3
+QTINC=/usr/lib64/qt-3.3/include
+LMOD_VERSION=8.4.10
+SSH_TTY=/dev/pts/70
+LC_ALL=C
+__LMOD_REF_COUNT_LOADEDMODULES=texlive/2016:1;StdEnv:1;cmake/3.14.5:1;mkl/2020.0:1;intel/19.1.0:1;impi/2018.0:1
+SLURM_NNODES=1
+USER=USER
+LS_COLORS=rs=0:di=38;5;27:ln=38;5;51:mh=44;38;5;15:pi=40;38;5;11:so=38;5;13:do=38;5;5:bd=48;5;232;38;5;11:cd=48;5;232;38;5;3:or=48;5;232;38;5;9:mi=05;48;5;232;38;5;15:su=48;5;196;38;5;15:sg=48;5;11;38;5;16:ca=48;5;196;38;5;226:tw=48;5;10;38;5;16:ow=48;5;10;38;5;21:st=48;5;21;38;5;15:ex=38;5;34:*.tar=38;5;9:*.tgz=38;5;9:*.arc=38;5;9:*.arj=38;5;9:*.taz=38;5;9:*.lha=38;5;9:*.lz4=38;5;9:*.lzh=38;5;9:*.lzma=38;5;9:*.tlz=38;5;9:*.txz=38;5;9:*.tzo=38;5;9:*.t7z=38;5;9:*.zip=38;5;9:*.z=38;5;9:*.Z=38;5;9:*.dz=38;5;9:*.gz=38;5;9:*.lrz=38;5;9:*.lz=38;5;9:*.lzo=38;5;9:*.xz=38;5;9:*.bz2=38;5;9:*.bz=38;5;9:*.tbz=38;5;9:*.tbz2=38;5;9:*.tz=38;5;9:*.deb=38;5;9:*.rpm=38;5;9:*.jar=38;5;9:*.war=38;5;9:*.ear=38;5;9:*.sar=38;5;9:*.rar=38;5;9:*.alz=38;5;9:*.ace=38;5;9:*.zoo=38;5;9:*.cpio=38;5;9:*.7z=38;5;9:*.rz=38;5;9:*.cab=38;5;9:*.jpg=38;5;13:*.jpeg=38;5;13:*.gif=38;5;13:*.bmp=38;5;13:*.pbm=38;5;13:*.pgm=38;5;13:*.ppm=38;5;13:*.tga=38;5;13:*.xbm=38;5;13:*.xpm=38;5;13:*.tif=38;5;13:*.tiff=38;5;13:*.png=38;5;13:*.svg=38;5;13:*.svgz=38;5;13:*.mng=38;5;13:*.pcx=38;5;13:*.mov=38;5;13:*.mpg=38;5;13:*.mpeg=38;5;13:*.m2v=38;5;13:*.mkv=38;5;13:*.webm=38;5;13:*.ogm=38;5;13:*.mp4=38;5;13:*.m4v=38;5;13:*.mp4v=38;5;13:*.vob=38;5;13:*.qt=38;5;13:*.nuv=38;5;13:*.wmv=38;5;13:*.asf=38;5;13:*.rm=38;5;13:*.rmvb=38;5;13:*.flc=38;5;13:*.avi=38;5;13:*.fli=38;5;13:*.flv=38;5;13:*.gl=38;5;13:*.dl=38;5;13:*.xcf=38;5;13:*.xwd=38;5;13:*.yuv=38;5;13:*.cgm=38;5;13:*.emf=38;5;13:*.axv=38;5;13:*.anx=38;5;13:*.ogv=38;5;13:*.ogx=38;5;13:*.aac=38;5;45:*.au=38;5;45:*.flac=38;5;45:*.mid=38;5;45:*.midi=38;5;45:*.mka=38;5;45:*.mp3=38;5;45:*.mpc=38;5;45:*.ogg=38;5;45:*.ra=38;5;45:*.wav=38;5;45:*.axa=38;5;45:*.oga=38;5;45:*.spx=38;5;45:*.xspf=38;5;45:
+LMOD_sys=Linux
+LD_LIBRARY_PATH=/g/g90/USER/softwares/library/libfabric-1.12.1/install/lib:/g/g90/USER/softwares/library/mercury-2.0.1/install/lib:/g/g90/USER/softwares/library/hdf5-1.12.0/build-impi-2018/lib:/g/g90/USER/softwares/library/hdf5-1.8.20/build-impi-2018/lib:/g/g90/USER/softwares/library/json-cwx/json-cwx/build/lib:/usr/tce/packages/impi/impi-2018.0-intel-19.1.0/lib:/usr/tce/packages/intel/intel-19.1.0/lib/intel64:/usr/tce/packages/mkl/mkl-2020.0/compilers_and_libraries/linux/mkl/lib/intel64:/g/g90/USER/sources/hdf5_with_multi/install-impi-2018/lib
+_dk_shell=bash
+ENV=/g/g90/USER/.bashrc
+PFTP_CONFIG_FILENAME=/etc/pftp_config
+SLURM_JOBID=1723825
+HOST_GRP=linux
+_ModuleTable004_=e30sWyJzdGFja0RlcHRoIl09MSxbInN0YXR1cyJdPSJhY3RpdmUiLFsidXNlck5hbWUiXT0idGV4bGl2ZS8yMDE2Iix9LH0sbXBhdGhBPXsiL3Vzci90Y2UvbW9kdWxlZmlsZXMvTVBJL2ludGVsLzE5LjEuMC9pbXBpLzIwMTguMCIsIi91c3IvdGNlL21vZHVsZWZpbGVzL0NvbXBpbGVyL2ludGVsLzE5LjEuMCIsIi9jb2xsYWIvdXNyL2dsb2JhbC90b29scy9tb2R1bGVmaWxlcy90b3NzXzNfeDg2XzY0X2liL0NvcmUiLCIvdXNyL3RjZS9tb2R1bGVmaWxlcy9Db3JlIiwiL3Vzci9hcHBzL21vZHVsZWZpbGVzIiwiL3Vzci9zaGFyZS9tb2R1bGVmaWxlcy9MaW51eCIsIi91c3Ivc2hhcmUvbW9kdWxlZmlsZXMvQ29yZSIsIi91c3Ivc2hhcmUvbG1vZC9sbW9kL21vZHVsZWZpbGVz
+CPATH=/usr/tce/packages/mkl/mkl-2020.0/compilers_and_libraries/linux/mkl/include
+__LMOD_REF_COUNT__LMFILES_=/usr/tce/modulefiles/Core/texlive/2016.lua:1;/usr/tce/modulefiles/Core/StdEnv.lua:1;/usr/tce/modulefiles/Core/cmake/3.14.5.lua:1;/usr/tce/modulefiles/Core/mkl/2020.0.lua:1;/usr/tce/modulefiles/Core/intel/19.1.0.lua:1;/usr/tce/modulefiles/Compiler/intel/19.1.0/impi/2018.0.lua:1
+DK_UEQRU=1
+GUESTFISH_PS1=\[\e[1;32m\]><fs>\[\e[0;31m\] 
+LMOD_PREPEND_BLOCK=normal
+LMOD_FAMILY_MPI_VERSION=2018.0
+SLURM_TASKS_PER_NODE=24
+PATH=/g/g90/USER/softwares/library/hdf5-1.12.0/build-impi-2018/bin:/p/lscratchh/USER/packages/otf2-2.1.1/build/bin/:/usr/tce/packages/impi/impi-2018.0-intel-19.1.0/bin:/usr/tce/packages/intel/intel-19.1.0/bin:/usr/tce/packages/cmake/cmake-3.14.5/bin:/usr/tce/packages/texlive/texlive-2016/2016/bin/x86_64-linux:/usr/tce/bin:/usr/lib64/qt-3.3/bin:/usr/condabin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin
+MAIL=/var/spool/mail/USER
+_ModuleTable001_=X01vZHVsZVRhYmxlXz17WyJNVHZlcnNpb24iXT0zLFsiY19yZWJ1aWxkVGltZSJdPWZhbHNlLFsiY19zaG9ydFRpbWUiXT1mYWxzZSxkZXB0aFQ9e30sZmFtaWx5PXtbImNvbXBpbGVyIl09ImludGVsIixbIm1waSJdPSJpbXBpIix9LG1UPXtTdGRFbnY9e1siZm4iXT0iL3Vzci90Y2UvbW9kdWxlZmlsZXMvQ29yZS9TdGRFbnYubHVhIixbImZ1bGxOYW1lIl09IlN0ZEVudiIsWyJsb2FkT3JkZXIiXT0yLHByb3BUPXtsbW9kPXtbInN0aWNreSJdPTEsfSx9LFsic3RhY2tEZXB0aCJdPTAsWyJzdGF0dXMiXT0iYWN0aXZlIixbInVzZXJOYW1lIl09IlN0ZEVudiIsfSxjbWFrZT17WyJmbiJdPSIvdXNyL3RjZS9tb2R1bGVmaWxlcy9Db3JlL2NtYWtlLzMuMTQuNS5sdWEiLFsiZnVs
+SLURM_WORKING_CLUSTER=catalyst:ecatalyst161:6817:8960:101
+SLURM_CONF=/etc/slurm/slurm.conf
+LCSCHEDCLUSTER=catalyst
+LIBFABRIC_DIR=/g/g90/USER/softwares/library/libfabric-1.12.1/install
+SLURM_JOB_ID=1723825
+PDC_DIR=/g/g90/USER/softwares/library/pdc/install/
+LMOD_SETTARG_CMD=:
+SLURM_JOB_USER=USER
+PWD=/g/g90/USER
+INPUTRC=/etc/inputrc
+_dk_rl=-1
+_LMFILES_=/usr/tce/modulefiles/Core/texlive/2016.lua:/usr/tce/modulefiles/Core/StdEnv.lua:/usr/tce/modulefiles/Core/cmake/3.14.5.lua:/usr/tce/modulefiles/Core/mkl/2020.0.lua:/usr/tce/modulefiles/Core/intel/19.1.0.lua:/usr/tce/modulefiles/Compiler/intel/19.1.0/impi/2018.0.lua
+EDITOR=/bin/vi
+LANG=en_US.UTF-8
+MODULEPATH=/usr/tce/modulefiles/MPI/intel/19.1.0/impi/2018.0:/usr/tce/modulefiles/Compiler/intel/19.1.0:/collab/usr/global/tools/modulefiles/toss_3_x86_64_ib/Core:/usr/tce/modulefiles/Core:/usr/apps/modulefiles:/usr/share/modulefiles/Linux:/usr/share/modulefiles/Core:/usr/share/lmod/lmod/modulefiles/Core
+SLURM_JOB_UID=30503
+DARSHAN_LLNL_LOGDIR=/usr/sonar/ingestion/darshan/catalyst/USER
+GUESTFISH_OUTPUT=\e[0m
+KDEDIRS=/usr
+LOADEDMODULES=texlive/2016:StdEnv:cmake/3.14.5:mkl/2020.0:intel/19.1.0:impi/2018.0
+_ModuleTable_Sz_=5
+SLURM_NODEID=0
+MERCURY_DIR=/g/g90/USER/softwares/library/mercury-2.0.1/install
+SLURM_SUBMIT_DIR=/g/g90/USER
+DK_SUBNODE=bash/toss_3_x86_64_ib:bash:toss_3_x86_64_ib:.
+I_MPI_F90=/usr/tce/packages/intel/intel-19.1.0/bin/ifort
+SLURM_TASK_PID=27586
+LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
+I_MPI_CC=/usr/tce/packages/intel/intel-19.1.0/bin/icc
+_ModuleTable005_=L0NvcmUiLH0sWyJzeXN0ZW1CYXNlTVBBVEgiXT0iL3Vzci90Y2UvbW9kdWxlZmlsZXMvQ29yZTovdXNyL2FwcHMvbW9kdWxlZmlsZXM6L3Vzci9zaGFyZS9tb2R1bGVmaWxlcy9MaW51eDovdXNyL3NoYXJlL21vZHVsZWZpbGVzL0NvcmU6L3Vzci9zaGFyZS9sbW9kL2xtb2QvbW9kdWxlZmlsZXMvQ29yZSIsfQ==
+SLURM_CPUS_ON_NODE=24
+SLURM_PROCID=0
+KRB5CCNAME=FILE:/tmp/krb5cc_30503_qAJqvy
+HISTCONTROL=ignoredups
+ENVIRONMENT=BATCH
+_dk_inuse=lcinit.0 dkcomplete.1 reuse.1
+SSH_ASKPASS=/usr/libexec/openssh/gnome-ssh-askpass
+SLURM_JOB_NODELIST=catalyst321
+HOME=/g/g90/USER
+SHLVL=2
+__LMOD_SET_FPATH=1
+SLURM_LOCALID=0
+__LMOD_REF_COUNT_PATH=/usr/tce/packages/impi/impi-2018.0-intel-19.1.0/bin:1;/usr/tce/packages/intel/intel-19.1.0/bin:1;/usr/tce/packages/cmake/cmake-3.14.5/bin:1;/usr/tce/packages/texlive/texlive-2016/2016/bin/x86_64-linux:1;/usr/tce/bin:1;/usr/lib64/qt-3.3/bin:1;/usr/condabin:1;/usr/local/bin:1;/usr/bin:1;/usr/local/sbin:1;/usr/sbin:1
+I_MPI_CXX=/usr/tce/packages/intel/intel-19.1.0/bin/icpc
+__LMOD_REF_COUNT_CPATH=/usr/tce/packages/mkl/mkl-2020.0/compilers_and_libraries/linux/mkl/include:1
+SLURM_JOB_GID=30503
+SLURM_JOB_CPUS_PER_NODE=24
+SLURM_CLUSTER_NAME=catalyst
+_ModuleTable002_=bE5hbWUiXT0iY21ha2UvMy4xNC41IixbImxvYWRPcmRlciJdPTMscHJvcFQ9e30sWyJzdGFja0RlcHRoIl09MCxbInN0YXR1cyJdPSJhY3RpdmUiLFsidXNlck5hbWUiXT0iY21ha2UvMy4xNC41Iix9LGltcGk9e1siZm4iXT0iL3Vzci90Y2UvbW9kdWxlZmlsZXMvQ29tcGlsZXIvaW50ZWwvMTkuMS4wL2ltcGkvMjAxOC4wLmx1YSIsWyJmdWxsTmFtZSJdPSJpbXBpLzIwMTguMCIsWyJsb2FkT3JkZXIiXT02LHByb3BUPXt9LFsic3RhY2tEZXB0aCJdPTAsWyJzdGF0dXMiXT0iYWN0aXZlIixbInVzZXJOYW1lIl09ImltcGkvMjAxOC4wIix9LGludGVsPXtbImZuIl09Ii91c3IvdGNlL21vZHVsZWZpbGVzL0NvcmUvaW50ZWwvMTkuMS4wLmx1YSIsWyJmdWxsTmFtZSJdPSJpbnRl
+SLURM_GTIDS=0
+SLURM_SUBMIT_HOST=catalyst160
+SLURM_JOB_PARTITION=pdebug
+BASH_ENV=/usr/share/lmod/lmod/init/bash
+I_MPI_FC=/usr/tce/packages/intel/intel-19.1.0/bin/ifort
+LOGNAME=USER
+LMOD_arch=x86_64
+CVS_RSH=ssh
+QTLIB=/usr/lib64/qt-3.3/lib
+SLURM_JOB_ACCOUNT=scr
+SSH_CONNECTION=99.21.104.63 56168 134.9.50.63 22
+_dk_isatty=1
+XDG_DATA_DIRS=/g/g90/USER/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
+MPIBIND_SPROLOG=
+SLURM_JOB_NUM_NODES=1
+SYS_TYPE=toss_3_x86_64_ib
+MODULESHOME=/usr/share/lmod/lmod
+__LMOD_REF_COUNT_LIBRARY_PATH=/usr/tce/packages/mkl/mkl-2020.0/compilers_and_libraries/linux/mkl/lib/intel64:1
+LESSOPEN=||/usr/bin/lesspipe.sh %s
+LMOD_SETTARG_FULL_SUPPORT=no
+__LMOD_REF_COUNT_LD_LIBRARY_PATH=/usr/tce/packages/impi/impi-2018.0-intel-19.1.0/lib:1;/usr/tce/packages/intel/intel-19.1.0/lib/intel64:1;/usr/tce/packages/mkl/mkl-2020.0/compilers_and_libraries/linux/mkl/lib/intel64:1
+LMOD_FULL_SETTARG_SUPPORT=no
+LMOD_FAMILY_COMPILER=intel
+__LMOD_REF_COUNT_INTEL_LICENSE_FILE=/usr/tce/packages/intel/intel-19.1.0/compilers_and_libraries_2020.0.166/linux/Licenses/license.client.intel.lic:1
+OFI_HOME=/g/g90/USER/softwares/library/libfabric-1.12.1/install
+QT_PLUGIN_PATH=/usr/lib64/kde4/plugins:/usr/lib/kde4/plugins
+LMOD_DIR=/usr/share/lmod/lmod/libexec
+__LMOD_REF_COUNT_MANPATH=/usr/tce/packages/impi/impi-2018.0-intel-19.1.0/man:1;/usr/tce/packages/intel/intel-19.1.0/man/common:1;/usr/tce/packages/cmake/cmake-3.14.5/share/man:1;/usr/tce/man:1;/usr/share/lmod/lmod/share/man:1;/usr/tce/packages/dotkit/dotkit/man:1;/usr/man:1;/usr/share/man:1;/usr/local/man:1;/usr/X11R6/man:1;/usr/lib64/mvapich/default/man:1
+GUESTFISH_RESTORE=\e[0m
+HISTFILE=/g/g90/USER/.bash_history
+DK_ROOT=/usr/tce/packages/dotkit/dotkit
+DK_NODE=/usr/global/tools/dotkit
+LMOD_COLORIZE=yes
+LMOD_FAMILY_MPI=impi
+HDF5_HOME=/g/g90/USER/softwares/library/hdf5-1.12.0/build-impi-2018
+BASH_FUNC_module()=() {  eval $($LMOD_CMD bash "$@") && eval $(${LMOD_SETTARG_CMD:-:} -s sh)
+}
+BASH_FUNC_ml()=() {  eval $($LMOD_DIR/ml_cmd "$@")
+}
+_=/usr/bin/env
++ lsb_release -a
+LSB Version:	:core-4.1-amd64:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-noarch:desktop-4.1-amd64:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch
+Distributor ID:	RedHatEnterpriseServer
+Description:	Red Hat Enterprise Linux Server release 7.9 (Maipo)
+Release:	7.9
+Codename:	Maipo
++ uname -a
+Linux catalyst321 3.10.0-1160.24.1.1chaos.ch6.x86_64 #1 SMP Thu Apr 8 17:30:52 PDT 2021 x86_64 x86_64 x86_64 GNU/Linux
++ lscpu
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                48
+On-line CPU(s) list:   0-47
+Thread(s) per core:    2
+Core(s) per socket:    12
+Socket(s):             2
+NUMA node(s):          2
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 62
+Model name:            Intel(R) Xeon(R) CPU E5-2695 v2 @ 2.40GHz
+Stepping:              4
+CPU MHz:               2401.000
+CPU max MHz:           2401.0000
+CPU min MHz:           1200.0000
+BogoMIPS:              4788.37
+Virtualization:        VT-x
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              256K
+L3 cache:              30720K
+NUMA node0 CPU(s):     0-11,24-35
+NUMA node1 CPU(s):     12-23,36-47
+Flags:                 fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm epb ssbd ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms xsaveopt dtherm ida arat pln pts md_clear spec_ctrl intel_stibp flush_l1d
++ cat /proc/meminfo
+MemTotal:       131603576 kB
+MemFree:        124711904 kB
+MemAvailable:   124599644 kB
+Buffers:           98640 kB
+Cached:           709924 kB
+SwapCached:            0 kB
+Active:           305432 kB
+Inactive:         623552 kB
+Active(anon):     192024 kB
+Inactive(anon):   508108 kB
+Active(file):     113408 kB
+Inactive(file):   115444 kB
+Unevictable:       15060 kB
+Mlocked:           15060 kB
+SwapTotal:             0 kB
+SwapFree:              0 kB
+Dirty:                 0 kB
+Writeback:            20 kB
+AnonPages:        133140 kB
+Mapped:            74280 kB
+Shmem:            569084 kB
+Slab:             760132 kB
+SReclaimable:     280808 kB
+SUnreclaim:       479324 kB
+KernelStack:       15824 kB
+PageTables:         4884 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    65801788 kB
+Committed_AS:     798604 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:     1713020 kB
+VmallocChunk:   34290793412 kB
+Percpu:            43648 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:         0 kB
+CmaTotal:              0 kB
+CmaFree:               0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+DirectMap4k:      790108 kB
+DirectMap2M:     9615360 kB
+DirectMap1G:    125829120 kB
++ inxi -F -c0
+/var/spool/slurmd/job1723825/slurm_script: line 18: inxi: command not found
++ lsblk -a
+NAME      MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINT
+sda         8:0    0 186.3G  0 disk  
+`-md0       9:0    0 744.8G  0 raid0 /l/ssd
+sdb         8:16   0 186.3G  0 disk  
+`-md0       9:0    0 744.8G  0 raid0 /l/ssd
+sdc         8:32   0 186.3G  0 disk  
+`-md0       9:0    0 744.8G  0 raid0 /l/ssd
+sdd         8:48   0 186.3G  0 disk  
+`-md0       9:0    0 744.8G  0 raid0 /l/ssd
+sde         8:64   0  34.2G  1 disk  
+`-rootdev 253:0    0  34.2G  1 mpath 
+sdf         8:80   0  34.2G  1 disk  
+`-rootdev 253:0    0  34.2G  1 mpath 
++ lsscsi -s
+[0:0:0:0]    disk    INTEL(R)  SSD 910 200GB   a424  /dev/sda    200GB
+[0:0:1:0]    disk    INTEL(R)  SSD 910 200GB   a424  /dev/sdb    200GB
+[0:0:2:0]    disk    INTEL(R)  SSD 910 200GB   a424  /dev/sdc    200GB
+[0:0:3:0]    disk    INTEL(R)  SSD 910 200GB   a424  /dev/sdd    200GB
+[9:0:0:0]    disk    LIO-ORG  FILEIO           4.0   /dev/sde   36.7GB
+[10:0:0:0]   disk    LIO-ORG  FILEIO           4.0   /dev/sdf   36.7GB
++ module list
+++ /usr/share/lmod/lmod/libexec/lmod bash list
+
+Currently Loaded Modules:
+  1) texlive/2016       3) cmake/3.14.5   5) intel/19.1.0
+  2) StdEnv       (S)   4) mkl/2020.0     6) impi/2018.0
+
+  Where:
+   S:  Module is Sticky, requires --force to unload or purge
+
+ 
+
++ eval 'MODULEPATH=/usr/tce/modulefiles/MPI/intel/19.1.0/impi/2018.0:/usr/tce/modulefiles/Compiler/intel/19.1.0:/collab/usr/global/tools/modulefiles/toss_3_x86_64_ib/Core:/usr/tce/modulefiles/Core:/usr/apps/modulefiles:/usr/share/modulefiles/Linux:/usr/share/modulefiles/Core:/usr/share/lmod/lmod/modulefiles/Core;' export 'MODULEPATH;' '_ModuleTable001_=X01vZHVsZVRhYmxlXz17WyJNVHZlcnNpb24iXT0zLFsiY19yZWJ1aWxkVGltZSJdPWZhbHNlLFsiY19zaG9ydFRpbWUiXT1mYWxzZSxkZXB0aFQ9e30sZmFtaWx5PXtbImNvbXBpbGVyIl09ImludGVsIixbIm1waSJdPSJpbXBpIix9LG1UPXtTdGRFbnY9e1siZm4iXT0iL3Vzci90Y2UvbW9kdWxlZmlsZXMvQ29yZS9TdGRFbnYubHVhIixbImZ1bGxOYW1lIl09IlN0ZEVudiIsWyJsb2FkT3JkZXIiXT0yLHByb3BUPXtsbW9kPXtbInN0aWNreSJdPTEsfSx9LFsic3RhY2tEZXB0aCJdPTAsWyJzdGF0dXMiXT0iYWN0aXZlIixbInVzZXJOYW1lIl09IlN0ZEVudiIsfSxjbWFrZT17WyJmbiJdPSIvdXNyL3RjZS9tb2R1bGVmaWxlcy9Db3JlL2NtYWtlLzMuMTQuNS5sdWEiLFsiZnVs;' export '_ModuleTable001_;' '_ModuleTable002_=bE5hbWUiXT0iY21ha2UvMy4xNC41IixbImxvYWRPcmRlciJdPTMscHJvcFQ9e30sWyJzdGFja0RlcHRoIl09MCxbInN0YXR1cyJdPSJhY3RpdmUiLFsidXNlck5hbWUiXT0iY21ha2UvMy4xNC41Iix9LGltcGk9e1siZm4iXT0iL3Vzci90Y2UvbW9kdWxlZmlsZXMvQ29tcGlsZXIvaW50ZWwvMTkuMS4wL2ltcGkvMjAxOC4wLmx1YSIsWyJmdWxsTmFtZSJdPSJpbXBpLzIwMTguMCIsWyJsb2FkT3JkZXIiXT02LHByb3BUPXt9LFsic3RhY2tEZXB0aCJdPTAsWyJzdGF0dXMiXT0iYWN0aXZlIixbInVzZXJOYW1lIl09ImltcGkvMjAxOC4wIix9LGludGVsPXtbImZuIl09Ii91c3IvdGNlL21vZHVsZWZpbGVzL0NvcmUvaW50ZWwvMTkuMS4wLmx1YSIsWyJmdWxsTmFtZSJdPSJpbnRl;' export '_ModuleTable002_;' '_ModuleTable003_=bC8xOS4xLjAiLFsibG9hZE9yZGVyIl09NSxwcm9wVD17fSxbInN0YWNrRGVwdGgiXT0wLFsic3RhdHVzIl09ImFjdGl2ZSIsWyJ1c2VyTmFtZSJdPSJpbnRlbC8xOS4xLjAiLH0sbWtsPXtbImZuIl09Ii91c3IvdGNlL21vZHVsZWZpbGVzL0NvcmUvbWtsLzIwMjAuMC5sdWEiLFsiZnVsbE5hbWUiXT0ibWtsLzIwMjAuMCIsWyJsb2FkT3JkZXIiXT00LHByb3BUPXt9LFsic3RhY2tEZXB0aCJdPTAsWyJzdGF0dXMiXT0iYWN0aXZlIixbInVzZXJOYW1lIl09Im1rbC8yMDIwLjAiLH0sdGV4bGl2ZT17WyJmbiJdPSIvdXNyL3RjZS9tb2R1bGVmaWxlcy9Db3JlL3RleGxpdmUvMjAxNi5sdWEiLFsiZnVsbE5hbWUiXT0idGV4bGl2ZS8yMDE2IixbImxvYWRPcmRlciJdPTEscHJvcFQ9;' export '_ModuleTable003_;' '_ModuleTable004_=e30sWyJzdGFja0RlcHRoIl09MSxbInN0YXR1cyJdPSJhY3RpdmUiLFsidXNlck5hbWUiXT0idGV4bGl2ZS8yMDE2Iix9LH0sbXBhdGhBPXsiL3Vzci90Y2UvbW9kdWxlZmlsZXMvTVBJL2ludGVsLzE5LjEuMC9pbXBpLzIwMTguMCIsIi91c3IvdGNlL21vZHVsZWZpbGVzL0NvbXBpbGVyL2ludGVsLzE5LjEuMCIsIi9jb2xsYWIvdXNyL2dsb2JhbC90b29scy9tb2R1bGVmaWxlcy90b3NzXzNfeDg2XzY0X2liL0NvcmUiLCIvdXNyL3RjZS9tb2R1bGVmaWxlcy9Db3JlIiwiL3Vzci9hcHBzL21vZHVsZWZpbGVzIiwiL3Vzci9zaGFyZS9tb2R1bGVmaWxlcy9MaW51eCIsIi91c3Ivc2hhcmUvbW9kdWxlZmlsZXMvQ29yZSIsIi91c3Ivc2hhcmUvbG1vZC9sbW9kL21vZHVsZWZpbGVz;' export '_ModuleTable004_;' '_ModuleTable005_=L0NvcmUiLH0sWyJzeXN0ZW1CYXNlTVBBVEgiXT0iL3Vzci90Y2UvbW9kdWxlZmlsZXMvQ29yZTovdXNyL2FwcHMvbW9kdWxlZmlsZXM6L3Vzci9zaGFyZS9tb2R1bGVmaWxlcy9MaW51eDovdXNyL3NoYXJlL21vZHVsZWZpbGVzL0NvcmU6L3Vzci9zaGFyZS9sbW9kL2xtb2QvbW9kdWxlZmlsZXMvQ29yZSIsfQ==;' export '_ModuleTable005_;' '_ModuleTable_Sz_=5;' export '_ModuleTable_Sz_;'
+++ MODULEPATH=/usr/tce/modulefiles/MPI/intel/19.1.0/impi/2018.0:/usr/tce/modulefiles/Compiler/intel/19.1.0:/collab/usr/global/tools/modulefiles/toss_3_x86_64_ib/Core:/usr/tce/modulefiles/Core:/usr/apps/modulefiles:/usr/share/modulefiles/Linux:/usr/share/modulefiles/Core:/usr/share/lmod/lmod/modulefiles/Core
+++ export MODULEPATH
+++ _ModuleTable001_=X01vZHVsZVRhYmxlXz17WyJNVHZlcnNpb24iXT0zLFsiY19yZWJ1aWxkVGltZSJdPWZhbHNlLFsiY19zaG9ydFRpbWUiXT1mYWxzZSxkZXB0aFQ9e30sZmFtaWx5PXtbImNvbXBpbGVyIl09ImludGVsIixbIm1waSJdPSJpbXBpIix9LG1UPXtTdGRFbnY9e1siZm4iXT0iL3Vzci90Y2UvbW9kdWxlZmlsZXMvQ29yZS9TdGRFbnYubHVhIixbImZ1bGxOYW1lIl09IlN0ZEVudiIsWyJsb2FkT3JkZXIiXT0yLHByb3BUPXtsbW9kPXtbInN0aWNreSJdPTEsfSx9LFsic3RhY2tEZXB0aCJdPTAsWyJzdGF0dXMiXT0iYWN0aXZlIixbInVzZXJOYW1lIl09IlN0ZEVudiIsfSxjbWFrZT17WyJmbiJdPSIvdXNyL3RjZS9tb2R1bGVmaWxlcy9Db3JlL2NtYWtlLzMuMTQuNS5sdWEiLFsiZnVs
+++ export _ModuleTable001_
+++ _ModuleTable002_=bE5hbWUiXT0iY21ha2UvMy4xNC41IixbImxvYWRPcmRlciJdPTMscHJvcFQ9e30sWyJzdGFja0RlcHRoIl09MCxbInN0YXR1cyJdPSJhY3RpdmUiLFsidXNlck5hbWUiXT0iY21ha2UvMy4xNC41Iix9LGltcGk9e1siZm4iXT0iL3Vzci90Y2UvbW9kdWxlZmlsZXMvQ29tcGlsZXIvaW50ZWwvMTkuMS4wL2ltcGkvMjAxOC4wLmx1YSIsWyJmdWxsTmFtZSJdPSJpbXBpLzIwMTguMCIsWyJsb2FkT3JkZXIiXT02LHByb3BUPXt9LFsic3RhY2tEZXB0aCJdPTAsWyJzdGF0dXMiXT0iYWN0aXZlIixbInVzZXJOYW1lIl09ImltcGkvMjAxOC4wIix9LGludGVsPXtbImZuIl09Ii91c3IvdGNlL21vZHVsZWZpbGVzL0NvcmUvaW50ZWwvMTkuMS4wLmx1YSIsWyJmdWxsTmFtZSJdPSJpbnRl
+++ export _ModuleTable002_
+++ _ModuleTable003_=bC8xOS4xLjAiLFsibG9hZE9yZGVyIl09NSxwcm9wVD17fSxbInN0YWNrRGVwdGgiXT0wLFsic3RhdHVzIl09ImFjdGl2ZSIsWyJ1c2VyTmFtZSJdPSJpbnRlbC8xOS4xLjAiLH0sbWtsPXtbImZuIl09Ii91c3IvdGNlL21vZHVsZWZpbGVzL0NvcmUvbWtsLzIwMjAuMC5sdWEiLFsiZnVsbE5hbWUiXT0ibWtsLzIwMjAuMCIsWyJsb2FkT3JkZXIiXT00LHByb3BUPXt9LFsic3RhY2tEZXB0aCJdPTAsWyJzdGF0dXMiXT0iYWN0aXZlIixbInVzZXJOYW1lIl09Im1rbC8yMDIwLjAiLH0sdGV4bGl2ZT17WyJmbiJdPSIvdXNyL3RjZS9tb2R1bGVmaWxlcy9Db3JlL3RleGxpdmUvMjAxNi5sdWEiLFsiZnVsbE5hbWUiXT0idGV4bGl2ZS8yMDE2IixbImxvYWRPcmRlciJdPTEscHJvcFQ9
+++ export _ModuleTable003_
+++ _ModuleTable004_=e30sWyJzdGFja0RlcHRoIl09MSxbInN0YXR1cyJdPSJhY3RpdmUiLFsidXNlck5hbWUiXT0idGV4bGl2ZS8yMDE2Iix9LH0sbXBhdGhBPXsiL3Vzci90Y2UvbW9kdWxlZmlsZXMvTVBJL2ludGVsLzE5LjEuMC9pbXBpLzIwMTguMCIsIi91c3IvdGNlL21vZHVsZWZpbGVzL0NvbXBpbGVyL2ludGVsLzE5LjEuMCIsIi9jb2xsYWIvdXNyL2dsb2JhbC90b29scy9tb2R1bGVmaWxlcy90b3NzXzNfeDg2XzY0X2liL0NvcmUiLCIvdXNyL3RjZS9tb2R1bGVmaWxlcy9Db3JlIiwiL3Vzci9hcHBzL21vZHVsZWZpbGVzIiwiL3Vzci9zaGFyZS9tb2R1bGVmaWxlcy9MaW51eCIsIi91c3Ivc2hhcmUvbW9kdWxlZmlsZXMvQ29yZSIsIi91c3Ivc2hhcmUvbG1vZC9sbW9kL21vZHVsZWZpbGVz
+++ export _ModuleTable004_
+++ _ModuleTable005_=L0NvcmUiLH0sWyJzeXN0ZW1CYXNlTVBBVEgiXT0iL3Vzci90Y2UvbW9kdWxlZmlsZXMvQ29yZTovdXNyL2FwcHMvbW9kdWxlZmlsZXM6L3Vzci9zaGFyZS9tb2R1bGVmaWxlcy9MaW51eDovdXNyL3NoYXJlL21vZHVsZWZpbGVzL0NvcmU6L3Vzci9zaGFyZS9sbW9kL2xtb2QvbW9kdWxlZmlsZXMvQ29yZSIsfQ==
+++ export _ModuleTable005_
+++ _ModuleTable_Sz_=5
+++ export _ModuleTable_Sz_
+++ : -s sh
++ eval
++ nvidia-smi
+NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver. Make sure that the latest NVIDIA driver is installed and running.
+
++ lshw -short -quiet -sanitize
++ cat
+WARNING: you should run this program as super-user.
+H/W path          Device  Class          Description
+====================================================
+                          system         Computer
+/0                        bus            Motherboard
+/0/0                      memory         128GiB System memory
+/0/6                      processor      Intel(R) Xeon(R) CPU E5-2695 v2 @ 2.40GHz
+/0/7                      processor      Intel(R) Xeon(R) CPU E5-2695 v2 @ 2.40GHz
+/0/100                    bridge         Xeon E7 v2/Xeon E5 v2/Core i7 DMI2
+/0/100/1                  bridge         Xeon E7 v2/Xeon E5 v2/Core i7 PCI Express Root Port 1a
+/0/100/1/0                bridge         C608/C606/X79 series chipset PCI Express Upstream Port
+/0/100/1/0/8              bridge         C608/C606/X79 series chipset PCI Express Virtual Switch Port
+/0/100/1/0/8/0            storage        C600/X79 series chipset Dual 4-Port SATA Storage Control Unit
+/0/100/1/0/8/0.3          bus            C600/X79 series chipset SMBus Controller 0
+/0/100/1/0/8/0.4          bus            C608/C606/X79 series chipset SMBus Controller 1
+/0/100/1.1                bridge         Xeon E7 v2/Xeon E5 v2/Core i7 PCI Express Root Port 1b
+/0/100/1.1/0      eno1    network        I350 Gigabit Network Connection
+/0/100/1.1/0.1    eno2    network        I350 Gigabit Network Connection
+/0/100/1.1/0.2    eno3    network        I350 Gigabit Network Connection
+/0/100/1.1/0.3    eno4    network        I350 Gigabit Network Connection
+/0/100/2                  bridge         Xeon E7 v2/Xeon E5 v2/Core i7 PCI Express Root Port 2a
+/0/100/2.2                bridge         Xeon E7 v2/Xeon E5 v2/Core i7 PCI Express Root Port 2c
+/0/100/3                  bridge         Xeon E7 v2/Xeon E5 v2/Core i7 PCI Express Root Port 3a
+/0/100/3/0        hsi0    bus            IBA7322 QDR InfiniBand HCA
+/0/100/3.2                bridge         Xeon E7 v2/Xeon E5 v2/Core i7 PCI Express Root Port 3c
+/0/100/4                  generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 0
+/0/100/4.1                generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 1
+/0/100/4.2                generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 2
+/0/100/4.3                generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 3
+/0/100/4.4                generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 4
+/0/100/4.5                generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 5
+/0/100/4.6                generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 6
+/0/100/4.7                generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 7
+/0/100/5                  generic        Xeon E7 v2/Xeon E5 v2/Core i7 VTd/Memory Map/Misc
+/0/100/5.1                generic        Xeon E7 v2/Xeon E5 v2/Core i7 Memory Hotplug
+/0/100/5.2                generic        Xeon E7 v2/Xeon E5 v2/Core i7 IIO RAS
+/0/100/5.4                generic        Xeon E7 v2/Xeon E5 v2/Core i7 IOAPIC
+/0/100/16                 communication  C600/X79 series chipset MEI Controller #1
+/0/100/16.1               communication  C600/X79 series chipset MEI Controller #2
+/0/100/1a                 bus            C600/X79 series chipset USB2 Enhanced Host Controller #2
+/0/100/1c                 bridge         C600/X79 series chipset PCI Express Root Port 1
+/0/100/1c.7               bridge         C600/X79 series chipset PCI Express Root Port 8
+/0/100/1c.7/0             display        MGA G200e [Pilot] ServerEngines (SEP1)
+/0/100/1d                 bus            C600/X79 series chipset USB2 Enhanced Host Controller #1
+/0/100/1e                 bridge         82801 PCI Bridge
+/0/100/1f                 bridge         C600/X79 series chipset LPC Controller
+/0/100/1f.2               storage        C600/X79 series chipset 6-Port SATA AHCI Controller
+/0/100/1f.3               bus            C600/X79 series chipset SMBus Host Controller
+/0/8                      generic        Xeon E7 v2/Xeon E5 v2/Core i7 QPI Link 0
+/0/9                      generic        Xeon E7 v2/Xeon E5 v2/Core i7 QPI Link 1
+/0/a                      generic        Xeon E7 v2/Xeon E5 v2/Core i7 Power Control Unit 0
+/0/b                      generic        Xeon E7 v2/Xeon E5 v2/Core i7 Power Control Unit 1
+/0/c                      generic        Xeon E7 v2/Xeon E5 v2/Core i7 Power Control Unit 2
+/0/d                      generic        Xeon E7 v2/Xeon E5 v2/Core i7 Power Control Unit 3
+/0/e                      generic        Xeon E7 v2/Xeon E5 v2/Core i7 UBOX Registers
+/0/f                      generic        Xeon E7 v2/Xeon E5 v2/Core i7 UBOX Registers
+/0/10                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/11                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/12                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/13                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/14                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/15                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/16                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/17                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/18                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/19                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/1a                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/1b                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/1c                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Home Agent 0
+/0/1d                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Home Agent 0
+/0/1e                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Target Address/Thermal Registers
+/0/1f                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 RAS Registers
+/0/20                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder Registers
+/0/21                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder Registers
+/0/22                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder Registers
+/0/23                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder Registers
+/0/24                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 Thermal Control 0
+/0/25                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 Thermal Control 1
+/0/26                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 ERROR Registers 0
+/0/27                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 ERROR Registers 1
+/0/28                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 Thermal Control 2
+/0/29                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 Thermal Control 3
+/0/2a                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 ERROR Registers 2
+/0/2b                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 ERROR Registers 3
+/0/2c                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 R2PCIe
+/0/2d                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 R2PCIe
+/0/2e                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 QPI Ring Registers
+/0/2f                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 QPI Ring Performance Ring Monitoring
+/0/30                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 QPI Ring Performance Ring Monitoring
+/0/31                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 System Address Decoder
+/0/32                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Broadcast Registers
+/0/33                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Broadcast Registers
+/0/34                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Home Agent 1
+/0/35                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Target Address/Thermal Registers
+/0/36                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 RAS Registers
+/0/37                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel Target Address Decoder Registers
+/0/38                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel Target Address Decoder Registers
+/0/39                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel Target Address Decoder Registers
+/0/3a                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel Target Address Decoder Registers
+/0/3b                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 Thermal Control 0
+/0/3c                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 Thermal Control 1
+/0/3d                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 ERROR Registers 0
+/0/3e                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 ERROR Registers 1
+/0/3f                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 Thermal Control 2
+/0/40                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 Thermal Control 3
+/0/41                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 ERROR Registers 2
+/0/42                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 ERROR Registers 3
+/0/1                      bridge         Xeon E7 v2/Xeon E5 v2/Core i7 PCI Express Root Port 1a
+/0/2                      bridge         Xeon E7 v2/Xeon E5 v2/Core i7 PCI Express Root Port 2a
+/0/2/0            hsi1    bus            IBA7322 QDR InfiniBand HCA
+/0/2.2                    bridge         Xeon E7 v2/Xeon E5 v2/Core i7 PCI Express Root Port 2c
+/0/2.2/0                  storage        SAS2008 PCI-Express Fusion-MPT SAS-2 [Falcon]
+/0/3                      bridge         Xeon E7 v2/Xeon E5 v2/Core i7 PCI Express Root Port 3a
+/0/3.2                    bridge         Xeon E7 v2/Xeon E5 v2/Core i7 PCI Express Root Port 3c
+/0/4                      generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 0
+/0/4.1                    generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 1
+/0/4.2                    generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 2
+/0/4.3                    generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 3
+/0/4.4                    generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 4
+/0/4.5                    generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 5
+/0/4.6                    generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 6
+/0/4.7                    generic        Xeon E7 v2/Xeon E5 v2/Core i7 Crystal Beach DMA Channel 7
+/0/5                      generic        Xeon E7 v2/Xeon E5 v2/Core i7 VTd/Memory Map/Misc
+/0/5.1                    generic        Xeon E7 v2/Xeon E5 v2/Core i7 Memory Hotplug
+/0/5.2                    generic        Xeon E7 v2/Xeon E5 v2/Core i7 IIO RAS
+/0/5.4                    generic        Xeon E7 v2/Xeon E5 v2/Core i7 IOAPIC
+/0/43                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 QPI Link 0
+/0/44                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 QPI Link 1
+/0/45                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Power Control Unit 0
+/0/46                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Power Control Unit 1
+/0/47                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Power Control Unit 2
+/0/48                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Power Control Unit 3
+/0/49                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 UBOX Registers
+/0/4a                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 UBOX Registers
+/0/4b                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/4c                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/4d                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/4e                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/4f                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/50                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/51                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/52                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/53                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/54                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/55                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/56                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Unicast Registers
+/0/57                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Home Agent 0
+/0/58                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Home Agent 0
+/0/59                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Target Address/Thermal Registers
+/0/5a                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 RAS Registers
+/0/5b                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder Registers
+/0/5c                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder Registers
+/0/5d                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder Registers
+/0/5e                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel Target Address Decoder Registers
+/0/5f                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 Thermal Control 0
+/0/60                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 Thermal Control 1
+/0/61                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 ERROR Registers 0
+/0/62                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 ERROR Registers 1
+/0/63                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 Thermal Control 2
+/0/64                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 Thermal Control 3
+/0/65                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 ERROR Registers 2
+/0/66                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel 0-3 ERROR Registers 3
+/0/67                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 R2PCIe
+/0/68                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 R2PCIe
+/0/69                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 QPI Ring Registers
+/0/6a                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 QPI Ring Performance Ring Monitoring
+/0/6b                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 QPI Ring Performance Ring Monitoring
+/0/6c                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 System Address Decoder
+/0/6d                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Broadcast Registers
+/0/6e                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Broadcast Registers
+/0/6f                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Home Agent 1
+/0/70                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Target Address/Thermal Registers
+/0/71                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 RAS Registers
+/0/72                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel Target Address Decoder Registers
+/0/73                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel Target Address Decoder Registers
+/0/74                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel Target Address Decoder Registers
+/0/75                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 1 Channel Target Address Decoder Registers
+/0/76                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 Thermal Control 0
+/0/77                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 Thermal Control 1
+/0/78                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 ERROR Registers 0
+/0/79                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 ERROR Registers 1
+/0/7a                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 Thermal Control 2
+/0/7b                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 Thermal Control 3
+/0/7c                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 ERROR Registers 2
+/0/7d                     generic        Xeon E7 v2/Xeon E5 v2/Core i7 Integrated Memory Controller 0 Channel 0-3 ERROR Registers 3
+/0/7e                     system         PnP device PNP0c02
+/0/7f                     system         PnP device PNP0b00
+/0/80                     generic        PnP device INT3f0d
+/0/81                     communication  PnP device PNP0501
+/0/82                     communication  PnP device PNP0501
+/0/83                     system         PnP device PNP0c02
+/0/84                     system         PnP device PNP0c01
+WARNING: output may be incomplete or inaccurate, you should run this program as super-user.

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
 /* This file is generated automatically, please do not change! */
 #ifndef _PILGRIM_FUNC_IDS_H_
 #define _PILGRIM_FUNC_IDS_H_

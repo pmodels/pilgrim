@@ -1,3 +1,8 @@
+##
+## Copyright (C) by Argonne National Laboratory
+##     See COPYRIGHT in top-level directory
+##
+
 #!/usr/bin/env python
 # encoding: utf-8
 import pickle, os
@@ -27,6 +32,7 @@ def filter_with_local_mpi_functions(funcs):
 
 def generate_function_id_file(funcs):
     function_id_file = open('../include/pilgrim_func_ids.h', 'w')
+    function_id_file.write("/*\n * Copyright (C) by Argonne National Laboratory\n *     See COPYRIGHT in top-level directory\n */\n")
     function_id_file.write('/* This file is generated automatically, please do not change! */\n')
     function_id_file.write('#ifndef _PILGRIM_FUNC_IDS_H_\n#define _PILGRIM_FUNC_IDS_H_\n')
     idx = 0
@@ -49,6 +55,12 @@ def is_mpi_object_arg(arg_type):
         "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Comm", "MPI_Request"])
     if arg_type in mpi_objects:
         return True
+    return False
+
+def is_fortran_mpi_object(arg_type):
+    if "MPI_" in arg_type and "MPI_Offset" not in arg_type \
+        and "MPI_Aint" not in arg_type and "MPI_Count" not in arg_type:
+            return True
     return False
 
 # Return if this funciton is used to free a MPI object
@@ -74,9 +86,9 @@ def codegen_assemble_args(func):
     obj_count, buffer_count = 0, 0
     for arg in func.arguments:
         if 'void' in arg.type:                                  # void* buf
-            line += "\tsize_t buf_id_%d[3];\n" %buffer_count
-            line += "\taddr2id(%s, &buf_id_%d[0], &buf_id_%d[1],  &buf_id_%d[2]);\n" %(arg.name, buffer_count, buffer_count, buffer_count)
-            assemble_args.append("buf_id_%d" %buffer_count)
+            line += "\tMemPtrAttr mem_attr_%d;\n" %buffer_count
+            line += "\taddr2id(%s, &mem_attr_%d);\n" %(arg.name, buffer_count)
+            assemble_args.append("&mem_attr_%d" %buffer_count)
             buffer_count+=1;
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             line += "\tappend_offset(%s);\n" %(arg.name)
@@ -136,7 +148,7 @@ def codegen_sizeof_args(func):
     sizeof_args = []
     for arg in func.arguments:
         if 'void' in arg.type:
-            sizeof_args.append('sizeof(size_t)*3')         # symbolic id, offset and size of the buffer
+            sizeof_args.append('sizeof(MemPtrAttr)')                # memory buffer
         elif 'char*' in arg.type:
             if '**' not in arg.type and '[' not in arg.type:        # only consider one single string
                 sizeof_args.append('strlen(%s)+1' %arg.name)
@@ -200,8 +212,10 @@ def handle_mpi_comm_creation(func, f):
         f.write("\tgenerate_intercomm_id(%s, %s, 0);\n" %(func.arguments[-3].name, func.arguments[-2].name))
 
 def generate_wrapper_file(funcs):
+    import re
+
     def signature(func, f):
-        line = func.ret_type + " " + func.name + func.signature + "\n"
+        line = func.ret_type + " imp_" + func.name + func.signature + "\n"
         f.write(line + '{\n')
 
     def phase_one(func, f):
@@ -213,6 +227,82 @@ def generate_wrapper_file(funcs):
     def phase_two(num_args, f):
         f.write('\tPILGRIM_TRACING_2(%d, sizes, args);\n}\n' %num_args)
 
+    def actual_wrapper(func, f):
+        arg_names = []
+        for arg in func.arguments:
+            arg_names.append(arg.name)
+        actual_call = "imp_" + func.name + "(" + ", ".join(arg_names)+");"
+
+        # C wrapper
+        line = func.ret_type + " " + func.name + func.signature
+        f.write(line + ' { return ' + actual_call + " }\n")
+
+        # TODO ignore MPI_T_ functions for Fortran
+        if "MPI_T_" in func.name:
+            return
+
+        # Fortran wrappers
+        fortran_sig = "("
+        for arg in func.arguments:
+            type_str = arg.type
+            name_str = arg.name
+            if is_fortran_mpi_object(arg.type):
+                type_str = "MPI_Fint*"
+                name_str = name_str.replace("[]", "")
+            if "[][]" in arg.type:      # [][3]
+                type_str = type_str.replace("[][]", "")
+                name_str = name_str + "[][3]"
+            elif "[]" in arg.type:
+                type_str = type_str.replace("[]", "")
+                name_str = name_str + "[]"
+
+            fortran_sig += type_str + " " +  name_str + ", "
+
+        if fortran_sig == "(":
+            fortran_sig = "()"
+        else:
+            fortran_sig = fortran_sig[0:-2] + ")"
+
+        '''
+        fortran_sig = re.sub(r'MPI_[^ ]* ', "MPI_Fint ", func.signature)
+        fortran_sig = fortran_sig.replace('(int ', " (MPI_Fint ")
+        fortran_sig = fortran_sig.replace(' int ', " MPI_Fint ")
+        fortran_sig = fortran_sig.replace('MPI_Fint ', "MPI_Fint *")
+        fortran_sig = fortran_sig.replace('MPI_Fint **', "MPI_Fint *")
+        fortran_sig = fortran_sig.replace('[]', "")
+        fortran_sig = fortran_sig.replace('(void)', "()")
+        '''
+
+        before_call = ""
+        arg_names = []
+        for arg in func.arguments:
+            t = arg.type.replace("*", "").replace(" ","").replace("[]","").replace("const", "")
+            if is_fortran_mpi_object(arg.type):
+                if "*" in arg.type or "[]" in arg.type:
+                    arg_names.append("(%s*)%s" %(t, arg.name))
+                else:
+                    if "MPI_Status" == t:
+                        before_call = "PMPI_Status_f2c(%s, &g_c_status);" %(arg.name)
+                        arg_names.append("&g_c_status")
+                    elif "MPI_Datatype" == t:
+                        arg_names.append("PMPI_Type_f2c(*%s)" %arg.name)
+                    else:
+                        arg_names.append("P%s_f2c(*%s)" %(t, arg.name))
+            else:
+                arg_names.append(arg.name)
+
+        actual_call = "imp_" + func.name + "(" + ", ".join(arg_names)+");"
+
+        if fortran_sig == "()":
+            fortran_sig = "(MPI_Fint *ierr)"
+        else:
+            fortran_sig = fortran_sig.replace(")", ", MPI_Fint *ierr)")
+        #f.write("extern void " + func.name.upper() + fortran_sig + "{ " + before_call+actual_call + "}\n")
+        #f.write("extern void " + func.name.lower() + fortran_sig + "{ " + before_call+actual_call + "}\n")
+        f.write("extern void " + func.name.lower() + "_" + fortran_sig + "{ "+before_call+actual_call + "}\n")
+        #f.write("extern void " + func.name.lower() + "__" + fortran_sig + "{ "+before_call+actual_call + "}\n")
+
+
     def logging(func, f):
         line, num_args = codegen_assemble_args(func)
         f.write(line)
@@ -220,12 +310,14 @@ def generate_wrapper_file(funcs):
         return num_args
 
     f = open('../src/pilgrim_wrappers.c', 'w')
+    f.write("/*\n * Copyright (C) by Argonne National Laboratory\n *     See COPYRIGHT in top-level directory\n */\n")
     f.write('#include <mpi.h>\n')
     f.write('#include <stdarg.h>\n')
     f.write('#include <stdlib.h>\n')
     f.write('#include <string.h>\n')
     f.write('#include "pilgrim.h"\n')
     f.write('static int placeholder = 0;\n')
+    f.write('MPI_Status g_c_status;\n')
 
     for name in funcs:
         func = funcs[name]
@@ -243,6 +335,7 @@ def generate_wrapper_file(funcs):
             handle_mpi_comm_creation(func, f)
             num_args = logging(func, f)
         phase_two(num_args, f)
+        actual_wrapper(func, f)
 
     f.close()
 

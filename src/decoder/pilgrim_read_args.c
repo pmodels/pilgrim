@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
 /* This file is generated automatically. Do not change. */
 #include <stdlib.h>
 #include <string.h>
@@ -41,7 +46,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_INOUT;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -107,7 +112,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -163,7 +168,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -214,7 +219,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -254,7 +259,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_OUT;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -333,7 +338,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_IN;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -377,7 +382,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -569,7 +574,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -591,7 +596,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -610,7 +615,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -700,7 +705,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_IN;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -746,7 +751,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -765,7 +770,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -880,7 +885,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -951,7 +956,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -970,7 +975,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -1226,7 +1231,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -1248,7 +1253,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -1333,7 +1338,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -1352,7 +1357,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -1433,7 +1438,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -1452,7 +1457,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -1494,7 +1499,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -1513,7 +1518,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -1657,7 +1662,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -1712,7 +1717,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -1767,7 +1772,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -1786,7 +1791,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -1841,7 +1846,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_OUT;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -1950,7 +1955,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -1986,7 +1991,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -2020,7 +2025,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -2062,7 +2067,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -2097,7 +2102,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_IN;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -2361,7 +2366,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -2509,7 +2514,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -2629,7 +2634,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_IN;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -2766,7 +2771,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -2785,7 +2790,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -2922,7 +2927,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -3138,13 +3143,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -3217,13 +3222,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -3295,7 +3300,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_OUT;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -3397,7 +3402,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -3625,7 +3630,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -3644,7 +3649,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -3693,19 +3698,19 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -3777,7 +3782,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -3828,7 +3833,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -3857,7 +3862,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -3988,7 +3993,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_OUT;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -4075,7 +4080,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -4222,7 +4227,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -4376,7 +4381,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -4415,7 +4420,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -4440,7 +4445,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -4482,7 +4487,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -4507,7 +4512,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -4656,7 +4661,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -4748,7 +4753,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -4980,7 +4985,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_IN;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -5107,7 +5112,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -5126,7 +5131,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -5175,7 +5180,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_INOUT;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -5236,7 +5241,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -5317,7 +5322,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -5429,7 +5434,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -5491,7 +5496,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -5768,7 +5773,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_IN;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -5871,7 +5876,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -5890,7 +5895,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -6045,7 +6050,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -6067,7 +6072,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -6086,7 +6091,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -6246,7 +6251,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -6436,7 +6441,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_IN;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -6471,7 +6476,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -6507,7 +6512,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -6643,7 +6648,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -6690,7 +6695,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -6733,7 +6738,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -6819,7 +6824,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_IN;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -6907,7 +6912,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -6949,7 +6954,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -7069,7 +7074,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -7161,7 +7166,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -7180,7 +7185,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -7455,7 +7460,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -7480,7 +7485,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -7529,7 +7534,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -7692,13 +7697,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_INOUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -7746,7 +7751,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_IN;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -7827,7 +7832,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -7846,7 +7851,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -7888,13 +7893,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -7944,7 +7949,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -7969,7 +7974,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -8018,7 +8023,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -8043,7 +8048,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -8115,7 +8120,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -8131,7 +8136,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -8150,7 +8155,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -8186,7 +8191,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -8205,7 +8210,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -8417,7 +8422,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_IN;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -8683,7 +8688,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -8760,7 +8765,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_OUT;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -8795,13 +8800,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -8874,13 +8879,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -8929,13 +8934,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -8978,7 +8983,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_OUT;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -9059,7 +9064,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_IN;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -9098,7 +9103,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -9123,7 +9128,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -9202,7 +9207,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -9273,7 +9278,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_IN;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -9289,7 +9294,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -9308,7 +9313,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -9404,7 +9409,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -9429,7 +9434,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -9471,7 +9476,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -9496,7 +9501,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -9538,13 +9543,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -9604,13 +9609,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -9678,7 +9683,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_IN;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -9754,7 +9759,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_IN;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -9799,13 +9804,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -9907,7 +9912,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -9926,7 +9931,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -10041,7 +10046,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -10169,7 +10174,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_OUT;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -10344,7 +10349,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -10392,13 +10397,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -10448,7 +10453,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_OUT;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -10503,7 +10508,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -10570,7 +10575,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_IN;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -10629,7 +10634,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -10648,7 +10653,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -10690,7 +10695,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -10726,7 +10731,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -10745,7 +10750,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -10831,7 +10836,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -10907,7 +10912,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -10990,7 +10995,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_IN;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -11011,13 +11016,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -11222,7 +11227,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -11241,7 +11246,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -11276,7 +11281,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -11390,7 +11395,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -11421,7 +11426,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[4];
 			cs->arg_types[5] = TYPE_NON_MPI;
 			cs->arg_directions[5] = DIRECTION_OUT;
-			cs->arg_sizes[5] = sizeof(int);
+			cs->arg_sizes[5] = sizeof(MemPtrAttr);
 			cs->args[5] = calloc(cs->arg_sizes[5], 1);
 			memcpy(cs->args[5], buff+pos, cs->arg_sizes[5]);
 			pos += cs->arg_sizes[5];
@@ -11500,7 +11505,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -11529,7 +11534,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[1];
 			cs->arg_types[2] = TYPE_NON_MPI;
 			cs->arg_directions[2] = DIRECTION_IN;
-			cs->arg_sizes[2] = sizeof(int);
+			cs->arg_sizes[2] = sizeof(MemPtrAttr);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
 			memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
 			pos += cs->arg_sizes[2];
@@ -11571,7 +11576,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -11623,7 +11628,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_INOUT;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -11716,7 +11721,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -11735,7 +11740,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -11778,7 +11783,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -11971,7 +11976,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -12065,7 +12070,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -12083,7 +12088,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[2];
 			cs->arg_types[3] = TYPE_NON_MPI;
 			cs->arg_directions[3] = DIRECTION_OUT;
-			cs->arg_sizes[3] = sizeof(int);
+			cs->arg_sizes[3] = sizeof(MemPtrAttr);
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
@@ -12178,13 +12183,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -12240,7 +12245,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -12258,7 +12263,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -12356,7 +12361,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -12520,7 +12525,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_OUT;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -12652,7 +12657,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -12694,7 +12699,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -12758,7 +12763,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -12806,7 +12811,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -12831,7 +12836,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -12880,7 +12885,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -12905,7 +12910,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[3];
 			cs->arg_types[4] = TYPE_NON_MPI;
 			cs->arg_directions[4] = DIRECTION_OUT;
-			cs->arg_sizes[4] = sizeof(int);
+			cs->arg_sizes[4] = sizeof(MemPtrAttr);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
 			memcpy(cs->args[4], buff+pos, cs->arg_sizes[4]);
 			pos += cs->arg_sizes[4];
@@ -13032,13 +13037,13 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_OUT;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -13117,7 +13122,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -13194,7 +13199,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos = 0;
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
-			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
@@ -13330,7 +13335,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
@@ -13366,7 +13371,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[0];
 			cs->arg_types[1] = TYPE_NON_MPI;
 			cs->arg_directions[1] = DIRECTION_IN;
-			cs->arg_sizes[1] = sizeof(int);
+			cs->arg_sizes[1] = sizeof(MemPtrAttr);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];

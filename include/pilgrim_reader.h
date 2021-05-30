@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
 #ifndef _PILGRIM_READER_H_
 #define _PILGRIM_READER_H_
 #include <ctype.h>
@@ -58,6 +63,9 @@ static char* TYPE_VAR_STR[] = {
 #define DIRECTION_OUT       1
 #define DIRECTION_INOUT     2
 
+
+int** read_cfg(char* cfg_path, int nprocs, int* num_symbols);
+CallSignature* read_cst(char* cst_path, int *num_sigs);
 
 void read_record_args(int func_id, void* buff, CallSignature *cs);
 void read_record_args_special(int func_id, void* buff, CallSignature *cs);

@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
 /* This file is generated automatically. Do not change. */
 #include <stdlib.h>
 #include <string.h>

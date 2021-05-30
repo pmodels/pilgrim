@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
@@ -452,6 +456,7 @@ void write_record(Record record) {
         entry->rank = __logger.rank;
         entry->terminal_id = current_terminal_id++;
         entry->count = 0;
+        entry->tstart = record.tstart;
         entry->ext_tstart = record.tstart;
 
         // TODO check if we need to store lossless info
@@ -529,6 +534,7 @@ void logger_init() {
         sequitur_init(&(__logger.intervals_grammar));
         sequitur_init(&(__logger.durations_grammar));
     }
+
     install_mem_hooks();
     __logger.recording = true;
 }

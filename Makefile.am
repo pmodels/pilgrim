@@ -15,20 +15,24 @@ nodist_noinst_SCRIPTS =
 dist_noinst_SCRIPTS = autogen.sh
 
 lib_LTLIBRARIES = libpilgrim.la
-bin_PROGRAMS = pilgrim_decoder
+bin_PROGRAMS = pilgrim_decoder pilgrim2text
 
 
 libpilgrim_la_SOURCES =
+
 pilgrim_decoder_SOURCES = 
 pilgrim_decoder_CFLAGS = $(AM_CFLAGS)
 
+pilgrim2text_SOURCES = 
+pilgrim2text_CFLAGS = $(AM_CFLAGS)
+
+
 AM_CPPFLAGS = -g -rdynamic
 AM_CFLAGS = -g -rdynamic
-
-
 
 libpilgrim_la_LDFLAGS = -lm -version-info @libpilgrim_so_version@
 
 include $(top_srcdir)/src/Makefile.mk
 include $(top_srcdir)/src/decoder/Makefile.mk
+include $(top_srcdir)/src/pilgrim_to_text/Makefile.mk
 include $(top_srcdir)/include/Makefile.mk

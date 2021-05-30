@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -80,7 +85,6 @@ Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size, size_t *unco
         gathered_integers += recvcounts[i];
         displs[i] = displs[i-1] + recvcounts[i-1];
     }
-    *uncompressed_integers = gathered_integers;
 
     int *gathered_grammars = NULL;
     if(mpi_rank == 0)
@@ -96,6 +100,9 @@ Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size, size_t *unco
     grammar->start_rule_id = min_in_array(gathered_grammars, gathered_integers)  -1;
     sequitur_init_rule_id(grammar, grammar->start_rule_id);
     int rules, rule_val, symbols, symbol_val, symbol_exp;
+
+
+    *uncompressed_integers = 0;
 
     // Go through each rank's grammar
     for(int i = 0; i < mpi_size; i++) {
@@ -121,18 +128,20 @@ Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size, size_t *unco
             // A unseen grammar, fully store it.
             int k = 0;
             rules = g[k++];
-            //append_terminal(grammar, entry->ugi, 1);
             append_terminal(grammar, rules, 1);
+            *uncompressed_integers += 2;
 
             for(int rule_idx = 0; rule_idx < rules; rule_idx++) {
                 rule_val = g[k++];
                 symbols = g[k++];
                 append_terminal(grammar, rule_val, 1);
                 append_terminal(grammar, symbols, 1);
+                *uncompressed_integers += 4;
                 for(int sym_id = 0; sym_id < symbols; sym_id++) {
                     symbol_val = g[k++];
                     symbol_exp = g[k++];
                     append_terminal(grammar, symbol_val, symbol_exp);
+                    *uncompressed_integers += 2;
                 }
             }
         }

@@ -1,11 +1,19 @@
-/**
- * Interval ID and Duration ID stored in the key
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
  */
 #include <math.h>
 #include <limits.h>
 #include "pilgrim.h"
 #include "pilgrim_timings.h"
 #include "uthash.h"
+
+#define BASE        (1.1)
+#define ZERO_BIN_ID (9999999)
+
+
+static double max_duration_rel_err;
+static double max_interval_rel_err;
 
 
 static inline int min(int a, int b) {
@@ -14,9 +22,9 @@ static inline int min(int a, int b) {
 
 static inline int get_bin_id(double val) {
     if(val==0)
-        val = 0.000001;
-    double base = 1.1;
-    int id = log(val) / log(base);
+        return ZERO_BIN_ID;      // a constant number to represent 0
+
+    int id = log(val) / log(BASE);
     if(id < 0) id = -id;
     id = min(999999, id);
     return id;
@@ -32,6 +40,8 @@ void handle_aggregated_timing(RecordHash* entry, Record* record) {
 
     entry->avg_duration = (entry->avg_duration * previous_count + duration) / entry->count;
     entry->std_duration = (entry->std_duration * previous_count +  t*t) / entry->count;
+
+    entry->tstart = record->tstart;
 }
 
 /*
@@ -45,7 +55,35 @@ void handle_non_aggregated_timing(RecordHash* entry, Record* record, int *durati
 
     *duration_id = get_bin_id(duration_i);
     *interval_id = get_bin_id(interval_i);
+
+    double saved_duration = 0, saved_interval = 0;
+    if(*duration_id != ZERO_BIN_ID)
+        saved_duration = pow(BASE ,*duration_id) * TIME_RESOLUTION;
+    if(*interval_id != ZERO_BIN_ID)
+        saved_interval = pow(BASE ,*interval_id) * TIME_RESOLUTION;
+
+    double err, rel_err;
+
+    err = fabs(saved_duration - duration);
+    rel_err = err / duration;
+    if(rel_err > max_duration_rel_err && err > 10*TIME_RESOLUTION) {
+        max_duration_rel_err = rel_err;
+        //printf("duration, err: %.6f, re_err:%.3f\n", err, rel_err);
+    }
+
+    err = abs(saved_interval - (record->tstart - entry->tstart));
+    rel_err = err / duration;
+    if(rel_err > max_interval_rel_err && err > 10*TIME_RESOLUTION) {
+        max_interval_rel_err = rel_err;
+        //printf("interval %d, err: %.6f, re_err:%.3f\n", *interval_id, err, rel_err);
+    }
+
+    entry->tstart = record->tstart;
+    entry->ext_tstart += interval_i * TIME_RESOLUTION;
 }
+
+
+
 
 /**
  * We can also store lossless timing
@@ -54,6 +92,8 @@ void handle_non_aggregated_timing(RecordHash* entry, Record* record, int *durati
 void handle_lossless_timing(RecordHash *entry, Record* record, double *duration, double *interval) {
     *duration = record->tend - record->tstart;        // in seconds
     *interval = record->tstart;                       // for interval, we just start abs tstart
+
+    entry->tstart = record->tstart;
 }
 
 void write_to_file(char* duration_path, char* interval_path, double* durations, double* intervals, int total) {

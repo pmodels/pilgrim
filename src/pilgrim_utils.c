@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
 #include <sys/time.h>
 #include <stdarg.h>     // for va_list, va_start and va_end
 #include <stdlib.h>

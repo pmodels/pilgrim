@@ -34,5 +34,4 @@ libpilgrim_la_LDFLAGS = -lm -version-info @libpilgrim_so_version@
 
 include $(top_srcdir)/src/Makefile.mk
 include $(top_srcdir)/src/decoder/Makefile.mk
-include $(top_srcdir)/src/pilgrim_to_text/Makefile.mk
 include $(top_srcdir)/include/Makefile.mk

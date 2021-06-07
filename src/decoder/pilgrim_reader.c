@@ -32,25 +32,6 @@ static RuleHash* rules_table;
 static VariablePool* variable_pools[15];    // One variable pool for each variable type
 static int variable_current_ids[15];
 
-void read_global_metadata(char* path, GlobalMetadata *gm) {
-    char global_metadata_path[256];
-    sprintf(global_metadata_path, "%s/pilgrim.mt", path);
-    FILE* fh = fopen(global_metadata_path, "rb");
-    fread(gm, sizeof(GlobalMetadata), 1, fh);
-    fclose(fh);
-
-    printf("Total procs: %d, Time resolution: %.1fus\n\n", gm->ranks, gm->time_resolution*1000000);
-}
-
-void read_local_metadata(char* path, int rank, LocalMetadata *lm) {
-    char local_metadata_path[256];
-    sprintf(local_metadata_path, "%s/%d.mt", path, rank);
-    FILE* fh = fopen(local_metadata_path, "rb");
-    fread(lm, sizeof(LocalMetadata), 1, fh);
-    fclose(fh);
-    printf("rank: %d, tstart: %f, tend: %f, records: %ld\n", lm->rank, lm->tstart, lm->tend, lm->records_count);
-}
-
 void print_rule(RuleHash *rule) {
     printf("rule %d, symbols: %d\n\t-->", rule->rule_id, rule->symbols);
     for(int i = 0; i < rule->symbols; i++)
@@ -248,7 +229,7 @@ int main(int argc, char** argv) {
 
     printf("Global Metadata\n");
     GlobalMetadata gm;
-    read_global_metadata(directory, &gm);
+    //read_global_metadata(directory, &gm);
 
     /*
     printf("Local Metadata\n");

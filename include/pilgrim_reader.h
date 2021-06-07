@@ -5,7 +5,7 @@
 
 #ifndef _PILGRIM_READER_H_
 #define _PILGRIM_READER_H_
-#include <ctype.h>
+//#include <ctype.h>
 
 typedef struct CallSignature_t {
     short func_id;
@@ -66,6 +66,7 @@ static char* TYPE_VAR_STR[] = {
 
 int** read_cfg(char* cfg_path, int nprocs, int* num_symbols);
 CallSignature* read_cst(char* cst_path, int *num_sigs);
+void read_metadata(char* metadata_path, GlobalMetadata *gm);
 
 void read_record_args(int func_id, void* buff, CallSignature *cs);
 void read_record_args_special(int func_id, void* buff, CallSignature *cs);

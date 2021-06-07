@@ -6,11 +6,13 @@
 AM_CPPFLAGS += -I$(top_srcdir)/src
 
 pilgrim_decoder_SOURCES += \
+	src/decoder/pilgrim_metadata_decoder.c \
 	src/decoder/pilgrim_reader.c src/decoder/pilgrim_read_args.c \
 	src/decoder/pilgrim_read_args_special.c src/dlmalloc.c
 
 pilgrim2text_SOURCES += \
 	src/decoder/pilgrim2text.c \
+	src/decoder/pilgrim_metadata_decoder.c \
 	src/decoder/pilgrim_cfg_decoder.c src/decoder/pilgrim_cst_decoder.c \
 	src/decoder/pilgrim_read_args.c src/decoder/pilgrim_read_args_special.c \
 	src/dlmalloc.c

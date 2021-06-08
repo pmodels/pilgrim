@@ -28,7 +28,10 @@ typedef struct CallSignature_t {
 #define TYPE_MPI_Op         7
 #define TYPE_MPI_Message    8
 #define TYPE_MPI_Comm       9
-#define TYPE_INT            10
+#define TYPE_MPI_Status     10
+#define TYPE_RANK_ENCODED   11
+#define TYPE_MEM_PTR        12
+#define TYPE_INT            13
 
 static char* TYPE_STR[] = {
     "NON_MPI",
@@ -41,6 +44,9 @@ static char* TYPE_STR[] = {
     "MPI_Op",
     "MPI_Message",
     "MPI_Comm",
+    "MPI_Status",
+    "MPI_RANK_ENCODED",
+    "void*",
     "int",
 };
 
@@ -55,6 +61,9 @@ static char* TYPE_VAR_STR[] = {
     "mpi_op",
     "mpi_message",
     "mpi_comm",
+    "mpi_status",
+    "",
+    "buf",
     "var",
 };
 

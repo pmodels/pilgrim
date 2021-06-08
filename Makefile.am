@@ -1,8 +1,7 @@
 ##
 ## Copyright (C) by Argonne National Laboratory
 ##     See COPYRIGHT in top-level directory
-##
-
+## 
 ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = autogen.sh

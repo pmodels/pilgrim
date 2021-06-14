@@ -5,7 +5,7 @@
 
 AM_CPPFLAGS += -I$(top_srcdir)/src
 
-pilgrim_decoder_SOURCES += \
+pilgrim_app_generator_SOURCES += \
 	src/decoder/pilgrim_app_generator.c \
 	src/decoder/pilgrim_metadata_decoder.c \
 	src/decoder/pilgrim_cfg_decoder.c src/decoder/pilgrim_cst_decoder.c \

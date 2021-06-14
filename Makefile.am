@@ -14,13 +14,13 @@ nodist_noinst_SCRIPTS =
 dist_noinst_SCRIPTS = autogen.sh
 
 lib_LTLIBRARIES = libpilgrim.la
-bin_PROGRAMS = pilgrim_decoder pilgrim2text
+bin_PROGRAMS = pilgrim_app_generator pilgrim2text
 
 
 libpilgrim_la_SOURCES =
 
-pilgrim_decoder_SOURCES = 
-pilgrim_decoder_CFLAGS = $(AM_CFLAGS)
+pilgrim_app_generator_SOURCES = 
+pilgrim_app_generator_CFLAGS = $(AM_CFLAGS)
 
 pilgrim2text_SOURCES = 
 pilgrim2text_CFLAGS = $(AM_CFLAGS)

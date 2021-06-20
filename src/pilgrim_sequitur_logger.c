@@ -72,7 +72,7 @@ int* serialize_grammar(Grammar *grammar, int *integers) {
  * Grammar* lg [in]: local grammar
  * return: a compressed grammar.
  */
-Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size, size_t *uncompressed_integers) {
+Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size, size_t *uncompressed_integers, int* num_unique_grammars, int* grammar_ids) {
     int integers = 0;
     int *local_grammar = serialize_grammar(lg, &integers);
 
@@ -98,7 +98,7 @@ Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size, size_t *unco
     // Run a final Sequitur pass to compress the gathered grammars
     Grammar *grammar = pilgrim_malloc(sizeof(Grammar));
     grammar->start_rule_id = min_in_array(gathered_grammars, gathered_integers)  -1;
-    sequitur_init_rule_id(grammar, grammar->start_rule_id);
+    sequitur_init_rule_id(grammar, grammar->start_rule_id, false);
     int rules, rule_val, symbols, symbol_val, symbol_exp;
 
 
@@ -116,14 +116,14 @@ Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size, size_t *unco
 
         if(entry) {
             entry->count++;
-
             // A duplicated grammar, only need to store its id
-            //append_terminal(grammar, entry->ugi, 1);
+            grammar_ids[i] = entry->ugi;
         } else {
             entry = pilgrim_malloc(sizeof(UniqueGrammar));
             entry->ugi = current_ugi++;
             entry->key = g;   // use the existing memory, do not copy it
             HASH_ADD_KEYPTR(hh, unique_grammars, entry->key, g_len, entry);
+            grammar_ids[i] = entry->ugi;
 
             // A unseen grammar, fully store it.
             int k = 0;
@@ -148,8 +148,8 @@ Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size, size_t *unco
     } // end of for loop
 
     // Clean up the hash table, and gathered grammars
-    int num_unique_grammars = HASH_COUNT(unique_grammars);
-    printf("[pilgrim] unique grammars: %d\n", num_unique_grammars);
+    *num_unique_grammars = HASH_COUNT(unique_grammars);
+    printf("[pilgrim] unique grammars: %d\n", *num_unique_grammars);
 
     UniqueGrammar *ug, *tmp;
     HASH_ITER(hh, unique_grammars, ug, tmp) {
@@ -168,7 +168,9 @@ double sequitur_dump(const char* path, Grammar *local_grammar, int mpi_rank, int
 
     // Compressed grammar is NULL except rank 0
     size_t uncompressed_integers = 0;
-    Grammar *grammar = compress_grammars(local_grammar, mpi_rank, mpi_size, &uncompressed_integers);
+    int grammar_ids[mpi_size];
+    int num_unique_grammars;
+    Grammar *grammar = compress_grammars(local_grammar, mpi_rank, mpi_size, &uncompressed_integers, &num_unique_grammars, grammar_ids);
 
     // Serialize the compressed grammar and write it to file
     if(mpi_rank == 0) {
@@ -177,6 +179,8 @@ double sequitur_dump(const char* path, Grammar *local_grammar, int mpi_rank, int
         errno = 0;
         FILE* f = fopen(path, "wb");
         if(f) {
+            fwrite(grammar_ids, sizeof(int), mpi_size, f);
+            fwrite(&num_unique_grammars, sizeof(int), 1, f);
             fwrite(&(grammar->start_rule_id), sizeof(int), 1, f);
             fwrite(&uncompressed_integers, sizeof(size_t), 1, f);
             fwrite(compressed_grammar, sizeof(int), compressed_integers, f);

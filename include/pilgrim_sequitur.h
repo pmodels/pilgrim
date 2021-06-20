@@ -75,6 +75,7 @@ typedef struct Grammar_t {
     Digram *digram_table;
     int start_rule_id;              // first rule id, normally is -1
     int rule_id;                    // current_rule id, a negative number start from 'start_rule_id'
+    bool twins_removal;             // if or not we will apply the twins-removal rule
 } Grammar;
 
 
@@ -85,7 +86,7 @@ typedef struct Grammar_t {
  */
 Symbol* append_terminal(Grammar *grammar, int val, int exp);
 void sequitur_init(Grammar *grammar);
-void sequitur_init_rule_id(Grammar *grammar, int start_rule_id);
+void sequitur_init_rule_id(Grammar *grammar, int start_rule_id, bool twins_removal);
 void sequitur_update(Grammar *grammar, int *update_terminal_id);
 double sequitur_finalize(const char* output_path, Grammar *grammar);
 void sequitur_cleanup(Grammar *grammar);

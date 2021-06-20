@@ -17,8 +17,7 @@ int main(int argc, char** argv) {
     assert(size >= 2);
 
     int* data;
-
-    if(rank == 0) { // g_mpi_rank = size-1;
+    if(rank == 0) {
         data = malloc(sizeof(int)*3);
         for(int i = 0; i < 3;i ++)
             MPI_Send(data, 3, MPI_INT, 1, 123, MPI_COMM_WORLD);

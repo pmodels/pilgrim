@@ -18,6 +18,32 @@ typedef struct CallSignature_t {
 
 } CallSignature;
 
+
+/**
+ * A hash table to represent a CFG
+ * Key: rule id
+ * Val: rule body
+ */
+typedef struct RuleHash_t {
+    int rule_id;
+    int *rule_body;     // 2i+0: val of symbol i,  2i+1: exp of symbol i
+    int symbols;        // There are a total of 2*symbols integers in the rule body
+    UT_hash_handle hh;
+} RuleHash;
+
+typedef struct DecodedGrammars_t {
+    int num_grammars;               // number of unique grammars
+
+    RuleHash** intra_cfgs;          // size of nprocs. for each unique grammar
+    int **unique_grammars;          // decoded unique grammars
+
+    int *num_symbols;               // number of symbols of each unique grammar
+    int *grammar_ids;               // size of nprocs. each rank's grammar id
+} DecodedGrammars;
+
+
+void free_decoded_grammars(DecodedGrammars *dg);
+
 #define TYPE_NON_MPI        0
 #define TYPE_MPI_Info       1
 #define TYPE_MPI_Datatype   2
@@ -73,7 +99,7 @@ static char* TYPE_VAR_STR[] = {
 #define DIRECTION_INOUT     2
 
 
-int** read_cfg(char* cfg_path, int nprocs, int* num_symbols);
+DecodedGrammars* read_cfg(char* cfg_path, int nprocs);
 CallSignature* read_cst(char* cst_path, int *num_sigs);
 void read_metadata(char* metadata_path, GlobalMetadata *gm);
 

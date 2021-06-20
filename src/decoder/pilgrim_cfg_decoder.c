@@ -10,18 +10,6 @@
 #include "pilgrim_utils.h"
 #include "uthash.h"
 
-/**
- * A hash table to represent a CFG
- * Key: rule id
- * Val: rule body
- */
-typedef struct RuleHash_t {
-    int rule_id;
-    int *rule_body;     // 2i+0: val of symbol i,  2i+1: exp of symbol i
-    int symbols;        // There are a total of 2*symbols integers in the rule body
-    UT_hash_handle hh;
-} RuleHash;
-
 void print_rule(RuleHash *rule) {
     printf("rule %d, symbols: %d\n\t-->", rule->rule_id, rule->symbols);
     for(int i = 0; i < rule->symbols; i++)
@@ -33,13 +21,18 @@ void print_rule(RuleHash *rule) {
 /**
  * Decompress a CFG by recursive rule application
  *
- * The decompressed symbols will be represented by
- * decopmressed_symbols array.
+ * The decompressed symbols will be stored in the
+ * decoded_symbols array.
+ *
+ * rule_id: id of the current rule to decode
+ * start_rule_id: the id of the first rule, not always -1 due
+ *                to inter-process compression
  *
  */
 void rule_application(RuleHash* rules, int rule_id, int start_rule_id, int* decoded_symbols, int* pos) {
-    RuleHash *rule;
+    RuleHash *rule = NULL;
     HASH_FIND_INT(rules, &rule_id, rule);
+    assert(rule != NULL);
 
     for(int i = 0; i < rule->symbols; i++) {
         int sym_val = rule->rule_body[2*i+0];
@@ -60,33 +53,6 @@ void rule_application(RuleHash* rules, int rule_id, int start_rule_id, int* deco
     }
 }
 
-/**
- * Second pass: for each rank, decode its grammar
- */
-/*
-void decode_and_write(int rule_id, FILE *f) {
-    RuleHash *rule;
-    HASH_FIND_INT(rules_table, &rule_id, rule);
-    for(int i = 0; i < rule->symbols; i++) {
-        int sym = rule->rule_body[2*i+0];
-        int exp = rule->rule_body[2*i+1];
-
-        // Non-terminal, i.e., a rule
-        if(sym < -1) {
-            decode_and_write(sym, f);
-        }
-        // Terminal
-        else {
-            if(sym == 9999999)
-                fprintf(f, "0\n");
-            else
-                fprintf(f, "%.6f\n", pow(1.1, sym));
-        }
-    }
-}
-*/
-
-
 void clean_rules(RuleHash* rules_table) {
     RuleHash *current, *tmp;
     HASH_ITER(hh, rules_table, current, tmp) {
@@ -97,15 +63,30 @@ void clean_rules(RuleHash* rules_table) {
     rules_table = NULL;
 }
 
+void free_decoded_grammars(DecodedGrammars* dg) {
+    free(dg->num_symbols);
+    free(dg->grammar_ids);
+    for(int i = 0; i < dg->num_grammars; i++) {
+        free(dg->unique_grammars[i]);
+        clean_rules(dg->intra_cfgs[i]);
+    }
+    free(dg->unique_grammars);
+    free(dg);
+}
+
+
 /**
  * Read the inter-process compressed grammar
  * And store its rules in a hash-table.
  *
  * It will be later used for decopmression.
  */
-RuleHash* read_inter_compressed_grammar(char* path, size_t* original_integers, int* start_rule_id) {
+RuleHash* read_inter_compressed_grammar(char* path, int nprocs, size_t* original_integers, int* start_rule_id, DecodedGrammars* dg) {
 
     FILE* f = fopen(path, "rb");
+
+    fread(dg->grammar_ids, sizeof(int), nprocs, f);
+    fread(&dg->num_grammars, sizeof(int), 1, f);
 
     // Read the inter-process compressed grammar
     // The header has three values:
@@ -127,7 +108,8 @@ RuleHash* read_inter_compressed_grammar(char* path, size_t* original_integers, i
 
         HASH_ADD_INT(rules_table, rule_id, rule);
     }
-    printf("Start_rule_id: %d, Rules: %d, Uncompressed integers: %ld\n", *start_rule_id, rules, *original_integers);
+    printf("Unique Grammars: %d, Start_rule_id: %d, Rules: %d, Uncompressed integers: %ld\n",
+            dg->num_grammars, *start_rule_id, rules, *original_integers);
 
     return rules_table;
 }
@@ -139,11 +121,14 @@ RuleHash* read_inter_compressed_grammar(char* path, size_t* original_integers, i
  * This function will read the grammar (integer array) to form
  * a hash table of rules
  */
-RuleHash* read_intra_compressed_grammar(int* grammar, int *size) {
+RuleHash* read_one_unique_grammar(int* grammar, int *size, bool last_grammar) {
     int pos = 0;
     RuleHash* rules_table = NULL;
+
     int rules = grammar[pos++];
     pos++;
+    printf("rules: %d\n", rules);
+
     for(int i = 0; i < rules; i++) {
         RuleHash *rule = malloc(sizeof(RuleHash));
 
@@ -153,8 +138,9 @@ RuleHash* read_intra_compressed_grammar(int* grammar, int *size) {
         rule->symbols = grammar[pos++];
         pos++;  // skip exp
 
-        rule->rule_body = malloc(2*sizeof(int)*rule->symbols);
-        memcpy(rule->rule_body, &(grammar[pos]), 2*sizeof(int)*rule->symbols);
+        int rule_integers = 2 * rule->symbols;   // val and exp
+        rule->rule_body = malloc(sizeof(int)*rule_integers);
+        memcpy(rule->rule_body, &(grammar[pos]), sizeof(int)*rule_integers);
         pos += (rule->symbols)*2;
         HASH_ADD_INT(rules_table, rule_id, rule);
     }
@@ -169,39 +155,48 @@ RuleHash* read_intra_compressed_grammar(int* grammar, int *size) {
  * The grammar is read by read_compressed_grammar()
  *
  */
-int** read_cfg(char* path, int nprocs, int *num_symbols) {
+DecodedGrammars* read_cfg(char* path, int nprocs) {
+
+    DecodedGrammars *dg = malloc(sizeof(DecodedGrammars));
+    dg->grammar_ids = malloc(sizeof(int) * nprocs);
 
     // 1. Read and decompress inter-process compressed grammar
     size_t original_integers;
     int start_rule_id;
     int pos = 0;
-    RuleHash* inter_cfg = read_inter_compressed_grammar(path, &original_integers, &start_rule_id);
-    int* decompressed = malloc(sizeof(int)*original_integers);
-    rule_application(inter_cfg, start_rule_id, start_rule_id, decompressed, &pos);
+    RuleHash* inter_cfg = read_inter_compressed_grammar(path, nprocs, &original_integers, &start_rule_id, dg);
+    int* inter_decompressed_t = malloc(sizeof(int)*original_integers);
+    int* inter_decompressed = inter_decompressed_t;
+    rule_application(inter_cfg, start_rule_id, start_rule_id, inter_decompressed, &pos);
     clean_rules(inter_cfg);
+    printf("Finsihed decopmressing inter-process compressed grammar\n");
+
+    for(int i = 0; i < original_integers; i++)
+        printf("%d ", inter_decompressed[i]);
+    printf("\n");
 
     // 2. Read and decompress each rank's grammar
-    int** decoded_symbols = malloc(sizeof(int*)*nprocs);
+    dg->unique_grammars = malloc(sizeof(int*)*dg->num_grammars);
+    dg->num_symbols = malloc(sizeof(int)*dg->num_grammars);
+    dg->intra_cfgs = malloc(sizeof(RuleHash*) * dg->num_grammars);
 
-    int last_grammar_size = 0;
-    int *grammar = decompressed;
-    for(int rank = 0; rank < nprocs; rank++) {
-        grammar += last_grammar_size;
-        RuleHash* intra_cfg = read_intra_compressed_grammar(grammar, &last_grammar_size);
+    for(int ugi = 0; ugi < dg->num_grammars; ugi++) {
+        int advance = 0;
+        bool last_grammar = (ugi == dg->num_grammars-1);
+        dg->intra_cfgs[ugi] = read_one_unique_grammar(inter_decompressed, &advance, last_grammar);
 
         // First pass to copmute the number of symbols after decompression
-        num_symbols[rank] = 0;
-        rule_application(intra_cfg, -1, -1, NULL, &num_symbols[rank]);
+        dg->num_symbols[ugi] = 0;
+        rule_application(dg->intra_cfgs[ugi], -1, -1, NULL, &dg->num_symbols[ugi]);
 
         // Second pass to fill in the symbols
-        decoded_symbols[rank] = malloc(sizeof(int) * num_symbols[rank]);
-        num_symbols[rank] = 0;
-        rule_application(intra_cfg, -1, -1, decoded_symbols[rank], &num_symbols[rank]);
+        dg->unique_grammars[ugi] = malloc(sizeof(int) * dg->num_symbols[ugi]);
+        dg->num_symbols[ugi] = 0;
+        rule_application(dg->intra_cfgs[ugi], -1, -1, dg->unique_grammars[ugi], &dg->num_symbols[ugi]);
 
-        clean_rules(intra_cfg);
+        inter_decompressed += advance;
     }
 
-    free(decompressed);
-    return decoded_symbols;
+    free(inter_decompressed_t);
+    return dg;
 }
-

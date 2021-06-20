@@ -139,8 +139,31 @@ char* write_argument(CallSignature *cs, int i) {
     return name;
 }
 
+void write_call_special(FILE* f, CallSignature *cs, const char* indent) {
+    if(cs->func_id == ID_MPI_Waitall) {
+        fprintf(f, "%sMPI_Request reqs[] = {", indent);
+        int count = *((int*)cs->args[0]);
+        for(int i = 0; i < count; i++) {
+            int *ids = cs->args[1];
+            VariablePool* var = NULL;
+            HASH_FIND_INT(variable_pools[TYPE_MPI_Request], &ids[i], var);
+            assert(var);
+            fprintf(f, "%s_%d", TYPE_VAR_STR[TYPE_MPI_Request], var->id);
+            if(i < count - 1)
+                fprintf(f, ", ");
+        }
+        fprintf(f, "};\n");
+        fprintf(f, "%sMPI_Waitall(%d, reqs, MPI_STATUSES_IGNORE);\n", indent, count);
+    }
+}
+
 
 void write_call(FILE* f, CallSignature *cs, const char* indent) {
+    if(cs->func_id == ID_MPI_Waitall) {
+        write_call_special(f, cs, indent);
+        return;
+    }
+
     fprintf(f, "%s%s(", indent, func_names[cs->func_id]);
     for(int i = 0; i < cs->arg_count; i++) {
         char* var = write_argument(cs, i);
@@ -164,14 +187,127 @@ void write_prologue(FILE* f) {
 
     fprintf(f, "int main(int argc, char* argv[]) {\n");
     fprintf(f, "\tMPI_Init(&argc, &argv);\n");
-    fprintf(f, "\tMPI_Comm_size(MPI_COMM_WORLD, &g_mpi_size);\n");
-    fprintf(f, "\tMPI_Comm_rank(MPI_COMM_WORLD, &g_mpi_rank);\n");
+    fprintf(f, "\tPMPI_Comm_size(MPI_COMM_WORLD, &g_mpi_size);\n");
+    fprintf(f, "\tPMPI_Comm_rank(MPI_COMM_WORLD, &g_mpi_rank);\n");
 }
 
 void write_epilogue(FILE* f) {
     fprintf(f, "\tMPI_Finalize();\n");
     fprintf(f, "\treturn 0;\n}\n");
 }
+
+
+static int loop_var;
+void recursive_write_rule(FILE* f, RuleHash* rules, int rule_id, CallSignature *cst) {
+
+    RuleHash *rule = NULL;
+    HASH_FIND_INT(rules, &rule_id, rule);
+    assert(rule != NULL);
+
+    for(int i = 0; i < rule->symbols; i++) {
+        int sym_val = rule->rule_body[2*i+0];
+        int sym_exp = rule->rule_body[2*i+1];
+        // Non-terminal, i.e., a rule
+        if(sym_val < -1) {
+            printf("write rule: %d\n", sym_val);
+            if(sym_exp > 1) {
+                fprintf(f, "\t\tfor(int i%d = 0; i%d < %d; i%d++) {\n", loop_var, loop_var, sym_exp, loop_var);
+                loop_var++;
+                recursive_write_rule(f, rules, sym_val, cst);
+                fprintf(f, "\t\t};\n");
+            } else {
+                recursive_write_rule(f, rules, sym_val, cst);
+            }
+        }
+        // Terminal
+        else {
+            CallSignature cs = cst[sym_val];
+            if(sym_exp > 1) {
+                fprintf(f, "\t\tfor(int i%d = 0; i%d < %d; i%d++)\n", loop_var, loop_var, sym_exp, loop_var);
+                loop_var++;
+                write_call(f, &cs, "\t\t\t");
+            } else {
+                write_call(f, &cs, "\t\t");
+            }
+        }
+    }
+}
+
+
+
+/*
+int main(int argc, char** argv) {
+
+    char* directory = argv[1];
+    char cfg_path[256];
+    char cst_path[256];
+    char metadata_path[256];
+    sprintf(cfg_path, "%s/grammars.dat", directory);
+    sprintf(cst_path, "%s/funcs.dat", directory);
+    sprintf(metadata_path, "%s/pilgrim.mt", directory);
+
+    // 0. Read metadata
+    GlobalMetadata gm;
+    read_metadata(metadata_path, &gm);
+
+    // 1. Read CST
+    int num_sigs;
+    CallSignature *cst = read_cst(cst_path, &num_sigs);
+
+    // 2. Read CFG
+    DecodedGrammars* dg = read_cfg(cfg_path, gm.ranks);
+
+    // 3. Generate a MPI program
+    char source_file_path[256];
+    sprintf(source_file_path, "%s/proxy_app.c", directory);
+    FILE* f = fopen(source_file_path, "w");
+
+    write_prologue(f);
+
+    for(int ugi = 0; ugi < dg->num_grammars; ugi++) {
+
+        bool first = true;
+        fprintf(f, "\tif(");
+        for(int rank = 0; rank < gm.ranks; rank++) {
+            if(ugi == dg->grammar_ids[rank]) {
+                if(first)
+                    fprintf(f, "g_mpi_rank == %d", rank);
+                else
+                    fprintf(f, " || g_mpi_rank == %d", rank);
+                first = false;
+            }
+        }
+        fprintf(f, ") {\n");
+
+
+        int* decoded_symbols = dg->unique_grammars[ugi];
+        write_init_variables(f, decoded_symbols, dg->num_symbols[ugi], cst);
+
+        for(int i = 0; i < dg->num_symbols[ugi]; i+=2) {
+
+            int sym = decoded_symbols[i];
+            int exp = decoded_symbols[i+1];
+            CallSignature cs = cst[sym];
+
+            if(exp > 1) {
+                fprintf(f, "\t\tfor(int i = 0; i < %d; i++)\n", exp);
+                write_call(f, &cs, "\t\t\t");
+            } else {
+                write_call(f, &cs, "\t\t");
+            }
+        }
+        free_init_variables(f);
+
+        fprintf(f, "\t}\n\n");
+    }
+
+    free_decoded_grammars(dg);
+    write_epilogue(f);
+    fclose(f);
+
+    return 0;
+}
+*/
 
 
 int main(int argc, char** argv) {
@@ -193,8 +329,7 @@ int main(int argc, char** argv) {
     CallSignature *cst = read_cst(cst_path, &num_sigs);
 
     // 2. Read CFG
-    int num_symbols[gm.ranks];
-    int** decoded_symbols = read_cfg(cfg_path, gm.ranks, num_symbols);
+    DecodedGrammars* dg = read_cfg(cfg_path, gm.ranks);
 
     // 3. Generate a MPI program
     char source_file_path[256];
@@ -203,33 +338,38 @@ int main(int argc, char** argv) {
 
     write_prologue(f);
 
-    for(int rank = 0; rank < gm.ranks; rank++) {
-        fprintf(f, "\tif(g_mpi_rank == %d) { \n", rank);
+    for(int ugi = 0; ugi < dg->num_grammars; ugi++) {
 
-        write_init_variables(f, decoded_symbols[rank], num_symbols[rank], cst);
-
-        for(int i = 0; i < num_symbols[rank]; i+=2) {
-
-            int sym = decoded_symbols[rank][i];
-            int exp = decoded_symbols[rank][i+1];
-            CallSignature cs = cst[sym];
-
-            if(exp > 1) {
-                fprintf(f, "\t\tfor(int i = 0; i < %d; i++)\n", exp);
-                write_call(f, &cs, "\t\t\t");
-            } else {
-                write_call(f, &cs, "\t\t");
+        // if condition for all ranks with the same grammar
+        bool first = true;
+        fprintf(f, "\tif(");
+        for(int rank = 0; rank < gm.ranks; rank++) {
+            if(ugi == dg->grammar_ids[rank]) {
+                if(first)
+                    fprintf(f, "g_mpi_rank == %d", rank);
+                else
+                    fprintf(f, " || g_mpi_rank == %d", rank);
+                first = false;
             }
         }
+        fprintf(f, ") {\n");
+
+        // Acutal if body
+        printf("write ugi: %d\n", ugi);
+        loop_var = 0;
+        int* decoded_symbols = dg->unique_grammars[ugi];
+        write_init_variables(f, decoded_symbols, dg->num_symbols[ugi], cst);
+
+        recursive_write_rule(f, dg->intra_cfgs[ugi], -1, cst);
+
+
         free_init_variables(f);
 
+        // end of if
         fprintf(f, "\t}\n\n");
-
-        free(decoded_symbols[rank]);
     }
 
-    free(decoded_symbols);
-
+    free_decoded_grammars(dg);
     write_epilogue(f);
     fclose(f);
 

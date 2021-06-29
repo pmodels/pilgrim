@@ -17,6 +17,13 @@ void print_rule(RuleHash *rule) {
     printf("\n");
 }
 
+void print_grammar(RuleHash *rules_table) {
+    RuleHash *current, *tmp;
+    HASH_ITER(hh, rules_table, current, tmp) {
+        print_rule(current);
+    }
+}
+
 
 /**
  * Decompress a CFG by recursive rule application
@@ -78,8 +85,10 @@ void free_decoded_grammars(DecodedGrammars* dg) {
 /**
  * Read the inter-process compressed grammar
  * And store its rules in a hash-table.
- *
  * It will be later used for decopmression.
+ *
+ * in: path, nprocs
+ * out: original_integers, start_rule_id, dg
  */
 RuleHash* read_inter_compressed_grammar(char* path, int nprocs, size_t* original_integers, int* start_rule_id, DecodedGrammars* dg) {
 
@@ -127,7 +136,6 @@ RuleHash* read_one_unique_grammar(int* grammar, int *size, bool last_grammar) {
 
     int rules = grammar[pos++];
     pos++;
-    printf("rules: %d\n", rules);
 
     for(int i = 0; i < rules; i++) {
         RuleHash *rule = malloc(sizeof(RuleHash));
@@ -165,15 +173,13 @@ DecodedGrammars* read_cfg(char* path, int nprocs) {
     int start_rule_id;
     int pos = 0;
     RuleHash* inter_cfg = read_inter_compressed_grammar(path, nprocs, &original_integers, &start_rule_id, dg);
+    //print_grammar(inter_cfg);
     int* inter_decompressed_t = malloc(sizeof(int)*original_integers);
     int* inter_decompressed = inter_decompressed_t;
     rule_application(inter_cfg, start_rule_id, start_rule_id, inter_decompressed, &pos);
     clean_rules(inter_cfg);
     printf("Finsihed decopmressing inter-process compressed grammar\n");
 
-    for(int i = 0; i < original_integers; i++)
-        printf("%d ", inter_decompressed[i]);
-    printf("\n");
 
     // 2. Read and decompress each rank's grammar
     dg->unique_grammars = malloc(sizeof(int*)*dg->num_grammars);

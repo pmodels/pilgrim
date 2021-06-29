@@ -21,6 +21,7 @@ libpilgrim_la_SOURCES =
 
 pilgrim_app_generator_SOURCES = 
 pilgrim_app_generator_CFLAGS = $(AM_CFLAGS)
+pilgrim_app_generator_LDFLAGS = -lm
 
 pilgrim2text_SOURCES = 
 pilgrim2text_CFLAGS = $(AM_CFLAGS)

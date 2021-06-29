@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(comm, &r);
     MPI_Comm_size(comm, &p);
     int n, energy, niters, px, py;
+    int *args;
 
     if (r==0) {
         // argument checking
@@ -43,11 +44,13 @@ int main(int argc, char **argv) {
             MPI_Abort(comm, 0);
 
         // distribute arguments
-        int args[5] = {n, energy, niters, px,  py};
+        args = malloc(sizeof(int) * 5);
+        args[0] = n; args[1] = energy; args[2] = niters; args[3] = px; args[4] = py;
+        //int args[5] = {n, energy, niters, px,  py};
         MPI_Bcast(args, 5, MPI_INT, 0, comm);
     }
     else {
-        int args[5];
+        args = malloc(sizeof(int)*5);
         MPI_Bcast(args, 5, MPI_INT, 0, comm);
         n=args[0]; energy=args[1]; niters=args[2]; px=args[3]; py=args[4];
     }
@@ -116,10 +119,10 @@ int main(int argc, char **argv) {
         MPI_Isend(sbufsouth, bx, MPI_DOUBLE, south, TAG, comm, &reqs[1]);
         MPI_Isend(sbufeast, by, MPI_DOUBLE, east, TAG, comm, &reqs[2]);
         MPI_Isend(sbufwest, by, MPI_DOUBLE, west, TAG, comm, &reqs[3]);
-        MPI_Irecv(rbufnorth, bx, MPI_DOUBLE, north, TAG, comm, &reqs[4]);
-        MPI_Irecv(rbufsouth, bx, MPI_DOUBLE, south, TAG, comm, &reqs[5]);
-        MPI_Irecv(rbufeast, by, MPI_DOUBLE, east, TAG, comm, &reqs[6]);
-        MPI_Irecv(rbufwest, by, MPI_DOUBLE, west, TAG, comm, &reqs[7]);
+        MPI_Irecv(rbufnorth, bx, MPI_DOUBLE, north, MPI_ANY_TAG, comm, &reqs[4]);
+        MPI_Irecv(rbufsouth, bx, MPI_DOUBLE, south, MPI_ANY_TAG, comm, &reqs[5]);
+        MPI_Irecv(rbufeast, by, MPI_DOUBLE, east, MPI_ANY_TAG, comm, &reqs[6]);
+        MPI_Irecv(rbufwest, by, MPI_DOUBLE, west, MPI_ANY_TAG, comm, &reqs[7]);
         MPI_Waitall(8, reqs, MPI_STATUSES_IGNORE);
         for(int i=0; i<bx; ++i) aold[ind(i+1,0)] = rbufnorth[i];        // unpack loop - into ghost cells
         for(int i=0; i<bx; ++i) aold[ind(i+1,by+1)] = rbufsouth[i];     // unpack loop
@@ -141,9 +144,14 @@ int main(int argc, char **argv) {
     t+=MPI_Wtime();
 
     // get final heat in the system
-    double rheat;
-    MPI_Allreduce(&heat, &rheat, 1, MPI_DOUBLE, MPI_SUM, comm);
-    if(!r) printf("[%i] last heat: %f time: %f\n", r, rheat, t);
+    double *rheat = malloc(sizeof(double));
+    double *sheat = malloc(sizeof(double));
+    *sheat = heat;
+    MPI_Allreduce(sheat, rheat, 1, MPI_DOUBLE, MPI_SUM, comm);
+    if(!r) printf("[%i] last heat: %f time: %f\n", r, *rheat, t);
+    free(sheat);
+    free(rheat);
+    free(args);
 
     MPI_Finalize();
 }

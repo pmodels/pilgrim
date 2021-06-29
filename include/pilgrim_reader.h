@@ -56,8 +56,9 @@ void free_decoded_grammars(DecodedGrammars *dg);
 #define TYPE_MPI_Comm       9
 #define TYPE_MPI_Status     10
 #define TYPE_RANK_ENCODED   11
-#define TYPE_MEM_PTR        12
-#define TYPE_INT            13
+#define TYPE_TAG            12
+#define TYPE_MEM_PTR        13
+#define TYPE_INT            14
 
 static char* TYPE_STR[] = {
     "NON_MPI",
@@ -72,6 +73,7 @@ static char* TYPE_STR[] = {
     "MPI_Comm",
     "MPI_Status",
     "MPI_RANK_ENCODED",
+    "MPI_TAG",
     "void*",
     "int",
 };
@@ -88,7 +90,8 @@ static char* TYPE_VAR_STR[] = {
     "mpi_message",
     "mpi_comm",
     "mpi_status",
-    "",
+    "",                 // RANK_ENCODED
+    "",                 // TAG
     "buf",
     "var",
 };

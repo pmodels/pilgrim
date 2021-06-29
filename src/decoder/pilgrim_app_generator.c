@@ -10,93 +10,122 @@
 #include "uthash.h"
 #include "pilgrim.h"
 #include "pilgrim_reader.h"
+#include "pilgrim_consts.h"
+#include "pilgrim_sequitur.h"
+
+#define max(a,b) (((a)>(b))?(a):(b))
+
+static int grammar_splitter = 10000;
 
 typedef struct VariablePool_t {
-    int value;          // value as key
-    int id;
+    char* name;
+    int symbolic_id;          // value (symbolic id in trace) as key
     UT_hash_handle hh;
 } VariablePool;
 
-
 static VariablePool* variable_pools[15];    // One variable pool for each variable type
-static int variable_current_ids[15];
 
-void free_init_variables(FILE* f) {
+VariablePool* var_find_or_add(int type, int symbolic_id, bool *exist) {
+    *exist = true;
+    VariablePool* var = NULL;
+    HASH_FIND_INT(variable_pools[type], &symbolic_id, var);
+    if(var == NULL) {
+        *exist = false;
+        var = malloc(sizeof(VariablePool));
+        var->symbolic_id = symbolic_id;
+        var->name = malloc(sizeof(32));
+        sprintf(var->name, "%s_%d", TYPE_VAR_STR[type], var->symbolic_id);
+        HASH_ADD_INT(variable_pools[type], symbolic_id, var);
+    }
+    return var;
+}
+
+void free_vars_pool() {
     for(int i = 0; i < 15; i++) {
-        VariablePool *current, *tmp;
-        HASH_ITER(hh, variable_pools[i], current, tmp) {
-            HASH_DEL(variable_pools[i], current);
-
-            if(i == TYPE_MEM_PTR)
-                fprintf(f, "\t\tfree(%s_%d);\n", TYPE_VAR_STR[i], current->value);
-            free(current);
+        VariablePool *var, *tmp;
+        HASH_ITER(hh, variable_pools[i], var, tmp) {
+            HASH_DEL(variable_pools[i], var);
+            free(var->name);
+            free(var);
         }
-        variable_current_ids[i] = 0;
         variable_pools[i] = NULL;
     }
 }
 
-void write_init_variables(FILE* fout, int* decoded_symbols, int num_symbols, CallSignature *cst) {
-
-    bool comm_flag = false;
-
-    CallSignature *cs;
-
-    for(int i = 0; i < num_symbols; i+=2) {
-        int sym = decoded_symbols[i];
-        cs = &(cst[sym]);
-
-        for(int j = 0; j < cs->arg_count; j++) {
-            int type = cs->arg_types[j];
-            int dir = cs->arg_directions[j];
-            if(type == TYPE_NON_MPI) {
-
-            } else if(type == TYPE_MPI_Comm) {
-                if(!comm_flag) {
-                    fprintf(fout, "\t\t%s %s_0 = MPI_COMM_WORLD;\n", TYPE_STR[type], TYPE_VAR_STR[type]);
-                    comm_flag = true;
-                }
-            } else if(type == TYPE_RANK_ENCODED) {
-            } else if(type == TYPE_MEM_PTR) {
-                MemPtrAttr* attr = (MemPtrAttr*) cs->args[j];
-
-                VariablePool* var = NULL;
-                HASH_FIND_INT(variable_pools[type], &attr->id, var);
-
-                if(var == NULL) {
-                    var = malloc(sizeof(VariablePool));
-                    var->value = attr->id;
-                    var->id = variable_current_ids[type]++;
-                    HASH_ADD_INT(variable_pools[type], value, var);
-                    fprintf(fout, "\t\t%s %s_%d = malloc(%lu);\n", TYPE_STR[type], TYPE_VAR_STR[type], var->id, attr->size);
-                }
-
-            } else {    // all types with interger values
-                int value = *((int*)cs->args[j]);
-
-                if(type==TYPE_INT && dir == DIRECTION_IN)
-                    continue;
-
-                VariablePool* var = NULL;
-                HASH_FIND_INT(variable_pools[type], &value, var);
-
-                if(var == NULL) {
-                    var = malloc(sizeof(VariablePool));
-                    var->value = value;
-                    var->id = variable_current_ids[type]++;
-                    HASH_ADD_INT(variable_pools[type], value, var);
-                    if(dir == DIRECTION_IN) {
-                        if(type == TYPE_MPI_Datatype)
-                            fprintf(fout, "\t\t%s %s_%d = MPI_INT;\n", TYPE_STR[type], TYPE_VAR_STR[type], var->id);
-                        else
-                            fprintf(fout, "\t\t%s %s_%d = %d;\n", TYPE_STR[type], TYPE_VAR_STR[type], var->id, value);
-                    }
-                    else
-                        fprintf(fout, "\t\t%s %s_%d;\n", TYPE_STR[type], TYPE_VAR_STR[type], var->id);
+void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
+    CallSignature* cs;
+    Symbol *rule, *sym;
+    DL_FOREACH(grammar->rules, rule) {
+        DL_FOREACH(rule->rule_body, sym) {
+            if(sym->val < 0 || sym->val >= grammar_splitter)
+                continue;
+            cs = &(cst[sym->val]);
+            for(int j = 0; j < cs->arg_count; j++) {
+                int type = cs->arg_types[j];
+                int dir = cs->arg_directions[j];
+                if(type == TYPE_NON_MPI) {
+                } else if(type == TYPE_MPI_Comm) {
+                } else if(type == TYPE_MPI_Datatype) {
+                } else if(type == TYPE_MPI_Op) {
+                } else if(type == TYPE_MPI_Status) {
+                } else if(type == TYPE_RANK_ENCODED) {
+                } else if(type == TYPE_TAG) {
+                } else if(type == TYPE_MEM_PTR) {
+                    MemPtrAttr* attr = (MemPtrAttr*) cs->args[j];
+                    bool exist;
+                    VariablePool* var = var_find_or_add(type, attr->id, &exist);
+                    //if(!exist)
+                    //    fprintf(f, "%s %s;\n", TYPE_STR[type], var->name);
+                } else {    // all types with interger values
+                    int value = *((int*)cs->args[j]);
+                    if(type == TYPE_INT && dir == DIRECTION_IN)
+                        continue;
+                    bool exist;
+                    VariablePool* var = var_find_or_add(type, value, &exist);
+                    if(!exist)
+                        fprintf(f, "%s %s;\n", TYPE_STR[type], var->name);
                 }
             }
         }
     }
+    fprintf(f, "\n");
+}
+
+int* write_vars_initialization(FILE* f, Symbol* rule, CallSignature *cst) {
+    CallSignature* cs;
+    Symbol *sym;
+
+    int *mem_buf_sizes = malloc(sizeof(int)*30);
+    memset(mem_buf_sizes, 0, sizeof(int)*30);
+    int mem_buf_count = 0;
+
+    DL_FOREACH(rule->rule_body, sym) {
+        if(sym->val < 0 || sym->val >= grammar_splitter)
+            continue;
+        cs = &(cst[sym->val]);
+        for(int i = 0; i < cs->arg_count; i++) {
+            int type = cs->arg_types[i];
+            if(type == TYPE_MEM_PTR) {
+                MemPtrAttr* attr = (MemPtrAttr*) cs->args[i];
+                mem_buf_sizes[attr->id] = max(attr->size, mem_buf_sizes[attr->id]);
+            }
+        }
+    }
+
+    for(int i = 0; i < 30; i++) {
+        if(mem_buf_sizes[i] > 0)
+            fprintf(f, "\t%s %s_%d = malloc(%d);\n", TYPE_STR[TYPE_MEM_PTR], TYPE_VAR_STR[TYPE_MEM_PTR], i, mem_buf_sizes[i]);
+    }
+
+    return mem_buf_sizes;
+}
+
+void write_vars_free(FILE* f, int *mem_buf_sizes) {
+    for(int i = 0; i < 30; i++) {
+        if(mem_buf_sizes[i] > 0)
+            fprintf(f, "\tfree(%s_%d);\n", TYPE_VAR_STR[TYPE_MEM_PTR], i);
+    }
+    free(mem_buf_sizes);
 }
 
 
@@ -107,32 +136,47 @@ char* write_argument(CallSignature *cs, int i) {
     char *name = calloc(sizeof(char), 20);
     if(type == TYPE_NON_MPI) {
         sprintf(name, "[Not Handled]");
-    } else if(type == TYPE_MPI_Comm) {
-        sprintf(name, "%s_0", TYPE_VAR_STR[type]);
     } else if(type == TYPE_RANK_ENCODED) {
         int value = *((int*)cs->args[i]);
-        if(value >= 0)
-            sprintf(name, "g_mpi_rank-%d", value);
+        if(value == PILGRIM_MPI_PROC_NULL)
+            sprintf(name, "MPI_PROC_NULL");
+        else if(value == PILGRIM_MPI_ANY_SOURCE)
+            sprintf(name, "MPI_ANY_SOURCE");
+        else {
+            if(value >= 0)
+                sprintf(name, "g_mpi_rank-%d", value);
+            else
+                sprintf(name, "g_mpi_rank+%d", -value);
+        }
+    } else if(type == TYPE_TAG) {
+        int value = *((int*)cs->args[i]);
+        if(value == PILGRIM_MPI_ANY_TAG)
+            sprintf(name, "MPI_ANY_TAG");
         else
-            sprintf(name, "g_mpi_rank+%d", -value);
+            sprintf(name, "%d", value);
     } else if(type == TYPE_MEM_PTR) {
         MemPtrAttr* attr = (MemPtrAttr*)cs->args[i];
         sprintf(name, "%s_%d+%lu", TYPE_VAR_STR[type], attr->id, attr->offset);
     } else if(type == TYPE_MPI_Status) {
         sprintf(name, "MPI_STATUS_IGNORE");
+    } else if(type == TYPE_MPI_Datatype) {
+        int id = *((int*)cs->args[i]);
+        sprintf(name, "%s", symbolic_id_to_mpi_datatype_str(id));
+    } else if(type == TYPE_MPI_Op) {
+        int id = *((int*)cs->args[i]);
+        sprintf(name, "%s", symbolic_id_to_mpi_op_str(id));
+    } else if(type == TYPE_MPI_Comm) {
+        int id = *((int*)cs->args[i]);
+        sprintf(name, "%s", symbolic_id_to_mpi_comm_str(id));
     } else {    // all other (basic data types or mpi objects) with integer values
         int value = *((int*)cs->args[i]);
-
         if(type==TYPE_INT && direction == DIRECTION_IN)
             sprintf(name, "%d", value);
         else {
-            VariablePool* var = NULL;
-            HASH_FIND_INT(variable_pools[type], &value, var);
-            assert(var);
             if(direction == DIRECTION_IN)
-                sprintf(name, "%s_%d", TYPE_VAR_STR[type], var->id);
+                sprintf(name, "%s_%d", TYPE_VAR_STR[type], value);
             else
-                sprintf(name, "&%s_%d", TYPE_VAR_STR[type], var->id);
+                sprintf(name, "&%s_%d", TYPE_VAR_STR[type], value);
         }
     }
 
@@ -143,16 +187,16 @@ void write_call_special(FILE* f, CallSignature *cs, const char* indent) {
     if(cs->func_id == ID_MPI_Waitall) {
         fprintf(f, "%sMPI_Request reqs[] = {", indent);
         int count = *((int*)cs->args[0]);
+
         for(int i = 0; i < count; i++) {
             int *ids = cs->args[1];
-            VariablePool* var = NULL;
-            HASH_FIND_INT(variable_pools[TYPE_MPI_Request], &ids[i], var);
-            assert(var);
-            fprintf(f, "%s_%d", TYPE_VAR_STR[TYPE_MPI_Request], var->id);
+            fprintf(f, "%s_%d", TYPE_VAR_STR[TYPE_MPI_Request], ids[i]);
             if(i < count - 1)
                 fprintf(f, ", ");
+            else
+                fprintf(f, "};\n");
         }
-        fprintf(f, "};\n");
+
         fprintf(f, "%sMPI_Waitall(%d, reqs, MPI_STATUSES_IGNORE);\n", indent, count);
     }
 }
@@ -177,138 +221,104 @@ void write_call(FILE* f, CallSignature *cs, const char* indent) {
     }
 }
 
-void write_prologue(FILE* f) {
+void write_prologue(FILE* f, Grammar* grammar, CallSignature* cst) {
     fprintf(f, "#include <stdio.h>\n");
     fprintf(f, "#include <stdlib.h>\n");
     fprintf(f, "#include <mpi.h>\n\n");
-
     fprintf(f, "static int g_mpi_rank;\n");
-    fprintf(f, "static int g_mpi_size;\n\n");
+    fprintf(f, "static int g_mpi_size;\n");
+    fprintf(f, "static int g_ugi;\n\n");
 
+    write_vars_declaration(f, grammar, cst);
+}
+
+
+void write_epilogue(FILE* f, int nprocs, DecodedGrammars *dg) {
     fprintf(f, "int main(int argc, char* argv[]) {\n");
     fprintf(f, "\tMPI_Init(&argc, &argv);\n");
     fprintf(f, "\tPMPI_Comm_size(MPI_COMM_WORLD, &g_mpi_size);\n");
     fprintf(f, "\tPMPI_Comm_rank(MPI_COMM_WORLD, &g_mpi_rank);\n");
-}
 
-void write_epilogue(FILE* f) {
+    // if condition for all ranks with the same grammar
+    bool first = true;
+    fprintf(f, "\tint grammar_ids[] = {");
+
+    for(int rank = 0; rank < nprocs; rank++) {
+        int ugi = dg->grammar_ids[rank];
+        if(rank == nprocs-1)
+            fprintf(f, "%d};\n", ugi);
+        else
+            fprintf(f, "%d, ", ugi);
+    }
+    fprintf(f, "\tg_ugi = grammar_ids[g_mpi_rank];\n");
+
+    fprintf(f, "\tfunc_1();\n");
     fprintf(f, "\tMPI_Finalize();\n");
     fprintf(f, "\treturn 0;\n}\n");
 }
 
 
-static int loop_var;
-void recursive_write_rule(FILE* f, RuleHash* rules, int rule_id, CallSignature *cst) {
-
-    RuleHash *rule = NULL;
-    HASH_FIND_INT(rules, &rule_id, rule);
-    assert(rule != NULL);
-
-    for(int i = 0; i < rule->symbols; i++) {
-        int sym_val = rule->rule_body[2*i+0];
-        int sym_exp = rule->rule_body[2*i+1];
-        // Non-terminal, i.e., a rule
-        if(sym_val < -1) {
-            printf("write rule: %d\n", sym_val);
-            if(sym_exp > 1) {
-                fprintf(f, "\t\tfor(int i%d = 0; i%d < %d; i%d++) {\n", loop_var, loop_var, sym_exp, loop_var);
-                loop_var++;
-                recursive_write_rule(f, rules, sym_val, cst);
-                fprintf(f, "\t\t};\n");
-            } else {
-                recursive_write_rule(f, rules, sym_val, cst);
-            }
-        }
-        // Terminal
-        else {
-            CallSignature cs = cst[sym_val];
-            if(sym_exp > 1) {
-                fprintf(f, "\t\tfor(int i%d = 0; i%d < %d; i%d++)\n", loop_var, loop_var, sym_exp, loop_var);
-                loop_var++;
-                write_call(f, &cs, "\t\t\t");
-            } else {
-                write_call(f, &cs, "\t\t");
-            }
-        }
-    }
-}
-
-
-
-/*
-int main(int argc, char** argv) {
-
-    char* directory = argv[1];
-    char cfg_path[256];
-    char cst_path[256];
-    char metadata_path[256];
-    sprintf(cfg_path, "%s/grammars.dat", directory);
-    sprintf(cst_path, "%s/funcs.dat", directory);
-    sprintf(metadata_path, "%s/pilgrim.mt", directory);
-
-    // 0. Read metadata
-    GlobalMetadata gm;
-    read_metadata(metadata_path, &gm);
-
-    // 1. Read CST
-    int num_sigs;
-    CallSignature *cst = read_cst(cst_path, &num_sigs);
-
-    // 2. Read CFG
-    DecodedGrammars* dg = read_cfg(cfg_path, gm.ranks);
-
-    // 3. Generate a MPI program
-    char source_file_path[256];
-    sprintf(source_file_path, "%s/proxy_app.c", directory);
-    FILE* f = fopen(source_file_path, "w");
-
-    write_prologue(f);
-
+Grammar* final_sequitur(DecodedGrammars* dg, int *final_splitter) {
+    int splitter = grammar_splitter;
+    Grammar *grammar = malloc(sizeof(Grammar));
+    sequitur_init(grammar);
     for(int ugi = 0; ugi < dg->num_grammars; ugi++) {
-
-        bool first = true;
-        fprintf(f, "\tif(");
-        for(int rank = 0; rank < gm.ranks; rank++) {
-            if(ugi == dg->grammar_ids[rank]) {
-                if(first)
-                    fprintf(f, "g_mpi_rank == %d", rank);
-                else
-                    fprintf(f, " || g_mpi_rank == %d", rank);
-                first = false;
-            }
-        }
-        fprintf(f, ") {\n");
-
-
-        int* decoded_symbols = dg->unique_grammars[ugi];
-        write_init_variables(f, decoded_symbols, dg->num_symbols[ugi], cst);
-
         for(int i = 0; i < dg->num_symbols[ugi]; i+=2) {
+            int sym = dg->unique_grammars[ugi][i];
+            int exp = dg->unique_grammars[ugi][i+1];
+            append_terminal(grammar, sym, exp);
+        }
+        append_terminal(grammar, splitter++, 1);
+    }
+    sequitur_print_rules(grammar);
+    *final_splitter = splitter;
 
-            int sym = decoded_symbols[i];
-            int exp = decoded_symbols[i+1];
-            CallSignature cs = cst[sym];
+    return grammar;
+}
 
-            if(exp > 1) {
-                fprintf(f, "\t\tfor(int i = 0; i < %d; i++)\n", exp);
-                write_call(f, &cs, "\t\t\t");
+void experimental_code(FILE* f, Grammar* grammar, CallSignature *cst, int final_splitter) {
+
+    Symbol *rule, *sym;
+    DL_FOREACH(grammar->rules, rule) {
+        fprintf(f, "void func_%d();\n", -1*rule->val);
+    }
+    fprintf(f, "\n");
+
+    DL_FOREACH(grammar->rules, rule) {
+        fprintf(f, "void func_%d() {\n", -1*rule->val);
+
+        int* mem_buf_sizes = write_vars_initialization(f, rule, cst);
+
+        if(rule->val == -1)
+            fprintf(f, "\tif(g_ugi == 0) {\n");
+
+        DL_FOREACH(rule->rule_body, sym) {
+
+            if(sym->val < grammar_splitter) {
+                if(sym->exp > 1)
+                    fprintf(f, "\tfor(int i = 0; i < %d; i++)\n", sym->exp);
+
+                if(sym->val >= 0) {
+                    CallSignature *cs = &cst[sym->val];
+                    write_call(f, cs, sym->exp>1?"\t\t":"\t");
+                } else {
+                    fprintf(f, "\t%sfunc_%d();\n", sym->exp>1?"\t":"", -1*sym->val);
+                }
             } else {
-                write_call(f, &cs, "\t\t");
+                // This code is only executed for rule -1
+                if(sym->val == final_splitter - 1)
+                    fprintf(f, "\t}\n");
+                else
+                    fprintf(f, "\t}\n\tif(g_ugi == %d) {\n", sym->val - grammar_splitter + 1);
             }
         }
-        free_init_variables(f);
 
-        fprintf(f, "\t}\n\n");
+        write_vars_free(f, mem_buf_sizes);
+
+        fprintf(f, "}\n");
     }
 
-    free_decoded_grammars(dg);
-    write_epilogue(f);
-    fclose(f);
-
-    return 0;
 }
-*/
-
 
 int main(int argc, char** argv) {
 
@@ -324,53 +334,30 @@ int main(int argc, char** argv) {
     GlobalMetadata gm;
     read_metadata(metadata_path, &gm);
 
-    // 1. Read CST
+    // 1. Read CST and CFG
     int num_sigs;
     CallSignature *cst = read_cst(cst_path, &num_sigs);
-
-    // 2. Read CFG
     DecodedGrammars* dg = read_cfg(cfg_path, gm.ranks);
+
+    // 2. Sequitur
+    int final_splitter;
+    Grammar *grammar = final_sequitur(dg, &final_splitter);
 
     // 3. Generate a MPI program
     char source_file_path[256];
     sprintf(source_file_path, "%s/proxy_app.c", directory);
     FILE* f = fopen(source_file_path, "w");
 
-    write_prologue(f);
+    write_prologue(f, grammar, cst);
 
-    for(int ugi = 0; ugi < dg->num_grammars; ugi++) {
+    experimental_code(f, grammar, cst, final_splitter);
 
-        // if condition for all ranks with the same grammar
-        bool first = true;
-        fprintf(f, "\tif(");
-        for(int rank = 0; rank < gm.ranks; rank++) {
-            if(ugi == dg->grammar_ids[rank]) {
-                if(first)
-                    fprintf(f, "g_mpi_rank == %d", rank);
-                else
-                    fprintf(f, " || g_mpi_rank == %d", rank);
-                first = false;
-            }
-        }
-        fprintf(f, ") {\n");
-
-        // Acutal if body
-        printf("write ugi: %d\n", ugi);
-        loop_var = 0;
-        int* decoded_symbols = dg->unique_grammars[ugi];
-        write_init_variables(f, decoded_symbols, dg->num_symbols[ugi], cst);
-
-        recursive_write_rule(f, dg->intra_cfgs[ugi], -1, cst);
+    write_epilogue(f, gm.ranks, dg);
 
 
-        free_init_variables(f);
-
-        // end of if
-        fprintf(f, "\t}\n\n");
-    }
-
+    free_vars_pool();
     free_decoded_grammars(dg);
-    write_epilogue(f);
+    sequitur_cleanup(grammar);
     fclose(f);
 
     return 0;

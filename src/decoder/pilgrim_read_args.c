@@ -1,8 +1,3 @@
-/*
- * Copyright (C) by Argonne National Laboratory
- *     See COPYRIGHT in top-level directory
- */
-
 /* This file is generated automatically. Do not change. */
 #include <stdlib.h>
 #include <string.h>
@@ -70,7 +65,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -82,7 +77,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[5] = calloc(cs->arg_sizes[5], 1);
 			memcpy(cs->args[5], buff+pos, cs->arg_sizes[5]);
 			pos += cs->arg_sizes[5];
-			cs->arg_types[6] = TYPE_INT;
+			cs->arg_types[6] = TYPE_TAG;
 			cs->arg_directions[6] = DIRECTION_IN;
 			cs->arg_sizes[6] = sizeof(int);
 			cs->args[6] = calloc(cs->arg_sizes[6], 1);
@@ -924,7 +919,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -1298,7 +1293,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -1714,7 +1709,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -1770,7 +1765,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -2431,7 +2426,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -3044,7 +3039,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
-			cs->arg_types[1] = TYPE_INT;
+			cs->arg_types[1] = TYPE_TAG;
 			cs->arg_directions[1] = DIRECTION_IN;
 			cs->arg_sizes[1] = sizeof(int);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
@@ -3167,7 +3162,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -3377,7 +3372,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -4850,7 +4845,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -5538,7 +5533,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -7229,7 +7224,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
 			memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
 			pos += cs->arg_sizes[1];
-			cs->arg_types[2] = TYPE_INT;
+			cs->arg_types[2] = TYPE_TAG;
 			cs->arg_directions[2] = DIRECTION_IN;
 			cs->arg_sizes[2] = sizeof(int);
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
@@ -8607,7 +8602,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
-			cs->arg_types[1] = TYPE_INT;
+			cs->arg_types[1] = TYPE_TAG;
 			cs->arg_directions[1] = DIRECTION_IN;
 			cs->arg_sizes[1] = sizeof(int);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
@@ -10361,7 +10356,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -10538,7 +10533,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -10645,7 +10640,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -10701,7 +10696,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -11605,7 +11600,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -11637,7 +11632,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[8] = calloc(cs->arg_sizes[8], 1);
 			memcpy(cs->args[8], buff+pos, cs->arg_sizes[8]);
 			pos += cs->arg_sizes[8];
-			cs->arg_types[9] = TYPE_INT;
+			cs->arg_types[9] = TYPE_TAG;
 			cs->arg_directions[9] = DIRECTION_IN;
 			cs->arg_sizes[9] = sizeof(int);
 			cs->args[9] = calloc(cs->arg_sizes[9], 1);
@@ -12196,7 +12191,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -12798,7 +12793,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
-			cs->arg_types[1] = TYPE_INT;
+			cs->arg_types[1] = TYPE_TAG;
 			cs->arg_directions[1] = DIRECTION_IN;
 			cs->arg_sizes[1] = sizeof(int);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
@@ -12931,7 +12926,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];
-			cs->arg_types[1] = TYPE_INT;
+			cs->arg_types[1] = TYPE_TAG;
 			cs->arg_directions[1] = DIRECTION_IN;
 			cs->arg_sizes[1] = sizeof(int);
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
@@ -13000,7 +12995,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);
@@ -13366,7 +13361,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->args[3] = calloc(cs->arg_sizes[3], 1);
 			memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
 			pos += cs->arg_sizes[3];
-			cs->arg_types[4] = TYPE_INT;
+			cs->arg_types[4] = TYPE_TAG;
 			cs->arg_directions[4] = DIRECTION_IN;
 			cs->arg_sizes[4] = sizeof(int);
 			cs->args[4] = calloc(cs->arg_sizes[4], 1);

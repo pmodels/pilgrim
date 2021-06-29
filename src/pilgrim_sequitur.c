@@ -10,8 +10,6 @@
 #include "pilgrim_sequitur.h"
 #include "pilgrim_utils.h"
 
-int mpi_rank, mpi_size;
-
 
 void delete_symbol(Symbol *sym) {
     symbol_delete(sym->rule, sym, true);
@@ -254,8 +252,6 @@ void sequitur_init_rule_id(Grammar *grammar, int start_rule_id, bool twins_remov
     grammar->rule_id = start_rule_id;
     grammar->twins_removal = twins_removal;
 
-    PMPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     // Add the main rule: S, which will be the head of the rule list
     rule_put(&(grammar->rules), new_rule(grammar));
@@ -277,10 +273,9 @@ void sequitur_update(Grammar *grammar, int *update_terminal_id) {
 
 double sequitur_finalize(const char* output_path, Grammar *grammar) {
 
-    if(mpi_rank == 0) {
-        // print_rules(grammar);
-        // print_digrams(grammar);
-    }
+    int mpi_size, mpi_rank;
+    PMPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     // Write grammars from all ranks to one file
     double compressed_size = sequitur_dump(output_path, grammar, mpi_rank, mpi_size);

@@ -45,6 +45,8 @@ def codegen_read_one_arg(func, i):
     if arg_type_strip(arg.type) == "int":
         if "source" in arg.name or "dest" in arg.name:
             lines.append('cs->arg_types[%d] = TYPE_RANK_ENCODED;' %i)
+        elif "tag" in arg.name:
+            lines.append('cs->arg_types[%d] = TYPE_TAG;' %i)
         else:
             lines.append('cs->arg_types[%d] = TYPE_INT;' %i)
     else:

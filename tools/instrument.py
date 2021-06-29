@@ -115,11 +115,15 @@ def codegen_assemble_args(func):
             obj_count += 1
         elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
-        elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for rank-1/rank+1 as src or dest
+        elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for src or dest ranks
             line += "\tint %s_rank = g_mpi_rank - %s;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = PILGRIM_MPI_ANY_SOURCE;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_PROC_NULL) %s_rank = PILGRIM_MPI_PROC_NULL;\n" %(arg.name, arg.name)
             assemble_args.append( "&%s_rank" %arg.name )
+        elif 'int' in arg.type and ('tag' == arg.name):    # pattern recognization for src or dest ranks
+            line += "\tint my_tag = %s;\n" %(arg.name)
+            line += "\tif(my_tag == MPI_ANY_TAG) my_tag = PILGRIM_MPI_ANY_TAG;\n"
+            assemble_args.append("&my_tag")
         else:
             assemble_args.append( "&"+arg.name)
 

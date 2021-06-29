@@ -125,7 +125,7 @@ Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size, size_t *unco
             HASH_ADD_KEYPTR(hh, unique_grammars, entry->key, g_len, entry);
             grammar_ids[i] = entry->ugi;
 
-            // A unseen grammar, fully store it.
+            // An unseen grammar, fully store it.
             int k = 0;
             rules = g[k++];
             append_terminal(grammar, rules, 1);

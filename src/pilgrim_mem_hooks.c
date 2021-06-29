@@ -54,12 +54,13 @@ void uninstall_mem_hooks() {
 
 // Symbolic representation of memory addresses
 void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
-    memset(mem_attr, 0, sizeof(MemPtrAttr)); // in cast the padding area has random content
+    memset(mem_attr, 0, sizeof(MemPtrAttr)); // in case the padding area has random content
     mem_attr->id = 0;
     mem_attr->offset = 0;
     mem_attr->size = 0;
     mem_attr->type = 0;
     mem_attr->device = -1;
+    bool stack_var = false;
 
 // Users do not want to track memory pointers
 #ifndef MEMORY_POINTERS
@@ -88,6 +89,7 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
         // Maybe a stack buffer so we don't know excatly the size
         // We assume it is 1 byte memory area.
         avl_node = avl_insert(&cpu_addr_tree, (intptr_t)buffer, 1, false);
+        stack_var = true;
     }
 
     // Two possible cases:
@@ -109,6 +111,7 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
     mem_attr->id = avl_node->id_node->id;
     mem_attr->offset = ((intptr_t)buffer) - avl_node->addr;
     mem_attr->size = avl_node->size;
+    if(stack_var) mem_attr->size = 0;   // use size = 0 to tell the post-processing that this is a stack var
     pthread_mutex_unlock(&avl_lock);
 }
 

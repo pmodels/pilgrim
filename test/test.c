@@ -2,7 +2,6 @@
  * Copyright (C) by Argonne National Laboratory
  *     See COPYRIGHT in top-level directory
  */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <mpi.h>

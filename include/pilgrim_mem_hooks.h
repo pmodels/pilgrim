@@ -7,10 +7,10 @@
 #define _PILGRIM_MEM_HOOKS_H_
 
 typedef struct MemPtrAttr_t {
-    int id;             // symbolic id
+    int id;              // symbolic id
     size_t offset;
     size_t size;
-    char type;          // memory location, retrived cudaPointerGetAttributes()
+    char type;           // memory location, retrived cudaPointerGetAttributes()
     char device;         // if on gpu, device id of the gpu, retrived cudaPointerGetAttributes()
 } MemPtrAttr;
 

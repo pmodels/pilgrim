@@ -4,74 +4,87 @@
  */
 
 #include "pilgrim_mpi_objects.h"
+#include "pilgrim_consts.h"
 #include "pilgrim_utils.h"
 
-#define MPI_OBJ_DEFINE(Type)                \
-    ObjHash_##Type *hash_##Type = NULL;     \
-    ObjNode_##Type *list_##Type = NULL;     \
-                                            \
-    static int allocated_##Type;            \
-    static int invalid_##Type = -1;         \
-                                            \
-    ObjHash_##Type* get_hash_entry_##Type(const Type *obj) {            \
-        if(obj == NULL)                                                 \
-            return NULL;                                                \
-        ObjHash_##Type *entry = NULL;                                   \
-        HASH_FIND(hh, hash_##Type, obj, sizeof(Type), entry);           \
-        return entry;                                                   \
-    }                                                                   \
-                                                                        \
-    int get_object_id_##Type(const Type *obj) {                        \
-        if(obj == NULL)                                                 \
-            return invalid_##Type;                                     \
-        ObjHash_##Type *entry = get_hash_entry_##Type(obj);             \
-        /* if not exists in the hash table, then this should be the     \
-         first time the object is created, need to add it to the        \
-         hash table */                                                  \
-        if(entry == NULL) {                                             \
-            entry = pilgrim_malloc(sizeof(ObjHash_##Type));                   \
-            entry->key = pilgrim_malloc(sizeof(Type));                        \
-            memcpy(entry->key, obj, sizeof(Type));                      \
-            entry->id_node = list_##Type;                               \
-            /* get a free id from the head of the free list             \
-               if the head is NULL, which means we have no free ids,    \
-               then create one according to the allocated counter */    \
-            if(entry->id_node == NULL) {                                \
-                entry->id_node = pilgrim_malloc(sizeof(ObjNode_##Type));      \
-                entry->id_node->id = allocated_##Type ++;               \
-            } else {                                                    \
-                DL_DELETE(list_##Type, entry->id_node);                 \
-            }                                                           \
-            HASH_ADD_KEYPTR(hh, hash_##Type, entry->key, sizeof(Type), entry); \
-        }                                                               \
-        return entry->id_node->id;                                      \
-    }                                                                   \
-                                                                        \
-    void object_release_##Type(const Type *obj) {                       \
-        ObjHash_##Type *entry = get_hash_entry_##Type(obj);             \
-        if(entry) {                                                     \
-            /* add the id back to the free list */                      \
-            DL_APPEND(list_##Type, entry->id_node);                     \
-            HASH_DEL(hash_##Type, entry);                               \
-            pilgrim_free(entry->key, sizeof(Type));                     \
-            pilgrim_free(entry, sizeof(ObjHash_##Type));                \
-        }                                                               \
-    }                                                                   \
-                                                                        \
-    void object_cleanup_##Type() {                                      \
-        ObjHash_##Type *entry, *tmp;                                    \
-        HASH_ITER(hh, hash_##Type, entry, tmp) {                        \
-            HASH_DEL(hash_##Type, entry);                               \
-            pilgrim_free(entry->key, sizeof(Type));                     \
-            pilgrim_free(entry->id_node, sizeof(ObjNode_##Type));       \
-            pilgrim_free(entry, sizeof(ObjHash_##Type));                \
-        }                                                               \
-                                                                        \
-        ObjNode_##Type *node, *tmp2;                                    \
-        DL_FOREACH_SAFE(list_##Type, node, tmp2) {                      \
-            DL_DELETE(list_##Type, node);                               \
-            pilgrim_free(node, sizeof(ObjNode_##Type));                 \
-        }                                                               \
+#define MPI_OBJ_DEFINE(Type)                                                        \
+    ObjHash_##Type *hash_##Type = NULL;                                             \
+    ObjNode_##Type *list_##Type = NULL;                                             \
+                                                                                    \
+    static int allocated_##Type;                                                    \
+    static int invalid_##Type = PILGRIM_INVALID_MPI_OBJECT_ID;                      \
+                                                                                    \
+    ObjHash_##Type* get_hash_entry_##Type(const Type *obj) {                        \
+        if(obj == NULL)                                                             \
+            return NULL;                                                            \
+        ObjHash_##Type *entry = NULL;                                               \
+        HASH_FIND(hh, hash_##Type, obj, sizeof(Type), entry);                       \
+        return entry;                                                               \
+    }                                                                               \
+                                                                                    \
+    int get_object_id_##Type(const Type *obj) {                                     \
+        if(obj == NULL)                                                             \
+            return invalid_##Type;                                                  \
+        if(strcmp(#Type, "MPI_Datatype")==0) {                                      \
+            int id = mpi_datatype_to_symbolic_id(obj);                              \
+            /* A buitin datatype like MPI_INT */                                    \
+            if(id!=PILGRIM_CUSTOM_MPI_DATATYPE_ID)                                  \
+                return id;                                                          \
+        }                                                                           \
+        if(strcmp(#Type, "MPI_Op")==0) {                                            \
+            int id = mpi_op_to_symbolic_id(obj);                                    \
+            /* A buitin op like MPI_SUM */                                          \
+            if(id!=PILGRIM_CUSTOM_MPI_OP_ID)                                        \
+                return id;                                                          \
+        }                                                                           \
+        ObjHash_##Type *entry = get_hash_entry_##Type(obj);                         \
+        /* if not exists in the hash table, then this should be the                 \
+         first time the object is created, need to add it to the                    \
+         hash table */                                                              \
+        if(entry == NULL) {                                                         \
+            entry = pilgrim_malloc(sizeof(ObjHash_##Type));                         \
+            entry->key = pilgrim_malloc(sizeof(Type));                              \
+            memcpy(entry->key, obj, sizeof(Type));                                  \
+            entry->id_node = list_##Type;                                           \
+            /* get a free id from the head of the free list                         \
+               if the head is NULL, which means we have no free ids,                \
+               then create one according to the allocated counter */                \
+            if(entry->id_node == NULL) {                                            \
+                entry->id_node = pilgrim_malloc(sizeof(ObjNode_##Type));            \
+                entry->id_node->id = allocated_##Type ++;                           \
+            } else {                                                                \
+                DL_DELETE(list_##Type, entry->id_node);                             \
+            }                                                                       \
+            HASH_ADD_KEYPTR(hh, hash_##Type, entry->key, sizeof(Type), entry);      \
+        }                                                                           \
+        return entry->id_node->id;                                                  \
+    }                                                                               \
+                                                                                    \
+    void object_release_##Type(const Type *obj) {                                   \
+        ObjHash_##Type *entry = get_hash_entry_##Type(obj);                         \
+        if(entry) {                                                                 \
+            /* add the id back to the free list */                                  \
+            DL_APPEND(list_##Type, entry->id_node);                                 \
+            HASH_DEL(hash_##Type, entry);                                           \
+            pilgrim_free(entry->key, sizeof(Type));                                 \
+            pilgrim_free(entry, sizeof(ObjHash_##Type));                            \
+        }                                                                           \
+    }                                                                               \
+                                                                                    \
+    void object_cleanup_##Type() {                                                  \
+        ObjHash_##Type *entry, *tmp;                                                \
+        HASH_ITER(hh, hash_##Type, entry, tmp) {                                    \
+            HASH_DEL(hash_##Type, entry);                                           \
+            pilgrim_free(entry->key, sizeof(Type));                                 \
+            pilgrim_free(entry->id_node, sizeof(ObjNode_##Type));                   \
+            pilgrim_free(entry, sizeof(ObjHash_##Type));                            \
+        }                                                                           \
+                                                                                    \
+        ObjNode_##Type *node, *tmp2;                                                \
+        DL_FOREACH_SAFE(list_##Type, node, tmp2) {                                  \
+            DL_DELETE(list_##Type, node);                                           \
+            pilgrim_free(node, sizeof(ObjNode_##Type));                             \
+        }                                                                           \
     }
 
 
@@ -248,10 +261,6 @@ void object_cleanup_MPI_Request() {
 MPICommHash *hash_MPI_Comm = NULL;
 
 
-static int invalid_comm_id = -999;
-static int comm_null_id = -1;
-static int comm_world_id = -2;
-static int comm_self_id = -3;
 static int allocated_comm_id = 0;
 // Pick a unique name for newcomm
 int comm2id(MPI_Comm *newcomm) {
@@ -350,16 +359,6 @@ int generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
     return id;
 }
 
-int get_predefined_comm_id(MPI_Comm comm) {
-    if(comm == MPI_COMM_NULL)
-        return comm_null_id;
-    if(comm == MPI_COMM_WORLD)
-        return comm_world_id;
-    if(comm == MPI_COMM_SELF)
-        return comm_self_id;
-    return invalid_comm_id;
-}
-
 /*
  * Name the following functinos in a way that we can
  * use the above defined MACROs:
@@ -367,11 +366,10 @@ int get_predefined_comm_id(MPI_Comm comm) {
  *  - MPI_OBJ_RELEASE(MPI_Comm, comm);
  */
 int get_object_id_MPI_Comm(MPI_Comm *comm) {
-    // check for predefined comm
-    if((comm == NULL) || (*comm== MPI_COMM_NULL))
-        return get_predefined_comm_id(MPI_COMM_NULL);
-    else if((*comm == MPI_COMM_WORLD) || (*comm == MPI_COMM_SELF))
-        return get_predefined_comm_id(*comm);
+    int id = mpi_comm_to_symbolic_id(comm);
+    // built in communicator like MPI_COMM_WORLD
+    if(id != PILGRIM_CUSTOM_MPI_COMM_ID)
+        return id;
 
     // otherwise, check for hash table
     MPICommHash *entry = NULL;
@@ -382,11 +380,12 @@ int get_object_id_MPI_Comm(MPI_Comm *comm) {
         // not possible
         if(!entry)
             printf("Not possible! cannot find MPI_Comm entry\n");
-        return invalid_comm_id;
+        return PILGRIM_MPI_COMM_NULL_ID;
     }
 }
 void object_release_MPI_Comm(MPI_Comm *comm) {
-    if( (comm==NULL) || (*comm==MPI_COMM_NULL) || (*comm==MPI_COMM_SELF) || (*comm == MPI_COMM_WORLD) )
+    int id = mpi_comm_to_symbolic_id(comm);
+    if(id != PILGRIM_CUSTOM_MPI_COMM_ID)
         return;
 
     MPICommHash *entry = NULL;

@@ -43,14 +43,21 @@ def codegen_read_one_arg(func, i):
 
     lines = []
     if arg_type_strip(arg.type) == "int":
-        lines.append('cs->arg_types[%d] = TYPE_INT;' %i)
+        if "source" in arg.name or "dest" in arg.name:
+            lines.append('cs->arg_types[%d] = TYPE_RANK_ENCODED;' %i)
+        elif "tag" in arg.name:
+            lines.append('cs->arg_types[%d] = TYPE_TAG;' %i)
+        else:
+            lines.append('cs->arg_types[%d] = TYPE_INT;' %i)
     else:
         lines.append('cs->arg_types[%d] = TYPE_NON_MPI;' %i)
     lines.append('cs->arg_directions[%d] = DIRECTION_%s;' %(i, arg.direction))
 
     if 'void' in arg.type:
+        lines.append('cs->arg_types[%d] = TYPE_MEM_PTR;' %i)
         lines.append('cs->arg_sizes[%d] = sizeof(MemPtrAttr);' %i)
     elif 'MPI_Status' in arg.type:
+        lines.append('cs->arg_types[%d] = TYPE_MPI_Status;' %i)
         lines.append('cs->arg_sizes[%d] = sizeof(int)*2;' %i)
     elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
         pass

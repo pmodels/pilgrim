@@ -160,6 +160,7 @@ avl_insert(AvlTree *t, intptr_t addr, size_t size, bool heap)
 
         (*t)->addr = addr;
         (*t)->size = size;
+        (*t)->used = false;
         (*t)->heap = heap;
         (*t)->id_node = NULL;      // id is assigned only when used in MPI calls
 

@@ -29,6 +29,11 @@ AddrIdNode *addr_id_list;               // free list of addr ids
 static bool hook_installed = false;
 static int allocated_addr_id = 0;
 
+static int num_malloc = 0;
+static int num_used_malloc = 0;
+static int num_free = 0;
+
+
 pthread_mutex_t avl_lock = PTHREAD_MUTEX_INITIALIZER;
 
 
@@ -50,6 +55,8 @@ void uninstall_mem_hooks() {
         DL_DELETE(addr_id_list, node);
         pilgrim_free(node, sizeof(AddrIdNode));
     }
+
+    printf("num malloc: %d, num free: %d, num used malloc: %d\n", num_malloc, num_free, num_used_malloc);
 }
 
 // Symbolic representation of memory addresses
@@ -60,7 +67,6 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
     mem_attr->size = 0;
     mem_attr->type = 0;
     mem_attr->device = -1;
-    bool stack_var = false;
 
 // Users do not want to track memory pointers
 #ifndef MEMORY_POINTERS
@@ -89,8 +95,12 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
         // Maybe a stack buffer so we don't know excatly the size
         // We assume it is 1 byte memory area.
         avl_node = avl_insert(&cpu_addr_tree, (intptr_t)buffer, 1, false);
-        stack_var = true;
+    } else {
+        // First use of this memory buffer
+        if(!avl_node->used && avl_node->heap)
+            num_used_malloc++;
     }
+    avl_node->used = true;
 
     // Two possible cases:
     // 1. New created avl_node
@@ -111,13 +121,14 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
     mem_attr->id = avl_node->id_node->id;
     mem_attr->offset = ((intptr_t)buffer) - avl_node->addr;
     mem_attr->size = avl_node->size;
-    if(stack_var) mem_attr->size = 0;   // use size = 0 to tell the post-processing that this is a stack var
+    if(!avl_node->heap) mem_attr->size = 0;   // use size = 0 to tell the post-processing that this is a stack var
     pthread_mutex_unlock(&avl_lock);
 }
 
 // Thread safe insert/delete from addr tree
 void safe_insert_addr(AvlTree *addr_tree, void* ptr, size_t size) {
     pthread_mutex_lock(&avl_lock);
+    num_malloc++;
     avl_insert(addr_tree, (intptr_t)ptr, size, true);
     pthread_mutex_unlock(&avl_lock);
 }
@@ -125,6 +136,7 @@ void safe_insert_addr(AvlTree *addr_tree, void* ptr, size_t size) {
 void safe_delete_addr(AvlTree *addr_tree, void* ptr) {
     pthread_mutex_lock(&avl_lock);
     AvlTree avl_node = avl_search(*addr_tree, (intptr_t)ptr);
+    num_free++;
 
     if(AVL_EMPTY == avl_node) {
         if(ptr != NULL) {

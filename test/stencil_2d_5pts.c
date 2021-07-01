@@ -153,5 +153,16 @@ int main(int argc, char **argv) {
     free(rheat);
     free(args);
 
+    free(sbufnorth);
+    free(sbufsouth);
+    free(sbufwest);
+    free(sbufeast);
+    free(rbufnorth);
+    free(rbufsouth);
+    free(rbufwest);
+    free(rbufeast);
+    free(aold);
+    free(anew);
+
     MPI_Finalize();
 }

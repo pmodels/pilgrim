@@ -18,7 +18,6 @@ void pilgrim_init(int *argc, char ***argv) {
     logger_init();
     elapsed_time = pilgrim_wtime();
     tstart = pilgrim_wtime();
-
 }
 
 void pilgrim_exit() {

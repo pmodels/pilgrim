@@ -103,5 +103,6 @@ logs
 #src/pilgrim_read_args.c
 pilgrim_reader
 pilgrim_decoder
+pilgrim_app_generator
 pilgrim2text
 pilgrim-logs

@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(comm, &r);
     MPI_Comm_size(comm, &p);
     int n, energy, niters, px, py;
-    int *args;
+    int *args = malloc(sizeof(int)*5);
 
     if (r==0) {
         // argument checking
@@ -44,13 +44,11 @@ int main(int argc, char **argv) {
             MPI_Abort(comm, 0);
 
         // distribute arguments
-        args = malloc(sizeof(int) * 5);
         args[0] = n; args[1] = energy; args[2] = niters; args[3] = px; args[4] = py;
         //int args[5] = {n, energy, niters, px,  py};
         MPI_Bcast(args, 5, MPI_INT, 0, comm);
     }
     else {
-        args = malloc(sizeof(int)*5);
         MPI_Bcast(args, 5, MPI_INT, 0, comm);
         n=args[0]; energy=args[1]; niters=args[2]; px=args[3]; py=args[4];
     }

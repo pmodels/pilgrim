@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include "pilgrim.h"
 #include "pilgrim_utils.h"
 #include "pilgrim_mem_hooks.h"
 #include "pilgrim_addr_avl.h"
@@ -143,6 +144,30 @@ void safe_delete_addr(AvlTree *addr_tree, void* ptr) {
             // TODO: potential memory leak. why
         }
     } else {
+        /* ------Experimental code below--------- */
+        // Treat free() like a MPI call so we keep
+        // a record for it in order to place it
+        // during proxy app generation.
+        if(addr_tree==&cpu_addr_tree && avl_node->heap && avl_node->used) {
+            MemPtrAttr attr;
+            addr2id(ptr, &attr);
+
+            int arg_sizes[1] = {sizeof(MemPtrAttr)};
+            Record record = {
+                .tstart = 0,
+                .tend = 0,
+                .res = 0,
+                .func_id = ID_free,
+                .arg_count = 1,
+                .arg_sizes = arg_sizes,
+            };
+            record.args = (void**) dlmalloc(sizeof(void*) * 1);
+            record.args[0] = &attr;
+            write_record(record);
+            dlfree(record.args);
+        }
+        /* ------Experimental code above--------- */
+
         if(avl_node->id_node)
             DL_APPEND(addr_id_list, avl_node->id_node);
         bool heap = avl_node->heap && (avl_node->addr==(intptr_t)ptr);

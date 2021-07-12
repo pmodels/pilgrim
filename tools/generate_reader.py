@@ -123,6 +123,11 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
                 f.write('\n\t\t\t'.join(lines))
         f.write('\n\t\t\tbreak;\n\t\t}\n')
 
+    # for free() function
+    f.write('\t\tcase ID_free:\n\t\t{\n')
+    f.write('\t\t\tread_record_args_special(func_id, buff, cs);')
+    f.write('\n\t\t\tbreak;\n\t\t}\n')
+
     f.write('\t}\n}\n')
     f.close()
 

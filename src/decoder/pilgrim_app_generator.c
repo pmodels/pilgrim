@@ -74,8 +74,8 @@ void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
                     MemPtrAttr* attr = (MemPtrAttr*) cs->args[j];
                     bool exist;
                     VariablePool* var = var_find_or_add(type, attr->id, &exist);
-                    //if(!exist)
-                    //    fprintf(f, "%s %s;\n", TYPE_STR[type], var->name);
+                    if(!exist)
+                        fprintf(f, "%s %s = NULL;\n", TYPE_STR[type], var->name);
                 } else {    // all types with interger values
                     int value = *((int*)cs->args[j]);
                     if(type == TYPE_INT && dir == DIRECTION_IN)
@@ -91,41 +91,16 @@ void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
     fprintf(f, "\n");
 }
 
-int* write_vars_initialization(FILE* f, Symbol* rule, CallSignature *cst) {
-    CallSignature* cs;
-    Symbol *sym;
-
-    int *mem_buf_sizes = malloc(sizeof(int)*30);
-    memset(mem_buf_sizes, 0, sizeof(int)*30);
-    int mem_buf_count = 0;
-
-    DL_FOREACH(rule->rule_body, sym) {
-        if(sym->val < 0 || sym->val >= grammar_splitter)
-            continue;
-        cs = &(cst[sym->val]);
-        for(int i = 0; i < cs->arg_count; i++) {
-            int type = cs->arg_types[i];
-            if(type == TYPE_MEM_PTR) {
-                MemPtrAttr* attr = (MemPtrAttr*) cs->args[i];
-                mem_buf_sizes[attr->id] = max(attr->size, mem_buf_sizes[attr->id]);
-            }
+void write_vars_initialization(FILE* f, CallSignature *cs) {
+    if(cs->func_id == ID_free)
+        return;
+    for(int i = 0; i < cs->arg_count; i++) {
+        int type = cs->arg_types[i];
+        if(type == TYPE_MEM_PTR) {
+            MemPtrAttr* attr = (MemPtrAttr*) cs->args[i];
+            fprintf(f, "\tif(!%s_%d) %s_%d = malloc(%lu);\n", TYPE_VAR_STR[TYPE_MEM_PTR], attr->id, TYPE_VAR_STR[TYPE_MEM_PTR], attr->id, attr->size);
         }
     }
-
-    for(int i = 0; i < 30; i++) {
-        if(mem_buf_sizes[i] > 0)
-            fprintf(f, "\t%s %s_%d = malloc(%d);\n", TYPE_STR[TYPE_MEM_PTR], TYPE_VAR_STR[TYPE_MEM_PTR], i, mem_buf_sizes[i]);
-    }
-
-    return mem_buf_sizes;
-}
-
-void write_vars_free(FILE* f, int *mem_buf_sizes) {
-    for(int i = 0; i < 30; i++) {
-        if(mem_buf_sizes[i] > 0)
-            fprintf(f, "\tfree(%s_%d);\n", TYPE_VAR_STR[TYPE_MEM_PTR], i);
-    }
-    free(mem_buf_sizes);
 }
 
 
@@ -199,11 +174,15 @@ void write_call_special(FILE* f, CallSignature *cs, const char* indent) {
 
         fprintf(f, "%sMPI_Waitall(%d, reqs, MPI_STATUSES_IGNORE);\n", indent, count);
     }
+    if(cs->func_id == ID_free) {
+        MemPtrAttr* attr = (MemPtrAttr*) cs->args[0];
+        fprintf(f, "\tfree(%s_%d);\n\t%s_%d = NULL;\n", TYPE_VAR_STR[TYPE_MEM_PTR], attr->id, TYPE_VAR_STR[TYPE_MEM_PTR], attr->id);
+    }
 }
 
 
 void write_call(FILE* f, CallSignature *cs, const char* indent) {
-    if(cs->func_id == ID_MPI_Waitall) {
+    if(cs->func_id == ID_MPI_Waitall || cs->func_id == ID_free) {
         write_call_special(f, cs, indent);
         return;
     }
@@ -276,7 +255,24 @@ Grammar* final_sequitur(DecodedGrammars* dg, int *final_splitter) {
     return grammar;
 }
 
-void experimental_code(FILE* f, Grammar* grammar, CallSignature *cst, int final_splitter) {
+void handle_one_symbol(FILE* f, Symbol* sym, CallSignature* cst) {
+
+    CallSignature *cs = &cst[sym->val];
+    if(sym->val >= 0)
+        write_vars_initialization(f, cs);
+
+    if(sym->exp > 1)
+        fprintf(f, "\tfor(int i = 0; i < %d; i++)\n", sym->exp);
+
+    if(sym->val >= 0) {
+        CallSignature *cs = &cst[sym->val];
+        write_call(f, cs, sym->exp>1?"\t\t":"\t");
+    } else {
+        fprintf(f, "\t%sfunc_%d();\n", sym->exp>1?"\t":"", -1*sym->val);
+    }
+}
+
+void one_func_per_rule(FILE* f, Grammar* grammar, CallSignature *cst, int final_splitter) {
 
     Symbol *rule, *sym;
     DL_FOREACH(grammar->rules, rule) {
@@ -287,23 +283,13 @@ void experimental_code(FILE* f, Grammar* grammar, CallSignature *cst, int final_
     DL_FOREACH(grammar->rules, rule) {
         fprintf(f, "void func_%d() {\n", -1*rule->val);
 
-        int* mem_buf_sizes = write_vars_initialization(f, rule, cst);
-
         if(rule->val == -1)
             fprintf(f, "\tif(g_ugi == 0) {\n");
 
         DL_FOREACH(rule->rule_body, sym) {
 
             if(sym->val < grammar_splitter) {
-                if(sym->exp > 1)
-                    fprintf(f, "\tfor(int i = 0; i < %d; i++)\n", sym->exp);
-
-                if(sym->val >= 0) {
-                    CallSignature *cs = &cst[sym->val];
-                    write_call(f, cs, sym->exp>1?"\t\t":"\t");
-                } else {
-                    fprintf(f, "\t%sfunc_%d();\n", sym->exp>1?"\t":"", -1*sym->val);
-                }
+                handle_one_symbol(f, sym, cst);
             } else {
                 // This code is only executed for rule -1
                 if(sym->val == final_splitter - 1)
@@ -313,7 +299,6 @@ void experimental_code(FILE* f, Grammar* grammar, CallSignature *cst, int final_
             }
         }
 
-        write_vars_free(f, mem_buf_sizes);
 
         fprintf(f, "}\n");
     }
@@ -343,6 +328,7 @@ int main(int argc, char** argv) {
     int final_splitter;
     Grammar *grammar = final_sequitur(dg, &final_splitter);
 
+
     // 3. Generate a MPI program
     char source_file_path[256];
     sprintf(source_file_path, "%s/proxy_app.c", directory);
@@ -350,15 +336,15 @@ int main(int argc, char** argv) {
 
     write_prologue(f, grammar, cst);
 
-    experimental_code(f, grammar, cst, final_splitter);
+    one_func_per_rule(f, grammar, cst, final_splitter);
 
     write_epilogue(f, gm.ranks, dg);
-
 
     free_vars_pool();
     free_decoded_grammars(dg);
     sequitur_cleanup(grammar);
     fclose(f);
+    // TODO free cst?
 
     return 0;
 }

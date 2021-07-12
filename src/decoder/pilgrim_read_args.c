@@ -13721,5 +13721,10 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			pos += cs->arg_sizes[12];
 			break;
 		}
+		case ID_free:
+		{
+			read_record_args_special(func_id, buff, cs);
+			break;
+		}
 	}
 }

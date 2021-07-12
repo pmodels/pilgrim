@@ -388,6 +388,7 @@
 #define ID_MPI_File_write_ordered_end 380
 #define ID_MPI_Graphdims_get 381
 #define ID_MPI_T_pvar_get_info 382
+#define ID_free 383
 static char *func_names[] = {
 "MPI_Type_delete_attr", 
 "MPI_Sendrecv_replace", 
@@ -772,6 +773,7 @@ static char *func_names[] = {
 "MPI_File_write_ordered_end", 
 "MPI_Graphdims_get", 
 "MPI_T_pvar_get_info", 
+"free", 
 };
 
 #endif

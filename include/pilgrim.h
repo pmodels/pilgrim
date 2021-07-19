@@ -22,7 +22,6 @@
 
 
 
-
 // First call the original function and stores the elapsed time, func id, etc
 // Need to call the function first so the output arguments have the correct value
 #define PILGRIM_TRACING_1(ret_type, func, func_args)                                    \
@@ -32,10 +31,13 @@
     }                                                                                   \
     short func_id = ID_##func;                                                          \
     double tstart = pilgrim_wtime() - g_program_start_time;                             \
+    set_inside_mpi();                                                                   \
     ret_type res = P##func func_args;                                                   \
+    unset_inside_mpi();                                                                 \
     double tend = pilgrim_wtime() - g_program_start_time;
 
-// Then store every in a Record structure and write it to log
+
+// Then in a Record structure and write it to log
 // Copy the arguments in case the application freed/modified the memory
 #define PILGRIM_TRACING_2(record_arg_count, record_arg_sizes, record_args)              \
     Record record = {                                                                   \
@@ -63,5 +65,6 @@
     pilgrim_free(record.args, sizeof(void*) * record_arg_count);                        \
                                                                                         \
     return res;
+
 
 #endif

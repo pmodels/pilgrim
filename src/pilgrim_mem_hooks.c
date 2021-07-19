@@ -33,6 +33,7 @@ static int allocated_addr_id = 0;
 static int num_malloc = 0;
 static int num_used_malloc = 0;
 static int num_free = 0;
+static int num_malloc_by_mpi = 0;
 
 
 pthread_mutex_t avl_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -57,7 +58,16 @@ void uninstall_mem_hooks() {
         pilgrim_free(node, sizeof(AddrIdNode));
     }
 
-    printf("num malloc: %d, num free: %d, num used malloc: %d\n", num_malloc, num_free, num_used_malloc);
+    int total_malloc, total_free, total_malloc_by_mpi, total_malloc_used;
+    PMPI_Reduce(&num_malloc, &total_malloc, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    PMPI_Reduce(&num_free, &total_free, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    PMPI_Reduce(&num_malloc_by_mpi, &total_malloc_by_mpi, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    PMPI_Reduce(&num_used_malloc, &total_malloc_used, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    int rank;
+    PMPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if(rank == 0)
+        printf("num malloc: %d, num free: %d, num malloc by mpi: %d, num used malloc: %d\n",
+                total_malloc, total_free, total_malloc_by_mpi, total_malloc_used);
 }
 
 // Symbolic representation of memory addresses
@@ -130,6 +140,8 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
 void safe_insert_addr(AvlTree *addr_tree, void* ptr, size_t size) {
     pthread_mutex_lock(&avl_lock);
     num_malloc++;
+    if(g_inside_mpi)
+        num_malloc_by_mpi++;
     avl_insert(addr_tree, (intptr_t)ptr, size, true);
     pthread_mutex_unlock(&avl_lock);
 }
@@ -184,7 +196,7 @@ void safe_delete_addr(AvlTree *addr_tree, void* ptr) {
  */
 #ifdef MEMORY_POINTERS
 void* malloc(size_t size) {
-    if(!hook_installed)
+    if(!hook_installed || g_inside_mpi)
         return dlmalloc(size);
 
     void* ptr = dlmalloc(size);
@@ -193,7 +205,7 @@ void* malloc(size_t size) {
 }
 
 void* calloc(size_t nitems, size_t size) {
-    if(!hook_installed)
+    if(!hook_installed || g_inside_mpi)
         return dlcalloc(nitems, size);
 
     void *ptr = dlcalloc(nitems, size);
@@ -202,7 +214,7 @@ void* calloc(size_t nitems, size_t size) {
 }
 
 void* realloc(void *ptr, size_t size) {
-    if(!hook_installed)
+    if(!hook_installed || g_inside_mpi)
         return dlrealloc(ptr, size);
 
     void *new_ptr = dlrealloc(ptr, size);
@@ -225,7 +237,7 @@ void* realloc(void *ptr, size_t size) {
 // Note that do not use printf() inside this funciton
 // as printf itself may allocate memory
 void free(void *ptr) {
-    if(!hook_installed) {
+    if(!hook_installed || g_inside_mpi) {
         dlfree(ptr);
         return;
     }

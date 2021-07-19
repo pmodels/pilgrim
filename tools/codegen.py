@@ -40,7 +40,7 @@ class MPIFunction:
                     if "INOUT" in direction.upper(): arg.direction = "INOUT"
                     elif "OUT" in direction.upper(): arg.direction = "OUT"
 
-                if 'length=[' in parameter: # only in MPI_Group_range_excl, the argument ranges[][3], length is ['n', '3']
+                if 'length=[' in parameter: # only in MPI_Group_range_excl/incl, the argument ranges[][3], length is ['n', '3']
                     length = parameter.split('length=[')[1].split(']')[0]
                     arg.length = '*'.join( length.split(',') ).replace('\"', '')
                 elif 'length=' in parameter:

@@ -48,7 +48,10 @@ def codegen_read_one_arg(func, i):
         elif "tag" in arg.name:
             lines.append('cs->arg_types[%d] = TYPE_TAG;' %i)
         else:
-            lines.append('cs->arg_types[%d] = TYPE_INT;' %i)
+            if '[' in arg.type:
+                lines.append('cs->arg_types[%d] = TYPE_INT_ARRAY;' %i)
+            else:
+                lines.append('cs->arg_types[%d] = TYPE_INT;' %i)
     else:
         lines.append('cs->arg_types[%d] = TYPE_NON_MPI;' %i)
     lines.append('cs->arg_directions[%d] = DIRECTION_%s;' %(i, arg.direction))
@@ -70,8 +73,10 @@ def codegen_read_one_arg(func, i):
     elif '*' in arg.type or '[' in arg.type:
         fixed_type = arg_type_strip(arg.type)
         if arg.length:
-            if '*' in arg.length:   # n*3
-                pass
+            if 'n*3' in arg.length:   # n*3, see codegen.py
+                idx = find_arg_idx(func, "n")
+                lines.append( 'length = *((int*) (cs->args[%d]));' %idx )
+                lines.append( "cs->arg_sizes[%d] = length * 3 * sizeof(%s);" %(i, fixed_type))
             else:
                 idx = find_arg_idx(func, arg.length)
                 lines.append( 'length = *((int*) (cs->args[%d]));' %idx )

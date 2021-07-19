@@ -59,6 +59,7 @@ void free_decoded_grammars(DecodedGrammars *dg);
 #define TYPE_TAG            12
 #define TYPE_MEM_PTR        13
 #define TYPE_INT            14
+#define TYPE_INT_ARRAY      15
 
 static char* TYPE_STR[] = {
     "NON_MPI",
@@ -75,6 +76,7 @@ static char* TYPE_STR[] = {
     "MPI_RANK_ENCODED",
     "MPI_TAG",
     "void*",
+    "int",
     "int",
 };
 
@@ -94,6 +96,7 @@ static char* TYPE_VAR_STR[] = {
     "",                 // TAG
     "buf",
     "var",
+    "arr",
 };
 
 

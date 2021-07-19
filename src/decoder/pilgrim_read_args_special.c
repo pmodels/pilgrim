@@ -45,7 +45,7 @@ void read_record_args_special(int func_id, void* buff, CallSignature *cs) {
 
             cs->arg_sizes[0] = sizeof(int);
             cs->arg_types[0] = TYPE_MPI_Request;
-            cs->arg_directions[0] = DIRECTION_IN;
+            cs->arg_directions[0] = DIRECTION_INOUT;
             cs->args[0] = malloc( cs->arg_sizes[0] );
             memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
             pos += cs->arg_sizes[0];

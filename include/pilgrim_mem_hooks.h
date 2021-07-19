@@ -14,17 +14,20 @@ typedef struct MemPtrAttr_t {
     char device;         // if on gpu, device id of the gpu, retrived cudaPointerGetAttributes()
 } MemPtrAttr;
 
-/*
-static void * (*real_calloc)(size_t nitems, size_t size);
-static void * (*real_malloc)(size_t size);
-static void * (*real_valloc)(size_t size);
-static void * (*real_pvalloc)(size_t size);
-static void * (*real_realloc)(void *ptr, size_t size);
-static void   (*real_free)(void *ptr);
-*/
+
+int g_inside_mpi;
+
 
 void install_mem_hooks();
 void uninstall_mem_hooks();
 void addr2id(const void *buffer, MemPtrAttr *mem_attr);
+
+
+static void set_inside_mpi() {
+    g_inside_mpi = 1;
+}
+static void unset_inside_mpi() {
+    g_inside_mpi = 0;
+}
 
 #endif

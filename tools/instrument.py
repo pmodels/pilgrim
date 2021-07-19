@@ -35,14 +35,18 @@ def generate_function_id_file(funcs):
     function_id_file.write("/*\n * Copyright (C) by Argonne National Laboratory\n *     See COPYRIGHT in top-level directory\n */\n")
     function_id_file.write('/* This file is generated automatically, please do not change! */\n')
     function_id_file.write('#ifndef _PILGRIM_FUNC_IDS_H_\n#define _PILGRIM_FUNC_IDS_H_\n')
+
     idx = 0
     for name in funcs:
         function_id_file.write('#define ID_'+name+' '+str(idx)+'\n')
         idx += 1
+    function_id_file.write('#define ID_free'+' '+str(idx)+'\n')
+
 
     function_id_file.write('static char *func_names[] = {\n')
     for name in funcs:
         function_id_file.write('"%s", \n' %name)
+    function_id_file.write('"free", \n')
     function_id_file.write('};\n\n')
 
     function_id_file.write('#endif')
@@ -115,11 +119,15 @@ def codegen_assemble_args(func):
             obj_count += 1
         elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
-        elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for rank-1/rank+1 as src or dest
+        elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for src or dest ranks
             line += "\tint %s_rank = g_mpi_rank - %s;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = PILGRIM_MPI_ANY_SOURCE;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_PROC_NULL) %s_rank = PILGRIM_MPI_PROC_NULL;\n" %(arg.name, arg.name)
             assemble_args.append( "&%s_rank" %arg.name )
+        elif 'int' in arg.type and ('tag' == arg.name):    # pattern recognization for src or dest ranks
+            line += "\tint my_tag = %s;\n" %(arg.name)
+            line += "\tif(my_tag == MPI_ANY_TAG) my_tag = PILGRIM_MPI_ANY_TAG;\n"
+            assemble_args.append("&my_tag")
         else:
             assemble_args.append( "&"+arg.name)
 
@@ -299,7 +307,7 @@ def generate_wrapper_file(funcs):
             fortran_sig = fortran_sig.replace(")", ", MPI_Fint *ierr)")
         #f.write("extern void " + func.name.upper() + fortran_sig + "{ " + before_call+actual_call + "}\n")
         #f.write("extern void " + func.name.lower() + fortran_sig + "{ " + before_call+actual_call + "}\n")
-        f.write("extern void " + func.name.lower() + "_" + fortran_sig + "{ "+before_call+actual_call + "}\n")
+        #f.write("extern void " + func.name.lower() + "_" + fortran_sig + "{ "+before_call+actual_call + "}\n")
         #f.write("extern void " + func.name.lower() + "__" + fortran_sig + "{ "+before_call+actual_call + "}\n")
 
 

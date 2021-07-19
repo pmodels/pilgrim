@@ -20,6 +20,7 @@ typedef struct AvlNode_t {
     intptr_t addr;               // use addr as key
     size_t size;                 // size of allocated memory
 
+    bool used;                   // this memory buffer is used by user's MPI call
     bool heap;
     AddrIdNode* id_node;         // symbolic id to represent this memory buffer
 

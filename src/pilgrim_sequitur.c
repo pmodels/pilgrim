@@ -10,8 +10,6 @@
 #include "pilgrim_sequitur.h"
 #include "pilgrim_utils.h"
 
-int mpi_rank, mpi_size;
-
 
 void delete_symbol(Symbol *sym) {
     symbol_delete(sym->rule, sym, true);
@@ -167,9 +165,10 @@ int check_digram(Grammar *grammar, Symbol *sym) {
     if(sym == NULL || sym->next == NULL || sym->next == sym)
         return 0;
 
-    // First of all, check if digram is of form a^i a^j
-    // If so, make it to a^(i+j)
-    if(sym->val == sym->next->val) {
+    // First of all, twins-removal rule.
+    // Check if digram is of form a^i a^j
+    // If so, represent it using a^(i+j)
+    if(grammar->twins_removal && sym->val == sym->next->val) {
         digram_delete(&(grammar->digram_table), sym->prev);
         sym->exp = sym->exp + sym->next->exp;
         //delete_symbol(sym->next);
@@ -247,20 +246,19 @@ void sequitur_cleanup(Grammar *grammar) {
     grammar->rule_id = -1;
 }
 
-void sequitur_init_rule_id(Grammar *grammar, int start_rule_id) {
+void sequitur_init_rule_id(Grammar *grammar, int start_rule_id, bool twins_removal) {
     grammar->digram_table = NULL;
     grammar->rules = NULL;
     grammar->rule_id = start_rule_id;
+    grammar->twins_removal = twins_removal;
 
-    PMPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     // Add the main rule: S, which will be the head of the rule list
     rule_put(&(grammar->rules), new_rule(grammar));
 }
 
 void sequitur_init(Grammar *grammar) {
-    sequitur_init_rule_id(grammar, -1);
+    sequitur_init_rule_id(grammar, -1, true);
 }
 
 void sequitur_update(Grammar *grammar, int *update_terminal_id) {
@@ -275,10 +273,9 @@ void sequitur_update(Grammar *grammar, int *update_terminal_id) {
 
 double sequitur_finalize(const char* output_path, Grammar *grammar) {
 
-    if(mpi_rank == 0) {
-        // print_rules(grammar);
-        // print_digrams(grammar);
-    }
+    int mpi_size, mpi_rank;
+    PMPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     // Write grammars from all ranks to one file
     double compressed_size = sequitur_dump(output_path, grammar, mpi_rank, mpi_size);

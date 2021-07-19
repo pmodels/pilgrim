@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include "pilgrim_sequitur.h"
 
-void print_digrams(Grammar *grammar) {
+void sequitur_print_digrams(Grammar *grammar) {
     Digram *digram, *tmp;
 
     printf("digrams count: %d\n", HASH_COUNT(grammar->digram_table));
@@ -23,7 +23,7 @@ void print_digrams(Grammar *grammar) {
     }
 }
 
-void print_rules(Grammar *grammar) {
+void sequitur_print_rules(Grammar *grammar) {
     Symbol *rule, *sym;
     int rules_count = 0, symbols_count = 0;
     DL_COUNT(grammar->rules, rule, rules_count);

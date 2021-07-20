@@ -165,21 +165,28 @@ void read_record_args_special(int func_id, void* buff, CallSignature *cs) {
         case ID_MPI_Testall:
         {
             //MPI_Testall(int count, MPI_Request array_of_requests[], int *flag, MPI_Status array_of_statuses[])
-            cs->args = malloc(4 * sizeof(void*));
+            CS_ARGS_INITIALIZATION(4)
+
             pos = 0;
 
             cs->arg_sizes[0] = sizeof(int);
             cs->args[0] = malloc(cs->arg_sizes[0]);
+            cs->arg_types[0] = TYPE_INT;
+            cs->arg_directions[0] = DIRECTION_IN;
             memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
             pos += cs->arg_sizes[0];
 
             cs->arg_sizes[1] = (*(int*)cs->args[0]) * sizeof(int);
+            cs->arg_types[1] = TYPE_MPI_Request;
             cs->args[1] = malloc(cs->arg_sizes[1]);
+            cs->arg_directions[1] = DIRECTION_INOUT;
             memcpy(cs->args[1], buff+pos, cs->arg_sizes[1]);
             pos += cs->arg_sizes[1];
 
             cs->arg_sizes[2] = sizeof(int);
             cs->args[2] = malloc(cs->arg_sizes[2]);
+            cs->arg_types[2] = TYPE_INT;
+            cs->arg_directions[2] = DIRECTION_OUT;
             memcpy(cs->args[2], buff+pos, cs->arg_sizes[2]);
             pos += cs->arg_sizes[2];
 
@@ -187,7 +194,9 @@ void read_record_args_special(int func_id, void* buff, CallSignature *cs) {
             if(flag) {
                 cs->arg_count = 4;
                 cs->arg_sizes[3] = (*(int*)cs->args[0]) * sizeof(int) * 2;
+                cs->arg_types[3] = TYPE_MPI_Status;
                 cs->args[3] = malloc(cs->arg_sizes[3]);
+                cs->arg_directions[3] = DIRECTION_OUT;
                 memcpy(cs->args[3], buff+pos, cs->arg_sizes[3]);
             } else {
                 cs->arg_count = 3;

@@ -1225,7 +1225,19 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 		}
 		case ID_MPI_Request_free:
 		{
-			read_record_args_special(func_id, buff, cs);
+			cs->arg_count = 1;
+			cs->arg_sizes = malloc(cs->arg_count * sizeof(int));
+			cs->arg_types = malloc(cs->arg_count * sizeof(int));
+			cs->arg_directions = malloc(cs->arg_count * sizeof(int));
+			cs->args = malloc(cs->arg_count * sizeof(void*));
+			pos = 0;
+			cs->arg_types[0] = TYPE_NON_MPI;
+			cs->arg_directions[0] = DIRECTION_INOUT;
+			cs->arg_sizes[0] = sizeof(int);
+			cs->arg_types[0] = TYPE_MPI_Request;
+			cs->args[0] = calloc(cs->arg_sizes[0], 1);
+			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
+			pos += cs->arg_sizes[0];
 			break;
 		}
 		case ID_MPI_File_read_all_end:

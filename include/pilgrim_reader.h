@@ -44,22 +44,23 @@ typedef struct DecodedGrammars_t {
 
 void free_decoded_grammars(DecodedGrammars *dg);
 
-#define TYPE_NON_MPI        0
-#define TYPE_MPI_Info       1
-#define TYPE_MPI_Datatype   2
-#define TYPE_MPI_File       3
-#define TYPE_MPI_Win        4
-#define TYPE_MPI_Request    5
-#define TYPE_MPI_Group      6
-#define TYPE_MPI_Op         7
-#define TYPE_MPI_Message    8
-#define TYPE_MPI_Comm       9
-#define TYPE_MPI_Status     10
-#define TYPE_RANK_ENCODED   11
-#define TYPE_TAG            12
-#define TYPE_MEM_PTR        13
-#define TYPE_INT            14
-#define TYPE_INT_ARRAY      15
+#define TYPE_NON_MPI            0
+#define TYPE_MPI_Info           1
+#define TYPE_MPI_Datatype       2
+#define TYPE_MPI_File           3
+#define TYPE_MPI_Win            4
+#define TYPE_MPI_Request        5
+#define TYPE_MPI_Group          6
+#define TYPE_MPI_Op             7
+#define TYPE_MPI_Message        8
+#define TYPE_MPI_Comm           9
+#define TYPE_MPI_Status         10
+#define TYPE_RANK_ENCODED       11
+#define TYPE_TAG                12
+#define TYPE_MEM_PTR            13
+#define TYPE_INT                14
+#define TYPE_INT_ARRAY          15
+#define TYPE_MPI_User_function  16
 
 static char* TYPE_STR[] = {
     "NON_MPI",
@@ -78,6 +79,7 @@ static char* TYPE_STR[] = {
     "void*",
     "int",
     "int",
+    "MPI_User_function",
 };
 
 static char* TYPE_VAR_STR[] = {
@@ -97,6 +99,7 @@ static char* TYPE_VAR_STR[] = {
     "buf",
     "var",
     "arr",
+    "mpi_user_func",
 };
 
 

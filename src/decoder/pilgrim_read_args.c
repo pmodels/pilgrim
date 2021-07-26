@@ -1635,6 +1635,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->arg_types[0] = TYPE_NON_MPI;
 			cs->arg_directions[0] = DIRECTION_IN;
 			cs->arg_sizes[0] = sizeof(MPI_User_function);
+			cs->arg_types[0] = TYPE_MPI_User_function;
 			cs->args[0] = calloc(cs->arg_sizes[0], 1);
 			memcpy(cs->args[0], buff+pos, cs->arg_sizes[0]);
 			pos += cs->arg_sizes[0];

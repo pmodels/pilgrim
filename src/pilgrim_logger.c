@@ -39,6 +39,7 @@ typedef struct OffsetNode_t {
 struct Logger {
     int rank;
     int nprocs;
+    bool debug;                     // enable debug output
     bool recording;                 // set to true only after initialization
     LocalMetadata local_metadata;   // local metadata information
 
@@ -356,7 +357,7 @@ void print_cst(RecordHash *cst) {
     }
 
     for(int i = 0; i < 400; i++) {
-        if(count[i] > 0)
+        if(count[i] > 0 && __logger.debug)
             printf("Func: %s, count: %d\n", func_names[i], count[i]);
     }
 }
@@ -503,6 +504,9 @@ void logger_init() {
     if(tm)
         __logger.timing_mode = atoi(tm);
 
+    if(getenv("PILGRIM_DEBUG"))
+        __logger.debug = true;
+
     // Set the output paths in advance because
     // application may change the cwd duration execution
     char cwd[256] = {0};
@@ -583,7 +587,7 @@ void logger_exit() {
     MPI_OBJ_CLEANUP_ALL();
 
     // Output statistics
-    if(__logger.rank == 0) {
+    if(__logger.rank == 0 && __logger.debug) {
         pilgrim_report_memory_status();
 
         printf("[pilgrim] Total mpi calls: %f *10e6\n", total_calls);

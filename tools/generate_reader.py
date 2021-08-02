@@ -54,7 +54,16 @@ def codegen_read_one_arg(func, i):
                 lines.append('cs->arg_types[%d] = TYPE_INT;' %i)
     else:
         lines.append('cs->arg_types[%d] = TYPE_NON_MPI;' %i)
+
+    # Set argument direction
+    #
+    # Note sometimes an argument with direction INOUT is not a pointer
+    # e.g., MPI_Info_set(info, ...); We correct its directino to IN
+    # for easier post-processing.
+    if (arg.direction == "INOUT") and ("*" not in arg.type and "[" not in arg.type):
+        arg.direction = "IN"
     lines.append('cs->arg_directions[%d] = DIRECTION_%s;' %(i, arg.direction))
+
 
     if 'void' in arg.type:
         lines.append('cs->arg_types[%d] = TYPE_MEM_PTR;' %i)

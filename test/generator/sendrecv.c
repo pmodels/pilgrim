@@ -7,6 +7,9 @@
 #include <assert.h>
 #include <mpi.h>
 
+void myfunc(void* in, void* out, int* len, MPI_Datatype *dtype) {
+}
+
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
     int rank, size;
@@ -27,6 +30,8 @@ int main(int argc, char** argv) {
     MPI_Type_commit(&subarray);
     MPI_Type_free(&subarray);
 
+    MPI_Op op;
+    MPI_Op_create(myfunc, 1, &op);
 
     MPI_Group group, newgroup;
     MPI_Comm_group(MPI_COMM_WORLD, &group);

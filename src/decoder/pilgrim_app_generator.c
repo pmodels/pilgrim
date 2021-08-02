@@ -15,7 +15,7 @@
 
 #define max(a,b) (((a)>(b))?(a):(b))
 
-static int grammar_splitter = 10000;
+static int grammar_splitter = 10000000;
 
 static int tmp_var_idx = 0;
 
@@ -27,7 +27,7 @@ typedef struct VariablePool_t {
 
 
 
-#define NUM_VAR_TYPES 16
+#define NUM_VAR_TYPES 17
 static VariablePool* variable_pools[NUM_VAR_TYPES];    // One variable pool for each variable type
 
 VariablePool* var_find_or_add(int type, int symbolic_id, bool *exist) {
@@ -68,25 +68,27 @@ void write_vars_declaration_core(FILE* f, int type, int id_or_val) {
 void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
     CallSignature* cs;
     Symbol *rule, *sym;
+
+    int max_str_len = -1;
+
     DL_FOREACH(grammar->rules, rule) {
         DL_FOREACH(rule->rule_body, sym) {
             if(sym->val < 0 || sym->val >= grammar_splitter)
                 continue;
             cs = &(cst[sym->val]);
+
             for(int j = 0; j < cs->arg_count; j++) {
                 int type = cs->arg_types[j];
                 int dir = cs->arg_directions[j];
 
                 if(type == TYPE_NON_MPI) {
-                } else if(type == TYPE_MPI_Comm) {
+                } else if(type == TYPE_MPI_Comm || type == TYPE_MPI_Datatype || type == TYPE_MPI_Op) {
                     int id = *((int*)cs->args[j]);
-                    if(id >= 0)     // custom MPI_Comm
+                    if(id >= 0)     // custom MPI object
                         write_vars_declaration_core(f, type, id);
-                } else if(type == TYPE_MPI_Datatype) {
-                    int id = *((int*)cs->args[j]);
-                    if(id >= 0)     // custom MPI_Datatype
-                        write_vars_declaration_core(f, type, id);
-                } else if(type == TYPE_MPI_Op) {
+                } else if(type == TYPE_MPI_User_function) {
+                    // dummpy MPI_User_function for creating MPI_Op_create
+                    fprintf(f, "void %s(void* in, void* out, int* len, MPI_Datatype* type) {}\n", TYPE_VAR_STR[type]);
                 } else if(type == TYPE_MPI_Status) {
                 } else if(type == TYPE_RANK_ENCODED) {
                 } else if(type == TYPE_TAG) {
@@ -94,6 +96,12 @@ void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
                 } else if(type == TYPE_MEM_PTR) {
                     MemPtrAttr* attr = (MemPtrAttr*) cs->args[j];
                     write_vars_declaration_core(f, type, attr->id);
+                } else if(type == TYPE_STRING) {
+                    if(dir == DIRECTION_OUT) {
+                        int len = strlen((char*)cs->args[j]);
+                        if(len > max_str_len)
+                            max_str_len = len;
+                    }
                 } else {    // all types with interger values
                     int value = *((int*)cs->args[j]);
                     if(type == TYPE_INT && dir == DIRECTION_IN)
@@ -103,6 +111,8 @@ void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
             }
         }
     }
+    if(max_str_len > 0)
+        fprintf(f, "char g_str[%d];\n", max_str_len+1);
     fprintf(f, "\n");
 }
 
@@ -162,11 +172,12 @@ void set_var_name(char* name, int type, int direction, int id_or_val) {
     }
 }
 
+
 char* write_argument(CallSignature *cs, int i) {
     int type = cs->arg_types[i];
     int direction = cs->arg_directions[i];
 
-    char *name = calloc(sizeof(char), 20);
+    char *name = calloc(sizeof(char), 128); // TODO longer argument name
     if(type == TYPE_NON_MPI) {
         sprintf(name, "[Not Handled]");
     } else if(type == TYPE_RANK_ENCODED) {
@@ -195,21 +206,30 @@ char* write_argument(CallSignature *cs, int i) {
     } else if(type == TYPE_MPI_Datatype) {
         int id = *((int*)cs->args[i]);
         if(id < 0)
-            sprintf(name, "%s", symbolic_id_to_mpi_datatype_str(id));
+            strcpy(name, symbolic_id_to_mpi_datatype_str(id));
         else
             set_var_name(name, type, direction, id);
     } else if(type == TYPE_MPI_Op) {
         int id = *((int*)cs->args[i]);
-        sprintf(name, "%s", symbolic_id_to_mpi_op_str(id));
-    } else if(type == TYPE_MPI_Comm) {
-        int id = *((int*)cs->args[i]);
-        // built-in MPI_Comm
         if(id < 0)
-            sprintf(name, "%s", symbolic_id_to_mpi_comm_str(id));
+            strcpy(name, symbolic_id_to_mpi_op_str(id));
         else
             set_var_name(name, type, direction, id);
+    } else if(type == TYPE_MPI_Comm) {
+        int id = *((int*)cs->args[i]);
+        if(id < 0)
+            strcpy(name, symbolic_id_to_mpi_comm_str(id));
+        else
+            set_var_name(name, type, direction, id);
+    } else if(type == TYPE_MPI_User_function) {
+        strcpy(name, TYPE_VAR_STR[type]);
     } else if(type == TYPE_INT_ARRAY) {
         sprintf(name, "%s_%d", TYPE_VAR_STR[type], tmp_var_idx++);
+    } else if(type == TYPE_STRING) {
+        if(direction == DIRECTION_IN)
+            sprintf(name, "\"%s\"", (char*)cs->args[i]);
+        else
+            strcpy(name, "g_str");
     } else {    // all other (basic data types or mpi objects) with integer values
         int value = *((int*)cs->args[i]);
         set_var_name(name, type, direction, value);
@@ -309,7 +329,7 @@ Grammar* final_sequitur(DecodedGrammars* dg, int *final_splitter) {
         }
         append_terminal(grammar, splitter++, 1);
     }
-    sequitur_print_rules(grammar);
+    //sequitur_print_rules(grammar);
     *final_splitter = splitter;
 
     return grammar;
@@ -318,14 +338,15 @@ Grammar* final_sequitur(DecodedGrammars* dg, int *final_splitter) {
 void handle_one_symbol(FILE* f, Symbol* sym, CallSignature* cst) {
 
     CallSignature *cs = &cst[sym->val];
+
     if(sym->val >= 0)
         write_vars_initialization(f, cs);
 
     if(sym->exp > 1)
         fprintf(f, "\tfor(int i = 0; i < %d; i++)\n", sym->exp);
-
     if(sym->val >= 0) {
         CallSignature *cs = &cst[sym->val];
+        //printf("%s\n", func_names[cs->func_id]);
         write_call(f, cs, sym->exp>1?"\t\t":"\t");
     } else {
         fprintf(f, "\t%sfunc_%d();\n", sym->exp>1?"\t":"", -1*sym->val);
@@ -347,7 +368,6 @@ void one_func_per_rule(FILE* f, Grammar* grammar, CallSignature *cst, int final_
             fprintf(f, "\tif(g_ugi == 0) {\n");
 
         DL_FOREACH(rule->rule_body, sym) {
-
             if(sym->val < grammar_splitter) {
                 handle_one_symbol(f, sym, cst);
             } else {
@@ -388,7 +408,6 @@ int main(int argc, char** argv) {
     int final_splitter;
     Grammar *grammar = final_sequitur(dg, &final_splitter);
 
-
     // 3. Generate a MPI program
     char source_file_path[256];
     sprintf(source_file_path, "%s/proxy_app.c", directory);
@@ -401,9 +420,11 @@ int main(int argc, char** argv) {
     write_epilogue(f, gm.ranks, dg);
 
     free_vars_pool();
-    free_decoded_grammars(dg);
+
     sequitur_cleanup(grammar);
     fclose(f);
+
+    free_decoded_grammars(dg);
     // TODO free cst?
 
     return 0;

@@ -258,28 +258,11 @@ void object_cleanup_MPI_Request() {
  * ======================================================================
  *
  */
+// TODO now we handles MPI_Comm just like other MPI objects
+// Delete below code and use the above macros
 MPICommHash *hash_MPI_Comm = NULL;
 
-
 static int allocated_comm_id = 0;
-// Pick a unique name for newcomm
-int comm2id(MPI_Comm *newcomm) {
-    int id = allocated_comm_id++;
-    return id;
-
-    /*
-     * The below code generates globally unique id.
-    void *id = pilgrim_malloc(COMM_ID_LEN);
-
-    int world_rank;
-    PMPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-
-    memcpy(id, newcomm, sizeof(MPI_Comm));
-    memcpy(id+sizeof(MPI_Comm), &world_rank, sizeof(int));
-
-    return id;
-    */
-}
 
 void add_mpi_comm_hash_entry(MPI_Comm *newcomm, int id) {
     MPICommHash *entry = pilgrim_malloc(sizeof(MPICommHash));
@@ -289,74 +272,14 @@ void add_mpi_comm_hash_entry(MPI_Comm *newcomm, int id) {
     HASH_ADD_KEYPTR(hh, hash_MPI_Comm, entry->key, sizeof(MPI_Comm), entry);
 }
 
-
 int generate_intracomm_id(MPI_Comm *newcomm) {
-    // check for predefined comm
-    if((newcomm == NULL) || (*newcomm==MPI_COMM_NULL))
-        return get_predefined_comm_id(MPI_COMM_NULL);
-
-    int id;
-    int rank, is_inter;
-
-    // *newcomm might actually be an inter-communicator
-    // This is only possible when MPI_Comm_create() is
-    // called with an inter-communicator as the input.
-    PMPI_Comm_test_inter(*newcomm, &is_inter);
-
-    MPI_Comm intracomm;
-    if(!is_inter)
-        intracomm = *newcomm;
-    else
-        PMPI_Intercomm_merge(*newcomm, 0, &intracomm);
-
-    PMPI_Comm_rank(intracomm, &rank);
-
-    if(rank == 0)
-        id = comm2id(newcomm);
-    PMPI_Bcast(&id, 1, MPI_INT, 0, intracomm);
-
-    if(is_inter)
-        PMPI_Comm_free(&intracomm);
-
+    int id = allocated_comm_id++;
     add_mpi_comm_hash_entry(newcomm, id);
-    return id;
 }
 
 int generate_intercomm_id(MPI_Comm local_comm, MPI_Comm *newcomm, int tag) {
-    // check for predefined comm
-    if((newcomm == NULL) || (*newcomm== MPI_COMM_NULL))
-        return get_predefined_comm_id(MPI_COMM_NULL);
-
-    int local_rank;
-    PMPI_Comm_rank(*newcomm, &local_rank);
-
-    int id;
-
-    // Local rank 0 of two communicator exchange a random number
-    // to decide who picks the unique name for the new communicator
-    if(local_rank == 0) {
-        time_t t;
-        int sendbuf = 0, recvbuf = 0;
-        sendbuf = randint();
-        PMPI_Sendrecv(&sendbuf, 1, MPI_INT, 0, tag, &recvbuf, 1, MPI_INT, 0, tag, *newcomm, MPI_STATUS_IGNORE);
-
-        // I will decide the unique id and send it to the other one
-        if(sendbuf < recvbuf) {
-            id = comm2id(newcomm);
-            PMPI_Send(&id, 1, MPI_INT, 0, tag, *newcomm);
-        } else if(sendbuf > recvbuf) {
-            PMPI_Recv(&id, 1, MPI_INT, 0, tag, *newcomm, MPI_STATUS_IGNORE);
-        } else {
-            // Very unlikely
-            abort();
-        }
-    } else {
-        // all non-rank 0 processes in the two local communicators
-    }
-
-    PMPI_Bcast(&id, 1, MPI_INT, 0, local_comm);
+    int id = allocated_comm_id++;
     add_mpi_comm_hash_entry(newcomm, id);
-    return id;
 }
 
 /*

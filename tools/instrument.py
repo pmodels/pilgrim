@@ -153,6 +153,7 @@ def codegen_assemble_args(func):
     return line, len(assemble_args)
 
 def codegen_sizeof_args(func):
+    need_comm_size = False
     sizeof_args = []
     for arg in func.arguments:
         if 'void' in arg.type:
@@ -167,11 +168,14 @@ def codegen_sizeof_args(func):
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             continue
         elif is_mpi_object_arg(arg_type_strip(arg.type)):
-            # TODO , now communicator is is also locally unique, use one iteger to represent
-            #if "MPI_Comm" in arg.type :
-            #    sizeof_args.append('sizeof(MPI_Comm)+sizeof(int)')
-            #else:
-            sizeof_args.append('sizeof(int)')
+            if '[' in arg.type:
+                if arg.length:
+                    sizeof_args.append('%s*sizeof(int)' %arg.length)
+                else:
+                    need_comm_size = True
+                    sizeof_args.append('comm_size*sizeof(int)')
+            else:
+                sizeof_args.append('sizeof(int)')
         elif '*' in arg.type or '[' in arg.type:
             n = "1" if not arg.length else arg.length
             fixed_type = arg.type.split('[')[0].replace('*', '')
@@ -179,10 +183,15 @@ def codegen_sizeof_args(func):
         else:
             sizeof_args.append("sizeof(%s)" %arg.type)
 
-    line = '\tint* sizes = NULL;\n';
+    line = ""
+    if need_comm_size:
+        line += "\tint comm_size;\n"
+        line += "\tPMPI_Comm_size(comm, &comm_size);\n"
     if len(sizeof_args) > 0:
         sizeof_args_str = ', '.join(sizeof_args)
-        line = '\tint sizes[] = { %s };\n' %sizeof_args_str
+        line += '\tint sizes[] = { %s };\n' %sizeof_args_str
+    else:
+        line = '\tint* sizes = NULL;\n';
     return line
 
 

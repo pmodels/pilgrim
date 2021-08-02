@@ -16,7 +16,7 @@ def handle_special_apis(func):
         return True
 
     # These are handled in pilgrim_init_pilgrim_wrappers_special.c
-    ignored = ["MPI_Wait", "MPI_Waitany", "MPI_Waitsome", "MPI_Waitall", "MPI_Request_free", "MPI_Startall",
+    ignored = ["MPI_Wait", "MPI_Waitany", "MPI_Waitsome", "MPI_Waitall",
                "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
 
     if func.name in ignored:
@@ -48,7 +48,10 @@ def codegen_read_one_arg(func, i):
         elif "tag" in arg.name:
             lines.append('cs->arg_types[%d] = TYPE_TAG;' %i)
         else:
-            lines.append('cs->arg_types[%d] = TYPE_INT;' %i)
+            if '[' in arg.type:
+                lines.append('cs->arg_types[%d] = TYPE_INT_ARRAY;' %i)
+            else:
+                lines.append('cs->arg_types[%d] = TYPE_INT;' %i)
     else:
         lines.append('cs->arg_types[%d] = TYPE_NON_MPI;' %i)
     lines.append('cs->arg_directions[%d] = DIRECTION_%s;' %(i, arg.direction))
@@ -61,6 +64,9 @@ def codegen_read_one_arg(func, i):
         lines.append('cs->arg_sizes[%d] = sizeof(int)*2;' %i)
     elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
         pass
+    elif 'MPI_User_function' in arg.type:
+        lines.append('cs->arg_sizes[%d] = sizeof(MPI_User_function);' %i)
+        lines.append('cs->arg_types[%d] = TYPE_MPI_User_function;' %i)
     elif is_mpi_object_arg(arg_type_strip(arg.type)):
         lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
         lines.append('cs->arg_types[%d] = TYPE_%s;' %(i, arg_type_strip(arg.type)))
@@ -70,8 +76,10 @@ def codegen_read_one_arg(func, i):
     elif '*' in arg.type or '[' in arg.type:
         fixed_type = arg_type_strip(arg.type)
         if arg.length:
-            if '*' in arg.length:   # n*3
-                pass
+            if 'n*3' in arg.length:   # n*3, see codegen.py
+                idx = find_arg_idx(func, "n")
+                lines.append( 'length = *((int*) (cs->args[%d]));' %idx )
+                lines.append( "cs->arg_sizes[%d] = length * 3 * sizeof(%s);" %(i, fixed_type))
             else:
                 idx = find_arg_idx(func, arg.length)
                 lines.append( 'length = *((int*) (cs->args[%d]));' %idx )

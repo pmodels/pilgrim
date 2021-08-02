@@ -71,6 +71,7 @@ MPI_Datatype builtin_mpi_datatypes[] = {
     MPI_LONG_INT,
     MPI_SHORT_INT,
     MPI_LONG_DOUBLE_INT,
+    MPI_DOUBLE_PRECISION,
 };
 
 char* builtin_mpi_datatypes_str[] = {
@@ -130,6 +131,7 @@ char* builtin_mpi_datatypes_str[] = {
     "MPI_LONG_INT",
     "MPI_SHORT_INT",
     "MPI_LONG_DOUBLE_INT",
+    "MPI_DOUBLE_PRECISION",
 };
 
 MPI_Op builtin_mpi_ops[] = {

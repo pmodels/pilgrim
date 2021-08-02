@@ -61,6 +61,7 @@ void free_decoded_grammars(DecodedGrammars *dg);
 #define TYPE_INT                14
 #define TYPE_INT_ARRAY          15
 #define TYPE_MPI_User_function  16
+#define TYPE_STRING             17
 
 static char* TYPE_STR[] = {
     "NON_MPI",
@@ -80,6 +81,7 @@ static char* TYPE_STR[] = {
     "int",
     "int",
     "MPI_User_function",
+    "char*"
 };
 
 static char* TYPE_VAR_STR[] = {
@@ -100,6 +102,7 @@ static char* TYPE_VAR_STR[] = {
     "var",
     "arr",
     "mpi_user_func",
+    "str"
 };
 
 

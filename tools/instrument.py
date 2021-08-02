@@ -88,6 +88,8 @@ def codegen_assemble_args(func):
     assemble_args = []
     args_set = set( [arg.name for arg in func.arguments] )
     obj_count, buffer_count = 0, 0
+    defined_comm_size = False
+
     for arg in func.arguments:
         if 'void' in arg.type:                                  # void* buf
             line += "\tMemPtrAttr mem_attr_%d;\n" %buffer_count
@@ -110,12 +112,26 @@ def codegen_assemble_args(func):
                 # Only these two functions need to stor "source, tag" information
                 line += "\tint obj_id_%d = request2id(%s, source, tag);\n" %(obj_count, arg.name)
             else:
-                if '*' in arg.type or '[' in arg.type:
+                if '*' in arg.type:
                     line += "\tint obj_id_%d = MPI_OBJ_ID(%s, %s);\n" %(obj_count, arg_type_strip(arg.type), arg.name)
+                    assemble_args.append("&obj_id_%d" %obj_count)
+                elif '[' in arg.type:
+                    if arg.length:
+                        line += "\tint obj_id_%d[%s];\n" %(obj_count, arg.length)
+                        line += "\tfor(int i=0; i<%s; i++) obj_id_%d[i] = MPI_OBJ_ID(%s, %s);\n" %(arg.length, obj_count, arg_type_strip(arg.type), arg.name)
+                    else:
+                        if not defined_comm_size:
+                            line += "\tint comm_size;\n"
+                            line += "\tPMPI_Comm_size(comm, &comm_size);\n"
+                            defined_comm_size = True
+                        line += "\tint obj_id_%d[comm_size+1];\n" %(obj_count)
+                        line += "\tobj_id_%d[0] = comm_size;\n" %(obj_count) # Use the first element to store count, so the reader knows the array size
+                        line += "\tfor(int i=1; i<=comm_size; i++) obj_id_%d[i] = MPI_OBJ_ID(%s, %s);\n" %(obj_count, arg_type_strip(arg.type), arg.name)
+                    assemble_args.append("obj_id_%d" %obj_count)
                 else:
                     line += "\t%s obj_%d = %s;\n" %(arg.type, obj_count, arg.name)
                     line += "\tint obj_id_%d = MPI_OBJ_ID(%s, &obj_%d);\n" %(obj_count, arg_type_strip(arg.type), obj_count)
-            assemble_args.append("&obj_id_%d" %obj_count)
+                    assemble_args.append("&obj_id_%d" %obj_count)
             obj_count += 1
         elif '*' in arg.type or '[' in arg.type:
             assemble_args.append(arg.name)      # its already the adress
@@ -172,8 +188,7 @@ def codegen_sizeof_args(func):
                 if arg.length:
                     sizeof_args.append('%s*sizeof(int)' %arg.length)
                 else:
-                    need_comm_size = True
-                    sizeof_args.append('comm_size*sizeof(int)')
+                    sizeof_args.append('(comm_size+1)*sizeof(int)') # first extra element is used to store this array count
             else:
                 sizeof_args.append('sizeof(int)')
         elif '*' in arg.type or '[' in arg.type:
@@ -183,15 +198,10 @@ def codegen_sizeof_args(func):
         else:
             sizeof_args.append("sizeof(%s)" %arg.type)
 
-    line = ""
-    if need_comm_size:
-        line += "\tint comm_size;\n"
-        line += "\tPMPI_Comm_size(comm, &comm_size);\n"
+    line = '\tint* sizes = NULL;\n';
     if len(sizeof_args) > 0:
         sizeof_args_str = ', '.join(sizeof_args)
-        line += '\tint sizes[] = { %s };\n' %sizeof_args_str
-    else:
-        line = '\tint* sizes = NULL;\n';
+        line = '\tint sizes[] = { %s };\n' %sizeof_args_str
     return line
 
 

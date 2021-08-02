@@ -68,11 +68,25 @@ def codegen_read_one_arg(func, i):
         lines.append('cs->arg_sizes[%d] = sizeof(MPI_User_function);' %i)
         lines.append('cs->arg_types[%d] = TYPE_MPI_User_function;' %i)
     elif is_mpi_object_arg(arg_type_strip(arg.type)):
-        lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
-        lines.append('cs->arg_types[%d] = TYPE_%s;' %(i, arg_type_strip(arg.type)))
+        if '[' in arg.type:     # MPI_Datatype[]
+            if arg.length:
+                idx = find_arg_idx(func, arg.length)
+                lines.append( 'length = *((int*) (cs->args[%d]));' %idx )
+                lines.append('cs->arg_sizes[%d] = sizeof(int)*length;' %(i))
+            else:
+                # size of this array is stored in the first entry
+                lines.append('length =  *((int*) (buff+pos));')
+                lines.append('assert(length > 0);');
+                lines.append('cs->arg_sizes[%d] = sizeof(int) * length;' %i)
+                lines.append('pos += sizeof(int);')
+            lines.append('cs->arg_types[%d] = TYPE_%s;' %(i, arg_type_strip(arg.type)))
+        else:
+            lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
+            lines.append('cs->arg_types[%d] = TYPE_%s;' %(i, arg_type_strip(arg.type)))
     elif 'char*' in arg.type:
         if '**' not in arg.type and '[' not in arg.type:    # only consider one single string
             lines.append('cs->arg_sizes[%d] = strlen(buff+pos)+1;' %i)
+            lines.append('cs->arg_types[%d] = TYPE_STRING;' %(i))
     elif '*' in arg.type or '[' in arg.type:
         fixed_type = arg_type_strip(arg.type)
         if arg.length:

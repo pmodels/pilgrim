@@ -73,9 +73,13 @@ def codegen_read_one_arg(func, i):
         lines.append('cs->arg_sizes[%d] = sizeof(int)*2;' %i)
     elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
         pass
-    elif 'MPI_User_function' in arg.type:
-        lines.append('cs->arg_sizes[%d] = sizeof(MPI_User_function);' %i)
-        lines.append('cs->arg_types[%d] = TYPE_MPI_User_function;' %i)
+    elif 'MPI_Aint' in arg.type:
+        lines.append('cs->arg_types[%d] = TYPE_MPI_Aint;' %i)
+        lines.append('cs->arg_sizes[%d] = sizeof(MPI_Aint);' %i)
+    elif ('MPI_' in arg.type) and ('function' in arg.type):
+        arg_type = arg_type_strip(arg.type)
+        lines.append('cs->arg_sizes[%d] = sizeof(%s);' %(i, arg_type))
+        lines.append('cs->arg_types[%d] = TYPE_%s;' %(i, arg_type))
     elif is_mpi_object_arg(arg_type_strip(arg.type)):
         if '[' in arg.type:     # MPI_Datatype[]
             if arg.length:

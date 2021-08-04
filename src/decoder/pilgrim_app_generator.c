@@ -30,6 +30,31 @@ typedef struct VariablePool_t {
 #define NUM_VAR_TYPES 17
 static VariablePool* variable_pools[NUM_VAR_TYPES];    // One variable pool for each variable type
 
+
+void set_var_name(char* name, int type, int direction, int id_or_val) {
+    if(type==TYPE_INT && direction == DIRECTION_IN)
+        sprintf(name, "%d", id_or_val);
+    else {
+        if(direction == DIRECTION_IN) {
+            if(id_or_val < 0)
+                sprintf(name, "%s__%d", TYPE_VAR_STR[type], (-1)*id_or_val);
+            else
+                sprintf(name, "%s_%d", TYPE_VAR_STR[type], id_or_val);
+        } else {
+            if(id_or_val < 0)
+                sprintf(name, "&%s__%d", TYPE_VAR_STR[type], (-1)*id_or_val);
+            else
+                sprintf(name, "&%s_%d", TYPE_VAR_STR[type], id_or_val);
+        }
+    }
+}
+
+bool is_mpi_user_function(int type) {
+    if(type >= TYPE_MPI_User_function && type <= TYPE_MPI_File_errhandler_function)
+        return true;
+    return false;
+}
+
 VariablePool* var_find_or_add(int type, int symbolic_id, bool *exist) {
     *exist = true;
     VariablePool* var = NULL;
@@ -38,8 +63,11 @@ VariablePool* var_find_or_add(int type, int symbolic_id, bool *exist) {
         *exist = false;
         var = malloc(sizeof(VariablePool));
         var->symbolic_id = symbolic_id;
-        var->name = malloc(sizeof(32));
-        sprintf(var->name, "%s_%d", TYPE_VAR_STR[type], var->symbolic_id);
+        var->name = malloc(sizeof(64));
+        if(symbolic_id < 0)
+            sprintf(var->name, "%s__%d", TYPE_VAR_STR[type], (-1)*symbolic_id);
+        else
+            sprintf(var->name, "%s_%d", TYPE_VAR_STR[type], symbolic_id);
         HASH_ADD_INT(variable_pools[type], symbolic_id, var);
     }
     return var;
@@ -58,11 +86,13 @@ void free_vars_pool() {
     }
 }
 
-void write_vars_declaration_core(FILE* f, int type, int id_or_val) {
+// use size_t for the last argument so it accomandates both int and MPI_Aint
+void write_vars_declaration_core(FILE* f, int type, size_t id_or_val) {
     bool exist;
     VariablePool* var = var_find_or_add(type, id_or_val, &exist);
-    if(!exist)
+    if(!exist) {
         fprintf(f, "%s %s;\n", TYPE_STR[type], var->name);
+    }
 }
 
 void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
@@ -82,13 +112,11 @@ void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
                 int dir = cs->arg_directions[j];
 
                 if(type == TYPE_NON_MPI) {
-                } else if(type == TYPE_MPI_Comm || type == TYPE_MPI_Datatype || type == TYPE_MPI_Op) {
+                } else if(type == TYPE_MPI_Comm || type == TYPE_MPI_Datatype || type == TYPE_MPI_Op || type == TYPE_MPI_Errhandler) {
                     int id = *((int*)cs->args[j]);
-                    if(id >= 0)     // custom MPI object
+                    if(id >= 0 || dir == DIRECTION_OUT)     // custom MPI object
                         write_vars_declaration_core(f, type, id);
-                } else if(type == TYPE_MPI_User_function) {
-                    // dummpy MPI_User_function for creating MPI_Op_create
-                    fprintf(f, "void %s(void* in, void* out, int* len, MPI_Datatype* type) {}\n", TYPE_VAR_STR[type]);
+                } else if(is_mpi_user_function(type)) {
                 } else if(type == TYPE_MPI_Status) {
                 } else if(type == TYPE_RANK_ENCODED) {
                 } else if(type == TYPE_TAG) {
@@ -102,8 +130,11 @@ void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
                         if(len > max_str_len)
                             max_str_len = len;
                     }
-                } else {    // all types with interger values
-                    int value = *((int*)cs->args[j]);
+                } else {    // all types with interger values or MPI_Aint
+                    size_t value;
+
+                    value = *((int*)cs->args[j]);
+
                     if(type == TYPE_INT && dir == DIRECTION_IN)
                         continue;
                     write_vars_declaration_core(f, type, value);
@@ -113,6 +144,9 @@ void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
     }
     if(max_str_len > 0)
         fprintf(f, "char g_str[%d];\n", max_str_len+1);
+    else
+        fprintf(f, "char g_str[MPI_MAX_ERROR_STRING];\n");
+
     fprintf(f, "\n");
 }
 
@@ -144,15 +178,15 @@ void write_vars_initialization(FILE* f, CallSignature *cs) {
                         fprintf(f, "%d}};\n", tmp[tmp_idx++]);
                 }
             } else {
-                // all other use 1D array.
+                // all the rest use 1D array.
                 fprintf(f, "\t%s %s_%d[] = {", TYPE_STR[type], TYPE_VAR_STR[type], tmp_var_idx++);
-                for(int j = 0; j < cs->arg_sizes[i]/sizeof(int); j++) {
+                int n = cs->arg_sizes[i]/sizeof(int);
+                for(int j = 0; j < n-1; j++) {
                     int val = ((int*)cs->args[i])[j];
-                    if(j == cs->arg_sizes[i]/sizeof(int) - 1)
-                        fprintf(f, "%d};\n", val);
-                    else
-                        fprintf(f, "%d, ", val);
+                    fprintf(f, "%d, ", val);
                 }
+                fprintf(f, "};\n");
+
             }
             arr_vars_count++;
         }
@@ -161,16 +195,6 @@ void write_vars_initialization(FILE* f, CallSignature *cs) {
     tmp_var_idx -= arr_vars_count;
 }
 
-void set_var_name(char* name, int type, int direction, int id_or_val) {
-    if(type==TYPE_INT && direction == DIRECTION_IN)
-        sprintf(name, "%d", id_or_val);
-    else {
-        if(direction == DIRECTION_IN)
-            sprintf(name, "%s_%d", TYPE_VAR_STR[type], id_or_val);
-        else
-            sprintf(name, "&%s_%d", TYPE_VAR_STR[type], id_or_val);
-    }
-}
 
 
 char* write_argument(CallSignature *cs, int i) {
@@ -205,31 +229,45 @@ char* write_argument(CallSignature *cs, int i) {
         sprintf(name, "MPI_STATUS_IGNORE");
     } else if(type == TYPE_MPI_Datatype) {
         int id = *((int*)cs->args[i]);
-        if(id < 0)
+        if(id < 0 && direction != DIRECTION_OUT)
             strcpy(name, symbolic_id_to_mpi_datatype_str(id));
         else
             set_var_name(name, type, direction, id);
     } else if(type == TYPE_MPI_Op) {
         int id = *((int*)cs->args[i]);
-        if(id < 0)
+        if(id < 0 && direction != DIRECTION_OUT)
             strcpy(name, symbolic_id_to_mpi_op_str(id));
+        else
+            set_var_name(name, type, direction, id);
+    } else if(type == TYPE_MPI_Errhandler) {
+        int id = *((int*)cs->args[i]);
+        if(id < 0 && direction != DIRECTION_OUT)
+            strcpy(name, symbolic_id_to_mpi_errhandler_str(id));
         else
             set_var_name(name, type, direction, id);
     } else if(type == TYPE_MPI_Comm) {
         int id = *((int*)cs->args[i]);
-        if(id < 0)
+        if(id < 0 && direction != DIRECTION_OUT)
             strcpy(name, symbolic_id_to_mpi_comm_str(id));
         else
             set_var_name(name, type, direction, id);
-    } else if(type == TYPE_MPI_User_function) {
+    } else if(is_mpi_user_function(type)) {
         strcpy(name, TYPE_VAR_STR[type]);
     } else if(type == TYPE_INT_ARRAY) {
         sprintf(name, "%s_%d", TYPE_VAR_STR[type], tmp_var_idx++);
     } else if(type == TYPE_STRING) {
-        if(direction == DIRECTION_IN)
+        if(direction == DIRECTION_IN) {
+            // Do not directly print \n in the string
+            // TODO need to escape it, but this will increase string length
+            char *tmp = (char*)cs->args[i];
+            for(int k = 0; k < strlen(tmp)+1; k++) {
+                if(tmp[k] == '\n')
+                    tmp[k] = '|';
+            }
             sprintf(name, "\"%s\"", (char*)cs->args[i]);
-        else
+        } else {
             strcpy(name, "g_str");
+        }
     } else {    // all other (basic data types or mpi objects) with integer values
         int value = *((int*)cs->args[i]);
         set_var_name(name, type, direction, value);
@@ -287,6 +325,17 @@ void write_prologue(FILE* f, Grammar* grammar, CallSignature* cst) {
     fprintf(f, "static int g_mpi_rank;\n");
     fprintf(f, "static int g_mpi_size;\n");
     fprintf(f, "static int g_ugi;\n\n");
+
+    fprintf(f, "void mpi_user_function(void* in, void* out, int* len, MPI_Datatype* type) {}\n");
+    fprintf(f, "void mpi_comm_errhandler_function(MPI_Comm* comm, int* err, ...) {}\n");
+    fprintf(f, "MPI_Copy_function* mpi_copy_function = MPI_NULL_COPY_FN;\n");
+    fprintf(f, "MPI_Delete_function* mpi_delete_function = MPI_NULL_DELETE_FN;\n");
+    fprintf(f, "MPI_Comm_copy_attr_function* mpi_comm_copy_attr_function = MPI_COMM_NULL_COPY_FN;\n");
+    fprintf(f, "MPI_Comm_delete_attr_function* mpi_comm_delete_attr_function = MPI_COMM_NULL_DELETE_FN;\n");
+    fprintf(f, "MPI_Type_copy_attr_function* mpi_type_copy_attr_function = MPI_TYPE_NULL_COPY_FN;\n");
+    fprintf(f, "MPI_Type_delete_attr_function* mpi_type_delete_attr_function = MPI_TYPE_NULL_DELETE_FN;\n");
+    fprintf(f, "MPI_Win_copy_attr_function* mpi_win_copy_attr_function = MPI_WIN_NULL_COPY_FN;\n");
+    fprintf(f, "MPI_Win_delete_attr_function* mpi_win_delete_attr_function = MPI_WIN_NULL_DELETE_FN;\n");
 
     write_vars_declaration(f, grammar, cst);
 }

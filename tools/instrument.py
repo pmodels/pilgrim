@@ -55,7 +55,7 @@ def generate_function_id_file(funcs):
 def is_mpi_object_arg(arg_type):
     # Do not include MPI_Request, MPI_Status, MPI_Comm, and MPI_Offset
     mpi_objects = set([
-        "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win",
+        "MPI_Info", "MPI_Datatype", "MPI_File", "MPI_Win", "MPI_Errhandler",
         "MPI_Group", "MPI_Op", "MPI_Message", "MPI_Comm", "MPI_Request"])
     if arg_type in mpi_objects:
         return True
@@ -71,7 +71,7 @@ def is_fortran_mpi_object(arg_type):
 # If so, also return the index of this MPI object
 def is_mpi_object_release(func):
     release_funcs = set([
-        "MPI_Info_free", "MPI_Type_free", "MPI_File_close",
+        "MPI_Info_free", "MPI_Type_free", "MPI_File_close", "MPI_Errhandler_free",
         "MPI_Win_free", "MPI_Group_free", "MPI_Op_free", "MPI_Comm_free"])
     if func.name in release_funcs:
         return True, 0

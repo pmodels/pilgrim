@@ -972,8 +972,9 @@ int MPI_Win_flush_local(int rank, MPI_Win win) { return imp_MPI_Win_flush_local(
 int imp_MPI_File_create_errhandler(MPI_File_errhandler_function *file_errhandler_fn, MPI_Errhandler *errhandler)
 {
 	PILGRIM_TRACING_1(int, MPI_File_create_errhandler, (file_errhandler_fn, errhandler));
-	void **args = assemble_args_list(2, file_errhandler_fn, errhandler);
-	int sizes[] = { 1*sizeof(MPI_File_errhandler_function), 1*sizeof(MPI_Errhandler) };
+	int obj_id_0 = MPI_OBJ_ID(MPI_Errhandler, errhandler);
+	void **args = assemble_args_list(2, file_errhandler_fn, &obj_id_0);
+	int sizes[] = { 1*sizeof(MPI_File_errhandler_function), sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_File_create_errhandler(MPI_File_errhandler_function *file_errhandler_fn, MPI_Errhandler *errhandler) { return imp_MPI_File_create_errhandler(file_errhandler_fn, errhandler); }
@@ -1956,8 +1957,10 @@ int imp_MPI_Win_set_errhandler(MPI_Win win, MPI_Errhandler errhandler)
 	PILGRIM_TRACING_1(int, MPI_Win_set_errhandler, (win, errhandler));
 	MPI_Win obj_0 = win;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Win, &obj_0);
-	void **args = assemble_args_list(2, &obj_id_0, &errhandler);
-	int sizes[] = { sizeof(int), sizeof(MPI_Errhandler) };
+	MPI_Errhandler obj_1 = errhandler;
+	int obj_id_1 = MPI_OBJ_ID(MPI_Errhandler, &obj_1);
+	void **args = assemble_args_list(2, &obj_id_0, &obj_id_1);
+	int sizes[] = { sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_Win_set_errhandler(MPI_Win win, MPI_Errhandler errhandler) { return imp_MPI_Win_set_errhandler(win, errhandler); }
@@ -2100,8 +2103,9 @@ int MPI_Comm_delete_attr(MPI_Comm comm, int comm_keyval) { return imp_MPI_Comm_d
 int imp_MPI_Comm_create_errhandler(MPI_Comm_errhandler_function *comm_errhandler_fn, MPI_Errhandler *errhandler)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_create_errhandler, (comm_errhandler_fn, errhandler));
-	void **args = assemble_args_list(2, comm_errhandler_fn, errhandler);
-	int sizes[] = { 1*sizeof(MPI_Comm_errhandler_function), 1*sizeof(MPI_Errhandler) };
+	int obj_id_0 = MPI_OBJ_ID(MPI_Errhandler, errhandler);
+	void **args = assemble_args_list(2, comm_errhandler_fn, &obj_id_0);
+	int sizes[] = { 1*sizeof(MPI_Comm_errhandler_function), sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_Comm_create_errhandler(MPI_Comm_errhandler_function *comm_errhandler_fn, MPI_Errhandler *errhandler) { return imp_MPI_Comm_create_errhandler(comm_errhandler_fn, errhandler); }
@@ -2235,8 +2239,9 @@ int imp_MPI_Win_get_errhandler(MPI_Win win, MPI_Errhandler *errhandler)
 	PILGRIM_TRACING_1(int, MPI_Win_get_errhandler, (win, errhandler));
 	MPI_Win obj_0 = win;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Win, &obj_0);
-	void **args = assemble_args_list(2, &obj_id_0, errhandler);
-	int sizes[] = { sizeof(int), 1*sizeof(MPI_Errhandler) };
+	int obj_id_1 = MPI_OBJ_ID(MPI_Errhandler, errhandler);
+	void **args = assemble_args_list(2, &obj_id_0, &obj_id_1);
+	int sizes[] = { sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_Win_get_errhandler(MPI_Win win, MPI_Errhandler *errhandler) { return imp_MPI_Win_get_errhandler(win, errhandler); }
@@ -2483,8 +2488,9 @@ int MPI_Get_accumulate(const void *origin_addr, int origin_count, MPI_Datatype o
 int imp_MPI_Win_create_errhandler(MPI_Win_errhandler_function *win_errhandler_fn, MPI_Errhandler *errhandler)
 {
 	PILGRIM_TRACING_1(int, MPI_Win_create_errhandler, (win_errhandler_fn, errhandler));
-	void **args = assemble_args_list(2, win_errhandler_fn, errhandler);
-	int sizes[] = { 1*sizeof(MPI_Win_errhandler_function), 1*sizeof(MPI_Errhandler) };
+	int obj_id_0 = MPI_OBJ_ID(MPI_Errhandler, errhandler);
+	void **args = assemble_args_list(2, win_errhandler_fn, &obj_id_0);
+	int sizes[] = { 1*sizeof(MPI_Win_errhandler_function), sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_Win_create_errhandler(MPI_Win_errhandler_function *win_errhandler_fn, MPI_Errhandler *errhandler) { return imp_MPI_Win_create_errhandler(win_errhandler_fn, errhandler); }
@@ -2890,8 +2896,9 @@ int imp_MPI_Comm_get_errhandler(MPI_Comm comm, MPI_Errhandler *errhandler)
 	PILGRIM_TRACING_1(int, MPI_Comm_get_errhandler, (comm, errhandler));
 	MPI_Comm obj_0 = comm;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Comm, &obj_0);
-	void **args = assemble_args_list(2, &obj_id_0, errhandler);
-	int sizes[] = { sizeof(int), 1*sizeof(MPI_Errhandler) };
+	int obj_id_1 = MPI_OBJ_ID(MPI_Errhandler, errhandler);
+	void **args = assemble_args_list(2, &obj_id_0, &obj_id_1);
+	int sizes[] = { sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_Comm_get_errhandler(MPI_Comm comm, MPI_Errhandler *errhandler) { return imp_MPI_Comm_get_errhandler(comm, errhandler); }
@@ -3770,8 +3777,10 @@ int imp_MPI_File_set_errhandler(MPI_File file, MPI_Errhandler errhandler)
 	PILGRIM_TRACING_1(int, MPI_File_set_errhandler, (file, errhandler));
 	MPI_File obj_0 = file;
 	int obj_id_0 = MPI_OBJ_ID(MPI_File, &obj_0);
-	void **args = assemble_args_list(2, &obj_id_0, &errhandler);
-	int sizes[] = { sizeof(int), sizeof(MPI_Errhandler) };
+	MPI_Errhandler obj_1 = errhandler;
+	int obj_id_1 = MPI_OBJ_ID(MPI_Errhandler, &obj_1);
+	void **args = assemble_args_list(2, &obj_id_0, &obj_id_1);
+	int sizes[] = { sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_File_set_errhandler(MPI_File file, MPI_Errhandler errhandler) { return imp_MPI_File_set_errhandler(file, errhandler); }
@@ -4449,9 +4458,11 @@ int imp_MPI_T_category_get_cvars(int cat_index, int len, int indices[])
 int MPI_T_category_get_cvars(int cat_index, int len, int indices[]) { return imp_MPI_T_category_get_cvars(cat_index, len, indices); }
 int imp_MPI_Errhandler_free(MPI_Errhandler *errhandler)
 {
+	int obj_id_0 = MPI_OBJ_ID(MPI_Errhandler, errhandler);
+	void **args = assemble_args_list(1, &obj_id_0);
+	MPI_OBJ_RELEASE(MPI_Errhandler, errhandler);
+	int sizes[] = { sizeof(int) };
 	PILGRIM_TRACING_1(int, MPI_Errhandler_free, (errhandler));
-	void **args = assemble_args_list(1, errhandler);
-	int sizes[] = { 1*sizeof(MPI_Errhandler) };
 	PILGRIM_TRACING_2(1, sizes, args);
 }
 int MPI_Errhandler_free(MPI_Errhandler *errhandler) { return imp_MPI_Errhandler_free(errhandler); }
@@ -4489,8 +4500,9 @@ int imp_MPI_File_get_errhandler(MPI_File file, MPI_Errhandler *errhandler)
 	PILGRIM_TRACING_1(int, MPI_File_get_errhandler, (file, errhandler));
 	MPI_File obj_0 = file;
 	int obj_id_0 = MPI_OBJ_ID(MPI_File, &obj_0);
-	void **args = assemble_args_list(2, &obj_id_0, errhandler);
-	int sizes[] = { sizeof(int), 1*sizeof(MPI_Errhandler) };
+	int obj_id_1 = MPI_OBJ_ID(MPI_Errhandler, errhandler);
+	void **args = assemble_args_list(2, &obj_id_0, &obj_id_1);
+	int sizes[] = { sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_File_get_errhandler(MPI_File file, MPI_Errhandler *errhandler) { return imp_MPI_File_get_errhandler(file, errhandler); }
@@ -4553,8 +4565,10 @@ int imp_MPI_Comm_set_errhandler(MPI_Comm comm, MPI_Errhandler errhandler)
 	PILGRIM_TRACING_1(int, MPI_Comm_set_errhandler, (comm, errhandler));
 	MPI_Comm obj_0 = comm;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Comm, &obj_0);
-	void **args = assemble_args_list(2, &obj_id_0, &errhandler);
-	int sizes[] = { sizeof(int), sizeof(MPI_Errhandler) };
+	MPI_Errhandler obj_1 = errhandler;
+	int obj_id_1 = MPI_OBJ_ID(MPI_Errhandler, &obj_1);
+	void **args = assemble_args_list(2, &obj_id_0, &obj_id_1);
+	int sizes[] = { sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(2, sizes, args);
 }
 int MPI_Comm_set_errhandler(MPI_Comm comm, MPI_Errhandler errhandler) { return imp_MPI_Comm_set_errhandler(comm, errhandler); }

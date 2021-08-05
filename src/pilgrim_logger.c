@@ -425,7 +425,7 @@ int* dump_cst() {
 // Compose key: (func_id, arguments)
 void* compose_call_signature(Record *record, int *key_len) {
     return concat_function_args(record->func_id, record->arg_count,
-            record->args, record->arg_sizes, key_len);
+            record->args, record->arg_sizes, record->comm_size, key_len);
 }
 
 void write_record(Record record) {

@@ -17,7 +17,7 @@
 
 static int grammar_splitter = 10000000;
 
-static int tmp_var_idx = 0;
+static int tmp_arr_idx = 0;
 
 typedef struct VariablePool_t {
     char* name;
@@ -120,7 +120,6 @@ void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
                 } else if(type == TYPE_MPI_Status) {
                 } else if(type == TYPE_RANK_ENCODED) {
                 } else if(type == TYPE_TAG) {
-                } else if(type == TYPE_INT_ARRAY) {
                 } else if(type == TYPE_MEM_PTR) {
                     MemPtrAttr* attr = (MemPtrAttr*) cs->args[j];
                     write_vars_declaration_core(f, type, attr->id);
@@ -162,37 +161,43 @@ void write_vars_initialization(FILE* f, CallSignature *cs) {
             MemPtrAttr* attr = (MemPtrAttr*) cs->args[i];
             fprintf(f, "\tif(!%s_%d) %s_%d = malloc(%lu);\n", TYPE_VAR_STR[TYPE_MEM_PTR], attr->id, TYPE_VAR_STR[TYPE_MEM_PTR], attr->id, attr->size);
         }
-        if(type == TYPE_INT_ARRAY) {
-            // only two mpi functions use 2D int[][3] arry
-            if(cs->func_id == ID_MPI_Group_range_excl || cs->func_id == ID_MPI_Group_range_incl) {
-                fprintf(f, "\t%s %s_%d[][3] = {", TYPE_STR[type], TYPE_VAR_STR[type], tmp_var_idx++);
-                int n = cs->arg_sizes[i]/sizeof(int)/3;
-                int *tmp = (int*) cs->args[i];
-                int tmp_idx = 0;
-                for(int j = 0; j < n; j++) {
-                    fprintf(f, "{%d, ", tmp[tmp_idx++]);
-                    fprintf(f, "%d, ", tmp[tmp_idx++]);
-                    if(j != n - 1)
-                        fprintf(f, "%d},", tmp[tmp_idx++]);
-                    else
-                        fprintf(f, "%d}};\n", tmp[tmp_idx++]);
-                }
-            } else {
-                // all the rest use 1D array.
-                fprintf(f, "\t%s %s_%d[] = {", TYPE_STR[type], TYPE_VAR_STR[type], tmp_var_idx++);
-                int n = cs->arg_sizes[i]/sizeof(int);
-                for(int j = 0; j < n-1; j++) {
-                    int val = ((int*)cs->args[i])[j];
-                    fprintf(f, "%d, ", val);
-                }
-                fprintf(f, "};\n");
 
+        // For array type arguments
+        if(cs->arg_lengths[i] != -1) {
+            if(type == TYPE_INT) {
+                int n = cs->arg_lengths[i];
+                // only two mpi functions use 2D int[][3] arry
+                if(cs->func_id == ID_MPI_Group_range_excl || cs->func_id == ID_MPI_Group_range_incl) {
+                    fprintf(f, "\tint arr_%d[][3] = {", tmp_arr_idx++);
+                    int *tmp = (int*) cs->args[i];
+                    int tmp_idx = 0;
+                    for(int j = 0; j < (n/3); j++) {
+                        fprintf(f, "{%d, ", tmp[tmp_idx++]);
+                        fprintf(f, "%d, ", tmp[tmp_idx++]);
+                        if(j != (n/3) - 1)
+                            fprintf(f, "%d},", tmp[tmp_idx++]);
+                        else
+                            fprintf(f, "%d}};\n", tmp[tmp_idx++]);
+                    }
+                } else {
+                    // all the rest use 1D array.
+                    fprintf(f, "\tint arr_%d[] = {", tmp_arr_idx++);
+                    for(int j = 0; j < n; j++) {
+                        int val = ((int*)cs->args[i])[j];
+                        fprintf(f, "%d, ", val);
+                    }
+                    fprintf(f, "};\n");
+
+                }
+                arr_vars_count++;
             }
-            arr_vars_count++;
+            else if(type == TYPE_MPI_Datatype) {
+            } else if(type == TYPE_MPI_Aint) {
+            }
         }
     }
 
-    tmp_var_idx -= arr_vars_count;
+    tmp_arr_idx -= arr_vars_count;
 }
 
 
@@ -253,8 +258,6 @@ char* write_argument(CallSignature *cs, int i) {
             set_var_name(name, type, direction, id);
     } else if(is_mpi_user_function(type)) {
         strcpy(name, TYPE_VAR_STR[type]);
-    } else if(type == TYPE_INT_ARRAY) {
-        sprintf(name, "%s_%d", TYPE_VAR_STR[type], tmp_var_idx++);
     } else if(type == TYPE_STRING) {
         if(direction == DIRECTION_IN) {
             // Do not directly print \n in the string
@@ -267,6 +270,14 @@ char* write_argument(CallSignature *cs, int i) {
             sprintf(name, "\"%s\"", (char*)cs->args[i]);
         } else {
             strcpy(name, "g_str");
+        }
+    } else if(type == TYPE_INT) {
+        // array
+        if(cs->arg_lengths[i] != -1) {
+            sprintf(name, "arr_%d", tmp_arr_idx++);
+        } else {
+            int value = *((int*)cs->args[i]);
+            set_var_name(name, type, direction, value);
         }
     } else {    // all other (basic data types or mpi objects) with integer values
         int value = *((int*)cs->args[i]);

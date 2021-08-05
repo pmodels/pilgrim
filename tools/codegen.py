@@ -20,6 +20,7 @@ class MPIFunction:
         self.signature = ""
         self.name = ""
         self.ret_type = ""
+        self.need_comm_size = False # comm size for array arguments length
         self.arguments = []
 
         if 'function_name' in func_block:
@@ -198,6 +199,20 @@ def complete_mpi_functions(cnames_file, funcs):
     for name in wait_for_clean:
         funcs.pop(name, None)
 
+
+def set_comm_size(funcs):
+    for name in funcs:
+        func = funcs[name]
+
+        arg_names = set( [arg.name for arg in func.arguments] )
+
+        for arg in func.arguments:
+            if ('[' in arg.type) and (not arg.length) and \
+               ('char' not in arg.type) and ('comm' in arg_names):
+                func.need_comm_size = True
+                break
+
+
 if __name__ == "__main__":
 
     MPI_STANDARD_DIR = sys.argv[1]
@@ -211,6 +226,9 @@ if __name__ == "__main__":
     # Not this file has to be generated in advance from mpi-standard directory by calling MAKE-APPLANG
     complete_mpi_functions(MPI_STANDARD_DIR+"/appLang-CNames.tex", funcs)
     print(len(funcs))
+
+    # Check if we need comm size to determine array arumgnet's length
+    set_comm_size(funcs)
 
     f = open('mpi_functions.pickle', 'w')
     pickle.dump(funcs, f)

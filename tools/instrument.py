@@ -88,19 +88,27 @@ def codegen_assemble_args(func):
     assemble_args = []
     args_set = set( [arg.name for arg in func.arguments] )
     obj_count, buffer_count = 0, 0
-    defined_comm_size = False
 
+    # First check if we need comm size to determine array arumgnet's length
+    if func.need_comm_size:
+        line += "\tint comm_size;\n"
+        line += "\tPMPI_Comm_size(comm, &comm_size);\n"
+
+    # Now iterate through every argument
     for arg in func.arguments:
+
+        arg_name = None
+
         if 'void' in arg.type:                                  # void* buf
             line += "\tMemPtrAttr mem_attr_%d;\n" %buffer_count
             line += "\taddr2id(%s, &mem_attr_%d);\n" %(arg.name, buffer_count)
-            assemble_args.append("&mem_attr_%d" %buffer_count)
+            arg_name =  "&mem_attr_%d" %buffer_count
             buffer_count+=1;
         elif 'MPI_Offset' in arg.type and '*' not in arg.type:  # keep separately
             line += "\tappend_offset(%s);\n" %(arg.name)
         elif 'MPI_Status*' in arg.type:
             line += "\tint status_arg[2] = {0};\n"
-            assemble_args.append("status_arg")
+            arg_name = "status_arg"
             if "source" in args_set:
                 line += "\tif(source == MPI_ANY_SOURCE && status && status!=MPI_STATUS_IGNORE) status_arg[0] = status->MPI_SOURCE;\n"
             if "recvtag" in args_set:
@@ -109,43 +117,40 @@ def codegen_assemble_args(func):
                 line += "\tif(tag == MPI_ANY_TAG && status && status!=MPI_STATUS_IGNORE) status_arg[1] = status->MPI_TAG;\n"
         elif is_mpi_object_arg(arg_type_strip(arg.type)):
             if 'MPI_Request' in arg.type and '*' in arg.type and (func.name == "MPI_Irecv" or func.name == "MPI_Recv_init"):
-                # Only these two functions need to stor "source, tag" information
+                # Only these two functions need to store "source, tag" information
                 line += "\tint obj_id_%d = request2id(%s, source, tag);\n" %(obj_count, arg.name)
             else:
                 if '*' in arg.type:
                     line += "\tint obj_id_%d = MPI_OBJ_ID(%s, %s);\n" %(obj_count, arg_type_strip(arg.type), arg.name)
-                    assemble_args.append("&obj_id_%d" %obj_count)
+                    arg_name = "&obj_id_%d" %obj_count
                 elif '[' in arg.type:
                     if arg.length:
                         line += "\tint obj_id_%d[%s];\n" %(obj_count, arg.length)
-                        line += "\tfor(int i=0; i<%s; i++) obj_id_%d[i] = MPI_OBJ_ID(%s, %s);\n" %(arg.length, obj_count, arg_type_strip(arg.type), arg.name)
+                        line += "\tfor(int i=0; i<%s; i++) obj_id_%d[i] = MPI_OBJ_ID(%s, &%s[i]);\n" %(arg.length, obj_count, arg_type_strip(arg.type), arg.name)
                     else:
-                        if not defined_comm_size:
-                            line += "\tint comm_size;\n"
-                            line += "\tPMPI_Comm_size(comm, &comm_size);\n"
-                            defined_comm_size = True
-                        line += "\tint obj_id_%d[comm_size+1];\n" %(obj_count)
-                        line += "\tobj_id_%d[0] = comm_size;\n" %(obj_count) # Use the first element to store count, so the reader knows the array size
-                        line += "\tfor(int i=1; i<=comm_size; i++) obj_id_%d[i] = MPI_OBJ_ID(%s, %s);\n" %(obj_count, arg_type_strip(arg.type), arg.name)
-                    assemble_args.append("obj_id_%d" %obj_count)
+                        line += "\tint obj_id_%d[comm_size];\n" %(obj_count)
+                        line += "\tfor(int i=0; i<comm_size; i++) obj_id_%d[i] = MPI_OBJ_ID(%s, &%s[i]);\n" %(obj_count, arg_type_strip(arg.type), arg.name)
+                    arg_name = "obj_id_%d" %obj_count
                 else:
                     line += "\t%s obj_%d = %s;\n" %(arg.type, obj_count, arg.name)
                     line += "\tint obj_id_%d = MPI_OBJ_ID(%s, &obj_%d);\n" %(obj_count, arg_type_strip(arg.type), obj_count)
-                    assemble_args.append("&obj_id_%d" %obj_count)
+                    arg_name = "&obj_id_%d" %obj_count
             obj_count += 1
         elif '*' in arg.type or '[' in arg.type:
-            assemble_args.append(arg.name)      # its already the adress
+            arg_name = arg.name      # its already the adress
         elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for src or dest ranks
             line += "\tint %s_rank = g_mpi_rank - %s;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = PILGRIM_MPI_ANY_SOURCE;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_PROC_NULL) %s_rank = PILGRIM_MPI_PROC_NULL;\n" %(arg.name, arg.name)
-            assemble_args.append( "&%s_rank" %arg.name )
+            arg_name =  "&%s_rank" %arg.name
         elif 'int' in arg.type and ('tag' == arg.name):    # pattern recognization for src or dest ranks
             line += "\tint my_tag = %s;\n" %(arg.name)
             line += "\tif(my_tag == MPI_ANY_TAG) my_tag = PILGRIM_MPI_ANY_TAG;\n"
-            assemble_args.append("&my_tag")
+            arg_name = "&my_tag"
         else:
-            assemble_args.append( "&"+arg.name)
+            arg_name = "&"+arg.name
+
+        if arg_name: assemble_args.append(arg_name)
 
     if func.name == "MPI_Comm_rank":
         # For MPI_Comm_rank, we always set the last argument(output rank) to 0
@@ -169,13 +174,12 @@ def codegen_assemble_args(func):
     return line, len(assemble_args)
 
 def codegen_sizeof_args(func):
-    need_comm_size = False
     sizeof_args = []
     for arg in func.arguments:
         if 'void' in arg.type:
             sizeof_args.append('sizeof(MemPtrAttr)')                # memory buffer
-        elif 'char*' in arg.type:
-            if '**' not in arg.type and '[' not in arg.type:        # only consider one single string
+        elif ('char[]' in arg.type or 'char*' in arg.type):
+            if '**' not in arg.type and '*[]' not in arg.type:        # only consider one single string
                 sizeof_args.append('strlen(%s)+1' %arg.name)
         elif 'MPI_Request' in arg.type:
             sizeof_args.append('sizeof(int)')
@@ -188,7 +192,7 @@ def codegen_sizeof_args(func):
                 if arg.length:
                     sizeof_args.append('%s*sizeof(int)' %arg.length)
                 else:
-                    sizeof_args.append('(comm_size+1)*sizeof(int)') # first extra element is used to store this array count
+                    sizeof_args.append('(comm_size)*sizeof(int)') # first extra element is used to store this array count
             else:
                 sizeof_args.append('sizeof(int)')
         elif '*' in arg.type or '[' in arg.type:
@@ -251,8 +255,8 @@ def generate_wrapper_file(funcs):
             arg_names.append(arg.name)
         f.write('\tPILGRIM_TRACING_1(%s, %s, (%s));\n' %(func.ret_type, func.name, ', '.join(arg_names)))
 
-    def phase_two(num_args, f):
-        f.write('\tPILGRIM_TRACING_2(%d, sizes, args);\n}\n' %num_args)
+    def phase_two(num_args, comm_size, f):
+        f.write('\tPILGRIM_TRACING_2(%d, sizes, args, %s);\n}\n' %(num_args, comm_size))
 
     def actual_wrapper(func, f):
         arg_names = []
@@ -361,7 +365,9 @@ def generate_wrapper_file(funcs):
             phase_one(func, f)
             handle_mpi_comm_creation(func, f)
             num_args = logging(func, f)
-        phase_two(num_args, f)
+
+        comm_size = "comm_size" if func.need_comm_size else "-1"
+        phase_two(num_args, comm_size, f)
         actual_wrapper(func, f)
 
     f.close()

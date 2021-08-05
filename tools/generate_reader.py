@@ -35,37 +35,31 @@ def codegen_read_one_arg(func, i):
                 return idx
         return -1
 
-
-
     arg = func.arguments[i]
 
     unique_types.add(arg_type_strip(arg.type))
 
     lines = []
-    if arg_type_strip(arg.type) == "int":
-        if "source" in arg.name or "dest" in arg.name:
-            lines.append('cs->arg_types[%d] = TYPE_RANK_ENCODED;' %i)
-        elif "tag" in arg.name:
-            lines.append('cs->arg_types[%d] = TYPE_TAG;' %i)
-        else:
-            if '[' in arg.type:
-                lines.append('cs->arg_types[%d] = TYPE_INT_ARRAY;' %i)
-            else:
-                lines.append('cs->arg_types[%d] = TYPE_INT;' %i)
-    else:
-        lines.append('cs->arg_types[%d] = TYPE_NON_MPI;' %i)
 
-    # Set argument direction
+    # 1. Set argument direction
     #
     # Note sometimes an argument with direction INOUT is not a pointer
-    # e.g., MPI_Info_set(info, ...); We correct its directino to IN
+    # e.g., MPI_Info_set(info, ...); We correct its direction to IN
     # for easier post-processing.
     if (arg.direction == "INOUT") and ("*" not in arg.type and "[" not in arg.type):
         arg.direction = "IN"
     lines.append('cs->arg_directions[%d] = DIRECTION_%s;' %(i, arg.direction))
 
-
-    if 'void' in arg.type:
+    # 2. Fill in details for each unique type
+    if arg_type_strip(arg.type) == "int":
+        lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
+        if "source" in arg.name or "dest" in arg.name:
+            lines.append('cs->arg_types[%d] = TYPE_RANK_ENCODED;' %i)
+        elif "tag" in arg.name:
+            lines.append('cs->arg_types[%d] = TYPE_TAG;' %i)
+        else:
+            lines.append('cs->arg_types[%d] = TYPE_INT;' %i)
+    elif 'void' in arg.type:
         lines.append('cs->arg_types[%d] = TYPE_MEM_PTR;' %i)
         lines.append('cs->arg_sizes[%d] = sizeof(MemPtrAttr);' %i)
     elif 'MPI_Status' in arg.type:
@@ -75,46 +69,46 @@ def codegen_read_one_arg(func, i):
         pass
     elif 'MPI_Aint' in arg.type:
         lines.append('cs->arg_types[%d] = TYPE_MPI_Aint;' %i)
-        lines.append('cs->arg_sizes[%d] = sizeof(MPI_Aint);' %i)
+        lines.append('cs->arg_sizes[%d] = sizeof(%s);' %(i, arg_type_strip(arg.type)) )
     elif ('MPI_' in arg.type) and ('function' in arg.type):
         arg_type = arg_type_strip(arg.type)
         lines.append('cs->arg_sizes[%d] = sizeof(%s);' %(i, arg_type))
         lines.append('cs->arg_types[%d] = TYPE_%s;' %(i, arg_type))
     elif is_mpi_object_arg(arg_type_strip(arg.type)):
-        if '[' in arg.type:     # MPI_Datatype[]
-            if arg.length:
-                idx = find_arg_idx(func, arg.length)
-                lines.append( 'length = *((int*) (cs->args[%d]));' %idx )
-                lines.append('cs->arg_sizes[%d] = sizeof(int)*length;' %(i))
-            else:
-                # size of this array is stored in the first entry
-                lines.append('length =  *((int*) (buff+pos));')
-                lines.append('assert(length > 0);');
-                lines.append('cs->arg_sizes[%d] = sizeof(int) * length;' %i)
-                lines.append('pos += sizeof(int);')
-            lines.append('cs->arg_types[%d] = TYPE_%s;' %(i, arg_type_strip(arg.type)))
-        else:
-            lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
-            lines.append('cs->arg_types[%d] = TYPE_%s;' %(i, arg_type_strip(arg.type)))
-    elif 'char*' in arg.type:
-        if '**' not in arg.type and '[' not in arg.type:    # only consider one single string
+        lines.append('cs->arg_sizes[%d] = sizeof(int);' %i)
+        lines.append('cs->arg_types[%d] = TYPE_%s;' %(i, arg_type_strip(arg.type)))
+    elif ('char[]' in arg.type or 'char*' in arg.type):
+        if '**' not in arg.type and '*[]' not in arg.type:    # only consider one single string for now
             lines.append('cs->arg_sizes[%d] = strlen(buff+pos)+1;' %i)
             lines.append('cs->arg_types[%d] = TYPE_STRING;' %(i))
-    elif '*' in arg.type or '[' in arg.type:
-        fixed_type = arg_type_strip(arg.type)
+        else:
+            # MPI_Comm_spawn, MPI_Comm_spawn_multi
+            pass
+    else:
+        # MPI_Aint, MPI_Count and MPI_T_* type parameters
+        lines.append('cs->arg_sizes[%d] = sizeof(%s);' %(i, arg_type_strip(arg.type)) )
+
+
+    # 3. Finally, update size for array arguments
+    if '[' in arg.type:
+        # could be MPI_Aint or int (int for int[], MPI_Datatype[])
+        size_type = arg_type_strip(arg.type)
+        if size_type == "MPI_Datatype": size_type = "int"
+
         if arg.length:
-            if 'n*3' in arg.length:   # n*3, see codegen.py
+            # n*3 int array, see codegen.py
+            if 'n*3' in arg.length:
                 idx = find_arg_idx(func, "n")
-                lines.append( 'length = *((int*) (cs->args[%d]));' %idx )
-                lines.append( "cs->arg_sizes[%d] = length * 3 * sizeof(%s);" %(i, fixed_type))
+                lines.append( 'cs->arg_lengths[%d] = 3 * (*((int*) (cs->args[%d])));' %(i, idx) )
             else:
                 idx = find_arg_idx(func, arg.length)
-                lines.append( 'length = *((int*) (cs->args[%d]));' %idx )
-                lines.append( "cs->arg_sizes[%d] = length * sizeof(%s);" %(i, fixed_type))
+                lines.append( 'cs->arg_lengths[%d] = *((int*) (cs->args[%d]));' %(i, idx) )
         else:
-            lines.append( "cs->arg_sizes[%d] = sizeof(%s);" %(i, fixed_type) )
-    else:
-        lines.append( "cs->arg_sizes[%d] = sizeof(%s);" %(i, arg.type) )
+            # size of this array is stored in "comm_size"
+            lines.append('cs->arg_lengths[%d] =  comm_size;' %(i))
+            lines.append('assert(cs->arg_lengths[%d] > 0);' %i);
+
+        lines.append('cs->arg_sizes[%d] = sizeof(%s) * cs->arg_lengths[%d];' %(i, size_type, i))
 
     lines.append('cs->args[%d] = calloc(cs->arg_sizes[%d], 1);' %(i,i))
     lines.append('memcpy(cs->args[%d], buff+pos, cs->arg_sizes[%d]);' %(i,i))
@@ -132,7 +126,7 @@ def generate_reader_file(funcs):
 #include "pilgrim.h"
 #include "pilgrim_reader.h"
 void read_record_args(int func_id, void* buff, CallSignature* cs) {
-    int length, pos;
+    int comm_size, pos;
     size_t n;
     switch(func_id) {
 '''
@@ -146,16 +140,18 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
         if handle_special_apis(func):
             f.write('\t\t\tread_record_args_special(func_id, buff, cs);')
         else:
-            f.write('\t\t\tcs->arg_count = %d;' %len(func.arguments))
-            f.write('\n\t\t\tcs->arg_sizes = malloc(cs->arg_count * sizeof(int));')
-            f.write('\n\t\t\tcs->arg_types = malloc(cs->arg_count * sizeof(int));')
-            f.write('\n\t\t\tcs->arg_directions = malloc(cs->arg_count * sizeof(int));')
-            f.write('\n\t\t\tcs->args = malloc(cs->arg_count * sizeof(void*));')
+            f.write('\t\t\tINIT_CALL_ARGS(cs, %d);' %len(func.arguments))
             f.write('\n\t\t\tpos = 0;')
+
+            if func.need_comm_size:
+                f.write('\n\t\t\tcomm_size =  *((int*) (buff+pos));')
+                f.write('\n\t\t\tpos += sizeof(int);')
+
             for i in range(len(func.arguments)):
                 f.write('\n\t\t\t')
                 lines = codegen_read_one_arg(func, i)
                 f.write('\n\t\t\t'.join(lines))
+
         f.write('\n\t\t\tbreak;\n\t\t}\n')
 
     # for free() function

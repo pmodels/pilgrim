@@ -29,6 +29,7 @@ typedef struct _Record {
     int *arg_sizes;             // size of each argument
     void **args;                // Store all arguments in array
     int res;                    // result returned from the original function call
+    int comm_size;              // used to determine array argument's length during post-processing
 } Record;
 
 /*

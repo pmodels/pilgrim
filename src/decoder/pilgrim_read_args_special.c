@@ -10,20 +10,13 @@
 #include "pilgrim.h"
 #include "pilgrim_reader.h"
 
-#define CS_ARGS_INITIALIZATION(count)                               \
-    cs->arg_count = count;                                          \
-    cs->args = malloc(cs->arg_count * sizeof(void*));               \
-    cs->arg_sizes = malloc(cs->arg_count * sizeof(int));            \
-    cs->arg_types = malloc(cs->arg_count * sizeof(int));            \
-    cs->arg_directions = malloc(cs->arg_count * sizeof(int));
-
 
 void read_record_args_special(int func_id, void* buff, CallSignature *cs) {
     int pos;
     switch(func_id) {
         case ID_free:
         {
-            CS_ARGS_INITIALIZATION(1);
+            INIT_CALL_ARGS(cs, 1);
             cs->arg_sizes[0] = sizeof(MemPtrAttr);
 			cs->arg_types[0] = TYPE_MEM_PTR;
 			cs->arg_directions[0] = DIRECTION_IN;
@@ -40,7 +33,7 @@ void read_record_args_special(int func_id, void* buff, CallSignature *cs) {
         }
         case ID_MPI_Wait:
 
-            CS_ARGS_INITIALIZATION(2)
+            INIT_CALL_ARGS(cs, 2);
             pos = 0;
 
             cs->arg_sizes[0] = sizeof(int);
@@ -58,7 +51,7 @@ void read_record_args_special(int func_id, void* buff, CallSignature *cs) {
             pos += cs->arg_sizes[1];
             break;
         case ID_MPI_Test:
-            CS_ARGS_INITIALIZATION(3);
+            INIT_CALL_ARGS(cs, 3);
 
             pos = 0;
 
@@ -137,7 +130,7 @@ void read_record_args_special(int func_id, void* buff, CallSignature *cs) {
         case ID_MPI_Waitall:
         {
             //MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_statuses[])
-            CS_ARGS_INITIALIZATION(3);
+            INIT_CALL_ARGS(cs, 3);
 
             pos = 0;
 
@@ -165,7 +158,7 @@ void read_record_args_special(int func_id, void* buff, CallSignature *cs) {
         case ID_MPI_Testall:
         {
             //MPI_Testall(int count, MPI_Request array_of_requests[], int *flag, MPI_Status array_of_statuses[])
-            CS_ARGS_INITIALIZATION(4)
+            INIT_CALL_ARGS(cs, 4);
 
             pos = 0;
 

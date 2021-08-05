@@ -39,7 +39,9 @@
 
 // Then in a Record structure and write it to log
 // Copy the arguments in case the application freed/modified the memory
-#define PILGRIM_TRACING_2(record_arg_count, record_arg_sizes, record_args)              \
+// 3rd argument comm_size is used for post-processing to determine the call's array
+// argument length, e.g., MPI_Alltoallw()
+#define PILGRIM_TRACING_2(record_arg_count, record_arg_sizes, record_args, commsize)    \
     Record record = {                                                                   \
         .tstart = tstart,                                                               \
         .tend = tend,                                                                   \
@@ -47,6 +49,7 @@
         .func_id = func_id,                                                             \
         .arg_count = record_arg_count,                                                  \
         .arg_sizes = record_arg_sizes,                                                  \
+        .comm_size = commsize,                                                         \
     };                                                                                  \
     record.args = pilgrim_malloc(sizeof(void*) * record_arg_count);                     \
     int i;                                                                              \

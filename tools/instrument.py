@@ -127,10 +127,10 @@ def codegen_assemble_args(func):
                 elif '[' in arg.type:
                     if arg.length:
                         line += "\tint obj_id_%d[%s];\n" %(obj_count, arg.length)
-                        line += "\tfor(int i=0; i<%s; i++) obj_id_%d[i] = MPI_OBJ_ID(%s, &%s[i]);\n" %(arg.length, obj_count, arg_type_strip(arg.type), arg.name)
+                        line += "\tfor(int i=0; i<%s; i++) obj_id_%d[i] = (%s==NULL) ? PILGRIM_INVALID_MPI_OBJECT_ID: MPI_OBJ_ID(%s, &%s[i]);\n" %(arg.length, obj_count, arg.name, arg_type_strip(arg.type), arg.name)
                     else:
                         line += "\tint obj_id_%d[comm_size];\n" %(obj_count)
-                        line += "\tfor(int i=0; i<comm_size; i++) obj_id_%d[i] = MPI_OBJ_ID(%s, &%s[i]);\n" %(obj_count, arg_type_strip(arg.type), arg.name)
+                        line += "\tfor(int i=0; i<comm_size; i++) obj_id_%d[i] = (%s==NULL) ? PILGRIM_INVALID_MPI_OBJECT_ID: MPI_OBJ_ID(%s, &%s[i]);\n" %(obj_count, arg.name, arg_type_strip(arg.type), arg.name)
                     arg_name = "obj_id_%d" %obj_count
                 else:
                     line += "\t%s obj_%d = %s;\n" %(arg.type, obj_count, arg.name)

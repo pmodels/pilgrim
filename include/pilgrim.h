@@ -14,13 +14,6 @@
 #include "pilgrim_mpi_objects.h"
 
 
-// Some constant integers for parameters are have pre-defined values
-#define PILGRIM_MPI_ANY_SOURCE -99999
-#define PILGRIM_MPI_ANY_TAG    -99998
-#define PILGRIM_MPI_PROC_NULL  -99997
-#define PILGRIM_EQUAL_MYRANK   -99996
-
-
 
 // First call the original function and stores the elapsed time, func id, etc
 // Need to call the function first so the output arguments have the correct value

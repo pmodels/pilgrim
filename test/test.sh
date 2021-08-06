@@ -12,7 +12,7 @@ coll_progs=($(ls -d /home/wangchen/Sources/mpich-3.4.2/test/mpi/coll/my-pilgrim-
 
 generator=/home/wangchen/Sources/pilgrim/pilgrim_app_generator
 
-for prog in ${pt2pt_progs[@]}
+for prog in ${coll_progs[@]}
 do
     echo $prog
     $generator $traces_dir/$prog

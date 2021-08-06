@@ -1,9 +1,15 @@
 #ifndef _PILGRIM_CONSTS_H_
 #define _PILGRIM_CONSTS_H_
-
 #include <assert.h>
 #include <mpi.h>
 #include "pilgrim_reader.h"
+
+// Some constant integers for parameters are have pre-defined values
+#define PILGRIM_MPI_ANY_SOURCE -99999
+#define PILGRIM_MPI_ANY_TAG    -99998
+#define PILGRIM_MPI_PROC_NULL  -99997
+#define PILGRIM_EQUAL_MYRANK   -99996
+
 
 #define PILGRIM_INVALID_MPI_OBJECT_ID       -9999
 
@@ -18,6 +24,7 @@
 
 #define PILGRIM_MPI_REQUEST_NULL            -9979
 
+static
 MPI_Datatype builtin_mpi_datatypes[] = {
     MPI_DATATYPE_NULL,
     MPI_CHAR,
@@ -78,6 +85,7 @@ MPI_Datatype builtin_mpi_datatypes[] = {
     MPI_DOUBLE_PRECISION,
 };
 
+static
 char* builtin_mpi_datatypes_str[] = {
     "MPI_DATATYPE_NULL",
     "MPI_CHAR",
@@ -138,6 +146,7 @@ char* builtin_mpi_datatypes_str[] = {
     "MPI_DOUBLE_PRECISION",
 };
 
+static
 MPI_Op builtin_mpi_ops[] = {
     MPI_OP_NULL,
     MPI_MAX,
@@ -155,6 +164,7 @@ MPI_Op builtin_mpi_ops[] = {
     MPI_REPLACE
 };
 
+static
 char* builtin_mpi_ops_str[] = {
     "MPI_OP_NULL",
     "MPI_MAX",
@@ -172,12 +182,13 @@ char* builtin_mpi_ops_str[] = {
     "MPI_REPLACE"
 };
 
-
+static
 MPI_Errhandler builtin_mpi_errhandlers[] = {
     MPI_ERRORS_ARE_FATAL,
     MPI_ERRORS_RETURN,
 };
 
+static
 char* builtin_mpi_errhandlers_str[] = {
     "MPI_ERRORS_ARE_FATAL",
     "MPI_ERRORS_RETURN",

@@ -85,6 +85,7 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
 #ifndef MEMORY_POINTERS
     return;
 #endif
+    if(buffer == NULL) return;
 
     AvlTree avl_node;
 

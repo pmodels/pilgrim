@@ -197,7 +197,12 @@ def codegen_sizeof_args(func):
             else:
                 sizeof_args.append('sizeof(int)')
         elif '*' in arg.type or '[' in arg.type:
-            n = "1" if not arg.length else arg.length
+            n = 1
+            if not arg.length:
+                if func.need_comm_size:
+                    n = "comm_size"
+            else:
+                n = arg.length
             fixed_type = arg.type.split('[')[0].replace('*', '')
             sizeof_args.append("%s*sizeof(%s)" %(n, fixed_type))
         else:
@@ -348,6 +353,7 @@ def generate_wrapper_file(funcs):
     f.write('#include <stdlib.h>\n')
     f.write('#include <string.h>\n')
     f.write('#include "pilgrim.h"\n')
+    f.write('#include "pilgrim_consts.h"\n')
     f.write('static int placeholder = 0;\n')
     f.write('MPI_Status g_c_status;\n')
 

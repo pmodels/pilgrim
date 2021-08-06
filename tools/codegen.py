@@ -201,8 +201,15 @@ def complete_mpi_functions(cnames_file, funcs):
 
 
 def set_comm_size(funcs):
-    # TODO: ugly fix, MPI_Waitall() 3rd argument MPI_Status[] should have the length "count"
+    # TODO: ugly fix, in MPI_Waitall, MPI_Testall, MPI_Waitsome, MPI_Testsome
+    # argument MPI_Status[] should have the length "count", but the MPI standard
+    # latex does not specifiy it.
     funcs["MPI_Waitall"].arguments[2].length = "count"
+    funcs["MPI_Testall"].arguments[3].length = "count"
+    funcs["MPI_Testsome"].arguments[3].length = "incount"
+    funcs["MPI_Testsome"].arguments[4].length = "incount"
+    funcs["MPI_Waitsome"].arguments[3].length = "incount"
+    funcs["MPI_Waitsome"].arguments[4].length = "incount"
 
     for name in funcs:
         func = funcs[name]

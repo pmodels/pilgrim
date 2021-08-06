@@ -42,11 +42,16 @@ def codegen_read_one_arg(func, i):
 
     # 1. Set argument direction
     #
-    # Note sometimes an argument with direction INOUT is not a pointer
+    # (a) sometimes an argument with direction INOUT is not a pointer
     # e.g., MPI_Info_set(info, ...); We correct its direction to IN
     # for easier post-processing.
+    # (b) some arguments are documented as IN, but it actually can be
+    # modified if is a pointer
+    # e.g., MPI_Cancel(MPI_Request *request)
     if (arg.direction == "INOUT") and ("*" not in arg.type and "[" not in arg.type):
         arg.direction = "IN"
+    if (arg.direction == "IN") and ("*" in arg.type):
+        arg.direction = "INOUT"
     lines.append('cs->arg_directions[%d] = DIRECTION_%s;' %(i, arg.direction))
 
     # 2. Fill in details for each unique type
@@ -106,7 +111,10 @@ def codegen_read_one_arg(func, i):
                 idx = find_arg_idx(func, arg.length)
                 lines.append( 'cs->arg_lengths[%d] = *((int*) (cs->args[%d]));' %(i, idx) )
         else:
-            # size of this array is stored in "comm_size"
+            # size of this array should stored in "comm_size"
+            if not func.need_comm_size:
+                print("TODO!!! need to fix: %s, %s %s" %(func.name, arg.type, arg.name))
+
             lines.append('cs->arg_lengths[%d] =  comm_size;' %(i))
             lines.append('assert(cs->arg_lengths[%d] > 0);' %i);
 

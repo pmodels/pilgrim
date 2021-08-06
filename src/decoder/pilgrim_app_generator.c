@@ -32,7 +32,7 @@ static VariablePool* variable_pools[NUM_VAR_TYPES];    // One variable pool for 
 
 
 void set_var_name(char* name, int type, int direction, int id_or_val) {
-    if(type==TYPE_INT && direction == DIRECTION_IN)
+    if((type==TYPE_INT || type==TYPE_MPI_Aint || type==TYPE_MPI_Count) && direction == DIRECTION_IN)
         sprintf(name, "%d", id_or_val);
     else {
         if(direction == DIRECTION_IN) {
@@ -41,10 +41,12 @@ void set_var_name(char* name, int type, int direction, int id_or_val) {
             else
                 sprintf(name, "%s_%d", TYPE_VAR_STR[type], id_or_val);
         } else {
-            if(id_or_val < 0)
+            if(id_or_val < 0) {
                 sprintf(name, "&%s__%d", TYPE_VAR_STR[type], (-1)*id_or_val);
-            else
+            } else {
                 sprintf(name, "&%s_%d", TYPE_VAR_STR[type], id_or_val);
+            }
+
         }
     }
 }
@@ -86,8 +88,8 @@ void free_vars_pool() {
     }
 }
 
-// use size_t for the last argument so it accomandates both int and MPI_Aint
-void write_vars_declaration_core(FILE* f, int type, size_t id_or_val) {
+// TODO use int64_t for the last argument so it accomandates both int, MPI_Aint and MPI_Count
+void write_vars_declaration_core(FILE* f, int type, int id_or_val) {
     bool exist;
     VariablePool* var = var_find_or_add(type, id_or_val, &exist);
     if(!exist) {
@@ -110,6 +112,8 @@ void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
             for(int j = 0; j < cs->arg_count; j++) {
                 int type = cs->arg_types[j];
                 int dir = cs->arg_directions[j];
+                int len = cs->arg_lengths[j];
+                if(len != -1) continue;
 
                 if(type == TYPE_NON_MPI) {
                 } else if(type == TYPE_MPI_Comm || type == TYPE_MPI_Datatype || type == TYPE_MPI_Op || type == TYPE_MPI_Errhandler) {
@@ -129,11 +133,8 @@ void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
                         if(len > max_str_len)
                             max_str_len = len;
                     }
-                } else {    // all types with interger values or MPI_Aint
-                    size_t value;
-
-                    value = *((int*)cs->args[j]);
-
+                } else {    // all types with interger values or MPI_Aint, MPI_Count
+                    int value = *((int*)cs->args[j]);
                     if(type == TYPE_INT && dir == DIRECTION_IN)
                         continue;
                     write_vars_declaration_core(f, type, value);
@@ -164,8 +165,10 @@ void write_vars_initialization(FILE* f, CallSignature *cs) {
 
         // For array type arguments
         if(cs->arg_lengths[i] != -1) {
+            int n = cs->arg_lengths[i];
+            arr_vars_count++;
+
             if(type == TYPE_INT) {
-                int n = cs->arg_lengths[i];
                 // only two mpi functions use 2D int[][3] arry
                 if(cs->func_id == ID_MPI_Group_range_excl || cs->func_id == ID_MPI_Group_range_incl) {
                     fprintf(f, "\tint arr_%d[][3] = {", tmp_arr_idx++);
@@ -187,12 +190,29 @@ void write_vars_initialization(FILE* f, CallSignature *cs) {
                         fprintf(f, "%d, ", val);
                     }
                     fprintf(f, "};\n");
-
                 }
-                arr_vars_count++;
-            }
-            else if(type == TYPE_MPI_Datatype) {
+            } else if(type == TYPE_MPI_Datatype || type == TYPE_MPI_Request) {
+                fprintf(f, "\t%s arr_%d[] = {", TYPE_STR[type], tmp_arr_idx++);
+                for(int j = 0; j < n; j++) {
+                    int id = ((int*)cs->args[i])[j];
+                    char tmp_name[128] = {0};
+                    if(symbolic_id_is_mpi_constant(id))
+                        strcpy(tmp_name, symbolic_id_to_mpi_constant_str(type, id));
+                    else
+                        set_var_name(tmp_name, type, DIRECTION_IN, id);
+                    fprintf(f, "%s, ", tmp_name);
+                }
+                fprintf(f, "};\n");
             } else if(type == TYPE_MPI_Aint) {
+                fprintf(f, "\tMPI_Aint arr_%d[] = {", tmp_arr_idx++);
+                for(int j = 0; j < n; j++) {
+                    MPI_Aint val = ((MPI_Aint*)cs->args[i])[j];
+                    fprintf(f, "%ld, ", val);
+                }
+                fprintf(f, "};\n");
+            } else {
+                // MPI_Status[], ignore for now.
+                arr_vars_count--;
             }
         }
     }
@@ -232,30 +252,16 @@ char* write_argument(CallSignature *cs, int i) {
         sprintf(name, "%s_%d+%lu", TYPE_VAR_STR[type], attr->id, attr->offset);
     } else if(type == TYPE_MPI_Status) {
         sprintf(name, "MPI_STATUS_IGNORE");
-    } else if(type == TYPE_MPI_Datatype) {
-        int id = *((int*)cs->args[i]);
-        if(id < 0 && direction != DIRECTION_OUT)
-            strcpy(name, symbolic_id_to_mpi_datatype_str(id));
-        else
-            set_var_name(name, type, direction, id);
-    } else if(type == TYPE_MPI_Op) {
-        int id = *((int*)cs->args[i]);
-        if(id < 0 && direction != DIRECTION_OUT)
-            strcpy(name, symbolic_id_to_mpi_op_str(id));
-        else
-            set_var_name(name, type, direction, id);
-    } else if(type == TYPE_MPI_Errhandler) {
-        int id = *((int*)cs->args[i]);
-        if(id < 0 && direction != DIRECTION_OUT)
-            strcpy(name, symbolic_id_to_mpi_errhandler_str(id));
-        else
-            set_var_name(name, type, direction, id);
-    } else if(type == TYPE_MPI_Comm) {
-        int id = *((int*)cs->args[i]);
-        if(id < 0 && direction != DIRECTION_OUT)
-            strcpy(name, symbolic_id_to_mpi_comm_str(id));
-        else
-            set_var_name(name, type, direction, id);
+    } else if( (type == TYPE_MPI_Datatype) || (type == TYPE_MPI_Op) || (type == TYPE_MPI_Errhandler) || (type == TYPE_MPI_Comm) || (type == TYPE_MPI_Request)) {
+        if(cs->arg_lengths[i] != -1) {
+            sprintf(name, "arr_%d", tmp_arr_idx++);
+        } else {
+            int id = *((int*)cs->args[i]);
+            if(symbolic_id_is_mpi_constant(id) && direction != DIRECTION_OUT)
+                strcpy(name, symbolic_id_to_mpi_constant_str(type, id));
+            else
+                set_var_name(name, type, direction, id);
+        }
     } else if(is_mpi_user_function(type)) {
         strcpy(name, TYPE_VAR_STR[type]);
     } else if(type == TYPE_STRING) {
@@ -279,6 +285,20 @@ char* write_argument(CallSignature *cs, int i) {
             int value = *((int*)cs->args[i]);
             set_var_name(name, type, direction, value);
         }
+    } else if(type == TYPE_MPI_Aint) {
+        if(cs->arg_lengths[i] != -1) {
+            sprintf(name, "arr_%d", tmp_arr_idx++);
+        } else {
+            MPI_Aint value = *((MPI_Aint*)cs->args[i]);
+            set_var_name(name, type, direction, value);
+        }
+    } else if(type == TYPE_MPI_Count) {
+        if(cs->arg_lengths[i] != -1) {
+            sprintf(name, "arr_%d", tmp_arr_idx++);
+        } else {
+            MPI_Count value = *((MPI_Count*)cs->args[i]);
+            set_var_name(name, type, direction, value);
+        }
     } else {    // all other (basic data types or mpi objects) with integer values
         int value = *((int*)cs->args[i]);
         set_var_name(name, type, direction, value);
@@ -288,21 +308,6 @@ char* write_argument(CallSignature *cs, int i) {
 }
 
 void write_call_special(FILE* f, CallSignature *cs, const char* indent) {
-    if(cs->func_id == ID_MPI_Waitall) {
-        fprintf(f, "%sMPI_Request reqs[] = {", indent);
-        int count = *((int*)cs->args[0]);
-
-        for(int i = 0; i < count; i++) {
-            int *ids = cs->args[1];
-            fprintf(f, "%s_%d", TYPE_VAR_STR[TYPE_MPI_Request], ids[i]);
-            if(i < count - 1)
-                fprintf(f, ", ");
-            else
-                fprintf(f, "};\n");
-        }
-
-        fprintf(f, "%sMPI_Waitall(%d, reqs, MPI_STATUSES_IGNORE);\n", indent, count);
-    }
     if(cs->func_id == ID_free) {
         MemPtrAttr* attr = (MemPtrAttr*) cs->args[0];
         fprintf(f, "\tfree(%s_%d);\n\t%s_%d = NULL;\n", TYPE_VAR_STR[TYPE_MEM_PTR], attr->id, TYPE_VAR_STR[TYPE_MEM_PTR], attr->id);
@@ -311,7 +316,7 @@ void write_call_special(FILE* f, CallSignature *cs, const char* indent) {
 
 
 void write_call(FILE* f, CallSignature *cs, const char* indent) {
-    if(cs->func_id == ID_MPI_Waitall || cs->func_id == ID_free) {
+    if(cs->func_id == ID_free) {
         write_call_special(f, cs, indent);
         return;
     }
@@ -347,6 +352,9 @@ void write_prologue(FILE* f, Grammar* grammar, CallSignature* cst) {
     fprintf(f, "MPI_Type_delete_attr_function* mpi_type_delete_attr_function = MPI_TYPE_NULL_DELETE_FN;\n");
     fprintf(f, "MPI_Win_copy_attr_function* mpi_win_copy_attr_function = MPI_WIN_NULL_COPY_FN;\n");
     fprintf(f, "MPI_Win_delete_attr_function* mpi_win_delete_attr_function = MPI_WIN_NULL_DELETE_FN;\n");
+    fprintf(f, "int mpi_grequest_query_function(void *extra_state, MPI_Status *status) { return MPI_SUCCESS; }\n");
+    fprintf(f, "int mpi_grequest_free_function(void *extra_state) { return MPI_SUCCESS; }\n");
+    fprintf(f, "int mpi_grequest_cancel_function(void *extra_state, int complete) { return MPI_SUCCESS; }\n");
 
     write_vars_declaration(f, grammar, cst);
 }

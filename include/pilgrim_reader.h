@@ -5,7 +5,8 @@
 
 #ifndef _PILGRIM_READER_H_
 #define _PILGRIM_READER_H_
-//#include <ctype.h>
+
+#include "pilgrim_logger.h"
 
 typedef struct CallSignature_t {
     short func_id;
@@ -63,24 +64,25 @@ void free_decoded_grammars(DecodedGrammars *dg);
 #define TYPE_STRING                     15
 #define TYPE_MPI_Errhandler             16
 #define TYPE_MPI_Aint                   17
+#define TYPE_MPI_Count                  18
 
-#define TYPE_MPI_User_function                  18
-#define TYPE_MPI_Copy_function                  19
-#define TYPE_MPI_Delete_function                20
-#define TYPE_MPI_Comm_copy_attr_function        21
-#define TYPE_MPI_Comm_delete_attr_function      22
-#define TYPE_MPI_Win_copy_attr_function         23
-#define TYPE_MPI_Win_delete_attr_function       24
-#define TYPE_MPI_Type_delete_attr_function      25
-#define TYPE_MPI_Type_copy_attr_function        26
-#define TYPE_MPI_Datarep_conversion_function    27
-#define TYPE_MPI_Datarep_extent_function        28
-#define TYPE_MPI_Grequest_query_function        29
-#define TYPE_MPI_Grequest_free_function         30
-#define TYPE_MPI_Grequest_cancel_function       31
-#define TYPE_MPI_Comm_errhandler_function       32
-#define TYPE_MPI_Win_errhandler_function        33
-#define TYPE_MPI_File_errhandler_function       34
+#define TYPE_MPI_User_function                  19
+#define TYPE_MPI_Copy_function                  20
+#define TYPE_MPI_Delete_function                21
+#define TYPE_MPI_Comm_copy_attr_function        22
+#define TYPE_MPI_Comm_delete_attr_function      23
+#define TYPE_MPI_Win_copy_attr_function         24
+#define TYPE_MPI_Win_delete_attr_function       25
+#define TYPE_MPI_Type_delete_attr_function      26
+#define TYPE_MPI_Type_copy_attr_function        27
+#define TYPE_MPI_Datarep_conversion_function    28
+#define TYPE_MPI_Datarep_extent_function        29
+#define TYPE_MPI_Grequest_query_function        30
+#define TYPE_MPI_Grequest_free_function         31
+#define TYPE_MPI_Grequest_cancel_function       32
+#define TYPE_MPI_Comm_errhandler_function       33
+#define TYPE_MPI_Win_errhandler_function        34
+#define TYPE_MPI_File_errhandler_function       35
 
 
 
@@ -103,7 +105,8 @@ static char* TYPE_STR[] = {
     "char*",
     "MPI_Errhandler",
     "MPI_Aint",
-    "MPI_User_function",                // 18
+    "MPI_Count",
+    "MPI_User_function",                // 19
     "MPI_Copy_function",
     "MPI_Delete_function",
     "MPI_Comm_copy_attr_function",
@@ -119,7 +122,7 @@ static char* TYPE_STR[] = {
     "MPI_Grequest_cancel_function",
     "MPI_Comm_errhandler_function",
     "MPI_Win_errhandler_function",
-    "MPI_File_errhandler_function",     // 34
+    "MPI_File_errhandler_function",     // 35
 };
 
 static char* TYPE_VAR_STR[] = {
@@ -141,7 +144,8 @@ static char* TYPE_VAR_STR[] = {
     "str",                  // char* STRING
     "mpi_err_handler",
     "mpi_aint",
-    "mpi_user_function",                // 18
+    "mpi_count",
+    "mpi_user_function",                // 19
     "mpi_copy_function",
     "mpi_delete_function",
     "mpi_comm_copy_attr_function",
@@ -157,7 +161,7 @@ static char* TYPE_VAR_STR[] = {
     "mpi_grequest_cancel_function",
     "mpi_comm_errhandler_function",
     "mpi_win_errhandler_function",
-    "mpi_file_errhandler_function",     // 34
+    "mpi_file_errhandler_function",     // 35
 };
 
 

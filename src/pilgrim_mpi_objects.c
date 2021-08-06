@@ -113,7 +113,7 @@ RequestHash *hash_MPI_Request;
 RequestNode *list_MPI_Request;
 RequestNodeHash *request_free_ids;
 
-static int invalid_request_id = -1;
+static int invalid_request_id = PILGRIM_MPI_REQUEST_NULL;
 static int allocated_request_id = 0;
 
 RequestHash* request_hash_entry(MPI_Request *req) {

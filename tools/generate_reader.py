@@ -16,8 +16,7 @@ def handle_special_apis(func):
         return True
 
     # These are handled in pilgrim_init_pilgrim_wrappers_special.c
-    ignored = ["MPI_Wait", "MPI_Waitany", "MPI_Waitsome", "MPI_Waitall",
-               "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
+    ignored = ["MPI_Pcontrol"]
 
     if func.name in ignored:
         return True
@@ -70,6 +69,9 @@ def codegen_read_one_arg(func, i):
     elif 'MPI_Aint' in arg.type:
         lines.append('cs->arg_types[%d] = TYPE_MPI_Aint;' %i)
         lines.append('cs->arg_sizes[%d] = sizeof(%s);' %(i, arg_type_strip(arg.type)) )
+    elif 'MPI_Count' in arg.type:
+        lines.append('cs->arg_types[%d] = TYPE_MPI_Count;' %i)
+        lines.append('cs->arg_sizes[%d] = sizeof(%s);' %(i, arg_type_strip(arg.type)) )
     elif ('MPI_' in arg.type) and ('function' in arg.type):
         arg_type = arg_type_strip(arg.type)
         lines.append('cs->arg_sizes[%d] = sizeof(%s);' %(i, arg_type))
@@ -85,12 +87,12 @@ def codegen_read_one_arg(func, i):
             # MPI_Comm_spawn, MPI_Comm_spawn_multi
             pass
     else:
-        # MPI_Aint, MPI_Count and MPI_T_* type parameters
+        # MPI_T_* type parameters
         lines.append('cs->arg_sizes[%d] = sizeof(%s);' %(i, arg_type_strip(arg.type)) )
 
 
     # 3. Finally, update size for array arguments
-    if '[' in arg.type:
+    if '[' in arg.type and 'char' not in arg.type:
         # could be MPI_Aint or int (int for int[], MPI_Datatype[])
         size_type = arg_type_strip(arg.type)
         if size_type == "MPI_Datatype": size_type = "int"
@@ -170,5 +172,4 @@ if __name__ == "__main__":
     funcs = filter_with_local_mpi_functions(funcs)
 
     generate_reader_file(funcs)
-    print(unique_types)
-    print(len(unique_types))
+    print(len(unique_types), unique_types)

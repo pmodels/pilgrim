@@ -1204,9 +1204,9 @@ int imp_MPI_Recv_init(void *buf, int count, MPI_Datatype datatype, int source, i
 	MPI_Comm obj_1 = comm;
 	int obj_id_1 = MPI_OBJ_ID(MPI_Comm, &obj_1);
 	int obj_id_2 = request2id(request, source, tag);
-	void **args = assemble_args_list(6, &mem_attr_0, &count, &obj_id_0, &source_rank, &my_tag, &obj_id_1);
+	void **args = assemble_args_list(7, &mem_attr_0, &count, &obj_id_0, &source_rank, &my_tag, &obj_id_1, &obj_id_2);
 	int sizes[] = { sizeof(MemPtrAttr), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int) };
-	PILGRIM_TRACING_2(6, sizes, args, -1);
+	PILGRIM_TRACING_2(7, sizes, args, -1);
 }
 int MPI_Recv_init(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request) { return imp_MPI_Recv_init(buf, count, datatype, source, tag, comm, request); }
 int imp_MPI_Comm_group(MPI_Comm comm, MPI_Group *group)
@@ -3636,9 +3636,9 @@ int imp_MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int t
 	MPI_Comm obj_1 = comm;
 	int obj_id_1 = MPI_OBJ_ID(MPI_Comm, &obj_1);
 	int obj_id_2 = request2id(request, source, tag);
-	void **args = assemble_args_list(6, &mem_attr_0, &count, &obj_id_0, &source_rank, &my_tag, &obj_id_1);
+	void **args = assemble_args_list(7, &mem_attr_0, &count, &obj_id_0, &source_rank, &my_tag, &obj_id_1, &obj_id_2);
 	int sizes[] = { sizeof(MemPtrAttr), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int) };
-	PILGRIM_TRACING_2(6, sizes, args, -1);
+	PILGRIM_TRACING_2(7, sizes, args, -1);
 }
 int MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request) { return imp_MPI_Irecv(buf, count, datatype, source, tag, comm, request); }
 int imp_MPI_Issend(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)

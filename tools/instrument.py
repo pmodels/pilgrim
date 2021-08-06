@@ -119,6 +119,7 @@ def codegen_assemble_args(func):
             if 'MPI_Request' in arg.type and '*' in arg.type and (func.name == "MPI_Irecv" or func.name == "MPI_Recv_init"):
                 # Only these two functions need to store "source, tag" information
                 line += "\tint obj_id_%d = request2id(%s, source, tag);\n" %(obj_count, arg.name)
+                arg_name = "&obj_id_%d" %(obj_count)
             else:
                 if '*' in arg.type:
                     line += "\tint obj_id_%d = MPI_OBJ_ID(%s, %s);\n" %(obj_count, arg_type_strip(arg.type), arg.name)

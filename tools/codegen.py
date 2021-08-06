@@ -201,16 +201,18 @@ def complete_mpi_functions(cnames_file, funcs):
 
 
 def set_comm_size(funcs):
+    # TODO: ugly fix, MPI_Waitall() 3rd argument MPI_Status[] should have the length "count"
+    funcs["MPI_Waitall"].arguments[2].length = "count"
+
     for name in funcs:
         func = funcs[name]
-
         arg_names = set( [arg.name for arg in func.arguments] )
-
         for arg in func.arguments:
             if ('[' in arg.type) and (not arg.length) and \
                ('char' not in arg.type) and ('comm' in arg_names):
                 func.need_comm_size = True
                 break
+
 
 
 if __name__ == "__main__":

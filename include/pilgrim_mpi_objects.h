@@ -79,6 +79,7 @@ MPI_OBJ_DECLARE(MPI_Win);
 MPI_OBJ_DECLARE(MPI_Group);
 MPI_OBJ_DECLARE(MPI_Op);
 MPI_OBJ_DECLARE(MPI_Message);
+MPI_OBJ_DECLARE(MPI_Errhandler);
 
 
 // MPI_Request and MPI_Comm need special implementations as below

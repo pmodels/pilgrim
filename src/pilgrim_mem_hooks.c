@@ -58,6 +58,7 @@ void uninstall_mem_hooks() {
         pilgrim_free(node, sizeof(AddrIdNode));
     }
 
+    /* comment out the print out
     int total_malloc, total_free, total_malloc_by_mpi, total_malloc_used;
     PMPI_Reduce(&num_malloc, &total_malloc, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     PMPI_Reduce(&num_free, &total_free, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
@@ -68,6 +69,7 @@ void uninstall_mem_hooks() {
     if(rank == 0)
         printf("num malloc: %d, num free: %d, num malloc by mpi: %d, num used malloc: %d\n",
                 total_malloc, total_free, total_malloc_by_mpi, total_malloc_used);
+    */
 }
 
 // Symbolic representation of memory addresses
@@ -83,6 +85,7 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
 #ifndef MEMORY_POINTERS
     return;
 #endif
+    if(buffer == NULL) return;
 
     AvlTree avl_node;
 

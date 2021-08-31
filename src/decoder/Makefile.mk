@@ -20,4 +20,4 @@ pilgrim2text_SOURCES += \
 	src/decoder/pilgrim_metadata_decoder.c \
 	src/decoder/pilgrim_cfg_decoder.c src/decoder/pilgrim_cst_decoder.c \
 	src/decoder/pilgrim_read_args.c src/decoder/pilgrim_read_args_special.c \
-	src/dlmalloc.c
+	src/pilgrim_utils.c src/dlmalloc.c

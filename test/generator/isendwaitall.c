@@ -24,6 +24,8 @@ int main(int argc, char** argv) {
             MPI_Isend(data, 3, MPI_INT, rank+1, 123, MPI_COMM_WORLD, &reqs[i]);
         //for(int i = 0; i < N; i++)
         //    MPI_Wait(&reqs[i], MPI_STATUS_IGNORE);
+        int idx;
+        MPI_Waitany(N, reqs, &idx, MPI_STATUS_IGNORE);
         MPI_Waitall(N, reqs, MPI_STATUSES_IGNORE);
     } else {
         for(int i = 0; i < N; i++)

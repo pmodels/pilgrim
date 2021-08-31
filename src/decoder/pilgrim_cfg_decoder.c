@@ -117,8 +117,8 @@ RuleHash* read_inter_compressed_grammar(char* path, int nprocs, size_t* original
 
         HASH_ADD_INT(rules_table, rule_id, rule);
     }
-    printf("Unique Grammars: %d, Start_rule_id: %d, Rules: %d, Uncompressed integers: %ld\n",
-            dg->num_grammars, *start_rule_id, rules, *original_integers);
+    //printf("Unique Grammars: %d, Start_rule_id: %d, Rules: %d, Uncompressed integers: %ld\n",
+    //        dg->num_grammars, *start_rule_id, rules, *original_integers);
 
     return rules_table;
 }
@@ -178,8 +178,7 @@ DecodedGrammars* read_cfg(char* path, int nprocs) {
     int* inter_decompressed = inter_decompressed_t;
     rule_application(inter_cfg, start_rule_id, start_rule_id, inter_decompressed, &pos);
     clean_rules(inter_cfg);
-    printf("Finsihed decopmressing inter-process compressed grammar\n");
-
+    //printf("Finsihed decopmressing inter-process compressed grammar\n");
 
     // 2. Read and decompress each rank's grammar
     dg->unique_grammars = malloc(sizeof(int*)*dg->num_grammars);

@@ -16,7 +16,7 @@ double pilgrim_wtime();
 /* Put multiple arguments (char *) in a list (char**) */
 void** assemble_args_list(int arg_count, ...);
 
-void* concat_function_args(short func_id, int arg_count, void** args, int* arg_sizes, int* key_len);
+void* concat_function_args(short func_id, int arg_count, void** args, int* arg_sizes, int comm_size, int* key_len);
 
 int randint();
 
@@ -31,5 +31,9 @@ int min_in_array(int* arr, size_t len);
  */
 double pilgrim_log2(int val);
 int pilgrim_ceil(double val);
+
+int pilgrim_sum_array(int* arr, int n);
+
+void print_bt();
 
 #endif

@@ -14,13 +14,6 @@
 #include "pilgrim_mpi_objects.h"
 
 
-// Some constant integers for parameters are have pre-defined values
-#define PILGRIM_MPI_ANY_SOURCE -99999
-#define PILGRIM_MPI_ANY_TAG    -99998
-#define PILGRIM_MPI_PROC_NULL  -99997
-#define PILGRIM_EQUAL_MYRANK   -99996
-
-
 
 // First call the original function and stores the elapsed time, func id, etc
 // Need to call the function first so the output arguments have the correct value
@@ -39,7 +32,9 @@
 
 // Then in a Record structure and write it to log
 // Copy the arguments in case the application freed/modified the memory
-#define PILGRIM_TRACING_2(record_arg_count, record_arg_sizes, record_args)              \
+// 3rd argument comm_size is used for post-processing to determine the call's array
+// argument length, e.g., MPI_Alltoallw()
+#define PILGRIM_TRACING_2(record_arg_count, record_arg_sizes, record_args, commsize)    \
     Record record = {                                                                   \
         .tstart = tstart,                                                               \
         .tend = tend,                                                                   \
@@ -47,6 +42,7 @@
         .func_id = func_id,                                                             \
         .arg_count = record_arg_count,                                                  \
         .arg_sizes = record_arg_sizes,                                                  \
+        .comm_size = commsize,                                                         \
     };                                                                                  \
     record.args = pilgrim_malloc(sizeof(void*) * record_arg_count);                     \
     int i;                                                                              \

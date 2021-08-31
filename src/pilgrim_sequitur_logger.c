@@ -149,7 +149,7 @@ Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size, size_t *unco
 
     // Clean up the hash table, and gathered grammars
     *num_unique_grammars = HASH_COUNT(unique_grammars);
-    printf("[pilgrim] unique grammars: %d\n", *num_unique_grammars);
+    //printf("[pilgrim] unique grammars: %d\n", *num_unique_grammars);
 
     UniqueGrammar *ug, *tmp;
     HASH_ITER(hh, unique_grammars, ug, tmp) {

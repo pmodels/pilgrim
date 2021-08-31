@@ -37,6 +37,11 @@
             if(id!=PILGRIM_CUSTOM_MPI_OP_ID)                                        \
                 return id;                                                          \
         }                                                                           \
+        if(strcmp(#Type, "MPI_Errhandler")==0) {                                    \
+            int id = mpi_errhandler_to_symbolic_id(obj);                            \
+            if(id!=PILGRIM_CUSTOM_MPI_ERRHANDLER_ID)                                \
+                return id;                                                          \
+        }                                                                           \
         ObjHash_##Type *entry = get_hash_entry_##Type(obj);                         \
         /* if not exists in the hash table, then this should be the                 \
          first time the object is created, need to add it to the                    \
@@ -95,6 +100,7 @@ MPI_OBJ_DEFINE(MPI_Win);
 MPI_OBJ_DEFINE(MPI_Group);
 MPI_OBJ_DEFINE(MPI_Op);
 MPI_OBJ_DEFINE(MPI_Message);
+MPI_OBJ_DEFINE(MPI_Errhandler);
 
 
 /*
@@ -107,7 +113,7 @@ RequestHash *hash_MPI_Request;
 RequestNode *list_MPI_Request;
 RequestNodeHash *request_free_ids;
 
-static int invalid_request_id = -1;
+static int invalid_request_id = PILGRIM_MPI_REQUEST_NULL;
 static int allocated_request_id = 0;
 
 RequestHash* request_hash_entry(MPI_Request *req) {

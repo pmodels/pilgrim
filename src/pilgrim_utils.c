@@ -2,6 +2,7 @@
  * Copyright (C) by Argonne National Laboratory
  *     See COPYRIGHT in top-level directory
  */
+#define UNW_LOCAL_ONLY
 
 #include <sys/time.h>
 #include <stdarg.h>     // for va_list, va_start and va_end
@@ -11,6 +12,7 @@
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
+#include <libunwind.h>
 #include "pilgrim_utils.h"
 #include "dlmalloc-2.8.6.h"
 #include "mpi.h"
@@ -53,11 +55,14 @@ inline void** assemble_args_list(int arg_count, ...) {
     return args;
 }
 
-void* concat_function_args(short func_id, int arg_count, void** args, int* arg_sizes, int* key_len) {
+void* concat_function_args(short func_id, int arg_count, void** args, int* arg_sizes, int comm_size, int* key_len) {
 
     // Compute key length first, note func_id is a short type
     int i;
     *key_len = sizeof(func_id);
+    if(comm_size != -1)
+        *key_len += sizeof(comm_size);
+
     for(i = 0; i < arg_count; i++)
         *key_len += arg_sizes[i];
 
@@ -66,6 +71,11 @@ void* concat_function_args(short func_id, int arg_count, void** args, int* arg_s
     void *key = pilgrim_malloc(*key_len);
     memcpy(key+pos, &func_id, sizeof(func_id));
     pos += sizeof(func_id);
+
+    if(comm_size != -1) {
+        memcpy(key+pos, &comm_size, sizeof(comm_size));
+        pos += sizeof(comm_size);
+    }
 
     for(i = 0; i < arg_count; i++) {
         if(args[i])
@@ -105,4 +115,36 @@ int pilgrim_ceil(double val) {
     int tmp = (int) val;
     if(val > tmp)
         return tmp + 1;
+}
+
+int pilgrim_sum_array(int* arr, int n) {
+    int sum = 0;
+    for(int i = 0; i < n; i++)
+        sum += arr[i];
+    return sum;
+}
+
+void print_bt() {
+    unw_cursor_t cursor;
+    unw_context_t context;
+    // Initialize cursor to current frame for local unwinding.
+    unw_getcontext(&context);
+    unw_init_local(&cursor, &context);
+
+    // Unwind frames one by one, going up the frame stack.
+    while (unw_step(&cursor) > 0) {
+        unw_word_t offset, pc;
+        unw_get_reg(&cursor, UNW_REG_IP, &pc);
+        if (pc == 0) {
+            break;
+        }
+        printf("0x%lx:", pc);
+
+        char sym[256];
+        if (unw_get_proc_name(&cursor, sym, sizeof(sym), &offset) == 0) {
+            printf(" (%s+0x%lx)\n", sym, offset);
+        } else {
+            printf(" -- error: unable to obtain symbol name for this frame\n");
+        }
+    }
 }

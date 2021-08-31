@@ -1,19 +1,30 @@
 #ifndef _PILGRIM_CONSTS_H_
 #define _PILGRIM_CONSTS_H_
-
 #include <assert.h>
 #include <mpi.h>
+#include "pilgrim_reader.h"
 
-#define PILGRIM_INVALID_MPI_OBJECT_ID   -9999
+// Some constant integers for parameters are have pre-defined values
+#define PILGRIM_MPI_ANY_SOURCE -99999
+#define PILGRIM_MPI_ANY_TAG    -99998
+#define PILGRIM_MPI_PROC_NULL  -99997
+#define PILGRIM_EQUAL_MYRANK   -99996
 
-#define PILGRIM_CUSTOM_MPI_DATATYPE_ID  -9998
-#define PILGRIM_CUSTOM_MPI_COMM_ID      -9997
-#define PILGRIM_CUSTOM_MPI_OP_ID        -9996
 
-#define PILGRIM_MPI_COMM_NULL_ID        -9995
-#define PILGRIM_MPI_COMM_WORLD_ID       -9994
-#define PILGRIM_MPI_COMM_SELF_ID        -9993
+#define PILGRIM_INVALID_MPI_OBJECT_ID       -9999
 
+#define PILGRIM_CUSTOM_MPI_DATATYPE_ID      -9998
+#define PILGRIM_CUSTOM_MPI_COMM_ID          -9997
+#define PILGRIM_CUSTOM_MPI_OP_ID            -9996
+#define PILGRIM_CUSTOM_MPI_ERRHANDLER_ID    -9995
+
+#define PILGRIM_MPI_COMM_NULL_ID            -9989
+#define PILGRIM_MPI_COMM_WORLD_ID           -9988
+#define PILGRIM_MPI_COMM_SELF_ID            -9987
+
+#define PILGRIM_MPI_REQUEST_NULL            -9979
+
+static
 MPI_Datatype builtin_mpi_datatypes[] = {
     MPI_DATATYPE_NULL,
     MPI_CHAR,
@@ -74,6 +85,7 @@ MPI_Datatype builtin_mpi_datatypes[] = {
     MPI_DOUBLE_PRECISION,
 };
 
+static
 char* builtin_mpi_datatypes_str[] = {
     "MPI_DATATYPE_NULL",
     "MPI_CHAR",
@@ -134,6 +146,7 @@ char* builtin_mpi_datatypes_str[] = {
     "MPI_DOUBLE_PRECISION",
 };
 
+static
 MPI_Op builtin_mpi_ops[] = {
     MPI_OP_NULL,
     MPI_MAX,
@@ -151,6 +164,7 @@ MPI_Op builtin_mpi_ops[] = {
     MPI_REPLACE
 };
 
+static
 char* builtin_mpi_ops_str[] = {
     "MPI_OP_NULL",
     "MPI_MAX",
@@ -168,6 +182,18 @@ char* builtin_mpi_ops_str[] = {
     "MPI_REPLACE"
 };
 
+static
+MPI_Errhandler builtin_mpi_errhandlers[] = {
+    MPI_ERRORS_ARE_FATAL,
+    MPI_ERRORS_RETURN,
+};
+
+static
+char* builtin_mpi_errhandlers_str[] = {
+    "MPI_ERRORS_ARE_FATAL",
+    "MPI_ERRORS_RETURN",
+};
+
 
 
 // Guarantee that built-in MPI datatype will have an negative
@@ -177,35 +203,33 @@ static int mpi_datatype_to_symbolic_id(const void* type_p) {
     MPI_Datatype datatype = *((MPI_Datatype*)type_p);
     for(int i = 0; i < sizeof(builtin_mpi_datatypes)/sizeof(MPI_Datatype); i++) {
         if(builtin_mpi_datatypes[i] == datatype)
-            return -1 * i;
+            return (-1 * i) - 1;
     }
     return PILGRIM_CUSTOM_MPI_DATATYPE_ID;
-}
-
-
-static char* symbolic_id_to_mpi_datatype_str(int id) {
-    assert(id < 0 && id!=PILGRIM_CUSTOM_MPI_DATATYPE_ID);
-    return builtin_mpi_datatypes_str[-id];
 }
 
 static int mpi_op_to_symbolic_id(const void* op_p) {
     MPI_Op op = *((MPI_Op*)op_p);
     for(int i = 0; i < sizeof(builtin_mpi_ops)/sizeof(MPI_Op); i++) {
         if(builtin_mpi_ops[i] == op)
-            return -1 * i;
+            return (-1 * i) - 1;
     }
     return PILGRIM_CUSTOM_MPI_OP_ID;
 }
 
-
-static char* symbolic_id_to_mpi_op_str(int id) {
-    assert(id < 0 && id!=PILGRIM_CUSTOM_MPI_OP_ID);
-    return builtin_mpi_ops_str[-id];
+static int mpi_errhandler_to_symbolic_id(const void* handler_p) {
+    MPI_Errhandler handler = *((MPI_Errhandler*)handler_p);
+    for(int i = 0; i < sizeof(builtin_mpi_errhandlers)/sizeof(MPI_Errhandler); i++) {
+        if(builtin_mpi_errhandlers[i] == handler)
+            return (-1 * i) - 1;
+    }
+    return PILGRIM_CUSTOM_MPI_ERRHANDLER_ID;
 }
 
-
 static int mpi_comm_to_symbolic_id(MPI_Comm *comm) {
-    if(comm==NULL || *comm == MPI_COMM_NULL)
+    if(comm == NULL)
+        return PILGRIM_INVALID_MPI_OBJECT_ID;
+    if(*comm == MPI_COMM_NULL)
         return PILGRIM_MPI_COMM_NULL_ID;
     if(*comm == MPI_COMM_WORLD)
         return PILGRIM_MPI_COMM_WORLD_ID;
@@ -214,15 +238,37 @@ static int mpi_comm_to_symbolic_id(MPI_Comm *comm) {
     return PILGRIM_CUSTOM_MPI_COMM_ID;
 }
 
-static char* symbolic_id_to_mpi_comm_str(int id) {
-    assert(id != PILGRIM_CUSTOM_MPI_COMM_ID && id < 0);
-    if(id == PILGRIM_MPI_COMM_NULL_ID)
-        return "MPI_COMM_NULL";
-    if(id == PILGRIM_MPI_COMM_WORLD_ID)
+inline static int symbolic_id_is_mpi_constant(int id) {
+    if(id != PILGRIM_CUSTOM_MPI_COMM_ID && id < 0)
+        return 1;
+    return 0;
+}
+
+static char* symbolic_id_to_mpi_constant_str(int type, int id) {
+    if(id == PILGRIM_INVALID_MPI_OBJECT_ID)
+        return "NULL";
+
+    assert(symbolic_id_is_mpi_constant(id));
+
+    if (type == TYPE_MPI_Datatype)
+        return builtin_mpi_datatypes_str[-(id+1)];
+    if (type == TYPE_MPI_Errhandler)
+        return builtin_mpi_errhandlers_str[-(id+1)];
+    if (type == TYPE_MPI_Op)
+        return builtin_mpi_ops_str[-(id+1)];
+    if (type == TYPE_MPI_Request)
+        return "MPI_REQUEST_NULL";
+    if (type == TYPE_MPI_Comm) {
+        if(id == PILGRIM_MPI_COMM_NULL_ID)
+            return "MPI_COMM_NULL";
+        if(id == PILGRIM_MPI_COMM_WORLD_ID)
+            return "MPI_COMM_WORLD";
+        if(id == PILGRIM_MPI_COMM_SELF_ID)
+            return "MPI_COMM_SELF";
         return "MPI_COMM_WORLD";
-    if(id == PILGRIM_MPI_COMM_SELF_ID)
-        return "MPI_COMM_SELF";
-    return "MPI_COMM_WORLD";
+    }
+
+    return "[Not Possible]";
 }
 
 

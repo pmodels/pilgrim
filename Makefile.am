@@ -21,16 +21,17 @@ libpilgrim_la_SOURCES =
 
 pilgrim_app_generator_SOURCES = 
 pilgrim_app_generator_CFLAGS = $(AM_CFLAGS)
-pilgrim_app_generator_LDFLAGS = -lm
+pilgrim_app_generator_LDFLAGS = -lm -lunwind
 
 pilgrim2text_SOURCES = 
 pilgrim2text_CFLAGS = $(AM_CFLAGS)
+pilgrim2text_LDFLAGS = -lm -lunwind
 
 
 AM_CPPFLAGS = -g -rdynamic
 AM_CFLAGS = -g -rdynamic
 
-libpilgrim_la_LDFLAGS = -lm -version-info @libpilgrim_so_version@
+libpilgrim_la_LDFLAGS = -lm -lunwind -version-info @libpilgrim_so_version@
 
 include $(top_srcdir)/src/Makefile.mk
 include $(top_srcdir)/src/decoder/Makefile.mk

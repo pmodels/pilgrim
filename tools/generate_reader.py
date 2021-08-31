@@ -96,8 +96,32 @@ def codegen_read_one_arg(func, i):
         lines.append('cs->arg_sizes[%d] = sizeof(%s);' %(i, arg_type_strip(arg.type)) )
 
 
-    # 3. Finally, update size for array arguments
-    if '[' in arg.type and 'char' not in arg.type:
+    # 3. Set up the length for array arguments of graph realated calls
+    # We need to do this because for some of them, we can not directly
+    # parse that info from the MPI Standard latex
+    if (func.name == "MPI_Graph_create" or func.name == "MPI_Graph_map") and arg.name == "edges":
+        # MPI_Graph_create(MPI_Comm comm_old, int nnodes, const int index[], const int edges[], int reorder, MPI_Comm * comm_graph)
+        # MPI_Graph_map(MPI_Comm comm, int nnodes, const int index[], const int edges[], int *newrank)
+        # length of edges: index[nnodes-1]
+        lines.append('cs->arg_lengths[%d] = ((int*)cs->args[2])[*(int*)cs->args[1]-1];' %i)
+
+    if func.name == "MPI_Dist_graph_create":
+        # MPI_Dist_graph_create(MPI_Comm comm_old, int n, const int sources[], const int degrees[], const int destinations[], const int weights[], MPI_Info info, int reorder, MPI_Comm *comm_dist_graph)
+        # length of destinations/weights: sum(degress)
+        if arg.name == "destinations" or arg.name == "weights":
+            lines.append('cs->arg_lengths[%d] = pilgrim_sum_array((int*) cs->args[3], *(int*)cs->args[1]);' %i)
+
+    if func.name == "MPI_Dist_graph_create_adjacent":
+        # length of sourceweights = indegree
+        # length of destweights = outdegree
+        if arg.name == "sourceweights":
+            lines.append('cs->arg_lengths[%d] = (*(int*) cs->args[1]);' %i)
+        if arg.name == "destweights":
+            lines.append('cs->arg_lengths[%d] = (*(int*) cs->args[4]);' %i)
+
+
+    # 4. Finally, update size for array arguments
+    if '[' in arg.type and 'char' not in arg.type and 'graph' not in func.name.lower():
         # could be MPI_Aint or int (int for int[], MPI_Datatype[])
         size_type = arg_type_strip(arg.type)
         if size_type == "MPI_Datatype": size_type = "int"
@@ -111,12 +135,13 @@ def codegen_read_one_arg(func, i):
                 idx = find_arg_idx(func, arg.length)
                 lines.append( 'cs->arg_lengths[%d] = *((int*) (cs->args[%d]));' %(i, idx) )
         else:
-            # size of this array should stored in "comm_size"
-            if not func.need_comm_size:
-                print("TODO!!! need to fix: %s, %s %s" %(func.name, arg.type, arg.name))
-
+            # func.need_comm_size must be True so we have comm_size set already
             lines.append('cs->arg_lengths[%d] =  comm_size;' %(i))
             lines.append('assert(cs->arg_lengths[%d] > 0);' %i);
+
+        if 'graph' in func.name.lower():
+            print(func.name, arg.type, arg.name, arg.length)
+
 
         lines.append('cs->arg_sizes[%d] = sizeof(%s) * cs->arg_lengths[%d];' %(i, size_type, i))
 

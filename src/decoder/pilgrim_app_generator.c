@@ -307,7 +307,7 @@ char* write_argument(CallSignature *cs, int i) {
     return name;
 }
 
-void write_call_special(FILE* f, CallSignature *cs, const char* indent) {
+void write_call_special(FILE* f, CallSignature *cs) {
     if(cs->func_id == ID_free) {
         MemPtrAttr* attr = (MemPtrAttr*) cs->args[0];
         fprintf(f, "\tfree(%s_%d);\n\t%s_%d = NULL;\n", TYPE_VAR_STR[TYPE_MEM_PTR], attr->id, TYPE_VAR_STR[TYPE_MEM_PTR], attr->id);
@@ -315,13 +315,13 @@ void write_call_special(FILE* f, CallSignature *cs, const char* indent) {
 }
 
 
-void write_call(FILE* f, CallSignature *cs, const char* indent) {
+void write_call(FILE* f, CallSignature *cs) {
     if(cs->func_id == ID_free) {
-        write_call_special(f, cs, indent);
+        write_call_special(f, cs);
         return;
     }
 
-    fprintf(f, "%s%s(", indent, func_names[cs->func_id]);
+    fprintf(f, "\t\t%s(", func_names[cs->func_id]);
     for(int i = 0; i < cs->arg_count; i++) {
         char* var = write_argument(cs, i);
         fprintf(f, "%s", var);
@@ -340,7 +340,8 @@ void write_prologue(FILE* f, Grammar* grammar, CallSignature* cst) {
     fprintf(f, "#include <mpi.h>\n\n");
     fprintf(f, "static int g_mpi_rank;\n");
     fprintf(f, "static int g_mpi_size;\n");
-    fprintf(f, "static int g_ugi;\n\n");
+    fprintf(f, "static int g_ugi;\n");
+    fprintf(f, "static int g_remaining_reqs;\n\n");
 
     fprintf(f, "void mpi_user_function(void* in, void* out, int* len, MPI_Datatype* type) {}\n");
     fprintf(f, "void mpi_comm_errhandler_function(MPI_Comm* comm, int* err, ...) {}\n");
@@ -403,21 +404,170 @@ Grammar* final_sequitur(DecodedGrammars* dg, int *final_splitter) {
     return grammar;
 }
 
+
+
 void handle_one_symbol(FILE* f, Symbol* sym, CallSignature* cst) {
-
-    CallSignature *cs = &cst[sym->val];
-
-    if(sym->val >= 0)
-        write_vars_initialization(f, cs);
-
     if(sym->exp > 1)
         fprintf(f, "\tfor(int i = 0; i < %d; i++)\n", sym->exp);
+
     if(sym->val >= 0) {
         CallSignature *cs = &cst[sym->val];
-        //printf("%s\n", func_names[cs->func_id]);
-        write_call(f, cs, sym->exp>1?"\t\t":"\t");
+        write_vars_initialization(f, cs);
+        write_call(f, cs);
     } else {
         fprintf(f, "\t%sfunc_%d();\n", sym->exp>1?"\t":"", -1*sym->val);
+    }
+}
+
+
+static bool wt_loop = false;
+static int  wt_loop_count;
+static int  wt_loop_call_id;
+static bool wt_loop_first_iter;
+static int  wt_loop_syms_per_iter;
+typedef struct WTHanddledSym_t {
+    int sym_val;          // use terminal id as key
+    UT_hash_handle hh;
+} WTHandledSym;
+static WTHandledSym *wt_handled_syms = NULL;
+
+bool enter_wt_loop(Symbol* sym, CallSignature* cst, int *reqs) {
+
+    if(sym->val >=0) {
+
+        CallSignature* cs = &cst[sym->val];
+        int id = cs->func_id;
+
+        // Here we need to check how many reqeusts are valid.
+        // We can not use N due to two special cases:
+        // 1. MPI_Testall(0, NULL, ...)     --> 0 reqs
+        // 2. MPI_Testall(3, [MPI_REQUEST_NULL, req1, req2) --> 2 reqs
+        int reqs = 0;
+        if(id == ID_MPI_Test) {
+            int req_id = (*(int*) cs->args[0]);
+            if(!symbolic_id_is_mpi_constant(req_id))
+                reqs = 1;
+        }
+
+        if(id == ID_MPI_Testsome ||
+           id == ID_MPI_Testany  || id == ID_MPI_Testall ||
+           id == ID_MPI_Waitany  || id == ID_MPI_Waitsome) {
+
+            int n = (*(int*) cs->args[0]);
+            for(int i = 0; i < n; i++) {
+                int req_id = ((int*)cs->args[1])[i];
+                if(!symbolic_id_is_mpi_constant(req_id))
+                    reqs++;
+            }
+        }
+
+        return (reqs > 0);
+    }
+    return false;
+}
+
+int get_wt_completed_reqs(CallSignature *cs) {
+    int completed = 0;
+    int id = cs->func_id;
+    if(id == ID_MPI_Test)
+        completed = (*(int*)cs->args[1]);
+    else if(id == ID_MPI_Testall)
+        completed = (*(int*)cs->args[2]) * wt_loop_count;
+    else if(id == ID_MPI_Testsome || id == ID_MPI_Waitsome)
+        completed = (*(int*)cs->args[2]);
+    else if (id == ID_MPI_Testany)
+        completed = (*(int*)cs->args[3]);
+    else if(id == ID_MPI_Waitany)
+        completed = 1;
+    return completed;
+}
+
+void init_wt_loop(FILE* f, Symbol* sym, CallSignature *cst, int n_reqs) {
+
+    CallSignature *cs = &cst[sym->val];
+    int id = cs->func_id;
+
+    wt_loop = true;
+    wt_loop_call_id = id;
+    wt_loop_first_iter = true;
+    wt_loop_syms_per_iter = 0;
+
+    wt_handled_syms = NULL;
+    wt_loop_count = n_reqs;
+    fprintf(f, "\tg_remaining_reqs = %d;\n", wt_loop_count);
+    fprintf(f, "\twhile(g_remaining_reqs > 0) {\n");
+
+    handle_one_symbol(f, sym, cst);
+
+    if(id == ID_MPI_Test) {
+        char* flag = write_argument(cs, 1); // something like &var_3
+        fprintf(f, "\t\tg_remaining_reqs -= %s;\n", flag+1);
+        free(flag);
+    } else if(id == ID_MPI_Testall) {
+        char* flag = write_argument(cs, 2); // something like &var_3
+        fprintf(f, "\t\tg_remaining_reqs -= (%d*%s);\n", wt_loop_count, flag+1);
+        free(flag);
+    } else if(id == ID_MPI_Testsome || id == ID_MPI_Waitsome) {
+        char* flag = write_argument(cs, 2); // something like &var_3
+        fprintf(f, "\t\tg_remaining_reqs -= %s;\n", flag+1);
+        free(flag);
+    } else if (id == ID_MPI_Testany) {
+        char* flag = write_argument(cs, 3); // something like &var_3
+        fprintf(f, "\t\tg_remaining_reqs -= %s;\n", flag+1);
+        free(flag);
+    } else if(id == ID_MPI_Waitany) {
+        fprintf(f, "\t\tg_remaining_reqs -= 1;\n");
+    }
+
+    wt_loop_count -= get_wt_completed_reqs(cs);
+}
+
+void handle_one_symbol_pre(FILE* f, Symbol *sym, CallSignature *cst) {
+
+    if(wt_loop) {
+
+        if(sym->val >= 0)
+            wt_loop_count -= get_wt_completed_reqs(&cst[sym->val]);
+
+        if(cst[sym->val].func_id != wt_loop_call_id) {
+            WTHandledSym *entry = NULL;
+            HASH_FIND_INT(wt_handled_syms, &sym->val, entry);
+            if(entry == NULL) {
+                WTHandledSym *entry = malloc(sizeof(WTHandledSym));
+                entry->sym_val = sym->val;
+                HASH_ADD_INT(wt_handled_syms, sym_val, entry);
+                handle_one_symbol(f, sym, cst);
+            }
+            if(wt_loop_first_iter)
+                wt_loop_syms_per_iter++;
+
+            // last iteration
+            if(wt_loop_count == 0)
+                wt_loop_syms_per_iter--;
+        } else {
+            // Now we see the same Wait/Test call again.
+            wt_loop_first_iter = false;
+        }
+
+        // Now its time to quit the loop
+        if(wt_loop_count == 0 && wt_loop_syms_per_iter == 0) {
+            fprintf(f, "\t}\n");
+            wt_loop = false;
+
+            WTHandledSym *entry, *tmp;
+            HASH_ITER(hh, wt_handled_syms, entry, tmp) {
+                HASH_DEL(wt_handled_syms, entry);
+                free(entry);
+            }
+            wt_handled_syms = NULL;
+        }
+
+    } else {
+        int n_reqs;
+        if(enter_wt_loop(sym, cst, &n_reqs))
+            init_wt_loop(f, sym, cst, n_reqs);
+        else
+            handle_one_symbol(f, sym, cst);
     }
 }
 
@@ -437,7 +587,8 @@ void one_func_per_rule(FILE* f, Grammar* grammar, CallSignature *cst, int final_
 
         DL_FOREACH(rule->rule_body, sym) {
             if(sym->val < grammar_splitter) {
-                handle_one_symbol(f, sym, cst);
+                // TODO
+                handle_one_symbol_pre(f, sym, cst);
             } else {
                 // This code is only executed for rule -1
                 if(sym->val == final_splitter - 1)

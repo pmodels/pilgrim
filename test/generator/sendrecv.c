@@ -14,15 +14,13 @@ int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
     int rank, size;
 
-    MPI_Comm dupcomm, splitcomm;
+    MPI_Comm dupcomm = MPI_COMM_WORLD;
+    MPI_Comm splitcomm = MPI_COMM_WORLD;
 
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     MPI_Datatype subarray;
-    int array[9] = { -1, -2, -3,
-                     -4, 1, 2,
-                     -5, 3, 4 };
     int array_size[2] = { 3, 3 };
     int array_subsize[2] = { 2, 2 };
     int array_start[2] = { 1, 1 };
@@ -43,7 +41,6 @@ int main(int argc, char** argv) {
 
     MPI_Comm_dup(MPI_COMM_WORLD, &dupcomm);
     MPI_Comm_split(MPI_COMM_WORLD, rank < 2, 1, &splitcomm);
-
     assert(size >= 2);
 
     int* data;

@@ -32,4 +32,8 @@ int min_in_array(int* arr, size_t len);
 double pilgrim_log2(int val);
 int pilgrim_ceil(double val);
 
+int pilgrim_sum_array(int* arr, int n);
+
+void print_bt();
+
 #endif

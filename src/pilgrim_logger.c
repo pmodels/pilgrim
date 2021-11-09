@@ -35,6 +35,8 @@ typedef struct OffsetNode_t {
     struct OffsetNode_t *next;
 } OffsetNode;
 
+TimingNode *g_durations = NULL;
+
 
 struct Logger {
     int rank;
@@ -56,7 +58,7 @@ struct Logger {
     double durations_file_size;     // compressed (or lossless) durations file size (in KB)
     double intervals_file_size;     // compressed (or lossless) intervals file size (in KB)
 
-    int timing_mode;                // 0: aggregated (default); 1: non-aggregated 2: lossless
+    char *timing_mode;              // check pilgrim_timing.h
 };
 
 // Global object to access the Logger fileds
@@ -468,19 +470,24 @@ void write_record(Record record) {
     }
 
     // Store timings infomraiton
-    if(__logger.timing_mode == TIMING_MODE_AGGREGATED) {
+    if(strcmp(__logger.timing_mode, TIMING_MODE_AGGREGATED) == 0) {
         handle_aggregated_timing(entry, &record);
-    } else if(__logger.timing_mode == TIMING_MODE_NONAGGREGATED) {
+    } else if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) == 0) {
         int duration_id, interval_id;
-        handle_non_aggregated_timing(entry, &record, &duration_id, &interval_id);
+        handle_cfg_timing(entry, &record, &duration_id, &interval_id);
         append_terminal(&(__logger.intervals_grammar), interval_id, 1);
         append_terminal(&(__logger.durations_grammar), duration_id, 1);
-    } else if(__logger.timing_mode == TIMING_MODE_LOSSLESS) {
+    } else {
         TimingNode *dur_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
         TimingNode *int_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
-        handle_lossless_timing(entry, &record, &(dur_node->val), &(int_node->val));
+        handle_nocomp_timing(entry, &record, &(dur_node->val), &(int_node->val));
         LL_PREPEND(entry->durations, dur_node);
         LL_PREPEND(entry->intervals, int_node);
+
+        // TODO remeber to delete global durations
+        TimingNode *dur_node2 = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
+        dur_node2->val = dur_node->val;
+        LL_PREPEND(g_durations, dur_node2);
     }
 
     // Grow the MPI call grammar
@@ -496,13 +503,17 @@ void logger_init() {
     __logger.local_metadata.rank = g_mpi_rank;
     __logger.hash_head = NULL;          // Must be NULL initialized
     __logger.offset_list = NULL;
-    __logger.timing_mode = TIMING_MODE_AGGREGATED;
+    __logger.timing_mode = strdup(TIMING_MODE_AGGREGATED);
 
     // Check if users want to store non-aggregated timings
     char* tm = NULL;
     tm  = getenv("PILGRIM_TIMING_MODE");
     if(tm)
-        __logger.timing_mode = atoi(tm);
+        __logger.timing_mode = strdup(tm);
+    else
+        __logger.timing_mode = strdup(TIMING_MODE_AGGREGATED);
+    printf("timing mode: %s\n", __logger.timing_mode);
+
 
     if(getenv("PILGRIM_DEBUG"))
         __logger.debug = true;
@@ -527,14 +538,14 @@ void logger_init() {
         GlobalMetadata global_metadata= {
             .time_resolution = TIME_RESOLUTION,
             .ranks = g_mpi_size,
-            .timing_mode = __logger.timing_mode,
+            .timing_mode = 0, // TODO need to store the actual mode
         };
         fwrite(&global_metadata, sizeof(GlobalMetadata), 1, global_metafh);
         fclose(global_metafh);
     }
 
     sequitur_init(&(__logger.grammar));
-    if(__logger.timing_mode == TIMING_MODE_NONAGGREGATED) {
+    if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) == 0) {
         sequitur_init(&(__logger.intervals_grammar));
         sequitur_init(&(__logger.durations_grammar));
     }
@@ -563,18 +574,39 @@ void logger_exit() {
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
     cst_compression_time = pilgrim_wtime() - cst_compression_time;
 
-    // 2. Inter-process copmression of Grammars
+
+    // 2. CFG based timing compression
     cfg_compression_time = pilgrim_wtime();
     __logger.final_grammar_size = sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
-    if(__logger.timing_mode == TIMING_MODE_NONAGGREGATED) {
+    if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) == 0) {
         __logger.durations_file_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
         __logger.intervals_file_size = sequitur_finalize(INTERVALS_OUTPUT_PATH, &(__logger.intervals_grammar));
     }
-    cfg_compression_time = pilgrim_wtime() - cfg_compression_time;
 
-    // 2.5 Write out lossless timing, one file per rank
-    if(__logger.timing_mode == TIMING_MODE_LOSSLESS)
-        write_lossless_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
+    // 2.5 other timing compression method
+    if(strcmp(__logger.timing_mode, TIMING_MODE_TEXT) == 0)
+        write_text_timings(__logger.hash_head, __logger.rank);
+    if(strcmp(__logger.timing_mode, TIMING_MODE_NOCOMP) == 0)
+        write_nocomp_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
+    if(strcmp(__logger.timing_mode, TIMING_MODE_ZFP) == 0)
+        write_zfp_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
+    if(strcmp(__logger.timing_mode, TIMING_MODE_SZ) == 0)
+        write_sz_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
+    if(strcmp(__logger.timing_mode, TIMING_MODE_HIST) == 0)
+        write_hist_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
+    if(strcmp(__logger.timing_mode, TIMING_MODE_ZSTD) == 0)
+        write_zstd_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
+
+    /*
+    if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) != 0) {
+        write_zstd_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
+        write_zfp_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
+        write_sz_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
+        write_hist_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
+    }
+    */
+
+    cfg_compression_time = pilgrim_wtime() - cfg_compression_time;
 
     // 3. Clean up all resources
     cleanup_cst(__logger.hash_head);
@@ -584,19 +616,26 @@ void logger_exit() {
         pilgrim_free(elt, sizeof(OffsetNode));
     }
 
+
     MPI_OBJ_CLEANUP_ALL();
 
     // Output statistics
     if(__logger.rank == 0 && __logger.debug) {
         pilgrim_report_memory_status();
 
-        printf("[pilgrim] Total mpi calls: %f *10e6\n", total_calls);
+        printf("[pilgrim] Total mpi calls: %f *1e6\n", total_calls);
         printf("[pilgrim] CST inter-process compression time: %.2f\n", cst_compression_time);
         printf("[pilgrim] CFG inter-process compression time: %.2f\n", cfg_compression_time);
         printf("[pilgrim] CST Size: %.2fKB, CFG Size: %.2fKB, Total: %.2fKB\n",
                 __logger.final_cst_size, __logger.final_grammar_size, __logger.final_cst_size + __logger.final_grammar_size);
-        if(__logger.timing_mode == TIMING_MODE_NONAGGREGATED)
+        if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) == 0) {
             printf("[pilgrim] Durations File Size: %.2fKB, Intervals File Size: %.2fKB\n",
                     __logger.durations_file_size, __logger.intervals_file_size);
+            printf("[pilgrim] Durations compression ratio: %f, Intervals compression ratio: %f\n",
+                    total_calls*1e6/(__logger.durations_file_size*1024)*sizeof(double),
+                    total_calls*1e6/(__logger.intervals_file_size*1024)*sizeof(double));
+        }
     }
+
+    free(__logger.timing_mode);
 }

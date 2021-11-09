@@ -31,7 +31,14 @@ pilgrim2text_LDFLAGS = -lm -lunwind
 AM_CPPFLAGS = -g -rdynamic
 AM_CFLAGS = -g -rdynamic
 
-libpilgrim_la_LDFLAGS = -lm -lunwind -version-info @libpilgrim_so_version@
+
+ZFP_DIR=/home/wangchen/Sources/zfp-0.5.5/install
+SZ_DIR=/home/wangchen/Sources/SZ-2.1.12/install
+
+zfp_LDFLAGS=-Wl,-rpath,$(ZFP_DIR)/lib -L$(ZFP_DIR)/lib -lzfp
+sz_LDFLAGS=-Wl,-rpath,$(SZ_DIR)/lib -L$(SZ_DIR)/lib -lSZ
+
+libpilgrim_la_LDFLAGS = -lm -lunwind $(zfp_LDFLAGS) $(sz_LDFLAGS) -version-info @libpilgrim_so_version@
 
 include $(top_srcdir)/src/Makefile.mk
 include $(top_srcdir)/src/decoder/Makefile.mk

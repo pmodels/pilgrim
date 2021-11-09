@@ -3,7 +3,7 @@
 ##     See COPYRIGHT in top-level directory
 ##
 
-AM_CPPFLAGS += -I$(top_srcdir)/src
+AM_CPPFLAGS += -I$(top_srcdir)/src -I/home/wangchen/Sources/zfp-0.5.5/install/include -I$(SZ_DIR)/include/sz
 
 libpilgrim_la_SOURCES += \
 	src/pilgrim_wrappers.c src/pilgrim_utils.c src/pilgrim_logger.c \

@@ -1,0 +1,1136 @@
+accfence1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=512 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=513 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=514 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host 
+accfence1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=515 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host 
+accfence1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=516 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=518 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=519 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=520 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+accfence1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=521 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+accfence1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=522 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=524 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=525 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=526 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+accfence1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=527 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+accfence1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=528 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=530 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=531 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=532 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+accfence1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=533 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+accfence1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=534 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=536 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=537 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=538 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=539 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=540 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=542 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=543 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=544 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=545 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=546 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=548 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=549 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=550 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=551 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=552 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=554 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=555 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=556 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=557 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=558 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+accfence1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=560 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=1.2
+accfence1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=561 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=1.2
+accfence1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=562 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=1.2
+accfence1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=563 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=1.2
+accfence1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=564 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=1.2
+accfence1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=566 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=1.2
+accfence1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=567 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=1.2
+accfence1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=568 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=1.2
+accfence1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=569 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=1.2
+accfence1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=570 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=1.2
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=572 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=1.2
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=573 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=1.2
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=574 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=1.2
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=575 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=1.2
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=576 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=1.2
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=578 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=1.2
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=579 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=1.2
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=580 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=1.2
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=581 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=1.2
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=582 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=1.2
+accpscw1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=584 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=585 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=586 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host 
+accpscw1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=587 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host 
+accpscw1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=588 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=590 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=591 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=592 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+accpscw1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=593 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+accpscw1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=594 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=596 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=597 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=598 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+accpscw1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=599 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+accpscw1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=600 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=602 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=603 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=604 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+accpscw1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=605 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+accpscw1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=606 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=608 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=609 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=610 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=611 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=612 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=614 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=615 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=616 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=617 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=618 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=620 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=621 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=622 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=623 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=624 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=626 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=627 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=628 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=629 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=630 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+accpscw1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=632 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=1.7
+accpscw1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=633 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=1.7
+accpscw1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=634 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=1.7
+accpscw1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=635 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=1.7
+accpscw1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=636 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=1.7
+accpscw1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=638 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=1.7
+accpscw1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=639 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=1.7
+accpscw1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=640 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=1.7
+accpscw1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=641 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=1.7
+accpscw1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=642 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=1.7
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=644 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=1.7
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=645 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=1.7
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=646 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=1.7
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=647 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=1.7
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=648 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=1.7
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=650 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=1.7
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=651 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=1.7
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=652 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=1.7
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=653 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=1.7
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=654 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=1.7
+epochtest 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=656 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=657 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=658 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host 
+epochtest 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=659 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host 
+epochtest 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=660 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=662 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=663 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=664 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+epochtest 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=665 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+epochtest 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=666 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=668 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=669 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=670 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+epochtest 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=671 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+epochtest 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=672 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=674 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=675 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=676 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+epochtest 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=677 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+epochtest 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=678 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=680 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=681 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=682 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=683 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=684 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=686 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=687 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=688 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=689 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=690 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=692 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=693 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=694 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=695 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=696 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=698 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=699 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=700 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=701 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=702 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+epochtest 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=704 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=705 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=706 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=707 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=708 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=710 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=711 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=712 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=713 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=714 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=716 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=717 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=718 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=719 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=720 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=722 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=723 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=724 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=725 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=726 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device timeLimit=300 mem=5
+getfence1 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=728 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=729 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=730 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host 
+getfence1 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=731 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host 
+getfence1 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=732 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=734 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=735 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=736 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+getfence1 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=737 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+getfence1 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=738 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=740 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=741 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=742 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+getfence1 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=743 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+getfence1 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=744 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=746 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=747 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=748 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+getfence1 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=749 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+getfence1 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=750 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=752 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=753 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=754 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=755 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=756 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=758 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=759 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=760 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=761 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=762 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=764 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=765 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=766 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=767 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=768 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=770 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=771 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=772 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=773 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=774 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+getfence1 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=776 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=2
+getfence1 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=777 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=2
+getfence1 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=778 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=2
+getfence1 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=779 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=2
+getfence1 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=780 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=2
+getfence1 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=782 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=2
+getfence1 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=783 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=2
+getfence1 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=784 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=2
+getfence1 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=785 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=2
+getfence1 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=786 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=2
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=788 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=2
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=789 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=2
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=790 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=2
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=791 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=2
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=792 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=2
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=794 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=2
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=795 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=2
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=796 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=2
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=797 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=2
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=798 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=2
+getfence1 2 arg=-type=MPI_INT arg=-count=16000000 arg=-seed=800 arg=-testsize=2  arg=-origmem=host arg=-targetmem=device timeLimit=1800 mem=3
+getfence1 2 arg=-type=MPI_INT arg=-count=16000000 arg=-seed=801 arg=-testsize=1  arg=-origmem=reg_host arg=-targetmem=device timeLimit=1800 mem=3
+getfence1 2 arg=-type=MPI_INT arg=-count=16000000 arg=-seed=802 arg=-testsize=2  arg=-origmem=device arg=-targetmem=host timeLimit=1800 mem=3
+getfence1 2 arg=-type=MPI_INT arg=-count=16000000 arg=-seed=803 arg=-testsize=1  arg=-origmem=device arg=-targetmem=reg_host timeLimit=1800 mem=3
+getfence1 2 arg=-type=MPI_INT arg=-count=16000000 arg=-seed=804 arg=-testsize=2  arg=-origmem=device arg=-targetmem=device timeLimit=1800 mem=3
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=16000000 arg=-seed=806 arg=-testsize=2  arg=-origmem=host arg=-targetmem=device timeLimit=1800 mem=3
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=16000000 arg=-seed=807 arg=-testsize=1  arg=-origmem=reg_host arg=-targetmem=device timeLimit=1800 mem=3
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=16000000 arg=-seed=808 arg=-testsize=2  arg=-origmem=device arg=-targetmem=host timeLimit=1800 mem=3
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=16000000 arg=-seed=809 arg=-testsize=1  arg=-origmem=device arg=-targetmem=reg_host timeLimit=1800 mem=3
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=16000000 arg=-seed=810 arg=-testsize=2  arg=-origmem=device arg=-targetmem=device timeLimit=1800 mem=3
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=812 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=813 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=814 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=815 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=816 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=817 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=818 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=820 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=821 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=822 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=823 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=824 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=825 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=826 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=828 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=829 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=830 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=831 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=832 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=833 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=834 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=836 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=837 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=838 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=839 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=840 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=841 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=842 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=844 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=845 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=846 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=847 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=848 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=849 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=850 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=852 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=853 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=854 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=855 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=856 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=857 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=858 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=860 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=861 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=862 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=863 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=864 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=865 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=866 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=868 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=869 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=870 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=871 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=872 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=873 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=874 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=876 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=877 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=878 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=879 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=880 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=881 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=882 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=884 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=885 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=886 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=887 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=888 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=889 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=890 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=892 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=893 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=894 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=895 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=896 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=897 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=898 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=900 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=901 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=902 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=903 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=904 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=905 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=906 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=2.1
+lock_dt 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=908 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=909 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=910 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=911 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=912 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=913 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=914 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=916 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=917 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=918 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=919 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=920 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=921 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=922 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=924 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=925 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=926 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=927 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=928 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=929 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=930 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=932 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=933 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=934 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=935 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=936 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=937 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=938 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=940 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=941 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=942 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=943 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=944 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=945 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=946 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=948 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=949 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=950 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=951 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=952 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=953 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=954 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=956 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=957 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=958 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=959 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=960 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=961 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=962 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=964 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=965 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=966 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=967 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=968 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=969 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=970 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=972 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=973 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=974 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=975 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=976 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=977 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=978 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=980 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=981 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=982 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=983 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=984 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=985 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=986 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=988 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=989 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=990 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=991 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=992 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=993 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=994 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=996 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=997 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=998 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=999 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1000 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1001 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1002 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1004 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1005 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1006 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1007 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1008 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1009 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1010 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1012 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1013 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1014 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1015 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1016 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1017 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1018 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1020 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1021 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1022 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1023 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1024 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1025 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1026 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1028 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1029 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1030 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1031 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1032 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1033 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1034 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1036 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1037 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1038 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1039 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1040 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1041 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1042 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1044 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1045 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1046 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1047 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1048 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1049 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1050 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1052 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1053 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1054 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1055 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1056 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1057 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1058 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1060 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1061 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1062 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1063 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1064 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1065 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1066 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1068 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1069 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1070 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1071 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1072 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1073 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1074 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1076 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1077 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1078 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1079 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1080 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1081 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1082 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1084 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1085 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1086 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1087 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1088 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1089 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1090 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1092 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1093 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1094 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1095 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1096 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1097 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1098 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1100 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1101 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1102 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1103 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1104 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1105 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1106 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1108 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1109 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1110 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1111 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1112 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1113 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1114 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1116 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1117 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1118 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1119 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1120 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1121 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1122 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1124 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1125 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1126 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1127 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1128 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1129 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1130 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1132 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1133 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1134 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1135 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1136 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1137 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1138 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1140 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1141 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1142 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1143 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1144 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1145 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1146 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1148 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1149 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1150 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1151 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1152 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1153 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1154 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1156 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1157 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1158 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1159 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1160 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1161 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1162 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1164 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1165 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1166 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1167 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1168 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1169 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1170 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1172 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1173 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1174 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1175 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1176 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1177 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1178 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1180 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1181 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1182 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1183 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1184 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1185 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1186 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1188 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1189 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1190 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1191 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1192 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1193 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1194 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1196 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1197 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1198 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1199 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1200 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1201 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1202 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1204 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1205 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1206 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1207 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1208 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1209 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1210 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1212 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1213 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1214 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1215 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1216 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1217 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1218 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1220 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1221 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1222 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1223 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1224 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1225 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1226 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1228 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1229 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1230 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1231 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1232 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1233 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1234 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1236 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1237 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1238 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1239 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1240 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1241 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1242 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1244 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1245 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1246 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1247 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1248 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1249 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1250 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1252 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1253 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1254 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1255 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1256 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1257 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1258 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1260 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1261 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1262 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1263 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1264 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1265 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1266 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1268 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1269 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1270 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1271 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1272 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1273 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1274 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1276 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1277 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1278 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1279 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1280 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1281 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1282 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1284 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1285 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1286 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1287 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1288 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1289 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1290 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=1.1
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1292 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1293 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1294 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1295 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1296 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1297 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1298 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1300 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1301 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1302 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1303 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1304 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1305 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1306 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1308 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1309 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1310 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1311 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1312 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1313 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1314 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1316 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1317 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1318 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1319 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1320 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1321 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1322 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1324 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1325 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1326 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1327 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1328 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1329 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1330 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1332 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1333 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1334 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1335 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1336 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1337 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1338 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1340 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1341 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1342 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1343 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1344 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1345 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1346 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1348 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1349 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1350 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1351 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1352 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1353 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1354 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1356 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1357 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1358 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1359 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1360 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1361 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1362 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1364 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1365 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1366 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1367 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1368 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1369 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1370 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1372 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1373 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1374 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1375 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1376 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1377 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1378 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1380 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1381 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1382 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1383 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1384 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1385 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1386 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1388 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1389 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1390 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1391 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1392 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1393 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1394 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1396 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1397 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1398 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1399 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1400 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1401 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1402 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1404 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1405 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1406 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1407 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1408 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1409 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1410 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1412 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1413 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1414 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1415 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1416 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1417 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1418 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1420 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1421 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1422 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1423 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1424 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1425 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1426 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1428 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1429 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1430 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1431 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1432 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1433 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1434 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1436 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1437 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1438 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1439 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1440 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1441 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1442 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1444 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1445 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1446 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1447 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1448 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1449 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1450 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1452 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1453 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1454 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1455 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1456 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1457 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1458 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1460 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1461 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1462 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1463 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1464 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1465 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1466 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1468 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1469 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1470 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1471 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1472 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1473 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1474 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1476 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1477 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1478 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1479 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1480 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1481 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1482 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1484 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1485 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1486 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1487 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1488 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1489 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1490 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1492 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1493 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1494 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1495 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1496 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1497 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1498 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1500 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1501 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1502 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1503 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1504 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1505 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1506 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1508 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1509 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1510 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1511 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1512 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1513 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1514 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1516 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1517 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1518 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1519 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1520 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1521 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1522 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1524 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1525 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1526 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1527 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1528 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1529 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1530 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1532 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1533 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1534 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1535 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1536 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1537 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1538 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1540 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1541 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1542 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1543 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1544 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1545 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1546 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1548 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1549 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1550 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1551 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1552 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1553 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1554 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1556 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1557 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1558 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1559 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1560 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1561 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1562 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1564 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1565 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1566 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1567 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1568 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1569 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1570 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1572 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1573 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1574 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1575 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1576 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1577 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1578 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=5
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1580 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1581 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1582 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1583 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1584 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1585 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1586 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1588 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1589 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1590 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1591 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1592 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1593 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1594 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1596 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1597 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1598 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1599 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1600 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1601 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1602 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1604 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1605 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1606 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1607 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1608 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1609 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1610 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1612 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1613 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1614 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1615 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1616 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1617 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1618 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1620 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1621 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1622 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1623 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1624 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1625 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1626 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1628 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1629 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1630 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1631 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1632 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1633 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1634 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1636 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1637 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1638 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1639 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1640 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1641 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1642 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host 
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1644 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1645 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1646 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1647 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1648 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1649 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1650 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1652 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1653 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1654 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1655 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1656 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1657 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1658 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1660 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1661 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1662 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1663 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1664 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1665 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1666 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1668 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1669 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1670 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1671 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1672 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1673 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=device timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1674 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host arg=-resultmem=reg_host timeLimit=600 mem=3
+putfence1 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1676 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1677 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1678 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host 
+putfence1 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1679 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host 
+putfence1 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1680 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1682 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1683 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1684 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putfence1 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1685 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putfence1 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1686 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1688 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1689 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1690 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putfence1 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1691 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putfence1 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1692 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1694 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1695 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1696 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putfence1 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1697 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putfence1 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1698 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1700 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1701 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1702 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putfence1 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1703 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putfence1 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1704 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1706 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1707 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1708 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putfence1 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1709 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putfence1 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1710 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1712 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1713 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1714 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1715 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1716 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1718 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1719 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1720 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1721 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1722 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1724 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1725 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1726 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1727 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1728 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1730 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1731 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1732 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1733 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1734 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1736 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1737 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1738 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1739 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1740 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1742 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1743 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1744 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1745 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1746 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putfence1 2 arg=-type=MPI_INT arg=-count=16000000 arg=-seed=1748 arg=-testsize=2  arg=-origmem=host arg=-targetmem=device timeLimit=1800 mem=2
+putfence1 2 arg=-type=MPI_INT arg=-count=16000000 arg=-seed=1749 arg=-testsize=1  arg=-origmem=reg_host arg=-targetmem=device timeLimit=1800 mem=2
+putfence1 2 arg=-type=MPI_INT arg=-count=16000000 arg=-seed=1750 arg=-testsize=2  arg=-origmem=device arg=-targetmem=host timeLimit=1800 mem=2
+putfence1 2 arg=-type=MPI_INT arg=-count=16000000 arg=-seed=1751 arg=-testsize=1  arg=-origmem=device arg=-targetmem=reg_host timeLimit=1800 mem=2
+putfence1 2 arg=-type=MPI_INT arg=-count=16000000 arg=-seed=1752 arg=-testsize=2  arg=-origmem=device arg=-targetmem=device timeLimit=1800 mem=2
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=16000000 arg=-seed=1754 arg=-testsize=2  arg=-origmem=host arg=-targetmem=device timeLimit=1800 mem=2
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=16000000 arg=-seed=1755 arg=-testsize=1  arg=-origmem=reg_host arg=-targetmem=device timeLimit=1800 mem=2
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=16000000 arg=-seed=1756 arg=-testsize=2  arg=-origmem=device arg=-targetmem=host timeLimit=1800 mem=2
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=16000000 arg=-seed=1757 arg=-testsize=1  arg=-origmem=device arg=-targetmem=reg_host timeLimit=1800 mem=2
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=16000000 arg=-seed=1758 arg=-testsize=2  arg=-origmem=device arg=-targetmem=device timeLimit=1800 mem=2
+putpscw1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1760 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1761 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1762 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host 
+putpscw1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1763 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host 
+putpscw1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1764 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1766 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1767 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1768 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putpscw1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1769 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putpscw1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1770 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1772 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1773 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1774 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putpscw1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1775 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putpscw1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1776 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1778 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1779 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1780 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putpscw1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1781 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putpscw1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1782 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1784 arg=-testsize=512  arg=-origmem=host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1785 arg=-testsize=256  arg=-origmem=reg_host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1786 arg=-testsize=512  arg=-origmem=device arg=-targetmem=host 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1787 arg=-testsize=256  arg=-origmem=device arg=-targetmem=reg_host 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1788 arg=-testsize=512  arg=-origmem=device arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1790 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1791 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1792 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1793 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1794 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1796 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1797 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1798 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1799 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1800 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1802 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1803 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1804 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1805 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host 
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1806 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device 
+putpscw1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1808 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=4
+putpscw1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1809 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=4
+putpscw1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1810 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=4
+putpscw1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1811 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=4
+putpscw1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1812 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=4
+putpscw1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1814 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=4
+putpscw1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1815 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=4
+putpscw1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1816 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=4
+putpscw1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1817 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=4
+putpscw1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1818 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=4
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1820 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=4
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1821 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=4
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1822 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=4
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1823 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=4
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1824 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=4
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1826 arg=-testsize=8  arg=-origmem=host arg=-targetmem=device mem=4
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1827 arg=-testsize=4  arg=-origmem=reg_host arg=-targetmem=device mem=4
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1828 arg=-testsize=8  arg=-origmem=device arg=-targetmem=host mem=4
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1829 arg=-testsize=4  arg=-origmem=device arg=-targetmem=reg_host mem=4
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1830 arg=-testsize=8  arg=-origmem=device arg=-targetmem=device mem=4

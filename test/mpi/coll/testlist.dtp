@@ -1,0 +1,12 @@
+bcast 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=3 arg=-testsize=1024  arg=-evenmemtype=host arg=-oddmemtype=host 
+bcast 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=7 arg=-testsize=16  arg=-evenmemtype=host arg=-oddmemtype=host 
+bcast 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=11 arg=-testsize=1024  arg=-evenmemtype=host arg=-oddmemtype=host 
+bcast 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=15 arg=-testsize=16  arg=-evenmemtype=host arg=-oddmemtype=host 
+bcast 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=19 arg=-testsize=16  arg=-evenmemtype=host arg=-oddmemtype=host timeLimit=420 mem=1.2
+bcast 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=23 arg=-testsize=16  arg=-evenmemtype=host arg=-oddmemtype=host timeLimit=420 mem=1.2
+bcast_comm_world_only 10 arg=-type=MPI_INT arg=-count=1 arg=-seed=27 arg=-testsize=1024  arg=-evenmemtype=host arg=-oddmemtype=host 
+bcast_comm_world_only 10 arg=-type=MPI_INT arg=-count=512 arg=-seed=31 arg=-testsize=16  arg=-evenmemtype=host arg=-oddmemtype=host 
+bcast_comm_world_only 10 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=35 arg=-testsize=1024  arg=-evenmemtype=host arg=-oddmemtype=host 
+bcast_comm_world_only 10 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=39 arg=-testsize=16  arg=-evenmemtype=host arg=-oddmemtype=host 
+bcast_comm_world_only 10 arg=-type=MPI_INT arg=-count=262144 arg=-seed=43 arg=-testsize=16  arg=-evenmemtype=host arg=-oddmemtype=host timeLimit=360 mem=1.9
+bcast_comm_world_only 10 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=47 arg=-testsize=16  arg=-evenmemtype=host arg=-oddmemtype=host timeLimit=360 mem=1.9

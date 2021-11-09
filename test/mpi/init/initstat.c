@@ -1,0 +1,30 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
+#include "mpi.h"
+#include <stdio.h>
+#include "mpitest.h"
+
+int main(int argc, char *argv[])
+{
+    int errs = 0;
+    int provided, flag, claimed;
+
+    MTest_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+
+    MPI_Is_thread_main(&flag);
+    if (!flag) {
+        errs++;
+        printf("This thread called init_thread but Is_thread_main gave false\n");
+    }
+    MPI_Query_thread(&claimed);
+    if (claimed != provided) {
+        errs++;
+        printf("Query thread gave thread level %d but Init_thread gave %d\n", claimed, provided);
+    }
+
+    MTest_Finalize(errs);
+    return MTestReturnValue(errs);
+}

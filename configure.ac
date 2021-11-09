@@ -163,5 +163,12 @@ AH_BOTTOM([
 #endif /* PILGRIM_CONFIG_H_INCLUDED */
 ])
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile                       \
+                 test/Makefile                  \
+                 test/tracing/Makefile          \
+                 test/mpi/misc/Makefile         \
+                 test/mpi/pt2pt/Makefile        \
+                 test/mpi/coll/Makefile         \
+                 test/mpi/util/Makefile         \
+                ])
 AC_OUTPUT

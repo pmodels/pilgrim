@@ -10,6 +10,12 @@
 #define PILGRIM_MPI_PROC_NULL  -99997
 #define PILGRIM_EQUAL_MYRANK   -99996
 
+// For MPI_Comm_split to encode color and rank
+#define PILGRIM_RANK_MOD_COL        -99995
+#define PILGRIM_RANK_DIV_COL        -99994
+#define PILGRIM_RANK_ENCODED_1D     -99993
+#define PILGRIM_NO_PATTERN          -99992
+
 
 #define PILGRIM_INVALID_MPI_OBJECT_ID       -9999
 

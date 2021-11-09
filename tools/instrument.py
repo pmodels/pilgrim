@@ -11,10 +11,10 @@ from codegen import MPIFunction, MPIArgument
 def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
-    os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
+    #os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /usr/tce/packages/impi/impi-2018.0-intel-19.1.0/include/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
-    #os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
+    os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
     for line in f.readlines():
         if "#define" in line or "MPI_Fint" in line:
@@ -290,10 +290,13 @@ def generate_wrapper_file(funcs):
         for arg in func.arguments:
             type_str = arg.type
             name_str = arg.name
+
             if is_fortran_mpi_object(arg.type):
                 type_str = "MPI_Fint*"
                 name_str = name_str.replace("[]", "")
-            if "[][]" in arg.type:      # [][3]
+            if "int" == arg.type:
+                type_str = "int*"
+            elif "[][]" in arg.type:      # [][3]
                 type_str = type_str.replace("[][]", "")
                 name_str = name_str + "[][3]"
             elif "[]" in arg.type:
@@ -333,7 +336,10 @@ def generate_wrapper_file(funcs):
                     else:
                         arg_names.append("P%s_f2c(*%s)" %(t, arg.name))
             else:
-                arg_names.append(arg.name)
+                if "int" == arg.type:
+                    arg_names.append("(*%s)" %arg.name)
+                else:
+                    arg_names.append(arg.name)
 
         actual_call = "imp_" + func.name + "(" + ", ".join(arg_names)+");"
 
@@ -341,10 +347,10 @@ def generate_wrapper_file(funcs):
             fortran_sig = "(MPI_Fint *ierr)"
         else:
             fortran_sig = fortran_sig.replace(")", ", MPI_Fint *ierr)")
-        #f.write("extern void " + func.name.upper() + fortran_sig + "{ " + before_call+actual_call + "}\n")
-        #f.write("extern void " + func.name.lower() + fortran_sig + "{ " + before_call+actual_call + "}\n")
-        #f.write("extern void " + func.name.lower() + "_" + fortran_sig + "{ "+before_call+actual_call + "}\n")
-        #f.write("extern void " + func.name.lower() + "__" + fortran_sig + "{ "+before_call+actual_call + "}\n")
+        f.write("extern void " + func.name.upper() + fortran_sig + "{ " + before_call+actual_call + "}\n")
+        f.write("extern void " + func.name.lower() + fortran_sig + "{ " + before_call+actual_call + "}\n")
+        f.write("extern void " + func.name.lower() + "_" + fortran_sig + "{ "+before_call+actual_call + "}\n")
+        f.write("extern void " + func.name.lower() + "__" + fortran_sig + "{ "+before_call+actual_call + "}\n")
 
 
     def logging(func, f):

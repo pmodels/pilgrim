@@ -1,0 +1,45 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
+#include "mpi.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include "mpitest.h"
+
+int main(int argc, char *argv[])
+{
+    int numprocs, myid, i;
+    int namelen;
+    char processor_name[MPI_MAX_PROCESSOR_NAME];
+    struct stat fileStat;
+    int errs = 0;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    MPI_Get_processor_name(processor_name, &namelen);
+
+    for (i = 0; i < 22; i++) {
+        MPI_Barrier(MPI_COMM_WORLD);
+        MTestSleep(1);
+    }
+
+    if (myid == 0) {
+        if (stat("/tmp/context-num2-0-0", &fileStat) < 0) {
+            printf("failed to find ckpoint file\n");
+            errs++;
+        } else if (fileStat.st_size == 0) {
+            printf("ckpoint file is empty\n");
+            errs++;
+        } else {
+            printf("No Errors\n");
+        }
+    }
+
+    MPI_Finalize();
+    return MTestReturnValue(errs);
+}

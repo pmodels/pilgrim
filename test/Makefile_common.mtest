@@ -1,0 +1,23 @@
+##
+## Copyright (C) by Argonne National Laboratory
+##     See COPYRIGHT in top-level directory
+##
+
+AM_CPPFLAGS = -I$(top_srcdir)/test/mpi/include
+AM_CFLAGS = -I$(top_srcdir)/test/mpi/include
+
+LDADD = $(top_srcdir)/test/mpi/util/mtest_single.$(OBJEXT) 		\
+		$(top_builddir)/test/mpi/util/mtest.$(OBJEXT) 			\
+		$(top_builddir)/test/mpi//util/mtest_common.$(OBJEXT)
+
+$(top_srcdir)/test/mpi/util/mtest.$(OBJEXT): $(top_srcdir)/test/mpi/util/mtest.c
+	(cd $(top_srcdir)/test/mpi/util && $(MAKE) mtest.$(OBJEXT))
+
+$(top_srcdir)/test/mpi/util/mtest_common.$(OBJEXT): $(top_srcdir)/test/mpi/util/mtest_common.c
+	(cd $(top_srcdir)/test/mpi/util && $(MAKE) mtest_common.$(OBJEXT))
+
+$(top_srcdir)/test/mpi/util/mtest_single.$(OBJEXT): $(top_srcdir)/test/mpi/util/mtest_single.c
+	(cd $(top_srcdir)/test/mpi/util && $(MAKE) mtest_single.$(OBJEXT))
+
+testing:
+	$(top_srcdir)/test/runtest.sh 

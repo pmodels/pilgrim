@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <math.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include "pilgrim.h"
 #include "pilgrim_sequitur.h"
@@ -20,6 +21,9 @@
 #include "utlist.h"
 #include "uthash.h"
 #include "mpi.h"
+
+pthread_mutex_t g_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 
 #define OUTPUT_DIR                  "pilgrim-logs"
 char GRAMMAR_OUTPUT_PATH[256];
@@ -103,9 +107,9 @@ void cleanup_cst(RecordHash* table) {
  * Serialize the local CST into
  * a contiguous memory space.
  * | number of entries |
- * | terminal id 1 | rank | key len 1 | key 1 |
+ * | terminal id 1 | rank | key len 1 | count | key 1 |
  * ...
- * | terminal id N | rank | key len N | key N |
+ * | terminal id N | rank | key len N | count | key N |
  *
  * @len: output, the length of this memory space
  * @return: the address of this memory space.
@@ -116,7 +120,7 @@ void* serialize_cst(RecordHash *table, size_t *len) {
 
     RecordHash *entry, *tmp;
     HASH_ITER(hh, table, entry, tmp) {
-        *len = *len + entry->key_len + sizeof(int)*3;
+        *len = *len + entry->key_len + sizeof(int)*3 + sizeof(unsigned);
     }
 
     int count = HASH_COUNT(table);
@@ -136,6 +140,9 @@ void* serialize_cst(RecordHash *table, size_t *len) {
 
         memcpy(ptr, &entry->key_len, sizeof(int));
         ptr = ptr + sizeof(int);
+
+        memcpy(ptr, &entry->count, sizeof(unsigned));
+        ptr = ptr + sizeof(unsigned);
 
         memcpy(ptr, entry->key, entry->key_len);
         ptr = ptr + entry->key_len;
@@ -165,6 +172,8 @@ RecordHash* deserialize_cst(void *data) {
         memcpy( &(entry->key_len), ptr, sizeof(int) );
         ptr += sizeof(int);
 
+        memcpy( &(entry->count), ptr, sizeof(unsigned) );
+        ptr += sizeof(unsigned);
 
         entry->key = pilgrim_malloc(entry->key_len);
         memcpy( entry->key, ptr, entry->key_len );
@@ -187,6 +196,7 @@ RecordHash* copy_cst(RecordHash* origin) {
         new_entry->terminal_id = entry->terminal_id;
         new_entry->key_len = entry->key_len;
         new_entry->rank = entry->rank;
+        new_entry->count = entry->count;
         new_entry->key = pilgrim_malloc(entry->key_len);
         new_entry->durations = NULL;
         new_entry->intervals = NULL;
@@ -241,6 +251,7 @@ RecordHash* compress_csts() {
             PMPI_Recv(buf, size, MPI_BYTE, other_rank, mask, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
             int cst_rank, entries, key_len;
+            unsigned count;
             void *ptr = buf;
             memcpy(&entries, ptr, sizeof(int));
             ptr = ptr + sizeof(int);
@@ -256,6 +267,10 @@ RecordHash* compress_csts() {
                 memcpy(&key_len, ptr, sizeof(int));
                 ptr = ptr + sizeof(int);
 
+                // 4 bytes count
+                memcpy(&count, ptr, sizeof(unsigned));
+                ptr = ptr + sizeof(unsigned);
+
                 // key length bytes key
                 void *key = pilgrim_malloc(key_len);
                 memcpy(key, ptr, key_len);
@@ -266,11 +281,13 @@ RecordHash* compress_csts() {
                 HASH_FIND(hh, merged_table, key, key_len, entry);
                 if(entry) {
                     pilgrim_free(key, key_len);
+                    entry->count += count;
                 } else {                                // Not exist, add to hash table
                     entry = (RecordHash*) pilgrim_malloc(sizeof(RecordHash));
                     entry->key = key;
                     entry->key_len = key_len;
                     entry->rank = cst_rank;
+                    entry->count = count;
                     entry->durations = NULL;
                     entry->intervals = NULL;
                     HASH_ADD_KEYPTR(hh, merged_table, key, key_len, entry);
@@ -303,64 +320,64 @@ RecordHash* compress_csts() {
 }
 
 void print_cst(RecordHash *cst) {
-    int count[400];
-    for(int i = 0; i < 400; i++)
+    unsigned int us[400], count[400];
+    for(int i = 0; i < 400; i++) {
+        us[i] = 0;
         count[i] = 0;
+    }
 
     RecordHash *entry, *tmp;
     HASH_ITER(hh, cst, entry, tmp) {
-        if(__logger.rank == 0) {
-            short func_id;
-            memcpy(&func_id, entry->key, sizeof(short));
-            count[func_id]++;
+        short func_id;
+        memcpy(&func_id, entry->key, sizeof(short));
 
-            int args[7];
-            int arg_start = sizeof(short);
-            /*
-            if(func_id == ID_MPI_Irecv) {
-                memcpy(args, entry->key+arg_start, sizeof(args));
-                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, source: %d, tag: %d, comm: %d, req: %d\n",
-                        args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-            }
-            if(func_id == ID_MPI_Igatherv) {
-                memcpy(args, entry->key+arg_start, sizeof(args));
-                printf("[pilgrim] sendbuf: %d, sencount: %d, sendtype: %d, recvbuf: %d, recvconts: %d, displs: %d\n",
-                        args[0], args[1], args[2], args[3], args[4], args[5]);
-            }
-            if(func_id == ID_MPI_Send) {
-                memcpy(args, entry->key+arg_start, sizeof(args));
-                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d\n",
-                        args[0], args[1], args[2], args[3], args[4]);
-            }
-            if(func_id == ID_MPI_Irecv) {
-                memcpy(args, entry->key+arg_start, sizeof(args));
-                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, source: %d, tag: %d, req: %d\n",
-                        args[0], args[1], args[2], args[3], args[4], args[7]);
-            }
-            if(func_id == ID_MPI_Isend) {
-                memcpy(args, entry->key+arg_start, sizeof(args));
-                printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d, req: %d\n",
-                        args[0], args[1], args[2], args[3], args[4], args[7]);
-            }
-            if(func_id == ID_MPI_Waitsome) {
-                int incount, outcount;
-                memcpy(&incount, entry->key+arg_start, sizeof(int));
-                int *reqs = pilgrim_malloc(sizeof(int) * incount);
-                memcpy(reqs, entry->key+arg_start+sizeof(int), sizeof(int)*incount);
-                memcpy(&outcount, entry->key+arg_start+sizeof(int)*(1+incount), sizeof(int));
-                printf("[pilgrim] Waitsome(intcount=%d, reqs:", incount);
-                for(int i = 0; i < incount; i++)
-                    printf("%d ", reqs[i]);
-                pilgrim_free(reqs, sizeof(int) * incount);
-                printf(", outcount: %d)\n", outcount);
-            }
-            */
+        us[func_id]++;
+        count[func_id] += entry->count;
+
+        int args[7];
+        int arg_start = sizeof(short);
+        /*
+        if(func_id == ID_MPI_Igatherv) {
+            memcpy(args, entry->key+arg_start, sizeof(args));
+            printf("[pilgrim] sendbuf: %d, sencount: %d, sendtype: %d, recvbuf: %d, recvconts: %d, displs: %d\n",
+                    args[0], args[1], args[2], args[3], args[4], args[5]);
         }
+        if(func_id == ID_MPI_Send) {
+            memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*4);
+            printf("[pilgrim] MPI_Send, count: %d, datatype: %d, dest: %d, tag: %d\n",
+                    args[0], args[1], args[2], args[3]);
+        }
+        if(func_id == ID_MPI_Irecv) {
+            memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*4);
+            printf("[pilgrim] MPI_Irecv, count: %d, datatype: %d, source: %d, tag: %d\n",
+                    args[0], args[1], args[2], args[3]);
+        }
+        */
+        /*
+        if(func_id == ID_MPI_Isend) {
+            memcpy(args, entry->key+arg_start, sizeof(args));
+            printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d, req: %d\n",
+                    args[0], args[1], args[2], args[3], args[4], args[7]);
+        }
+        if(func_id == ID_MPI_Waitsome) {
+            int incount, outcount;
+            memcpy(&incount, entry->key+arg_start, sizeof(int));
+            int *reqs = pilgrim_malloc(sizeof(int) * incount);
+            memcpy(reqs, entry->key+arg_start+sizeof(int), sizeof(int)*incount);
+            memcpy(&outcount, entry->key+arg_start+sizeof(int)*(1+incount), sizeof(int));
+            printf("[pilgrim] Waitsome(intcount=%d, reqs:", incount);
+            for(int i = 0; i < incount; i++)
+                printf("%d ", reqs[i]);
+            pilgrim_free(reqs, sizeof(int) * incount);
+            printf(", outcount: %d)\n", outcount);
+        }
+        */
     }
 
     for(int i = 0; i < 400; i++) {
         if(count[i] > 0 && __logger.debug)
-            printf("Func: %s, count: %d\n", func_names[i], count[i]);
+            printf("%s, %d, %d\n", func_names[i], us[i], count[i]);
+            //printf("Func: %s, unique signatures: %d, total count: %d\n", func_names[i], us[i], count[i]);
     }
 }
 
@@ -393,8 +410,6 @@ int* dump_cst() {
         } else {
             printf("[pilgrim] Open file: %s failed, errno: %d\n", FUNCS_OUTPUT_PATH, errno);
         }
-        print_cst(compressed_cst);
-
     } else {
         PMPI_Bcast(&cst_stream_size, sizeof(cst_stream_size), MPI_BYTE, 0, MPI_COMM_WORLD);
         cst_stream = pilgrim_malloc(cst_stream_size);
@@ -433,6 +448,8 @@ void* compose_call_signature(Record *record, int *key_len) {
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
 
+    pthread_mutex_lock(&g_mutex);
+
     /*
     if(__logger.rank == 0)
        printf("[Pilgrim (rank=%d)] tstart:%.6lf, tend:%.6f, func:%s\n", __logger.rank,
@@ -458,7 +475,7 @@ void write_record(Record record) {
         entry->key_len = key_len;
         entry->rank = __logger.rank;
         entry->terminal_id = current_terminal_id++;
-        entry->count = 0;
+        entry->count = 1;
         entry->tstart = record.tstart;
         entry->ext_tstart = record.tstart;
 
@@ -492,6 +509,8 @@ void write_record(Record record) {
 
     // Grow the MPI call grammar
     append_terminal(&(__logger.grammar), entry->terminal_id, 1);
+
+    pthread_mutex_unlock(&g_mutex);
 }
 
 void logger_init() {
@@ -512,11 +531,11 @@ void logger_init() {
         __logger.timing_mode = strdup(tm);
     else
         __logger.timing_mode = strdup(TIMING_MODE_AGGREGATED);
-    printf("timing mode: %s\n", __logger.timing_mode);
 
 
     if(getenv("PILGRIM_DEBUG"))
         __logger.debug = true;
+
 
     // Set the output paths in advance because
     // application may change the cwd duration execution
@@ -565,25 +584,25 @@ void logger_exit() {
     double total_calls;
     PMPI_Reduce(&local_calls, &total_calls, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-    double cst_compression_time, cfg_compression_time;
-
     // 1. Inter-process compression of CSTs
-    cst_compression_time = pilgrim_wtime();
+    if(__logger.rank == 1)
+        print_cst(__logger.hash_head);
+    double cst_compression_time = pilgrim_wtime();
     int* update_terminal_id = dump_cst();
     sequitur_update(&(__logger.grammar), update_terminal_id);
     pilgrim_free(update_terminal_id, sizeof(int)*current_terminal_id);
     cst_compression_time = pilgrim_wtime() - cst_compression_time;
 
-
-    // 2. CFG based timing compression
-    cfg_compression_time = pilgrim_wtime();
+    // 2. Inter-process copmression of CFGs
+    double cfg_compression_time = pilgrim_wtime();
     __logger.final_grammar_size = sequitur_finalize(GRAMMAR_OUTPUT_PATH, &(__logger.grammar));
+    cfg_compression_time = pilgrim_wtime() - cfg_compression_time;
+
+    // 3. Write out timing information
     if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) == 0) {
         __logger.durations_file_size = sequitur_finalize(DURATIONS_OUTPUT_PATH, &(__logger.durations_grammar));
         __logger.intervals_file_size = sequitur_finalize(INTERVALS_OUTPUT_PATH, &(__logger.intervals_grammar));
     }
-
-    // 2.5 other timing compression method
     if(strcmp(__logger.timing_mode, TIMING_MODE_TEXT) == 0)
         write_text_timings(__logger.hash_head, __logger.rank);
     if(strcmp(__logger.timing_mode, TIMING_MODE_NOCOMP) == 0)
@@ -606,9 +625,7 @@ void logger_exit() {
     }
     */
 
-    cfg_compression_time = pilgrim_wtime() - cfg_compression_time;
-
-    // 3. Clean up all resources
+    // 4. Clean up all resources
     cleanup_cst(__logger.hash_head);
     OffsetNode *elt, *tmp2;
     LL_FOREACH_SAFE(__logger.offset_list, elt, tmp2) {
@@ -635,6 +652,7 @@ void logger_exit() {
                     total_calls*1e6/(__logger.durations_file_size*1024)*sizeof(double),
                     total_calls*1e6/(__logger.intervals_file_size*1024)*sizeof(double));
         }
+        fflush(stdout);
     }
 
     free(__logger.timing_mode);

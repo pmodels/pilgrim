@@ -24,6 +24,7 @@ void pilgrim_exit() {
 
     double finalize_time = pilgrim_wtime();
     logger_exit();
+    PMPI_Barrier(MPI_COMM_WORLD);
     finalize_time = pilgrim_wtime() - finalize_time;
 
     tend = pilgrim_wtime();

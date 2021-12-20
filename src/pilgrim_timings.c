@@ -63,8 +63,15 @@ int top_eight_counts_sum(int arr[], int N, int* top_eight) {
     return sum;
 }
 
-static inline int min(int a, int b) {
+static inline int mymin(int a, int b) {
     return a < b ? a: b;
+}
+
+static inline int myceil(double v) {
+    double a = v - ((int)v);
+    if(a > 0.5)
+        return 1 + (int)v;
+    return (int)v;
 }
 
 static inline int get_bin_id(double val) {
@@ -74,18 +81,19 @@ static inline int get_bin_id(double val) {
 
     int id = ceil(log(val)/log(BASE));
     if(id < 0) id = -id;
-    id = min(255, id);
+    id = mymin(255, id);
     return id;
 }
 
 static inline int get_bin_id_int(int val) {
-    if(val <= 1000)
+    if(val <= 10)
         return 0;
         //return ZERO_BIN_ID;      // a constant number to represent 0
 
-    int id = ceil(log(val)/log(BASE));
+    int id = 0;
+    id = myceil(log(val)/log(BASE));
     if(id < 0) id = -id;
-    id = min(255, id);
+    id = mymin(255, id);
     return id;
 }
 
@@ -123,6 +131,8 @@ void handle_cfg_timing(RecordHash* entry, Record* record, int *duration_id, int*
 
     /*
      * Code for calculating abs/rel errors
+     */
+    /*
     static double max_duration_rel_err;
     static double max_interval_rel_err;
     double saved_duration = 0, saved_interval = 0;
@@ -130,9 +140,9 @@ void handle_cfg_timing(RecordHash* entry, Record* record, int *duration_id, int*
         saved_duration = pow(BASE, *duration_id) * TIME_RESOLUTION;
     if(*interval_id != ZERO_BIN_ID)
         saved_interval = pow(BASE, *interval_id) * TIME_RESOLUTION;
-
-    err = fabs(saved_interval - interval);
-    rel_err = err / interval;
+    double err = fabs(saved_duration - duration);
+    double re = err / interval;
+    assert(re <= REL_ERR);
     */
 }
 
@@ -161,33 +171,44 @@ void write_to_file(char* duration_path, char* interval_path, double* durations, 
 }
 
 void write_text_timings(RecordHash* cst, int mpi_rank) {
-    RecordHash *entry, *tmp;
-    TimingNode *elt, *tmp2;
+    if(mpi_rank != 1) return;
 
-    char dur_path[32] = {0};
-    char raw_dur_path[32] = {0};
+    RecordHash *entry, *tmp;
+    TimingNode *tn;
+
+    char dur_path[64] = {0};
+    char raw_dur_path[64] = {0};
     sprintf(dur_path, "./durations.%d", mpi_rank);
     sprintf(raw_dur_path, "./durations_raw.%d", mpi_rank);
 
     FILE* f_dur = fopen(dur_path, "w");
     FILE* f_raw_dur = fopen(raw_dur_path, "w");
 
+    int i = 0;
     HASH_ITER(hh, cst, entry, tmp) {
+        int count;
+        LL_COUNT(entry->durations, tn, count);
 
-        short func_id;
-        memcpy(&func_id, entry->key, sizeof(short));
-        fprintf(f_dur, "%s\n", func_names[func_id]);
-        fprintf(f_raw_dur, "%s\n", func_names[func_id]);
+        //if(count > 100) {
+            short func_id;
+            memcpy(&func_id, entry->key, sizeof(short));
+            fprintf(f_dur, "%s\n", func_names[func_id]);
+            fprintf(f_raw_dur, "%s\n", func_names[func_id]);
 
-        LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
-            fprintf(f_dur, "%d, ", get_bin_id(elt->val));
-            fprintf(f_raw_dur, "%d\n", (int)(elt->val/TIME_RESOLUTION));    // in us
-        }
+            int j = 0;
+            LL_FOREACH(entry->durations, tn) {
+                //fprintf(f_dur, "%d, ", get_bin_id(tn->val));
+                fprintf(f_raw_dur, "%d\n", (int)(tn->val/TIME_RESOLUTION));    // in us
+                //if( j++ > 100) break;
+            }
 
-        fprintf(f_dur, "\n");
-        fprintf(f_raw_dur, "\n");
+            fprintf(f_dur, "\n");
+            fprintf(f_raw_dur, "\n");
+        //}
     }
 
+    fflush(f_dur);
+    fflush(f_raw_dur);
     fclose(f_dur);
     fclose(f_raw_dur);
 }
@@ -266,29 +287,6 @@ void write_zfp_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_pa
         local_durations[i++] = elt->val;
     }
 
-
-    /*
-    HASH_ITER(hh, cst, entry, tmp) {
-        int count = 0;
-        LL_COUNT(entry->intervals, elt, count);
-        local_total += count;
-    }
-
-    double *local_durations = pilgrim_malloc(sizeof(double) * local_total);
-    double *local_intervals = pilgrim_malloc(sizeof(double) * local_total);
-    double *global_durations, *global_intervals;
-
-    int i = 0, j = 0;
-    HASH_ITER(hh, cst, entry, tmp) {
-        LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
-            local_durations[i++] = elt->val;
-        }
-        LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
-            local_intervals[j++] = elt->val;
-        }
-    }
-    */
-
     zfp_type type = zfp_type_double;                                     // array scalar type
     zfp_field* field = zfp_field_1d(local_durations, type, local_total); // array metadata
 
@@ -329,10 +327,6 @@ void write_zfp_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_pa
     */
     PMPI_Barrier(MPI_COMM_WORLD);
 }
-
-#define SetBit(A,k)     ( A[(k)/8] |= (1 << ((k)%8)) )
-#define ClearBit(A,k)   ( A[(k)/8] &= ~(1 << ((k)%8)) )
-#define TestBit(A,k)    ( A[(k)/8] & (1 << ((k)%8)) )
 
 void write_hist_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path) {
 
@@ -441,30 +435,6 @@ void write_sz_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_pat
         local_durations[i++] = elt->val;
     }
 
-    /*
-    HASH_ITER(hh, cst, entry, tmp) {
-        int count = 0;
-        LL_COUNT(entry->intervals, elt, count);
-        local_total += count;
-    }
-
-    double *local_durations = pilgrim_malloc(sizeof(double) * local_total);
-    double *local_intervals = pilgrim_malloc(sizeof(double) * local_total);
-    double *global_durations, *global_intervals;
-
-    int i = 0, j = 0;
-    HASH_ITER(hh, cst, entry, tmp) {
-        LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
-            local_durations[i++] = elt->val;
-        }
-        LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
-            local_intervals[j++] = elt->val;
-        }
-    }
-    */
-
-
-
     size_t outsize;
 
     SZ_Init(NULL);
@@ -482,7 +452,9 @@ void write_sz_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_pat
     PMPI_Barrier(MPI_COMM_WORLD);
 }
 
-void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path, TimingNode *g_durations) {
+void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size,
+                        char* dur_path, char* int_path,
+                        TimingNode *g_durations) {
 
     RecordHash *entry, *tmp;
     TimingNode *elt, *tmp2;
@@ -497,29 +469,6 @@ void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_p
     LL_FOREACH_SAFE(g_durations, elt, tmp2) {
         local_durations[i++] = elt->val;
     }
-
-    /*
-    int local_total = 0;
-    HASH_ITER(hh, cst, entry, tmp) {
-        int count = 0;
-        LL_COUNT(entry->intervals, elt, count);
-        local_total += count;
-    }
-
-    double *local_durations = pilgrim_malloc(sizeof(double) * local_total);
-    double *local_intervals = pilgrim_malloc(sizeof(double) * local_total);
-    double *global_durations, *global_intervals;
-
-    int i = 0, j = 0;
-    HASH_ITER(hh, cst, entry, tmp) {
-        LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
-            local_durations[i++] = elt->val;
-        }
-        LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
-            local_intervals[j++] = elt->val;
-        }
-    }
-    */
 
     size_t buff_size = ZSTD_compressBound(local_total*sizeof(double));
     void* buff = pilgrim_malloc(buff_size);

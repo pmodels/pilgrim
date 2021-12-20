@@ -32,13 +32,15 @@ AM_CPPFLAGS = -g -rdynamic
 AM_CFLAGS = -g -rdynamic
 
 
-ZFP_DIR=/home/wangchen/Sources/zfp-0.5.5/install
-SZ_DIR=/home/wangchen/Sources/SZ-2.1.12/install
+#ZFP_DIR=/home/wangchen/Sources/zfp-0.5.5/install
+ZFP_DIR=/g/g90/wang116/sources/zfp/install/
+#SZ_DIR=/home/wangchen/Sources/SZ-2.1.12/install
+SZ_DIR=/g/g90/wang116/sources/SZ-2.1.12/install/
 
-zfp_LDFLAGS=-Wl,-rpath,$(ZFP_DIR)/lib -L$(ZFP_DIR)/lib -lzfp
-sz_LDFLAGS=-Wl,-rpath,$(SZ_DIR)/lib -L$(SZ_DIR)/lib -lSZ
+zfp_LDFLAGS=-Wl,-rpath,$(ZFP_DIR)/lib64 -L$(ZFP_DIR)/lib64 -lzfp
+sz_LDFLAGS=-Wl,-rpath,$(SZ_DIR)/lib64 -L$(SZ_DIR)/lib64 -lSZ
 
-libpilgrim_la_LDFLAGS = -lm -lunwind $(zfp_LDFLAGS) $(sz_LDFLAGS) -version-info @libpilgrim_so_version@
+libpilgrim_la_LDFLAGS = -lm -lunwind -pthread $(zfp_LDFLAGS) $(sz_LDFLAGS) -version-info @libpilgrim_so_version@
 
 include $(top_srcdir)/src/Makefile.mk
 include $(top_srcdir)/src/decoder/Makefile.mk

@@ -1,31 +1,34 @@
 #!/usr/bin/bash
-#SBATCH -N 22
-#SBATCH -n 512
-#SBATCH -t 00:10:00
+#SBATCH -N 1
+#SBATCH -n 2
+#SBATCH -t 00:01:00
 #SBATCH -p pbatch
-#SBATCH --job-name="3d stencil"
+#SBATCH --job-name="2d stencil"
 
 export I_MPI_EXTRA_FILESYSTEM=on
 export I_MPI_EXTRA_FILESYSTEM_LIST=lustre
 export OMP_NUM_THREADS=1
 
+export PILGRIM_DEBUG=1
+
 cd /g/g90/wang116/sources/pilgrim/test
-#lfs setstripe -c 8 -S 4M ./
 
 #LD_PRELOAD=/g/g90/wang116/sources/pilgrim/.libs/libpilgrim.so srun ./a.out
-for p in 2 4 8
+p=8
+for iters in 100
 do
-    procs=$(( $p * $p * $p ))
-    echo "[pilgrim CHEN]" $procs
-    #mpirun -np $procs -env LD_PRELOAD /g/g90/wang116/sources/pilgrim/.libs/libpilgrim.so ./3d.out $p 10
-    mpirun -np $procs -env LD_PRELOAD /g/g90/wang116/sources/pilgrim/.libs/libpilgrim.so ./a.out
+    procs=$(( $p * $p ))
+
+    export PILGRIM_TIMING_MODE=TEXT
+    mpirun -np 2 -env LD_PRELOAD $libpilgrim ./pingpong.out $iters
+
+    export PILGRIM_TIMING_MODE=CFG
+    mpirun -np 2 -env LD_PRELOAD $libpilgrim ./pingpong.out $iters
+
+    export PILGRIM_TIMING_MODE=SZ
+    mpirun -np 2 -env LD_PRELOAD $libpilgrim ./pingpong.out $iters
+
+    export PILGRIM_TIMING_MODE=ZFP
+    mpirun -np 2 -env LD_PRELOAD $libpilgrim ./pingpong.out $iters
+
 done
-
-
-#for p in 2 4 8 16
-#do
-#    procs=$(( $p * $p ))
-#    echo "[pilgrim CHEN]" $procs
-#    mpirun -np $procs -env LD_PRELOAD /g/g90/wang116/sources/pilgrim/.libs/libpilgrim.so ./2d.out $p $p 10
-#done
-

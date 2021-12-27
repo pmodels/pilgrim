@@ -316,6 +316,7 @@ void write_call_special(FILE* f, CallSignature *cs) {
 
 
 void write_call(FILE* f, CallSignature *cs) {
+
     if(cs->func_id == ID_free) {
         write_call_special(f, cs);
         return;
@@ -627,7 +628,7 @@ int main(int argc, char** argv) {
     int final_splitter;
     Grammar *grammar = final_sequitur(dg, &final_splitter);
 
-    // 3. Generate a MPI program
+    // 3. Generate an proxy MPI program
     char source_file_path[256];
     sprintf(source_file_path, "%s/proxy_app.c", directory);
     FILE* f = fopen(source_file_path, "w");

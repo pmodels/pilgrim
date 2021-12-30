@@ -12,6 +12,7 @@
 static int invalid_request_id = -1;
 
 
+
 typedef struct IdupReqHash_t {
     void *key;              // idup_req
     MPI_Comm *newcomm;
@@ -23,6 +24,16 @@ typedef struct IdupReqHash_t {
 
 static int idup_reqs_counter = 0;
 IdupReqHash *idup_reqs_table = NULL;
+
+
+static int int_comp(const void *p1, const void *p2)
+{
+    int i1 = *(int*) p1;
+    int i2 = *(int*) p2;
+    if ( i1 == i2 ) return 0;
+    else if ( i1 < i2 ) return 1;
+    else return -1;
+}
 
 // Check if the given request is genereated from MPI_Comm_idup.
 // and if it is completed.
@@ -129,7 +140,8 @@ bool is_completed_idup_request(MPI_Request *req) {
     for(idx = 0; idx < count; idx++) {                                                              \
         ids[idx] = get_request_id( &(array_of_requests[idx]) );                                     \
         memcpy( &old_reqs[idx],  &array_of_requests[idx], sizeof(MPI_Request));                     \
-    }
+    }                                                                                               \
+    qsort(ids, count, sizeof(int), int_comp);
 
 
 int get_request_id(MPI_Request* req) {
@@ -221,6 +233,7 @@ int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_
     int indices[count];
     for(idx = 0; idx < count; idx++) indices[idx] = idx;
     GET_STATUSES_INFO(count, indices, array_of_statuses);
+
     void **args = assemble_args_list(3, &count, ids, statuses_info);
     int sizes[] = { sizeof(count), count*sizeof(int), sizeof(statuses_info)};
     PILGRIM_TRACING_2(3, sizes, args, -1);

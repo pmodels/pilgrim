@@ -116,10 +116,17 @@ def codegen_assemble_args(func):
             elif "tag" in args_set:
                 line += "\tif(tag == MPI_ANY_TAG && status && status!=MPI_STATUS_IGNORE) status_arg[1] = status->MPI_TAG;\n"
         elif is_mpi_object_arg(arg_type_strip(arg.type)):
-            if 'MPI_Request' in arg.type and '*' in arg.type and (func.name == "MPI_Irecv" or func.name == "MPI_Recv_init"):
-                # Only these two functions need to store "source, tag" information
-                line += "\tint obj_id_%d = request2id(%s, source, tag);\n" %(obj_count, arg.name)
-                arg_name = "&obj_id_%d" %(obj_count)
+            if 'MPI_Request' in arg.type and '*' in arg.type:
+                # These functions generate request id from signature-specific request id pool
+                # src/dst, tag, and comm is enough for the signature. obj_id_1 is comm.
+                func_id = "ID_" + func.name
+                if (func.name == "MPI_Irecv" or func.name == "MPI_Recv_init"):
+                    # Only these two functions need to store "source, tag" information
+                    line += "\tint obj_id_%d = create_request_id(%s, false, %s, source, tag, obj_id_1);\n" %(obj_count, arg.name, func_id)
+                    arg_name = "&obj_id_%d" %(obj_count)
+                if func.name == "MPI_Isend":
+                    line += "\tint obj_id_%d = create_request_id(%s, false, %s, dest, tag, obj_id_1);\n" %(obj_count, arg.name, func_id)
+                    arg_name = "&obj_id_%d" %(obj_count)
             else:
                 if '*' in arg.type:
                     line += "\tint obj_id_%d = MPI_OBJ_ID(%s, %s);\n" %(obj_count, arg_type_strip(arg.type), arg.name)

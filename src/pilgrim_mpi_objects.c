@@ -164,39 +164,79 @@ int create_request_id(MPI_Request *req, void* signature, int signature_len) {
 }
 */
 
-int request2id(MPI_Request *req, int source, int tag) {
+int create_request_id(MPI_Request *req, bool from_universal_pool, int func_id, int src_or_dst, int tag, int comm) {
     if(req==NULL || *req == MPI_REQUEST_NULL)
         return invalid_request_id;
 
     RequestHash *entry = request_hash_entry(req);
-    if(entry == NULL) {
-        entry = pilgrim_malloc(sizeof(RequestHash));
-        entry->key = pilgrim_malloc(sizeof(MPI_Request));
-        memcpy(entry->key, req, sizeof(MPI_Request));
-        entry->key_len = sizeof(MPI_Request);
-        entry->req_node = list_MPI_Request;               // get the first (head) free id
-        entry->any_source = (source == MPI_ANY_SOURCE);
-        entry->any_tag = (tag == MPI_ANY_TAG);
+    assert(entry == NULL);
 
+    entry = pilgrim_malloc(sizeof(RequestHash));
+    entry->key = pilgrim_malloc(sizeof(MPI_Request));
+    memcpy(entry->key, req, sizeof(MPI_Request));
+    entry->key_len = sizeof(MPI_Request);
+    entry->any_source = (src_or_dst == MPI_ANY_SOURCE);
+    entry->any_tag = (tag == MPI_ANY_TAG);
+
+
+    // request id generated from signature-specific ids pool
+    // i.e., isend and irecv functions.
+    if(!from_universal_pool) {
+
+        int sig[] = {func_id, src_or_dst, tag, comm};
+        entry->signature_len = sizeof(int) * 4;
+        entry->signature = pilgrim_malloc(entry->signature_len);
+        memcpy(entry->signature, sig, entry->signature_len);
+
+        RequestNodeHash *ids_pool = NULL;
+        HASH_FIND(hh, request_free_ids, entry->signature, entry->signature_len, ids_pool);
+
+        if(ids_pool == NULL) {
+            ids_pool = pilgrim_malloc(sizeof(RequestNodeHash));
+            ids_pool->key_len = entry->signature_len;
+            ids_pool->key = pilgrim_malloc(ids_pool->key_len);
+            memcpy(ids_pool->key, entry->signature, ids_pool->key_len);
+            ids_pool->free_ids = NULL;
+            HASH_ADD_KEYPTR(hh, request_free_ids, ids_pool->key, ids_pool->key_len, ids_pool);
+        }
+
+        entry->req_node = ids_pool->free_ids;           // get the first (head) free id
+
+        if(entry->req_node == NULL) {                   // free list is empty, create one according to allocated_request_id
+            entry->req_node = (RequestNode*) pilgrim_malloc(sizeof(RequestNode));
+            entry->req_node->id = allocated_request_id++;
+        } else {                                        // free list is not empty, get the first one and remove it from list
+            DL_DELETE(ids_pool->free_ids, entry->req_node);
+        }
+
+    }
+    // request id generated from universal request ids pool
+    // i.e., all functions except isend/irecv
+    else {
         entry->signature = NULL;
         entry->signature_len = 0;
 
-        if(entry->req_node == NULL) {                       // free list is empty, create one according to allocated_request_id
+        entry->req_node = list_MPI_Request;             // get the first (head) free id
+
+        if(entry->req_node == NULL) {                   // free list is empty, create one according to allocated_request_id
             entry->req_node = (RequestNode*) pilgrim_malloc(sizeof(RequestNode));
             entry->req_node->id = allocated_request_id++;
-        } else {                                            // free list is not empty, get the first one and remove it from list
+        } else {                                        // free list is not empty, get the first one and remove it from list
             DL_DELETE(list_MPI_Request, entry->req_node);
         }
-
-        HASH_ADD_KEYPTR(hh, hash_MPI_Request, entry->key, entry->key_len, entry);
     }
+
+
+
+    HASH_ADD_KEYPTR(hh, hash_MPI_Request, entry->key, entry->key_len, entry);
+
     return entry->req_node->id;
 }
 
 int get_object_id_MPI_Request(MPI_Request *req) {
     RequestHash *entry = request_hash_entry(req);
     if(!entry)
-        return request2id(req, 0, 0);
+        return create_request_id(req, true, 0, 0, 0, 0);
 
     if(entry && entry->req_node)
         return entry->req_node->id;

@@ -114,8 +114,7 @@ typedef struct RequestHash_t {
 } RequestHash;
 
 RequestHash* request_hash_entry(MPI_Request* request);
-int create_request_id(MPI_Request *req, void* signature, int key_len);
-int request2id(MPI_Request* request, int source, int tag);
+int create_request_id(MPI_Request* req, bool from_universal_pool, int func_id, int src_or_dst, int tag, int comm);
 
 /*
  * Name the following functinos in a way that

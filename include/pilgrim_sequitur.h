@@ -117,7 +117,7 @@ int digram_delete(Digram **digram_table, Symbol *symbol);
 double sequitur_dump(const char *path, Grammar *grammar, int mpi_rank, int mpi_size);
 
 /* pilgrim_sequitur_utils.c */
-void  sequitur_print_rules(Grammar *grammar);
+void  sequitur_print_rules(FILE* stream, Grammar *grammar);
 void  sequitur_print_digrams(Grammar *grammar);
 
 

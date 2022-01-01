@@ -23,7 +23,7 @@ void sequitur_print_digrams(Grammar *grammar) {
     }
 }
 
-void sequitur_print_rules(Grammar *grammar) {
+void sequitur_print_rules(FILE* stream, Grammar *grammar) {
     Symbol *rule, *sym;
     int rules_count = 0, symbols_count = 0;
     DL_COUNT(grammar->rules, rule, rules_count);
@@ -34,15 +34,15 @@ void sequitur_print_rules(Grammar *grammar) {
         symbols_count += count;
 
         //#ifdef DEBUG
-        printf("Rule %d :-> ", rule->val);
+        fprintf(stream, "Rule %d :-> ", rule->val);
 
         DL_FOREACH(rule->rule_body, sym) {
             if(sym->exp > 1)
-                printf("%d^%d ", sym->val, sym->exp);
+                fprintf(stream, "%d^%d ", sym->val, sym->exp);
             else
-                printf("%d ", sym->val);
+                fprintf(stream, "%d ", sym->val);
         }
-        printf("\n");
+        fprintf(stream, "\n");
         //#endif
     }
 
@@ -51,5 +51,5 @@ void sequitur_print_rules(Grammar *grammar) {
     printf("Number of symbols: %d\n", symbols_count);
     printf("Number of Digrams: %d\n=======================\n", HASH_COUNT(grammar.digram_table));
     */
-    printf("[pilgrim] Rules: %d, Symbols: %d\n", rules_count, symbols_count);
+    fprintf(stream, "[pilgrim] Rules: %d, Symbols: %d\n", rules_count, symbols_count);
 }

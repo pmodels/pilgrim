@@ -32,6 +32,7 @@ CallSignature* read_cst(char *path, int *num_funcs) {
         fread(&terminal, sizeof(int), 1, f);
         fread(&rank, sizeof(int), 1, f);
         fread(&key_len, sizeof(int), 1, f);
+        printf("key len: %ld\n", key_len);
         assert(key_len < BUF_LEN);
         fread(&count, sizeof(unsigned), 1, f);
 

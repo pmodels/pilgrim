@@ -12,7 +12,7 @@
 #include "uthash.h"
 #include "dlmalloc-2.8.6.h"
 
-#define BUF_LEN (16*1024)
+#define BUF_LEN (20*1024)
 
 
 static char buff[BUF_LEN];
@@ -32,6 +32,7 @@ CallSignature* read_cst(char *path, int *num_funcs) {
         fread(&terminal, sizeof(int), 1, f);
         fread(&rank, sizeof(int), 1, f);
         fread(&key_len, sizeof(int), 1, f);
+        printf("key len: %ld\n", key_len);
         assert(key_len < BUF_LEN);
         fread(&count, sizeof(unsigned), 1, f);
 

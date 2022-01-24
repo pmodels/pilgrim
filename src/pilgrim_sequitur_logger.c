@@ -161,6 +161,23 @@ Grammar* compress_grammars(Grammar *lg, int mpi_rank, int mpi_size, size_t *unco
     return grammar;
 }
 
+// Only used in pilgrim_timings.c
+int* compress_serialize_grammars(int mpi_rank, int mpi_size, Grammar* local_grammar, int* compressed_integers) {
+    size_t uncompressed_integers = 0;
+    int grammar_ids[mpi_size];
+    int num_unique_grammars;
+    Grammar *grammar = compress_grammars(local_grammar, mpi_rank, mpi_size, &uncompressed_integers, &num_unique_grammars, grammar_ids);
+
+    int* compressed_grammar = NULL;
+    if(mpi_rank == 0) {
+        compressed_grammar = serialize_grammar(grammar, compressed_integers);
+        sequitur_cleanup(grammar);
+        pilgrim_free(grammar, sizeof(Grammar));
+    }
+
+    return compressed_grammar;
+}
+
 
 // Return the size of compressed grammar in KB
 double sequitur_dump(const char* path, Grammar *local_grammar, int mpi_rank, int mpi_size) {
@@ -184,6 +201,7 @@ double sequitur_dump(const char* path, Grammar *local_grammar, int mpi_rank, int
             fwrite(&(grammar->start_rule_id), sizeof(int), 1, f);
             fwrite(&uncompressed_integers, sizeof(size_t), 1, f);
             fwrite(compressed_grammar, sizeof(int), compressed_integers, f);
+            fflush(f);
             fclose(f);
         } else {
             printf("Open file: %s failed, errno: %d!\n", path, errno);

@@ -152,7 +152,7 @@ void handle_cfg_timing(RecordHash* entry, Record* record, int *duration_id, int*
  * We can also store lossless timing
  * Later, we can use external compressor tool like fpzip to compress it
  */
-void handle_nocomp_timing(RecordHash *entry, Record* record, double *duration, double *interval) {
+void handle_lossless_timing(RecordHash *entry, Record* record, double *duration, double *interval) {
     *duration = record->tend - record->tstart;        // in seconds
     *interval = record->tstart - entry->tstart;
 

@@ -13,7 +13,7 @@
 #define TIMING_MODE_AGGREGATED      "AGGREGATED"
 
 // Lossless
-#define TIMING_MODE_NOCOMP          "NOCOMP"
+#define TIMING_MODE_LOSSLESS        "LOSSLESS"
 #define TIMING_MODE_TEXT            "TEXT"
 #define TIMING_MODE_ZSTD            "ZSTD"
 
@@ -28,9 +28,9 @@
 
 void handle_aggregated_timing(RecordHash* entry, Record* record);
 void handle_cfg_timing(RecordHash* entry, Record* record, int* duration_id, int* interval_id);
-void handle_nocomp_timing(RecordHash* entry, Record* record, double* duration, double* interval);
+void handle_lossless_timing(RecordHash* entry, Record* record, double* duration, double* interval);
 
-void write_nocomp_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path);
+void write_lossless_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path);
 
 void write_zfp_timings(RecordHash* cst, int mpi_rank, double total_size, char* dur_path, char* int_path, TimingNode* g_durations, TimingNode* g_intervals);
 void write_zfp_clustering_timings(RecordHash* cst, int mpi_rank, double total_size, char* dur_path, char* int_path);

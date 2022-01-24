@@ -12,7 +12,7 @@
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
-#include <libunwind.h>
+//#include <libunwind.h>
 #include "pilgrim_utils.h"
 #include "dlmalloc-2.8.6.h"
 #include "mpi.h"
@@ -124,6 +124,7 @@ int pilgrim_sum_array(int* arr, int n) {
     return sum;
 }
 
+/*
 void print_bt() {
     unw_cursor_t cursor;
     unw_context_t context;
@@ -148,3 +149,4 @@ void print_bt() {
         }
     }
 }
+*/

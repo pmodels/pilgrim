@@ -8271,7 +8271,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->arg_directions[1] = DIRECTION_IN;
 			cs->arg_sizes[1] = sizeof(int);
 			cs->arg_types[1] = TYPE_INT;
-			cs->arg_lengths[1] =  comm_size;
+			cs->arg_lengths[1] =  3; //comm_size;
 			assert(cs->arg_lengths[1] > 0);
 			cs->arg_sizes[1] = sizeof(int) * cs->arg_lengths[1];
 			cs->args[1] = calloc(cs->arg_sizes[1], 1);
@@ -8280,7 +8280,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->arg_directions[2] = DIRECTION_IN;
 			cs->arg_sizes[2] = sizeof(int);
 			cs->arg_types[2] = TYPE_INT;
-			cs->arg_lengths[2] =  comm_size;
+			cs->arg_lengths[2] =  3; //comm_size;
 			assert(cs->arg_lengths[2] > 0);
 			cs->arg_sizes[2] = sizeof(int) * cs->arg_lengths[2];
 			cs->args[2] = calloc(cs->arg_sizes[2], 1);
@@ -8304,7 +8304,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->arg_directions[5] = DIRECTION_IN;
 			cs->arg_sizes[5] = sizeof(int);
 			cs->arg_types[5] = TYPE_INT;
-			cs->arg_lengths[5] =  comm_size;
+			cs->arg_lengths[5] =  3; //comm_size;
 			assert(cs->arg_lengths[5] > 0);
 			cs->arg_sizes[5] = sizeof(int) * cs->arg_lengths[5];
 			cs->args[5] = calloc(cs->arg_sizes[5], 1);
@@ -8313,7 +8313,7 @@ void read_record_args(int func_id, void* buff, CallSignature* cs) {
 			cs->arg_directions[6] = DIRECTION_IN;
 			cs->arg_sizes[6] = sizeof(int);
 			cs->arg_types[6] = TYPE_INT;
-			cs->arg_lengths[6] =  comm_size;
+			cs->arg_lengths[6] =  3; //comm_size;
 			assert(cs->arg_lengths[6] > 0);
 			cs->arg_sizes[6] = sizeof(int) * cs->arg_lengths[6];
 			cs->args[6] = calloc(cs->arg_sizes[6], 1);

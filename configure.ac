@@ -105,6 +105,18 @@ dnl ----------------------------------------------------------------------------
 # strict
 PAC_ARG_STRICT
 
+AC_ARG_WITH(zfp,
+	AS_HELP_STRING([--with-zfp=DIR], [Specify the install location of ZFP.]),,
+	with_zfp=)
+ZFP_DIR="$with_zfp"
+AC_SUBST([ZFP_DIR])
+
+AC_ARG_WITH(sz,
+	AS_HELP_STRING([--with-sz=DIR], [Specify the install location of SZ.]),,
+	with_sz=)
+SZ_DIR="$with_sz"
+AC_SUBST([SZ_DIR])
+
 # --enable-debug
 AC_ARG_ENABLE([g],AS_HELP_STRING([--enable-g],[alias for --enable-debug]),,[enable_g=no])
 AC_ARG_ENABLE([debug],AS_HELP_STRING([--enable-debug],[adds -g to CFLAGS]),,[enable_debug=${enable_g}])

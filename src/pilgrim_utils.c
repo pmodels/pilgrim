@@ -55,11 +55,11 @@ inline void** assemble_args_list(int arg_count, ...) {
     return args;
 }
 
-void* concat_function_args(short func_id, int arg_count, void** args, int* arg_sizes, int comm_size, int* key_len) {
+void* concat_function_args(short func_id, int tid, int arg_count, void** args, int* arg_sizes, int comm_size, int* key_len) {
 
     // Compute key length first, note func_id is a short type
     int i;
-    *key_len = sizeof(func_id);
+    *key_len = (sizeof(func_id) + sizeof(tid));
     if(comm_size != -1)
         *key_len += sizeof(comm_size);
 
@@ -71,6 +71,9 @@ void* concat_function_args(short func_id, int arg_count, void** args, int* arg_s
     void *key = pilgrim_malloc(*key_len);
     memcpy(key+pos, &func_id, sizeof(func_id));
     pos += sizeof(func_id);
+
+    memcpy(key+pos, &tid, sizeof(tid));
+    pos += sizeof(tid);
 
     if(comm_size != -1) {
         memcpy(key+pos, &comm_size, sizeof(comm_size));

@@ -24,12 +24,13 @@ typedef struct TimingNode_t {
 
 typedef struct _Record {
     double tstart, tend;
-    short func_id;              // 2 bytes function id
-    int arg_count;
-    int *arg_sizes;             // size of each argument
-    void **args;                // Store all arguments in array
-    int res;                    // result returned from the original function call
-    int comm_size;              // used to determine array argument's length during post-processing
+    short  func_id;             // 2 bytes function id
+    int    tid;                 // symbolic id of pthread_t
+    int    arg_count;
+    int*   arg_sizes;           // size of each argument
+    void** args;                // Store all arguments in array
+    int    res;                 // result returned from the original function call
+    int    comm_size;           // used to determine array argument's length during post-processing
 } Record;
 
 /*

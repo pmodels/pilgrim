@@ -450,14 +450,14 @@ int* dump_cst() {
 
 // Compose key: (func_id, arguments)
 void* compose_call_signature(Record *record, int *key_len) {
-    return concat_function_args(record->func_id, record->arg_count,
+    return concat_function_args(record->func_id, record->tid, record->arg_count,
             record->args, record->arg_sizes, record->comm_size, key_len);
 }
 
 void write_record(Record record) {
     if (!__logger.recording) return;       // have not initialized yet
 
-    pthread_mutex_lock(&g_mutex);
+    PILGRIM_REAL_CALL(pthread_mutex_lock)(&g_mutex);
 
     /*
     if(__logger.rank == 0)
@@ -523,7 +523,7 @@ void write_record(Record record) {
     // Grow the MPI call grammar
     append_terminal(&(__logger.grammar), entry->terminal_id, 1);
 
-    pthread_mutex_unlock(&g_mutex);
+    PILGRIM_REAL_CALL(pthread_mutex_unlock)(&g_mutex);
 }
 
 void logger_init() {
@@ -582,6 +582,8 @@ void logger_init() {
         sequitur_init(&(__logger.durations_grammar));
     }
 
+    MAP_OR_FAIL(pthread_mutex_lock);
+    MAP_OR_FAIL(pthread_mutex_unlock);
     install_mem_hooks();
     __logger.recording = true;
 }

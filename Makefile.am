@@ -31,8 +31,8 @@ pilgrim2text_LDFLAGS = -lm
 AM_CPPFLAGS = -g -rdynamic
 AM_CFLAGS = -g -rdynamic
 
-zfp_LDFLAGS=-Wl,-rpath,-L$(ZFP_DIR)/lib -L$(ZFP_DIR)/lib64 -lzfp
-sz_LDFLAGS=-Wl,-rpath,-L$(SZ_DIR)/lib -L$(SZ_DIR)/lib64 -lSZ
+zfp_LDFLAGS=-Wl,-rpath=$(ZFP_DIR)/lib,-L$(ZFP_DIR)/lib,-rpath=$(ZFP_DIR)/lib64,-L$(ZFP_DIR)/lib64,-lzfp
+sz_LDFLAGS=-Wl,-rpath=$(SZ_DIR)/lib,-L$(SZ_DIR)/lib,-rpath=$(SZ_DIR)/lib64,-L$(SZ_DIR)/lib64,-lSZ
 
 libpilgrim_la_LDFLAGS = -lm -lzstd -pthread $(zfp_LDFLAGS) $(sz_LDFLAGS) -version-info @libpilgrim_so_version@
 

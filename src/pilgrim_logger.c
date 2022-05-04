@@ -319,7 +319,7 @@ RecordHash* compress_csts() {
 }
 
 void print_cst(RecordHash *cst) {
-    unsigned int us[400], count[400];
+    unsigned long long us[400], count[400];
     for(int i = 0; i < 400; i++) {
         us[i] = 0;
         count[i] = 0;
@@ -333,13 +333,18 @@ void print_cst(RecordHash *cst) {
         us[func_id]++;
         count[func_id] += entry->count;
 
-        int args[7];
+        int args[8];
         int arg_start = sizeof(short);
+
         /*
-        if(func_id == ID_MPI_Igatherv) {
-            memcpy(args, entry->key+arg_start, sizeof(args));
-            printf("[pilgrim] sendbuf: %d, sencount: %d, sendtype: %d, recvbuf: %d, recvconts: %d, displs: %d\n",
-                    args[0], args[1], args[2], args[3], args[4], args[5]);
+        if(func_id == ID_MPI_Sendrecv) {
+            memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*4);
+            printf("[pilgrim] MPI_Sendrecv, scount:%d, stype:%d, dest:%d, stag:%d,",
+                    args[0], args[1], args[2], args[3]);
+            memcpy(args, entry->key+arg_start+2*sizeof(MemPtrAttr)+sizeof(int)*4, sizeof(int)*4);
+            printf("rcount:%d, rtype:%d, src:%d, rtag:%d\n",
+                    args[0], args[1], args[2], args[3]);
+
         }
         if(func_id == ID_MPI_Send) {
             memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*4);
@@ -351,31 +356,23 @@ void print_cst(RecordHash *cst) {
             printf("[pilgrim] MPI_Irecv, count: %d, datatype: %d, source: %d, tag: %d\n",
                     args[0], args[1], args[2], args[3]);
         }
-        */
-        /*
         if(func_id == ID_MPI_Isend) {
             memcpy(args, entry->key+arg_start, sizeof(args));
             printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d, req: %d\n",
                     args[0], args[1], args[2], args[3], args[4], args[7]);
         }
-        if(func_id == ID_MPI_Waitsome) {
-            int incount, outcount;
-            memcpy(&incount, entry->key+arg_start, sizeof(int));
-            int *reqs = pilgrim_malloc(sizeof(int) * incount);
-            memcpy(reqs, entry->key+arg_start+sizeof(int), sizeof(int)*incount);
-            memcpy(&outcount, entry->key+arg_start+sizeof(int)*(1+incount), sizeof(int));
-            printf("[pilgrim] Waitsome(intcount=%d, reqs:", incount);
-            for(int i = 0; i < incount; i++)
-                printf("%d ", reqs[i]);
-            pilgrim_free(reqs, sizeof(int) * incount);
-            printf(", outcount: %d)\n", outcount);
+        if(func_id == ID_MPI_Comm_split) {
+            memcpy(args, entry->key+arg_start, sizeof(int)*4);
+            printf("[pilgrim] MPI_Comm_split, oldcomm: %d, color: %d, key: %d, newcomm: %d\n",
+                    args[0], args[1], args[2], args[3]);
         }
         */
+
     }
 
     for(int i = 0; i < 400; i++) {
         if(count[i] > 0 && __logger.debug)
-            printf("%s, %d, %d\n", func_names[i], us[i], count[i]);
+            printf("%s, %llu, %llu\n", func_names[i], us[i], count[i]);
             //printf("Func: %s, unique signatures: %d, total count: %d\n", func_names[i], us[i], count[i]);
     }
 }
@@ -397,6 +394,17 @@ int* dump_cst() {
 
     if(__logger.rank == 0) {
         cst_stream = serialize_cst(compressed_cst, &cst_stream_size);
+
+        /*
+        printf("compressed stream size: %d, %ld\n", HASH_COUNT(compressed_cst), cst_stream_size);
+        RecordHash *entry, *tmp;
+        HASH_ITER(hh, compressed_cst, entry, tmp) {
+            short func_id;
+            memcpy(&func_id, entry->key, sizeof(short));
+            printf("func: %s, key len: %d\n", func_names[func_id], entry->key_len);
+        }
+        */
+
         PMPI_Bcast(&cst_stream_size, sizeof(cst_stream_size), MPI_BYTE, 0, MPI_COMM_WORLD);
         PMPI_Bcast(cst_stream, cst_stream_size, MPI_BYTE, 0, MPI_COMM_WORLD);
 
@@ -606,6 +614,7 @@ void logger_exit() {
         write_cfg_timings(&(__logger.durations_grammar), &(__logger.intervals_grammar), __logger.rank, __logger.nprocs, total_calls);
     if(strcmp(__logger.timing_mode, TIMING_MODE_TEXT) == 0)
         write_text_timings(__logger.hash_head, __logger.rank);
+    /*
     if(strcmp(__logger.timing_mode, TIMING_MODE_LOSSLESS) == 0)
         write_lossless_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
     if(strcmp(__logger.timing_mode, TIMING_MODE_ZFP) == 0)
@@ -616,9 +625,10 @@ void logger_exit() {
         write_hist_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
     if(strcmp(__logger.timing_mode, TIMING_MODE_ZSTD) == 0)
         write_zstd_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
+    */
 
-    /*
-    if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) != 0) {
+    if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) != 0 &&
+       strcmp(__logger.timing_mode, TIMING_MODE_AGGREGATED) != 0) {
         //write_zstd_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
 
         write_zfp_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals);
@@ -628,8 +638,8 @@ void logger_exit() {
         write_sz_clustering_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
 
         write_hist_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
+        write_vitter_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
     }
-    */
 
     // 4. Clean up all resources
     cleanup_cst(__logger.hash_head);

@@ -20,6 +20,7 @@
 // Lossy
 #define TIMING_MODE_CFG             "CFG"
 #define TIMING_MODE_HIST            "HIST"
+#define TIMING_MODE_VITTER          "VITTER"
 #define TIMING_MODE_SZ              "SZ"
 #define TIMING_MODE_ZFP             "ZFP"
 
@@ -41,6 +42,7 @@ void write_sz_clustering_timings(RecordHash* cst, int mpi_rank, double total_cal
 void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path, TimingNode* g_durations);
 
 void write_hist_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path);
+void write_vitter_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path);
 
 void write_text_timings(RecordHash* cst, int mpi_rank);
 void write_cfg_timings(Grammar* duration_grammar, Grammar* interval_grammar, int mpi_rank, int mpi_size, double total_calls);

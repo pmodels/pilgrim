@@ -1,0 +1,184 @@
+accfence1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=511 arg=-testsize=1024  
+accfence1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=517 arg=-testsize=16  
+accfence1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=523 arg=-testsize=16  
+accfence1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=529 arg=-testsize=16  
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=535 arg=-testsize=1024  
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=541 arg=-testsize=16  
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=547 arg=-testsize=16  
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=553 arg=-testsize=16  
+accfence1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=559 arg=-testsize=16  mem=1.2
+accfence1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=565 arg=-testsize=16  mem=1.2
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=571 arg=-testsize=16  mem=1.2
+accfence1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=577 arg=-testsize=16  mem=1.2
+accpscw1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=583 arg=-testsize=1024  
+accpscw1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=589 arg=-testsize=16  
+accpscw1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=595 arg=-testsize=16  
+accpscw1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=601 arg=-testsize=16  
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=607 arg=-testsize=1024  
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=613 arg=-testsize=16  
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=619 arg=-testsize=16  
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=625 arg=-testsize=16  
+accpscw1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=631 arg=-testsize=16  mem=1.7
+accpscw1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=637 arg=-testsize=16  mem=1.7
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=643 arg=-testsize=16  mem=1.7
+accpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=649 arg=-testsize=16  mem=1.7
+epochtest 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=655 arg=-testsize=1024  
+epochtest 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=661 arg=-testsize=16  
+epochtest 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=667 arg=-testsize=16  
+epochtest 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=673 arg=-testsize=16  
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=679 arg=-testsize=1024  
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=685 arg=-testsize=16  
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=691 arg=-testsize=16  
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=697 arg=-testsize=16  
+epochtest 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=703 arg=-testsize=16  timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=709 arg=-testsize=16  timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=715 arg=-testsize=16  timeLimit=300 mem=5
+epochtest 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=721 arg=-testsize=16  timeLimit=300 mem=5
+getfence1 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=727 arg=-testsize=1024  
+getfence1 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=733 arg=-testsize=16  
+getfence1 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=739 arg=-testsize=16  
+getfence1 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=745 arg=-testsize=16  
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=751 arg=-testsize=1024  
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=757 arg=-testsize=16  
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=763 arg=-testsize=16  
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=769 arg=-testsize=16  
+getfence1 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=775 arg=-testsize=16  mem=2
+getfence1 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=781 arg=-testsize=16  mem=2
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=787 arg=-testsize=16  mem=2
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=793 arg=-testsize=16  mem=2
+getfence1 2 arg=-type=MPI_INT arg=-count=16000000 arg=-seed=799 arg=-testsize=4  timeLimit=1800 mem=3
+getfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=16000000 arg=-seed=805 arg=-testsize=4  timeLimit=1800 mem=3
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=811 arg=-testsize=1024  
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=819 arg=-testsize=16  
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=827 arg=-testsize=16  
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=835 arg=-testsize=16  
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=843 arg=-testsize=1024  
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=851 arg=-testsize=16  
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=859 arg=-testsize=16  
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=867 arg=-testsize=16  
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=875 arg=-testsize=16  timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=883 arg=-testsize=16  timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=891 arg=-testsize=16  timeLimit=600 mem=2.1
+lock_contention_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=899 arg=-testsize=16  timeLimit=600 mem=2.1
+lock_dt 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=907 arg=-testsize=1024  
+lock_dt 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=915 arg=-testsize=16  
+lock_dt 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=923 arg=-testsize=16  
+lock_dt 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=931 arg=-testsize=16  
+lock_dt 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=939 arg=-testsize=16  
+lock_dt 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=947 arg=-testsize=16  
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=955 arg=-testsize=1024  
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=963 arg=-testsize=16  
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=971 arg=-testsize=16  
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=979 arg=-testsize=16  
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=987 arg=-testsize=16  
+lock_dt 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=995 arg=-testsize=16  
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1003 arg=-testsize=1024  
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1011 arg=-testsize=16  
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1019 arg=-testsize=16  
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1027 arg=-testsize=16  
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1035 arg=-testsize=16  
+lock_dt_flush 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1043 arg=-testsize=16  
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1051 arg=-testsize=1024  
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1059 arg=-testsize=16  
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1067 arg=-testsize=16  
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1075 arg=-testsize=16  
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1083 arg=-testsize=16  
+lock_dt_flush 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1091 arg=-testsize=16  
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1099 arg=-testsize=1024  
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1107 arg=-testsize=16  
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1115 arg=-testsize=16  
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1123 arg=-testsize=16  
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1131 arg=-testsize=16  
+lock_dt_flushlocal 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1139 arg=-testsize=16  
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1147 arg=-testsize=1024  
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1155 arg=-testsize=16  
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1163 arg=-testsize=16  
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1171 arg=-testsize=16  
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1179 arg=-testsize=16  
+lock_dt_flushlocal 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1187 arg=-testsize=16  
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1195 arg=-testsize=1024  
+lockall_dt 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1203 arg=-testsize=16  
+lockall_dt 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1211 arg=-testsize=16  
+lockall_dt 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1219 arg=-testsize=16  
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1227 arg=-testsize=1024  
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1235 arg=-testsize=16  
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1243 arg=-testsize=16  
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1251 arg=-testsize=16  
+lockall_dt 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1259 arg=-testsize=16  timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1267 arg=-testsize=16  timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1275 arg=-testsize=16  timeLimit=600 mem=1.1
+lockall_dt 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1283 arg=-testsize=16  timeLimit=600 mem=1.1
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1291 arg=-testsize=1024  
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1299 arg=-testsize=16  
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1307 arg=-testsize=16  
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1315 arg=-testsize=16  
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1323 arg=-testsize=16  
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1331 arg=-testsize=1024  
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1339 arg=-testsize=16  
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1347 arg=-testsize=16  
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1355 arg=-testsize=16  
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1363 arg=-testsize=16  
+lockall_dt_flush 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1371 arg=-testsize=16  timeLimit=600
+lockall_dt_flush 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1379 arg=-testsize=16  timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1387 arg=-testsize=1024  
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1395 arg=-testsize=16  
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1403 arg=-testsize=16  
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1411 arg=-testsize=16  
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1419 arg=-testsize=16  
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1427 arg=-testsize=1024  
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1435 arg=-testsize=16  
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1443 arg=-testsize=16  
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1451 arg=-testsize=16  
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1459 arg=-testsize=16  
+lockall_dt_flushall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1467 arg=-testsize=16  timeLimit=600
+lockall_dt_flushall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1475 arg=-testsize=16  timeLimit=600
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1483 arg=-testsize=1024  
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1491 arg=-testsize=16  
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1499 arg=-testsize=16  
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1507 arg=-testsize=16  
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1515 arg=-testsize=1024  
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1523 arg=-testsize=16  
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1531 arg=-testsize=16  
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1539 arg=-testsize=16  
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1547 arg=-testsize=16  timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1555 arg=-testsize=16  timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1563 arg=-testsize=16  timeLimit=600 mem=5
+lockall_dt_flushlocal 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1571 arg=-testsize=16  timeLimit=600 mem=5
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1579 arg=-testsize=1024  
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1587 arg=-testsize=16  
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1595 arg=-testsize=16  
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1603 arg=-testsize=16  
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1611 arg=-testsize=1024  
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1619 arg=-testsize=16  
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1627 arg=-testsize=16  
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1635 arg=-testsize=16  
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1643 arg=-testsize=16  timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1651 arg=-testsize=16  timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1659 arg=-testsize=16  timeLimit=600 mem=3
+lockall_dt_flushlocalall 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1667 arg=-testsize=16  timeLimit=600 mem=3
+putfence1 2 arg=-type=MPI_INT arg=-count=1 arg=-seed=1675 arg=-testsize=1024  
+putfence1 2 arg=-type=MPI_INT arg=-count=512 arg=-seed=1681 arg=-testsize=16  
+putfence1 2 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1687 arg=-testsize=16  
+putfence1 2 arg=-type=MPI_INT arg=-count=17 arg=-seed=1693 arg=-testsize=16  
+putfence1 2 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1699 arg=-testsize=16  
+putfence1 2 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1705 arg=-testsize=16  
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1711 arg=-testsize=1024  
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1717 arg=-testsize=16  
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1723 arg=-testsize=16  
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1729 arg=-testsize=16  
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1735 arg=-testsize=16  
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1741 arg=-testsize=16  
+putfence1 2 arg=-type=MPI_INT arg=-count=16000000 arg=-seed=1747 arg=-testsize=4  timeLimit=1800 mem=2
+putfence1 2 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=16000000 arg=-seed=1753 arg=-testsize=4  timeLimit=1800 mem=2
+putpscw1 4 arg=-type=MPI_INT arg=-count=1 arg=-seed=1759 arg=-testsize=1024  
+putpscw1 4 arg=-type=MPI_INT arg=-count=512 arg=-seed=1765 arg=-testsize=16  
+putpscw1 4 arg=-type=MPI_INT arg=-count=17 arg=-seed=1771 arg=-testsize=16  
+putpscw1 4 arg=-type=MPI_INT arg=-count=1018 arg=-seed=1777 arg=-testsize=16  
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1 arg=-seed=1783 arg=-testsize=1024  
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=512 arg=-seed=1789 arg=-testsize=16  
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=17 arg=-seed=1795 arg=-testsize=16  
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=1018 arg=-seed=1801 arg=-testsize=16  
+putpscw1 4 arg=-type=MPI_INT arg=-count=65530 arg=-seed=1807 arg=-testsize=16  mem=4
+putpscw1 4 arg=-type=MPI_INT arg=-count=262144 arg=-seed=1813 arg=-testsize=16  mem=4
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=65530 arg=-seed=1819 arg=-testsize=16  mem=4
+putpscw1 4 arg=-type=MPI_INT:4+MPI_DOUBLE:8 arg=-count=262144 arg=-seed=1825 arg=-testsize=16  mem=4

@@ -1,0 +1,37 @@
+/*
+ * Copyright (C) by Argonne National Laboratory
+ *     See COPYRIGHT in top-level directory
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include "mpi.h"
+#include "mpitest.h"
+
+int main(int argc, char **argv)
+{
+    MPI_Request req;
+    MPI_Status status;
+
+    MTest_Init(&argc, &argv);
+
+    MPI_Issend(NULL, 0, MPI_BYTE, 0, 123, MPI_COMM_SELF, &req);
+
+    MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_SELF, &status);
+    assert(status.MPI_SOURCE == 0);
+    assert(status.MPI_TAG == 123);
+
+    MPI_Cancel(&req);
+    assert(req != MPI_REQUEST_NULL);
+
+    MPI_Request_free(&req);
+
+    MPI_Irecv(NULL, 0, MPI_BYTE, 0, 123, MPI_COMM_SELF, &req);
+    MPI_Cancel(&req);
+    MPI_Wait(&req, &status);
+
+    MTest_Finalize(0);
+
+    return 0;
+}

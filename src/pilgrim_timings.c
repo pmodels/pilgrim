@@ -11,6 +11,7 @@
 #include "zfp.h"
 #include "sz.h"
 #include "zstd.h"
+#include "vitter.h"
 
 #define REL_ERR     (0.1)
 #define BASE        (1.0+REL_ERR)
@@ -81,7 +82,7 @@ static inline int get_bin_id(double val) {
 
     int id = myceil(log(val)/log(BASE));
     if(id < 0) id = -id;
-    id = mymin(255, id);
+    id = mymin(32766, id);         // cap it to 2^15-1
     return id;
 }
 
@@ -93,7 +94,7 @@ static inline int get_bin_id_int(int val) {
     int id = 0;
     id = myceil(log(val)/log(BASE));
     if(id < 0) id = -id;
-    id = mymin(255, id);
+    id = mymin(32766, id);         // cap it to 2^15-1
     return id;
 }
 
@@ -478,7 +479,7 @@ double write_hist_timings_core(RecordHash* cst, int mpi_rank, char* dur_path, ch
         }
 
         int top_eight[8];
-        int c = top_eight_counts_sum(local_ids, count, top_eight);
+        int c = top_eight_counts_sum(local_ids, mymin(count, 100), top_eight);
 
         int mask_idx = 0;
         uint16_t masks[4] = { 0b0111000000000000, 0b0000011100000000,
@@ -544,6 +545,85 @@ void write_hist_timings(RecordHash* cst, int mpi_rank, double total_calls, char*
     if(mpi_rank == 0) {
         printf("total_dur_kb: %f, total int kb: %f\n", total_dur_kb, total_int_kb);
         printf("HIST duration compression ratio: %f, interval compression ratio: %f\n",
+                total_calls*1e6/total_dur_kb/1024.0*sizeof(double), total_calls*1e6/total_int_kb/1024.0*sizeof(double));
+    }
+    PMPI_Barrier(MPI_COMM_WORLD);
+}
+
+
+double write_vitter_timings_core(RecordHash* cst, int mpi_rank, char* dur_path, char* int_path, bool dur) {
+
+    RecordHash *entry, *tmp;
+    TimingNode *elt, *tmp2;
+
+    int local_total = 0;
+    HASH_ITER(hh, cst, entry, tmp) {
+        int count = 0;
+        LL_COUNT(entry->intervals, elt, count);
+        local_total += count;
+    }
+
+    // large enough buffer for compression
+    size_t buff_size = local_total*sizeof(uint16_t);
+    void*  buff = pilgrim_malloc(buff_size);
+    memset(buff, 0, buff_size);
+
+    // Apply Vitter algorithm
+    vitter_t v;
+    vitter_alloc(&v, 32767);
+    bitstream_init(&v.stream, buff, buff_size);
+
+    HASH_ITER(hh, cst, entry, tmp) {
+        uint16_t bin_id;
+        if(dur) {
+            LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
+                bin_id = get_bin_id(elt->val);
+                vitter_encode(&v, bin_id);
+            }
+        } else {
+            LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
+                bin_id = get_bin_id(elt->val);
+                vitter_encode(&v, bin_id);
+            }
+        }
+    }
+
+    /*
+    if(dur) {
+        //fprintf(stderr, "\n\n======================\n\n");
+        for(int i = 0; i < 1000; i++) {
+            uint16_t id = 30000;
+            vitter_encode(&v, id);
+        }
+        //fprintf(stderr, "\n\n======================\n\n");
+        //fprintf(stderr, "size: %ld\n", vitter_get_bytes(&v));
+    }
+    */
+
+    size_t uncompressed_bytes = vitter_get_bytes(&v);
+    size_t zstd_buff_size = ZSTD_compressBound(uncompressed_bytes);
+    void* zstd_buff = pilgrim_malloc(zstd_buff_size);
+    size_t compressed_bytes = ZSTD_compress(zstd_buff, zstd_buff_size, buff, uncompressed_bytes, 1);
+    //size_t compressed_bytes = vitter_get_bytes(&v);
+
+    //bitstream_flush(&v.stream);
+    vitter_dealloc(&v);
+    pilgrim_free(buff, buff_size);
+    pilgrim_free(zstd_buff, zstd_buff_size);
+
+    double local_kb = compressed_bytes / 1024.0;
+    double total_kb = 0;
+    PMPI_Reduce(&local_kb, &total_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    return total_kb;
+}
+
+
+void write_vitter_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path) {
+    double total_dur_kb = write_vitter_timings_core(cst, mpi_rank, dur_path, int_path, true);
+    double total_int_kb = write_vitter_timings_core(cst, mpi_rank, dur_path, int_path, false);
+    if(mpi_rank == 0) {
+        printf("Vitter total_dur_kb: %f, total int kb: %f\n", total_dur_kb, total_int_kb);
+        printf("Vitter duration compression ratio: %f, interval compression ratio: %f\n",
                 total_calls*1e6/total_dur_kb/1024.0*sizeof(double), total_calls*1e6/total_int_kb/1024.0*sizeof(double));
     }
     PMPI_Barrier(MPI_COMM_WORLD);
@@ -695,6 +775,39 @@ void write_cfg_timings(Grammar* duration_grammar, Grammar* interval_grammar, int
     size_t duration_compressed_bytes, interval_compressed_bytes;
     void* zstd_buf;
 
+    /**
+     * Simple local ZSTD
+     */
+    compressed_grammar = serialize_grammar(duration_grammar, &compressed_integers);
+    zstd_buf_size = ZSTD_compressBound(sizeof(int)*compressed_integers);
+    zstd_buf = pilgrim_malloc(zstd_buf_size);
+    duration_compressed_bytes = ZSTD_compress(zstd_buf, zstd_buf_size, compressed_grammar, sizeof(int)*compressed_integers, 1);
+    pilgrim_free(zstd_buf, zstd_buf_size);
+    pilgrim_free(compressed_grammar, sizeof(int)*compressed_integers);
+
+    compressed_grammar = serialize_grammar(interval_grammar, &compressed_integers);
+    zstd_buf_size = ZSTD_compressBound(sizeof(int)*compressed_integers);
+    zstd_buf = pilgrim_malloc(zstd_buf_size);
+    interval_compressed_bytes = ZSTD_compress(zstd_buf, zstd_buf_size, compressed_grammar, sizeof(int)*compressed_integers, 1);
+    pilgrim_free(zstd_buf, zstd_buf_size);
+    pilgrim_free(compressed_grammar, sizeof(int)*compressed_integers);
+
+    double local_dur_kb = duration_compressed_bytes / 1024.0;
+    double local_int_kb = interval_compressed_bytes / 1024.0;
+    double total_dur_kb , total_int_kb;
+    PMPI_Reduce(&local_dur_kb, &total_dur_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    PMPI_Reduce(&local_int_kb, &total_int_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    if(mpi_rank == 0) {
+        printf("CFG (local ZSTD) clustering duration compression ratio: %f, interval compression ratio: %f\n",
+                total_calls*1e6/total_dur_kb/1024.0*sizeof(double), total_calls*1e6/total_int_kb/1024.0*sizeof(double));
+    }
+    PMPI_Barrier(MPI_COMM_WORLD);
+
+
+    /*
+     *
+     * inter-process Sequitur pass + ZSTD
+     *
     compressed_grammar = compress_serialize_grammars(mpi_rank, mpi_size, duration_grammar, &compressed_integers);
     if(mpi_rank == 0) {
         zstd_buf_size = ZSTD_compressBound(sizeof(int)*compressed_integers);
@@ -716,6 +829,7 @@ void write_cfg_timings(Grammar* duration_grammar, Grammar* interval_grammar, int
                     total_calls*1e6/duration_compressed_bytes*sizeof(double),
                     total_calls*1e6/interval_compressed_bytes*sizeof(double));
     }
+    */
 
     sequitur_cleanup(duration_grammar);
     sequitur_cleanup(interval_grammar);

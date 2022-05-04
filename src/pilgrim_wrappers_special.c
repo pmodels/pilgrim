@@ -94,9 +94,9 @@ bool is_completed_idup_request(MPI_Request *req) {
 }
 
 
-#define GET_STATUS_INFO(req, status, flag)                          \
+#define GET_STATUS_INFO(old_req, new_req, status, flag)             \
     RequestHash* entry = NULL;                                      \
-    entry = request_hash_entry(req);                                \
+    entry = request_hash_entry(old_req);                            \
     int status_info[] = {0, 0};                                     \
     int req_id = invalid_request_id;                                \
     if(entry && entry->req_node)                                    \
@@ -110,7 +110,14 @@ bool is_completed_idup_request(MPI_Request *req) {
             if(entry->any_tag)                                      \
                 status_info[1] = g_mpi_rank - status->MPI_TAG;      \
         }                                                           \
-        MPI_OBJ_RELEASE(MPI_Request, req);                          \
+        /* Only when new request is set to NULL */                  \
+        /* we can free the object. This is necessary */             \
+        /* as MPI_Wait() may not release the request */             \
+        /* if the request was a persistent one created */           \
+        /* by Recv_init() */                                        \
+        if(new_req==NULL || *new_req==MPI_REQUEST_NULL) {           \
+            MPI_OBJ_RELEASE(MPI_Request, old_req);                  \
+        }                                                           \
     }
 
 
@@ -159,21 +166,30 @@ int MPI_Pcontrol(const int level, ...)
     PILGRIM_TRACING_2(1, sizes, args, -1);
 }
 
-int MPI_Wait(MPI_Request *request, MPI_Status *status)
+int imp_MPI_Wait(MPI_Request *request, MPI_Status *status)
 {
     MPI_Request old_req;
     memcpy(&old_req, request, sizeof(MPI_Request));
 
     PILGRIM_TRACING_1(int, MPI_Wait, (request, status));
 
-    check_idup_request(request);
+    check_idup_request(&old_req);
 
-    GET_STATUS_INFO(&old_req, status, true);
+    GET_STATUS_INFO(&old_req, request, status, true);
     int sizes[] = {sizeof(int), sizeof(status_info)};
     void **args = assemble_args_list(2, &req_id, status_info);
 
     PILGRIM_TRACING_2(2, sizes, args, -1);
 }
+int MPI_Wait(MPI_Request *request, MPI_Status *status) {
+    imp_MPI_Wait(request, status);
+    return MPI_SUCCESS;
+}
+int mpi_wait_(MPI_Fint* request, MPI_Fint* status) {
+    imp_MPI_Wait((MPI_Request*)request, (MPI_Status*)status);
+    return MPI_SUCCESS;
+}
+
 
 int MPI_Waitany(int count, MPI_Request array_of_requests[], int *index, MPI_Status *status)
 {
@@ -185,7 +201,7 @@ int MPI_Waitany(int count, MPI_Request array_of_requests[], int *index, MPI_Stat
     if(*index != MPI_UNDEFINED) {
         num_args = 4;
         check_idup_request(&old_reqs[*index]);
-        GET_STATUS_INFO(&old_reqs[*index], status, true);
+        GET_STATUS_INFO(&old_reqs[*index], &array_of_requests[*index], status, true);
         void **args = assemble_args_list(num_args, &count, ids, index, status_info);
         int sizes[] = { sizeof(int), sizeof(int)*count, sizeof(int), sizeof(status_info) };
         PILGRIM_TRACING_2(num_args, sizes, args, -1);
@@ -221,7 +237,7 @@ int MPI_Waitsome(int incount, MPI_Request array_of_requests[], int *outcount, in
     }
 }
 
-int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_statuses[])
+int imp_MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_statuses[])
 {
 
     COPY_REQUESTS(count);
@@ -239,6 +255,19 @@ int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_
     PILGRIM_TRACING_2(3, sizes, args, -1);
 }
 
+int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_statuses[]) {
+    imp_MPI_Waitall(count, array_of_requests, array_of_statuses);
+    return MPI_SUCCESS;
+}
+
+int mpi_waitall_(int *count, MPI_Fint* array_of_requests, MPI_Fint* array_of_statuses) {
+    imp_MPI_Waitall(*count, (MPI_Request*)array_of_requests, (MPI_Status*)array_of_statuses);
+    return MPI_SUCCESS;
+}
+
+
+
+
 int MPI_Test(MPI_Request *request, int *flag, MPI_Status *status)
 {
     MPI_Request old_req;
@@ -246,8 +275,8 @@ int MPI_Test(MPI_Request *request, int *flag, MPI_Status *status)
 
     PILGRIM_TRACING_1(int, MPI_Test, (request, flag, status));
 
-    GET_STATUS_INFO(&old_req, status, *flag);
-    void **args = assemble_args_list(3, req_id, flag, status_info);
+    GET_STATUS_INFO(&old_req, request, status, *flag);
+    void **args = assemble_args_list(3, &req_id, flag, status_info);
     int sizes[] = { sizeof(int), sizeof(int), sizeof(status_info)};
 
     PILGRIM_TRACING_2(3, sizes, args, -1);
@@ -262,7 +291,7 @@ int MPI_Testany(int count, MPI_Request array_of_requests[], int *index, int *fla
     int num_args;
     if(*index != MPI_UNDEFINED) {
         num_args = 5;
-        GET_STATUS_INFO(&old_reqs[*index], status, *flag);
+        GET_STATUS_INFO(&old_reqs[*index], &array_of_requests[*index], status, *flag);
         void **args = assemble_args_list(num_args, &count, ids, index, flag, status_info);
         int sizes[] = { sizeof(int), sizeof(int)*count, sizeof(int), sizeof(int), sizeof(status_info) };
         PILGRIM_TRACING_2(num_args, sizes, args, -1);
@@ -323,15 +352,12 @@ int MPI_Testsome(int incount, MPI_Request array_of_requests[], int *outcount, in
 
 int MPI_Request_free(MPI_Request *request)
 {
-    MPI_Request *old_req = request;
-
     int id = get_request_id(request);
+    MPI_OBJ_RELEASE(MPI_Request, request);
 
     void **args = assemble_args_list(1, &id);
     int sizes[] = {sizeof(int)};
     PILGRIM_TRACING_1(int, MPI_Request_free, (request));
-
-    MPI_OBJ_RELEASE(MPI_Request, request);
 
     PILGRIM_TRACING_2(1, sizes, args, -1);
 }

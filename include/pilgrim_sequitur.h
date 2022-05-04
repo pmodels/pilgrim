@@ -115,6 +115,7 @@ int digram_delete(Digram **digram_table, Symbol *symbol);
 
 /* pilgrim_sequitur_logger.c */
 double sequitur_dump(const char *path, Grammar *grammar, int mpi_rank, int mpi_size);
+int* serialize_grammar(Grammar *grammar, int *integers);
 int* compress_serialize_grammars(int mpi_rank, int mpi_size, Grammar* local_grammar, int* compressed_integers);
 
 /* pilgrim_sequitur_utils.c */

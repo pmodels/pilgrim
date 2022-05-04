@@ -627,6 +627,8 @@ int main(int argc, char** argv) {
     // 2. Sequitur
     int final_splitter;
     Grammar *grammar = final_sequitur(dg, &final_splitter);
+    int c; Symbol *rule; DL_COUNT(grammar->rules, rule,c);
+    printf("Unique grammars: %d, Total rules: %d\n", dg->num_grammars, c);
 
     // 3. Generate an proxy MPI program
     char source_file_path[256];

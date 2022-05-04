@@ -234,7 +234,9 @@ int create_request_id(MPI_Request *req, bool from_universal_pool, int func_id, i
 }
 
 int get_object_id_MPI_Request(MPI_Request *req) {
+
     RequestHash *entry = request_hash_entry(req);
+
     if(!entry)
         return create_request_id(req, true, 0, 0, 0, 0);
 

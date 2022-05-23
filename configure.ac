@@ -110,12 +110,20 @@ AC_ARG_WITH(zfp,
 	with_zfp=)
 ZFP_DIR="$with_zfp"
 AC_SUBST([ZFP_DIR])
+AM_CONDITIONAL([WITH_ZFP],[test "$with_zfp" != ""])
+if test "${with_zfp}" != "" ; then
+    PAC_APPEND_FLAG([-DWITH_ZFP], [CFLAGS])
+fi
 
 AC_ARG_WITH(sz,
 	AS_HELP_STRING([--with-sz=DIR], [Specify the install location of SZ]),,
 	with_sz=)
 SZ_DIR="$with_sz"
 AC_SUBST([SZ_DIR])
+AM_CONDITIONAL([WITH_SZ],[test "$with_sz" != ""])
+if test "${with_sz}" != "" ; then
+    PAC_APPEND_FLAG([-DWITH_SZ], [CFLAGS])
+fi
 
 # --enable-debug
 AC_ARG_ENABLE([g],AS_HELP_STRING([--enable-g],[alias for --enable-debug]),,[enable_g=no])

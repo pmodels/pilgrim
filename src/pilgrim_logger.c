@@ -616,19 +616,22 @@ void logger_exit() {
         write_cfg_timings(&(__logger.durations_grammar), &(__logger.intervals_grammar), __logger.rank, __logger.nprocs, total_calls);
     if(strcmp(__logger.timing_mode, TIMING_MODE_TEXT) == 0)
         write_text_timings(__logger.hash_head, __logger.rank);
-    /*
     if(strcmp(__logger.timing_mode, TIMING_MODE_LOSSLESS) == 0)
         write_lossless_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
+    #ifdef WITH_ZFP
     if(strcmp(__logger.timing_mode, TIMING_MODE_ZFP) == 0)
         write_zfp_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals);
+    #endif
+    #ifdef WITH_SZ
     if(strcmp(__logger.timing_mode, TIMING_MODE_SZ) == 0)
         write_sz_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals);
+    #endif
     if(strcmp(__logger.timing_mode, TIMING_MODE_HIST) == 0)
         write_hist_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
     if(strcmp(__logger.timing_mode, TIMING_MODE_ZSTD) == 0)
         write_zstd_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
-    */
 
+    /*
     if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) != 0 &&
        strcmp(__logger.timing_mode, TIMING_MODE_AGGREGATED) != 0) {
         //write_zstd_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
@@ -642,6 +645,7 @@ void logger_exit() {
         write_hist_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
         write_vitter_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
     }
+    */
 
     // 4. Clean up all resources
     cleanup_cst(__logger.hash_head);

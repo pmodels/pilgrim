@@ -106,13 +106,13 @@ dnl ----------------------------------------------------------------------------
 PAC_ARG_STRICT
 
 AC_ARG_WITH(zfp,
-	AS_HELP_STRING([--with-zfp=DIR], [Specify the install location of ZFP.]),,
+	AS_HELP_STRING([--with-zfp=DIR], [Specify the install location of ZFP]),,
 	with_zfp=)
 ZFP_DIR="$with_zfp"
 AC_SUBST([ZFP_DIR])
 
 AC_ARG_WITH(sz,
-	AS_HELP_STRING([--with-sz=DIR], [Specify the install location of SZ.]),,
+	AS_HELP_STRING([--with-sz=DIR], [Specify the install location of SZ]),,
 	with_sz=)
 SZ_DIR="$with_sz"
 AC_SUBST([SZ_DIR])
@@ -124,12 +124,12 @@ if test "${enable_debug}" != "no" ; then
     PAC_APPEND_FLAG([-g],[CFLAGS])
 fi
 
-AC_ARG_ENABLE([pointers], AS_HELP_STRING([--enable-pointers], [Enabel intercepting and storing pointers]),,[enable_pointers=no])
+AC_ARG_ENABLE([pointers], AS_HELP_STRING([--enable-pointers], [Enabel intercepting and storing pointers [default=no]]),,[enable_pointers=no])
 if test "${enable_pointers}" == "yes" ; then
     PAC_APPEND_FLAG([-DMEMORY_POINTERS], [CFLAGS])
 fi
 
-AC_ARG_ENABLE([cuda], AS_HELP_STRING([--enable-cuda], [Enabel intercepting cuda memory calls and storing device locations]),,[enable_cuda=no])
+AC_ARG_ENABLE([cuda], AS_HELP_STRING([--enable-cuda], [Enabel intercepting cuda memory calls and storing device locations [default=no]]),,[enable_cuda=no])
 if test "${enable_cuda}" == "yes" ; then
     PAC_APPEND_FLAG([-DCUDA_POINTERS], [CFLAGS])
     PAC_APPEND_FLAG([-lcuda -lcudart], [LDFLAGS])

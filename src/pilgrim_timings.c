@@ -8,9 +8,16 @@
 #include "pilgrim_timings.h"
 #include "uthash.h"
 
-#include "zfp.h"
+#ifdef WITH_SZ
 #include "sz.h"
+#endif
+
+#ifdef WITH_ZFP
+#include "zfp.h"
+#endif
+
 #include "zstd.h"
+
 #include "vitter.h"
 
 #define REL_ERR     (0.1)
@@ -272,6 +279,7 @@ void write_lossless_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* d
     }
 }
 
+#ifdef WITH_ZFP
 void write_zfp_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path, TimingNode *g_durations, TimingNode* g_intervals)  {
     TimingNode *elt, *tmp;
 
@@ -429,6 +437,7 @@ void write_zfp_clustering_timings(RecordHash* cst, int mpi_rank, double total_ca
 
     PMPI_Barrier(MPI_COMM_WORLD);
 }
+#endif
 
 double write_hist_timings_core(RecordHash* cst, int mpi_rank, char* dur_path, char* int_path, bool dur) {
 
@@ -630,6 +639,7 @@ void write_vitter_timings(RecordHash* cst, int mpi_rank, double total_calls, cha
 }
 
 
+#ifdef WITH_SZ
 void write_sz_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path, TimingNode *g_durations, TimingNode* g_intervals) {
 
     TimingNode *elt, *tmp2;
@@ -733,7 +743,7 @@ void write_sz_clustering_timings(RecordHash* cst, int mpi_rank, double total_cal
 
     PMPI_Barrier(MPI_COMM_WORLD);
 }
-
+#endif
 
 void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size,
                         char* dur_path, char* int_path,

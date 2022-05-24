@@ -35,7 +35,17 @@ To enable this feature and store parameters of CUDA memory pointers, use
 ./configure --enable-cuda
 ```
 
-(3) Specifying lossy timing compression library
+
+(3) Storing thread id of each call
+
+For multithreaded MPI programs, where MPI calls can be made from different threads, Pilgrim can preseve the thread id of each MPI call.
+To enable this feature, use
+```bash
+./configure --enable-tid
+```
+Pilgrim supports all thread levels defined by the MPI standard.
+
+(4) Specifying lossy timing compression library
 
 Pilgrim provides three modes to store the timing information.
 - Aggregated: Only store statistics of MPI functions, i.e., average duration and interval of each function.

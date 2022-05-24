@@ -143,6 +143,11 @@ if test "${enable_cuda}" == "yes" ; then
     PAC_APPEND_FLAG([-lcuda -lcudart], [LDFLAGS])
 fi
 
+AC_ARG_ENABLE([tid], AS_HELP_STRING([--enable-tid], [Storing the thread id of each call [default=no]]),,[enable_tid=no])
+if test "${enable_tid}" == "yes" ; then
+    PAC_APPEND_FLAG([-DENABLE_THREAD_ID], [CFLAGS])
+fi
+
 
 
 

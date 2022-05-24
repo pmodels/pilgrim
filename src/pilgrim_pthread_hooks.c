@@ -11,7 +11,6 @@
 #include "uthash.h"
 
 
-
 typedef struct thread_tid_entry {
     pthread_t thread;   // pthread_t as key
     int       tid;      // symbolic tid as value
@@ -34,9 +33,8 @@ void thread_tid_entry_destroy(pthread_t thread) {
 }
 */
 
-
 int pilgrim_pthread_add_get_tid() {
-
+#ifdef ENABLE_THREAD_ID
     thread_tid_entry_t *entry = NULL;
 
     pthread_rwlock_rdlock(&uthash_lock);
@@ -63,12 +61,20 @@ int pilgrim_pthread_add_get_tid() {
     pthread_rwlock_unlock(&uthash_lock);
 
     return entry->tid;
+#else
+    return 0;
+#endif
 }
 
 
 // ---------------------------
 // Start of hooks
 // ---------------------------
+//
+/* pthread hooks are not used for now.
+ * Currently, we simply map pthread_self() to a local symbolic
+ */
+/*
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void*), void *arg) {
     MAP_OR_FAIL(pthread_create);
     int res = PILGRIM_REAL_CALL(pthread_create)(thread, attr, start_routine, arg);
@@ -140,8 +146,7 @@ int pthread_mutex_trylock(pthread_mutex_t *mutex) {
     printf("intercepted pthread_mutex_trylock()\n");
     return PILGRIM_REAL_CALL(pthread_mutex_trylock)(mutex);
 }
-
-
+*/
 // ---------------------------
 // End of hooks
 // ---------------------------

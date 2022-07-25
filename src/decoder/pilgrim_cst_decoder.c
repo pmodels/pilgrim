@@ -22,7 +22,7 @@ CallSignature* read_cst(char *path, int *num_funcs) {
 
     short func_id;
     unsigned count;
-    int entries, key_len, terminal, rank, duration, interval;
+    int tid, entries, key_len, terminal, rank, duration, interval;
     fread(&entries, sizeof(int), 1, f);
     *num_funcs = entries;
 
@@ -36,7 +36,8 @@ CallSignature* read_cst(char *path, int *num_funcs) {
         fread(&count, sizeof(unsigned), 1, f);
 
         fread(&func_id, sizeof(short), 1, f);
-        fread(buff, 1, key_len-sizeof(short), f);
+        fread(&tid, sizeof(int), 1, f);
+        fread(buff, 1, key_len-sizeof(short)-sizeof(int), f);
         assert(func_id >= 0);
 
         assert(terminal < entries);

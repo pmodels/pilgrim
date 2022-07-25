@@ -11,6 +11,7 @@
 #include "pilgrim_logger.h"
 #include "pilgrim_utils.h"
 #include "pilgrim_mem_hooks.h"
+#include "pilgrim_pthread_hooks.h"
 #include "pilgrim_mpi_objects.h"
 
 
@@ -42,8 +43,9 @@
         .func_id = func_id,                                                             \
         .arg_count = record_arg_count,                                                  \
         .arg_sizes = record_arg_sizes,                                                  \
-        .comm_size = commsize,                                                         \
+        .comm_size = commsize,                                                          \
     };                                                                                  \
+    record.tid  = pilgrim_pthread_add_get_tid();                                        \
     record.args = pilgrim_malloc(sizeof(void*) * record_arg_count);                     \
     int i;                                                                              \
     for(i = 0; i < record_arg_count; i++) {                                             \

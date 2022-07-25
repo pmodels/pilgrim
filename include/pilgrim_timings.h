@@ -33,11 +33,15 @@ void handle_lossless_timing(RecordHash* entry, Record* record, double* duration,
 
 void write_lossless_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path);
 
+#ifdef WITH_ZFP
 void write_zfp_timings(RecordHash* cst, int mpi_rank, double total_size, char* dur_path, char* int_path, TimingNode* g_durations, TimingNode* g_intervals);
 void write_zfp_clustering_timings(RecordHash* cst, int mpi_rank, double total_size, char* dur_path, char* int_path);
+#endif
 
+#ifdef WITH_SZ
 void write_sz_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path, TimingNode* g_durations, TimingNode* g_intervals);
 void write_sz_clustering_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path);
+#endif
 
 void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path, TimingNode* g_durations);
 

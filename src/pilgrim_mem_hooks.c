@@ -41,6 +41,9 @@ pthread_mutex_t avl_lock = PTHREAD_MUTEX_INITIALIZER;
 
 // Three public available function in .h
 void install_mem_hooks() {
+    MAP_OR_FAIL(pthread_mutex_lock);
+    MAP_OR_FAIL(pthread_mutex_unlock);
+
     hook_installed = true;
     cpu_addr_tree = NULL;
     gpu_addr_tree = NULL;
@@ -95,7 +98,8 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
     mem_attr->type = attr.memoryType;
     mem_attr->device = attr.device;
 
-    pthread_mutex_lock(&avl_lock);
+    PILGRIM_REAL_CALL(pthread_mutex_lock)(&avl_lock);
+
     if(mem_attr->type == 0)      // unregistered memory, which is allocated using malloc()
         avl_node = avl_search(cpu_addr_tree, (intptr_t) buffer);
     else
@@ -136,21 +140,21 @@ void addr2id(const void* buffer, MemPtrAttr *mem_attr) {
     mem_attr->offset = ((intptr_t)buffer) - avl_node->addr;
     mem_attr->size = avl_node->size;
     if(!avl_node->heap) mem_attr->size = 0;   // use size = 0 to tell the post-processing that this is a stack var
-    pthread_mutex_unlock(&avl_lock);
+    PILGRIM_REAL_CALL(pthread_mutex_unlock)(&avl_lock);
 }
 
 // Thread safe insert/delete from addr tree
 void safe_insert_addr(AvlTree *addr_tree, void* ptr, size_t size) {
-    pthread_mutex_lock(&avl_lock);
+    PILGRIM_REAL_CALL(pthread_mutex_lock)(&avl_lock);
     num_malloc++;
     if(g_inside_mpi)
         num_malloc_by_mpi++;
     avl_insert(addr_tree, (intptr_t)ptr, size, true);
-    pthread_mutex_unlock(&avl_lock);
+    PILGRIM_REAL_CALL(pthread_mutex_unlock)(&avl_lock);
 }
 
 void safe_delete_addr(AvlTree *addr_tree, void* ptr) {
-    pthread_mutex_lock(&avl_lock);
+    PILGRIM_REAL_CALL(pthread_mutex_lock)(&avl_lock);
     AvlTree avl_node = avl_search(*addr_tree, (intptr_t)ptr);
     num_free++;
 
@@ -190,7 +194,7 @@ void safe_delete_addr(AvlTree *addr_tree, void* ptr) {
         if(heap)
             dlfree(ptr);
     }
-    pthread_mutex_unlock(&avl_lock);
+    PILGRIM_REAL_CALL(pthread_mutex_unlock)(&avl_lock);
 }
 
 
@@ -222,7 +226,7 @@ void* realloc(void *ptr, size_t size) {
 
     void *new_ptr = dlrealloc(ptr, size);
 
-    pthread_mutex_lock(&avl_lock);
+    PILGRIM_REAL_CALL(pthread_mutex_lock)(&avl_lock);
     if(new_ptr == ptr) {
         AvlTree t = avl_search(cpu_addr_tree, (intptr_t)ptr);
         if(t != AVL_EMPTY) {
@@ -232,7 +236,7 @@ void* realloc(void *ptr, size_t size) {
         avl_delete(&cpu_addr_tree, (intptr_t)ptr);
         avl_insert(&cpu_addr_tree, (intptr_t)new_ptr, size, true);
     }
-    pthread_mutex_unlock(&avl_lock);
+    PILGRIM_REAL_CALL(pthread_mutex_unlock)(&avl_lock);
 
     return new_ptr;
 }

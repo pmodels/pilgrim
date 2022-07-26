@@ -129,7 +129,7 @@ void dump_timings(void* buf, size_t buf_size, const char* filename) {
     int size = (int) buf_size;
     int offset;
     // A prefix sum to decide the offset of my write
-    PMPI_Scan(&size, &offset, sizeof(size), MPI_BYTE, MPI_SUM, MPI_COMM_WORLD);
+    PMPI_Scan(&size, &offset, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
     MPI_File file;
     PMPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_WRONLY|MPI_MODE_CREATE, MPI_INFO_NULL, &file);
@@ -319,7 +319,7 @@ void write_lossless_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* d
 
 
 
-void report(size_t local_dur_bytes, size_t local_int_bytes, double total_calls, double time) {
+void report(size_t local_dur_bytes, size_t local_int_bytes, double total_calls, double time, const char* algo_str) {
 
     double dur_kb = 0, int_kb = 0;
     double local_kb;
@@ -328,14 +328,15 @@ void report(size_t local_dur_bytes, size_t local_int_bytes, double total_calls, 
     PMPI_Reduce(&local_kb, &dur_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
     local_kb = local_int_bytes/ 1024.0;
-    PMPI_Reduce(&local_kb, &dur_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    PMPI_Reduce(&local_kb, &int_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
     int mpi_rank;
     PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     if(mpi_rank == 0) {
-        printf("HIST duration compression ratio: %f, interval compression ratio: %f, throughput: %f (%f seconds) %f\n",
+        printf("%s Duration CR: %6f, Interval CR: %6f, Throughput: %6fMB/s, Total calls: %6f\n",
+                algo_str,
                 total_calls*1e6/dur_kb/1024.0*sizeof(double), total_calls*1e6/int_kb/1024.0*sizeof(double),
-                total_calls*1e6/1024.0/1024.0/time*sizeof(double)*2, time, total_calls);
+                total_calls*1e6/1024.0/1024.0/time*sizeof(double)*2, total_calls);
     }
 }
 
@@ -470,8 +471,6 @@ void* write_hist_timings_core(RecordHash* cst, int mpi_rank, bool dur, size_t* c
     size_t zstd_buff_size = ZSTD_compressBound(uncompressed_bytes);
     void* zstd_buff = malloc(zstd_buff_size);
     *compressed_bytes = ZSTD_compress(zstd_buff, zstd_buff_size, buff, uncompressed_bytes, 1);
-
-    pilgrim_free(zstd_buff, zstd_buff_size);
     pilgrim_free(buff, buff_size);
 
     return zstd_buff;
@@ -497,7 +496,7 @@ void write_hist_timings(RecordHash* cst, int mpi_rank, double total_calls, char*
 
     double t2 = PMPI_Wtime();
 
-    report(dur_bytes, int_bytes, total_calls, t2-t1);
+    report(dur_bytes, int_bytes, total_calls, t2-t1, "HIST");
 
     free(dur_buf);
     free(int_buf);
@@ -613,7 +612,7 @@ void write_sz_timings(RecordHash* cst, int mpi_rank, double total_calls, char* d
 
     // Local function calls count
     int local_total = 0;
-    if(cluster) {
+    if(clustering) {
         HASH_ITER(hh, cst, entry, tmp) {
             int count = 0;
             LL_COUNT(entry->intervals, elt, count);
@@ -656,7 +655,7 @@ void write_sz_timings(RecordHash* cst, int mpi_rank, double total_calls, char* d
     dump_timings(int_buf, int_bytes, int_path);
 
     double t2 = PMPI_Wtime();
-    report(dur_bytes, int_bytes, total_calls, t2-t1);
+    report(dur_bytes, int_bytes, total_calls, t2-t1, clustering?"SZ-clustered":"SZ");
 
     free(dur_buf);
     free(int_buf);
@@ -664,14 +663,14 @@ void write_sz_timings(RecordHash* cst, int mpi_rank, double total_calls, char* d
 #endif
 
 #ifdef WITH_ZFP
-void* write_zfp_tiimngs_core(void* in, size_t count, size_t* outsize) {
+void* write_zfp_timings_core(void* in, size_t count, size_t* outsize) {
     zfp_type type = zfp_type_double;                                     // array scalar type
     zfp_field* field = zfp_field_1d(in, type, count);                    // array metadata
     zfp_stream* zfp = zfp_stream_open(NULL);                             // compressed stream and parameters
     zfp_stream_set_accuracy(zfp, ZFP_DUR_ABS_ERR);                       // set tolerance for fixed-accuracy mode, this is absolute error
     size_t bufsize = zfp_stream_maximum_size(zfp, field);                // capacity of compressed buffer (conservative)
     void* out = malloc(bufsize);                                         // storage for compressed stream
-    bitstream* stream = stream_open(buffer, bufsize);                    // bit stream to compress to
+    bitstream* stream = stream_open(out, bufsize);                       // bit stream to compress to
     zfp_stream_set_bit_stream(zfp, stream);                              // associate with compressed stream
     zfp_stream_rewind(zfp);                                              // rewind stream to beginning
     *outsize = zfp_compress(zfp, field);                                 // return value is byte size of compressed stream
@@ -708,7 +707,7 @@ void write_zfp_timings(RecordHash* cst, int mpi_rank, double total_calls, char* 
 
     // Local function calls count
     int local_total = 0;
-    if(cluster) {
+    if(clustering) {
         HASH_ITER(hh, cst, entry, tmp) {
             int count = 0;
             LL_COUNT(entry->intervals, elt, count);
@@ -751,7 +750,7 @@ void write_zfp_timings(RecordHash* cst, int mpi_rank, double total_calls, char* 
     dump_timings(int_buf, int_bytes, int_path);
 
     double t2 = PMPI_Wtime();
-    report(dur_bytes, int_bytes, total_calls, t2-t1);
+    report(dur_bytes, int_bytes, total_calls, t2-t1, clustering?"ZFP-clustered":"ZFP");
 
     free(dur_buf);
     free(int_buf);

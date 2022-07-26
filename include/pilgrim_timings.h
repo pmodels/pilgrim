@@ -40,24 +40,27 @@ void handle_aggregated_timing(RecordHash* entry, Record* record);
 void handle_cfg_timing(RecordHash* entry, Record* record, int* duration_id, int* interval_id);
 void handle_lossless_timing(RecordHash* entry, Record* record, double* duration, double* interval);
 
+
+void write_text_timings(RecordHash* cst, int mpi_rank);
+
 void write_lossless_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path);
-
-#ifdef WITH_ZFP
-void write_zfp_timings(RecordHash* cst, int mpi_rank, double total_size, char* dur_path, char* int_path, TimingNode* g_durations, TimingNode* g_intervals);
-void write_zfp_clustering_timings(RecordHash* cst, int mpi_rank, double total_size, char* dur_path, char* int_path);
-#endif
-
-#ifdef WITH_SZ
-void write_sz_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path, TimingNode* g_durations, TimingNode* g_intervals);
-void write_sz_clustering_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path);
-#endif
 
 void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path, TimingNode* g_durations);
 
 void write_hist_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path);
 
-void write_text_timings(RecordHash* cst, int mpi_rank);
 void write_cfg_timings(Grammar* duration_grammar, Grammar* interval_grammar, int mpi_rank, int mpi_size, double total_calls);
+
+#ifdef WITH_ZFP
+void write_zfp_timings(RecordHash* cst, int mpi_rank, double total_size, char* dur_path, char* int_path,
+                       TimingNode* g_durations, TimingNode* g_intervals, bool clustering);
+#endif
+
+#ifdef WITH_SZ
+void write_sz_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path,
+                      TimingNode* g_durations, TimingNode* g_intervals, bool clustering);
+#endif
+
 
 
 #endif

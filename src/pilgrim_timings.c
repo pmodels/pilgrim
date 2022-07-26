@@ -125,6 +125,18 @@ static inline int get_bin_id_int(int val) {
     return id;
 }
 
+void dump_timings(void* buf, size_t buf_size, const char* filename) {
+    int size = (int) buf_size;
+    int offset;
+    // A prefix sum to decide the offset of my write
+    PMPI_Scan(&size, &offset, sizeof(size), MPI_BYTE, MPI_SUM, MPI_COMM_WORLD);
+
+    MPI_File file;
+    PMPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_WRONLY|MPI_MODE_CREATE, MPI_INFO_NULL, &file);
+    PMPI_File_write_at_all(file, offset, buf, size, MPI_BYTE, MPI_STATUS_IGNORE);
+    PMPI_File_close(&file);
+}
+
 /*
  * By default, keep only aggregated timing inofrmation
  */
@@ -181,10 +193,9 @@ void handle_cfg_timing(RecordHash* entry, Record* record, int *duration_id, int*
 }
 
 
-
 /**
  * We can also store lossless timing
- * Later, we can use external compressor tool like fpzip to compress it
+ * Later, we can use external compressor tool like zstd to compress it
  */
 void handle_lossless_timing(RecordHash *entry, Record* record, double *duration, double *interval) {
     *duration = record->tend - record->tstart;        // in seconds
@@ -192,6 +203,7 @@ void handle_lossless_timing(RecordHash *entry, Record* record, double *duration,
 
     entry->tstart = record->tstart;
 }
+
 
 void write_to_file(char* duration_path, char* interval_path, double* durations, double* intervals, int total) {
     FILE* f;
@@ -305,233 +317,29 @@ void write_lossless_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* d
     }
 }
 
-#ifdef WITH_ZFP
-void write_zfp_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path, TimingNode *g_durations, TimingNode* g_intervals)  {
-    double t1 = PMPI_Wtime();
-    TimingNode *elt, *tmp;
-
-    int local_total = 0;
-    LL_COUNT(g_durations, elt, local_total);
-
-    double *local_durations = pilgrim_malloc(sizeof(double) * local_total);
-    double *local_intervals = pilgrim_malloc(sizeof(double) * local_total);
-
-    int i = 0;
-    LL_FOREACH_SAFE(g_durations, elt, tmp) {
-        local_durations[i++] = elt->val;
-    }
-    i = 0;
-    LL_FOREACH_SAFE(g_intervals, elt, tmp) {
-        local_intervals[i++] = elt->val;
-    }
-
-    // ---------------------
-    // 1. Durations
-    zfp_type type = zfp_type_double;                                     // array scalar type
-    zfp_field* field = zfp_field_1d(local_durations, type, local_total); // array metadata
-    zfp_stream* zfp = zfp_stream_open(NULL);                  // compressed stream and parameters
-    zfp_stream_set_accuracy(zfp, ZFP_DUR_ABS_ERR);            // set tolerance for fixed-accuracy mode, this is absolute error
-    size_t bufsize = zfp_stream_maximum_size(zfp, field);     // capacity of compressed buffer (conservative)
-    void* buffer = pilgrim_malloc(bufsize);                   // storage for compressed stream
-    bitstream* stream = stream_open(buffer, bufsize);         // bit stream to compress to
-    zfp_stream_set_bit_stream(zfp, stream);                   // associate with compressed stream
-    zfp_stream_rewind(zfp);                                   // rewind stream to beginning
-    size_t duration_outsize = zfp_compress(zfp, field);       // return value is byte size of compressed stream
-    zfp_stream_close(zfp);
-    stream_close(stream);
-    //pilgrim_free(buffer, bufsize);
-    // ---------------------
-
-    // decopmress durations
-    /*
-    double* decompressed = pilgrim_malloc(sizeof(double)*local_total);
-    field = zfp_field_1d(decompressed, type, local_total);
-    zfp = zfp_stream_open(NULL);
-    zfp_stream_set_accuracy(zfp, ZFP_DUR_ABS_ERR);
-    stream = stream_open(buffer, duration_outsize);
-    zfp_stream_set_bit_stream(zfp, stream);
-    zfp_stream_rewind(zfp);
-    if(!zfp_decompress(zfp, field))
-        printf("zfp decompress error\n");
-    else
-        report_psnr(local_durations, decompressed, local_total);
-    zfp_stream_close(zfp);
-    stream_close(stream);
-    pilgrim_free(decompressed, sizeof(double)*local_total);
-    */
-    pilgrim_free(buffer, bufsize);
 
 
+void report(size_t local_dur_bytes, size_t local_int_bytes, double total_calls, double time) {
 
-    // ---------------------
-    // 2. Intervals
-    field = zfp_field_1d(local_intervals, type, local_total); // array metadata
-    zfp = zfp_stream_open(NULL);                              // compressed stream and parameters
-    zfp_stream_set_accuracy(zfp, ZFP_INT_ABS_ERR);            // set tolerance for fixed-accuracy mode, this is absolute error
-    bufsize = zfp_stream_maximum_size(zfp, field);            // capacity of compressed buffer (conservative)
-    buffer = pilgrim_malloc(bufsize);                         // storage for compressed stream
-    stream = stream_open(buffer, bufsize);                    // bit stream to compress to
-    zfp_stream_set_bit_stream(zfp, stream);                   // associate with compressed stream
-    zfp_stream_rewind(zfp);                                   // rewind stream to beginning
-    size_t interval_outsize = zfp_compress(zfp, field);       // return value is byte size of compressed stream
-    zfp_stream_close(zfp);
-    stream_close(stream);
-    //pilgrim_free(buffer, bufsize);
-    // ---------------------
+    double dur_kb = 0, int_kb = 0;
+    double local_kb;
 
-    // decopmress intervals
-    /*
-    decompressed = pilgrim_malloc(sizeof(double)*local_total);
-    field = zfp_field_1d(decompressed, type, local_total);
-    zfp = zfp_stream_open(NULL);
-    zfp_stream_set_accuracy(zfp, ZFP_INT_ABS_ERR);
-    stream = stream_open(buffer, duration_outsize);
-    zfp_stream_set_bit_stream(zfp, stream);
-    zfp_stream_rewind(zfp);
-    if(!zfp_decompress(zfp, field))
-        printf("zfp decompress error\n");
-    else
-        report_psnr(local_intervals, decompressed, local_total);
-    zfp_stream_close(zfp);
-    stream_close(stream);
-    pilgrim_free(decompressed, sizeof(double)*local_total);
-    */
-    pilgrim_free(buffer, bufsize);
+    local_kb = local_dur_bytes/ 1024.0;
+    PMPI_Reduce(&local_kb, &dur_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
+    local_kb = local_int_bytes/ 1024.0;
+    PMPI_Reduce(&local_kb, &dur_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-
-    pilgrim_free(local_durations, sizeof(double)*local_total);
-    pilgrim_free(local_intervals, sizeof(double)*local_total);
-
-    double local_dur_kb = duration_outsize / 1024.0;
-    double local_int_kb = interval_outsize / 1024.0;
-    double total_dur_kb , total_int_kb;
-    PMPI_Reduce(&local_dur_kb, &total_dur_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    PMPI_Reduce(&local_int_kb, &total_int_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    double t2 = PMPI_Wtime();
+    int mpi_rank;
+    PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     if(mpi_rank == 0) {
-        printf("ZFP duration compression ratio: %f, interval compression ratio: %f, throughput: %f (%f seconds)\n",
-                total_calls*1e6/total_dur_kb/1024.0*sizeof(double), total_calls*1e6/total_int_kb/1024.0*sizeof(double),
-                total_calls*1e6/1024.0/1024.0/(t2-t1)*sizeof(double)*2, (t2-t1) );
+        printf("HIST duration compression ratio: %f, interval compression ratio: %f, throughput: %f (%f seconds) %f\n",
+                total_calls*1e6/dur_kb/1024.0*sizeof(double), total_calls*1e6/int_kb/1024.0*sizeof(double),
+                total_calls*1e6/1024.0/1024.0/time*sizeof(double)*2, time, total_calls);
     }
-
-    PMPI_Barrier(MPI_COMM_WORLD);
 }
 
-void write_zfp_clustering_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path)  {
-    double t1 = PMPI_Wtime();
-
-    RecordHash *entry, *tmp;
-    TimingNode *elt, *tmp2;
-
-    int local_total = 0;
-    HASH_ITER(hh, cst, entry, tmp) {
-        int count = 0;
-        LL_COUNT(entry->intervals, elt, count);
-        local_total += count;
-    }
-
-    double *local_durations = pilgrim_malloc(sizeof(double) * local_total);
-    double *local_intervals = pilgrim_malloc(sizeof(double) * local_total);
-    int i = 0, j = 0;
-
-    HASH_ITER(hh, cst, entry, tmp) {
-        LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
-            local_durations[i++] = elt->val;
-        }
-        LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
-            local_intervals[j++] = elt->val;
-        }
-    }
-
-    // 1. Durations
-    zfp_type type = zfp_type_double;                                     // array scalar type
-    zfp_field* field = zfp_field_1d(local_durations, type, local_total); // array metadata
-    zfp_stream* zfp = zfp_stream_open(NULL);                  // compressed stream and parameters
-    zfp_stream_set_accuracy(zfp, ZFP_DUR_ABS_ERR);            // set tolerance for fixed-accuracy mode, this is absolute error
-    size_t bufsize = zfp_stream_maximum_size(zfp, field);     // capacity of compressed buffer (conservative)
-    void* buffer = pilgrim_malloc(bufsize);                   // storage for compressed stream
-    bitstream* stream = stream_open(buffer, bufsize);         // bit stream to compress to
-    zfp_stream_set_bit_stream(zfp, stream);                   // associate with compressed stream
-    zfp_stream_rewind(zfp);                                   // rewind stream to beginning
-    size_t duration_outsize = zfp_compress(zfp, field);       // return value is byte size of compressed stream
-    zfp_stream_close(zfp);
-    stream_close(stream);
-    //pilgrim_free(buffer, bufsize);
-
-    // decopmress durations
-    /*
-    double* decompressed = pilgrim_malloc(sizeof(double)*local_total);
-    field = zfp_field_1d(decompressed, type, local_total);
-    zfp = zfp_stream_open(NULL);
-    zfp_stream_set_accuracy(zfp, ZFP_DUR_ABS_ERR);
-    stream = stream_open(buffer, duration_outsize);
-    zfp_stream_set_bit_stream(zfp, stream);
-    zfp_stream_rewind(zfp);
-    if(!zfp_decompress(zfp, field))
-        printf("zfp decompress error\n");
-    else
-        report_psnr(local_durations, decompressed, local_total);
-    zfp_stream_close(zfp);
-    stream_close(stream);
-    pilgrim_free(decompressed, sizeof(double)*local_total);
-    */
-    pilgrim_free(buffer, bufsize);
-
-    // 2. Intervals
-    field = zfp_field_1d(local_intervals, type, local_total); // array metadata
-    zfp = zfp_stream_open(NULL);                              // compressed stream and parameters
-    zfp_stream_set_accuracy(zfp, ZFP_INT_ABS_ERR);            // set tolerance for fixed-accuracy mode, this is absolute error
-    bufsize = zfp_stream_maximum_size(zfp, field);            // capacity of compressed buffer (conservative)
-    buffer = pilgrim_malloc(bufsize);                         // storage for compressed stream
-    stream = stream_open(buffer, bufsize);                    // bit stream to compress to
-    zfp_stream_set_bit_stream(zfp, stream);                   // associate with compressed stream
-    zfp_stream_rewind(zfp);                                   // rewind stream to beginning
-    size_t interval_outsize = zfp_compress(zfp, field);       // return value is byte size of compressed stream
-    zfp_stream_close(zfp);
-    stream_close(stream);
-    //pilgrim_free(buffer, bufsize);
-
-    // decopmress intervals
-    /*
-    decompressed = pilgrim_malloc(sizeof(double)*local_total);
-    field = zfp_field_1d(decompressed, type, local_total);
-    zfp = zfp_stream_open(NULL);
-    zfp_stream_set_accuracy(zfp, ZFP_INT_ABS_ERR);
-    stream = stream_open(buffer, duration_outsize);
-    zfp_stream_set_bit_stream(zfp, stream);
-    zfp_stream_rewind(zfp);
-    if(!zfp_decompress(zfp, field))
-        printf("zfp decompress error\n");
-    else
-        report_psnr(local_intervals, decompressed, local_total);
-    zfp_stream_close(zfp);
-    stream_close(stream);
-    pilgrim_free(decompressed, sizeof(double)*local_total);
-    */
-    pilgrim_free(buffer, bufsize);
-
-
-    pilgrim_free(local_durations, sizeof(double)*local_total);
-    pilgrim_free(local_intervals, sizeof(double)*local_total);
-
-    double local_dur_kb = duration_outsize / 1024.0;
-    double local_int_kb = interval_outsize / 1024.0;
-    double total_dur_kb , total_int_kb;
-    PMPI_Reduce(&local_dur_kb, &total_dur_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    PMPI_Reduce(&local_int_kb, &total_int_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    double t2 = PMPI_Wtime();
-    if(mpi_rank == 0) {
-        printf("ZFP clustering duration compression ratio: %f, interval compression ratio: %f, throughput: %f (%f seconds)\n",
-                total_calls*1e6/total_dur_kb/1024*sizeof(double), total_calls*1e6/total_int_kb/1024*sizeof(double),
-                total_calls*1e6/1024.0/1024.0/(t2-t1)*sizeof(double)*2, (t2-t1));
-    }
-
-    PMPI_Barrier(MPI_COMM_WORLD);
-}
-#endif
-
-double write_hist_timings_core(RecordHash* cst, int mpi_rank, char* dur_path, char* int_path, bool dur) {
+void* write_hist_timings_core(RecordHash* cst, int mpi_rank, bool dur, size_t* compressed_bytes) {
 
     RecordHash *entry, *tmp;
     TimingNode *elt, *tmp2;
@@ -660,186 +468,40 @@ double write_hist_timings_core(RecordHash* cst, int mpi_rank, char* dur_path, ch
 
     size_t uncompressed_bytes = buff_idx * sizeof(uint16_t);
     size_t zstd_buff_size = ZSTD_compressBound(uncompressed_bytes);
-    void* zstd_buff = pilgrim_malloc(zstd_buff_size);
-    size_t compressed_bytes = ZSTD_compress(zstd_buff, zstd_buff_size, buff, uncompressed_bytes, 1);
+    void* zstd_buff = malloc(zstd_buff_size);
+    *compressed_bytes = ZSTD_compress(zstd_buff, zstd_buff_size, buff, uncompressed_bytes, 1);
 
     pilgrim_free(zstd_buff, zstd_buff_size);
     pilgrim_free(buff, buff_size);
 
-    double local_kb = compressed_bytes / 1024.0;
-    double total_kb = 0;
-    PMPI_Reduce(&local_kb, &total_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    return total_kb;
+    return zstd_buff;
 }
 
 void write_hist_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path) {
     double t1 = PMPI_Wtime();
-    double total_dur_kb = write_hist_timings_core(cst, mpi_rank, dur_path, int_path, true);
-    double total_int_kb = write_hist_timings_core(cst, mpi_rank, dur_path, int_path, false);
+
+    size_t buf_size, dur_bytes, int_bytes;
+    void   *dur_buf, *int_buf;
+    double local_kb;
+    double dur_kb = 0, int_kb = 0;
+
+    // compress durations
+    dur_buf = write_hist_timings_core(cst, mpi_rank, true, &dur_bytes);
+
+    // compress intervals
+    int_buf = write_hist_timings_core(cst, mpi_rank, false, &int_bytes);
+
+    // write to files
+    dump_timings(dur_buf, dur_bytes, dur_path);
+    dump_timings(int_buf, int_bytes, int_path);
+
     double t2 = PMPI_Wtime();
-    if(mpi_rank == 0) {
-        printf("HIST duration compression ratio: %f, interval compression ratio: %f, throughput: %f (%f seconds) %f\n",
-                total_calls*1e6/total_dur_kb/1024.0*sizeof(double), total_calls*1e6/total_int_kb/1024.0*sizeof(double),
-                total_calls*1e6/1024.0/1024.0/(t2-t1)*sizeof(double)*2, (t2-t1), total_calls);
-    }
-}
 
-#ifdef WITH_SZ
-void write_sz_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path, TimingNode *g_durations, TimingNode* g_intervals) {
-    double t1 = PMPI_Wtime();
+    report(dur_bytes, int_bytes, total_calls, t2-t1);
 
-    TimingNode *elt, *tmp2;
+    free(dur_buf);
+    free(int_buf);
 
-    int local_total = 0;
-    LL_COUNT(g_durations, elt, local_total);
-
-    double *local_durations = pilgrim_malloc(sizeof(double) * local_total);
-    double *local_intervals = pilgrim_malloc(sizeof(double) * local_total);
-
-    int i = 0;
-    LL_FOREACH_SAFE(g_durations, elt, tmp2) {
-        local_durations[i++] = elt->val;
-    }
-    i = 0;
-    LL_FOREACH_SAFE(g_intervals, elt, tmp2) {
-        local_intervals[i++] = elt->val;
-    }
-
-    size_t duration_outsize, interval_outsize;
-    void *raw_c, *raw_d;
-    double *decompressed;
-
-    SZ_Init(NULL);
-    raw_c = SZ_compress_args(SZ_DOUBLE, local_durations, &duration_outsize, PW_REL, 0, 0, REL_ERR, 0, 0, 0, 0, local_total);
-    //raw_d = SZ_decompress(SZ_DOUBLE, raw_c, duration_outsize, 0, 0, 0, 0, local_total);
-    //report_psnr(local_durations, (double*)raw_d, local_total);
-    free(raw_c);
-    //free(raw_d);
-    SZ_Finalize();
-
-    SZ_Init(NULL);
-    raw_c = SZ_compress_args(SZ_DOUBLE, local_intervals, &interval_outsize, PW_REL, 0, 0, REL_ERR, 0, 0, 0, 0, local_total);
-    //raw_d = SZ_decompress(SZ_DOUBLE, raw_c, interval_outsize, 0, 0, 0, 0, local_total);
-    //report_psnr(local_intervals, (double*)raw_d, local_total);
-    free(raw_c);
-    //free(raw_d);
-    SZ_Finalize();
-
-    pilgrim_free(local_durations, sizeof(double)*local_total);
-    pilgrim_free(local_intervals, sizeof(double)*local_total);
-
-    double local_dur_kb = duration_outsize / 1024.0;
-    double local_int_kb = interval_outsize / 1024.0;
-
-
-    double total_dur_kb , total_int_kb;
-    PMPI_Reduce(&local_dur_kb, &total_dur_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    PMPI_Reduce(&local_int_kb, &total_int_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    double t2 = PMPI_Wtime();
-    if(mpi_rank == 0) {
-        printf("SZ duration compression ratio: %f, interval compression ratio: %f, throughput: %f (%f seconds)\n",
-                total_calls*1e6/total_dur_kb/1024.0*sizeof(double), total_calls*1e6/total_int_kb/1024.0*sizeof(double),
-                total_calls*1e6/1024.0/1024.0/(t2-t1)*sizeof(double)*2, (t2-t1));
-    }
-
-    PMPI_Barrier(MPI_COMM_WORLD);
-}
-
-void write_sz_clustering_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path) {
-
-    double t1 = PMPI_Wtime();
-
-    RecordHash *entry, *tmp;
-    TimingNode *elt, *tmp2;
-
-    int local_total = 0;
-    HASH_ITER(hh, cst, entry, tmp) {
-        int count = 0;
-        LL_COUNT(entry->intervals, elt, count);
-        local_total += count;
-    }
-
-    double* local_durations = pilgrim_malloc(sizeof(double) * local_total);
-    double* local_intervals = pilgrim_malloc(sizeof(double) * local_total);
-    int i = 0, j = 0;
-
-    HASH_ITER(hh, cst, entry, tmp) {
-        LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
-            local_durations[i++] = elt->val;
-        }
-        LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
-            local_intervals[j++] = elt->val;
-        }
-    }
-
-    size_t duration_outsize, interval_outsize;
-    void *raw_c, *raw_d;
-
-    SZ_Init(NULL);
-    raw_c = SZ_compress_args(SZ_DOUBLE, local_durations, &duration_outsize, PW_REL, 0, 0, REL_ERR, 0, 0, 0, 0, local_total);
-    //raw_d = SZ_decompress(SZ_DOUBLE, raw_c, duration_outsize, 0, 0, 0, 0, local_total);
-    //report_psnr(local_durations, (double*)raw_d, local_total);
-    free(raw_c);
-    //free(raw_d);
-    SZ_Finalize();
-
-    SZ_Init(NULL);
-    raw_c = SZ_compress_args(SZ_DOUBLE, local_intervals, &interval_outsize, PW_REL, 0, 0, REL_ERR, 0, 0, 0, 0, local_total);
-    //raw_d = SZ_decompress(SZ_DOUBLE, raw_c, interval_outsize, 0, 0, 0, 0, local_total);
-    //report_psnr(local_intervals, (double*)raw_d, local_total);
-    free(raw_c);
-    //free(raw_d);
-    SZ_Finalize();
-
-    pilgrim_free(local_durations, sizeof(int)*local_total);
-    pilgrim_free(local_intervals, sizeof(int)*local_total);
-
-    double local_dur_kb = duration_outsize / 1024.0;
-    double local_int_kb = interval_outsize / 1024.0;
-    double total_dur_kb , total_int_kb;
-    PMPI_Reduce(&local_dur_kb, &total_dur_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    PMPI_Reduce(&local_int_kb, &total_int_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    double t2 = PMPI_Wtime();
-    if(mpi_rank == 0) {
-        printf("SZ clustering duration compression ratio: %f, interval compression ratio: %f, throughput: %f (%f seconds)\n",
-                total_calls*1e6/total_dur_kb/1024.0*sizeof(double), total_calls*1e6/total_int_kb/1024.0*sizeof(double),
-                total_calls*1e6/1024.0/1024.0/(t2-t1)*sizeof(double)*2, (t2-t1));
-    }
-
-    PMPI_Barrier(MPI_COMM_WORLD);
-}
-#endif
-
-void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size,
-                        char* dur_path, char* int_path,
-                        TimingNode *g_durations) {
-
-    RecordHash *entry, *tmp;
-    TimingNode *elt, *tmp2;
-
-    int local_total = 0;
-    LL_COUNT(g_durations, elt, local_total);
-
-    double *local_durations = pilgrim_malloc(sizeof(double) * local_total);
-    double *local_intervals = pilgrim_malloc(sizeof(double) * local_total);
-
-    int i = 0;
-    LL_FOREACH_SAFE(g_durations, elt, tmp2) {
-        local_durations[i++] = elt->val;
-    }
-
-    size_t buff_size = ZSTD_compressBound(local_total*sizeof(double));
-    void* buff = pilgrim_malloc(buff_size);
-
-    size_t compressed_bytes = ZSTD_compress(buff, buff_size, local_durations, local_total*sizeof(double), 1);
-
-    pilgrim_free(buff, buff_size);
-
-    pilgrim_free(local_durations, sizeof(double)*local_total);
-    pilgrim_free(local_intervals, sizeof(double)*local_total);
-
-    PMPI_Barrier(MPI_COMM_WORLD);
-    printf("ZSTD compression ratio: %f\n", (1.0*local_total/compressed_bytes*sizeof(double)));
 }
 
 void write_cfg_timings(Grammar* duration_grammar, Grammar* interval_grammar, int mpi_rank, int mpi_size, double total_calls) {
@@ -928,3 +590,203 @@ void write_cfg_timings(Grammar* duration_grammar, Grammar* interval_grammar, int
     sequitur_cleanup(duration_grammar);
     sequitur_cleanup(interval_grammar);
 }
+
+#ifdef WITH_SZ
+void* write_sz_timings_core(void* buf, size_t count, size_t* compressed_bytes) {
+    SZ_Init(NULL);
+    void* raw_c = SZ_compress_args(SZ_DOUBLE, buf, compressed_bytes, PW_REL, 0, 0, REL_ERR, 0, 0, 0, 0, count);
+    //raw_d = SZ_decompress(SZ_DOUBLE, raw_c, duration_outsize, 0, 0, 0, 0, local_total);
+    //report_psnr(local_durations, (double*)raw_d, local_total);
+    //free(raw_c);
+    //free(raw_d);
+    SZ_Finalize();
+    return raw_c;
+}
+
+void write_sz_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path,
+                      TimingNode *g_durations, TimingNode* g_intervals, bool clustering) {
+
+    double t1 = PMPI_Wtime();
+
+    RecordHash *entry, *tmp;
+    TimingNode *elt, *tmp2;
+
+    // Local function calls count
+    int local_total = 0;
+    if(cluster) {
+        HASH_ITER(hh, cst, entry, tmp) {
+            int count = 0;
+            LL_COUNT(entry->intervals, elt, count);
+            local_total += count;
+        }
+    } else {
+        LL_COUNT(g_durations, elt, local_total);
+    }
+
+    double *local_durations = pilgrim_malloc(sizeof(double) * local_total);
+    double *local_intervals = pilgrim_malloc(sizeof(double) * local_total);
+
+    // Combine all timestamps to form a 1D array
+    int i = 0, j = 0;
+    if(clustering) {
+        HASH_ITER(hh, cst, entry, tmp) {
+            LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
+                local_durations[i++] = elt->val;
+            }
+            LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
+                local_intervals[j++] = elt->val;
+            }
+        }
+    } else {
+        LL_FOREACH_SAFE(g_durations, elt, tmp2) {
+            local_durations[i++] = elt->val;
+        }
+        LL_FOREACH_SAFE(g_intervals, elt, tmp2) {
+            local_intervals[j++] = elt->val;
+        }
+    }
+
+    size_t dur_bytes, int_bytes;
+    void* dur_buf = write_sz_timings_core(local_durations, local_total, &dur_bytes);
+    void* int_buf = write_sz_timings_core(local_intervals, local_total, &int_bytes);
+    pilgrim_free(local_durations, sizeof(double)*local_total);
+    pilgrim_free(local_intervals, sizeof(double)*local_total);
+
+    dump_timings(dur_buf, dur_bytes, dur_path);
+    dump_timings(int_buf, int_bytes, int_path);
+
+    double t2 = PMPI_Wtime();
+    report(dur_bytes, int_bytes, total_calls, t2-t1);
+
+    free(dur_buf);
+    free(int_buf);
+}
+#endif
+
+#ifdef WITH_ZFP
+void* write_zfp_tiimngs_core(void* in, size_t count, size_t* outsize) {
+    zfp_type type = zfp_type_double;                                     // array scalar type
+    zfp_field* field = zfp_field_1d(in, type, count);                    // array metadata
+    zfp_stream* zfp = zfp_stream_open(NULL);                             // compressed stream and parameters
+    zfp_stream_set_accuracy(zfp, ZFP_DUR_ABS_ERR);                       // set tolerance for fixed-accuracy mode, this is absolute error
+    size_t bufsize = zfp_stream_maximum_size(zfp, field);                // capacity of compressed buffer (conservative)
+    void* out = malloc(bufsize);                                         // storage for compressed stream
+    bitstream* stream = stream_open(buffer, bufsize);                    // bit stream to compress to
+    zfp_stream_set_bit_stream(zfp, stream);                              // associate with compressed stream
+    zfp_stream_rewind(zfp);                                              // rewind stream to beginning
+    *outsize = zfp_compress(zfp, field);                                 // return value is byte size of compressed stream
+    zfp_stream_close(zfp);
+    stream_close(stream);
+
+    return out;
+
+    /*
+    double* decompressed = pilgrim_malloc(sizeof(double)*local_total);
+    field = zfp_field_1d(decompressed, type, local_total);
+    zfp = zfp_stream_open(NULL);
+    zfp_stream_set_accuracy(zfp, ZFP_DUR_ABS_ERR);
+    stream = stream_open(buffer, duration_outsize);
+    zfp_stream_set_bit_stream(zfp, stream);
+    zfp_stream_rewind(zfp);
+    if(!zfp_decompress(zfp, field))
+        printf("zfp decompress error\n");
+    else
+        report_psnr(local_durations, decompressed, local_total);
+    zfp_stream_close(zfp);
+    stream_close(stream);
+    pilgrim_free(decompressed, sizeof(double)*local_total);
+    */
+}
+
+void write_zfp_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path,
+                       TimingNode *g_durations, TimingNode* g_intervals, bool clustering) {
+    double t1 = PMPI_Wtime();
+
+    // Identical pre-process code as in SZ
+    RecordHash *entry, *tmp;
+    TimingNode *elt, *tmp2;
+
+    // Local function calls count
+    int local_total = 0;
+    if(cluster) {
+        HASH_ITER(hh, cst, entry, tmp) {
+            int count = 0;
+            LL_COUNT(entry->intervals, elt, count);
+            local_total += count;
+        }
+    } else {
+        LL_COUNT(g_durations, elt, local_total);
+    }
+
+    double *local_durations = pilgrim_malloc(sizeof(double) * local_total);
+    double *local_intervals = pilgrim_malloc(sizeof(double) * local_total);
+
+    // Combine all timestamps to form a 1D array
+    int i = 0, j = 0;
+    if(clustering) {
+        HASH_ITER(hh, cst, entry, tmp) {
+            LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
+                local_durations[i++] = elt->val;
+            }
+            LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
+                local_intervals[j++] = elt->val;
+            }
+        }
+    } else {
+        LL_FOREACH_SAFE(g_durations, elt, tmp2) {
+            local_durations[i++] = elt->val;
+        }
+        LL_FOREACH_SAFE(g_intervals, elt, tmp2) {
+            local_intervals[j++] = elt->val;
+        }
+    }
+
+    size_t dur_bytes, int_bytes;
+    void* dur_buf = write_zfp_timings_core(local_durations, local_total, &dur_bytes);
+    void* int_buf = write_zfp_timings_core(local_intervals, local_total, &int_bytes);
+    pilgrim_free(local_durations, sizeof(double)*local_total);
+    pilgrim_free(local_intervals, sizeof(double)*local_total);
+
+    dump_timings(dur_buf, dur_bytes, dur_path);
+    dump_timings(int_buf, int_bytes, int_path);
+
+    double t2 = PMPI_Wtime();
+    report(dur_bytes, int_bytes, total_calls, t2-t1);
+
+    free(dur_buf);
+    free(int_buf);
+}
+#endif
+
+void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size,
+                        char* dur_path, char* int_path,
+                        TimingNode *g_durations) {
+
+    RecordHash *entry, *tmp;
+    TimingNode *elt, *tmp2;
+
+    int local_total = 0;
+    LL_COUNT(g_durations, elt, local_total);
+
+    double *local_durations = pilgrim_malloc(sizeof(double) * local_total);
+    double *local_intervals = pilgrim_malloc(sizeof(double) * local_total);
+
+    int i = 0;
+    LL_FOREACH_SAFE(g_durations, elt, tmp2) {
+        local_durations[i++] = elt->val;
+    }
+
+    size_t buff_size = ZSTD_compressBound(local_total*sizeof(double));
+    void* buff = pilgrim_malloc(buff_size);
+
+    size_t compressed_bytes = ZSTD_compress(buff, buff_size, local_durations, local_total*sizeof(double), 1);
+
+    pilgrim_free(buff, buff_size);
+
+    pilgrim_free(local_durations, sizeof(double)*local_total);
+    pilgrim_free(local_intervals, sizeof(double)*local_total);
+
+    PMPI_Barrier(MPI_COMM_WORLD);
+    printf("ZSTD compression ratio: %f\n", (1.0*local_total/compressed_bytes*sizeof(double)));
+}
+

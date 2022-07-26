@@ -334,7 +334,7 @@ void print_cst(RecordHash *cst) {
         count[func_id] += entry->count;
 
         int args[8];
-        int arg_start = sizeof(short);
+        int arg_start = sizeof(short) + sizeof(int); // func_id and tid
 
         /*
         if(func_id == ID_MPI_Sendrecv) {
@@ -347,19 +347,26 @@ void print_cst(RecordHash *cst) {
 
         }
         if(func_id == ID_MPI_Send) {
-            memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*4);
-            printf("[pilgrim] MPI_Send, count: %d, datatype: %d, dest: %d, tag: %d\n",
-                    args[0], args[1], args[2], args[3]);
+            memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*5);
+            printf("[pilgrim] MPI_Send, count: %d, datatype: %d, dest: %d, tag: %d, comm: %d\n",
+                    args[0], args[1], args[2], args[3], args[4]);
         }
-        if(func_id == ID_MPI_Irecv) {
+        */
+        if(func_id == ID_MPI_Recv) {
             memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*4);
-            printf("[pilgrim] MPI_Irecv, count: %d, datatype: %d, source: %d, tag: %d\n",
-                    args[0], args[1], args[2], args[3]);
+            printf("[pilgrim] MPI_Recv my rank: %d, count: %d, datatype: %d, source: %d, tag: %d, comm: %d\n",
+                    __logger.rank, args[0], args[1], args[2], args[3], args[4]);
+        }
+        /*
+        if(func_id == ID_MPI_Irecv) {
+            memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*5);
+            printf("[pilgrim] MPI_Irecv my rank: %d, count: %d, datatype: %d, source: %d, tag: %d\n",
+                    __logger.rank, args[0], args[1], args[2], args[3]);
         }
         if(func_id == ID_MPI_Isend) {
-            memcpy(args, entry->key+arg_start, sizeof(args));
-            printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d, req: %d\n",
-                    args[0], args[1], args[2], args[3], args[4], args[7]);
+            memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(args));
+            printf("[pilgrim] MPI_Isend, count: %d, datatype: %d, dest: %d, tag: %d, comm: %d, req: %d\n",
+                    args[0], args[1], args[2], args[3], args[4], args[5], args[5]);
         }
         if(func_id == ID_MPI_Comm_split) {
             memcpy(args, entry->key+arg_start, sizeof(int)*4);
@@ -384,6 +391,7 @@ void print_cst(RecordHash *cst) {
  *
  */
 int* dump_cst() {
+
     // 1. Inter-process copmression for CSTs
     // Eventually, rank 0 will have the compressed table.
     RecordHash* compressed_cst = compress_csts();
@@ -596,7 +604,7 @@ void logger_exit() {
     //printf("[pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
     //        HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
     double local_calls = __logger.local_metadata.records_count/1000.0/1000.0;
-    double total_calls;
+    double total_calls = 0;
     PMPI_Reduce(&local_calls, &total_calls, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
     // 1. Inter-process compression of CSTs
@@ -616,22 +624,19 @@ void logger_exit() {
         write_cfg_timings(&(__logger.durations_grammar), &(__logger.intervals_grammar), __logger.rank, __logger.nprocs, total_calls);
     if(strcmp(__logger.timing_mode, TIMING_MODE_TEXT) == 0)
         write_text_timings(__logger.hash_head, __logger.rank);
+    /*
     if(strcmp(__logger.timing_mode, TIMING_MODE_LOSSLESS) == 0)
         write_lossless_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
-    #ifdef WITH_ZFP
     if(strcmp(__logger.timing_mode, TIMING_MODE_ZFP) == 0)
         write_zfp_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals);
-    #endif
-    #ifdef WITH_SZ
     if(strcmp(__logger.timing_mode, TIMING_MODE_SZ) == 0)
         write_sz_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals);
-    #endif
     if(strcmp(__logger.timing_mode, TIMING_MODE_HIST) == 0)
         write_hist_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
     if(strcmp(__logger.timing_mode, TIMING_MODE_ZSTD) == 0)
         write_zstd_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
+    */
 
-    /*
     if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) != 0 &&
        strcmp(__logger.timing_mode, TIMING_MODE_AGGREGATED) != 0) {
         //write_zstd_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
@@ -643,9 +648,8 @@ void logger_exit() {
         write_sz_clustering_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
 
         write_hist_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
-        write_vitter_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
+        //write_vitter_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
     }
-    */
 
     // 4. Clean up all resources
     cleanup_cst(__logger.hash_head);

@@ -1084,6 +1084,10 @@ extern void mpi_type_get_envelope_(MPI_Fint* datatype, int* num_integers, int* n
 extern void mpi_type_get_envelope__(MPI_Fint* datatype, int* num_integers, int* num_addresses, int* num_datatypes, int* combiner, MPI_Fint *ierr){ imp_MPI_Type_get_envelope(PMPI_Type_f2c(*datatype), num_integers, num_addresses, num_datatypes, combiner);}
 int imp_MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
 {
+    // CHEN
+    //if(g_mpi_rank == 9)
+    //    printf("MPI_Send (%d->%d, %d)\n", g_mpi_rank, dest, count);
+
 	PILGRIM_TRACING_1(int, MPI_Send, (buf, count, datatype, dest, tag, comm));
 	MemPtrAttr mem_attr_0;
 	addr2id(buf, &mem_attr_0);
@@ -4664,6 +4668,11 @@ int imp_MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int ta
 	int status_arg[2] = {0};
 	if(source == MPI_ANY_SOURCE && status && status!=MPI_STATUS_IGNORE) status_arg[0] = status->MPI_SOURCE;
 	if(tag == MPI_ANY_TAG && status && status!=MPI_STATUS_IGNORE) status_arg[1] = status->MPI_TAG;
+
+    // CHEN
+    //if(g_mpi_rank == 4)
+    //    printf("MPI_Recv (%d<-%d, count: %d)\n", g_mpi_rank, source, count);
+
 	void **args = assemble_args_list(7, &mem_attr_0, &count, &obj_id_0, &source_rank, &my_tag, &obj_id_1, status_arg);
 	int sizes[] = { sizeof(MemPtrAttr), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int)*2 };
 	PILGRIM_TRACING_2(7, sizes, args, -1);
@@ -4782,6 +4791,11 @@ extern void mpi_ireduce_scatter_(const void* sendbuf, void* recvbuf, const int r
 extern void mpi_ireduce_scatter__(const void* sendbuf, void* recvbuf, const int recvcounts[], MPI_Fint* datatype, MPI_Fint* op, MPI_Fint* comm, MPI_Fint* request, MPI_Fint *ierr){ imp_MPI_Ireduce_scatter(sendbuf, recvbuf, recvcounts, PMPI_Type_f2c(*datatype), PMPI_Op_f2c(*op), PMPI_Comm_f2c(*comm), (MPI_Request*)request);}
 int imp_MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request)
 {
+    // CHEN
+    //if(g_mpi_rank == 9) {
+    //    printf("MPI_Irecv (9 <- %d), count: %d, tag: %d\n", source, count, tag);
+    //}
+
 	PILGRIM_TRACING_1(int, MPI_Irecv, (buf, count, datatype, source, tag, comm, request));
 	MemPtrAttr mem_attr_0;
 	addr2id(buf, &mem_attr_0);
@@ -4795,6 +4809,7 @@ int imp_MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int t
 	MPI_Comm obj_1 = comm;
 	int obj_id_1 = MPI_OBJ_ID(MPI_Comm, &obj_1);
 	int obj_id_2 = create_request_id(request, false, ID_MPI_Irecv, source, tag, obj_id_1);
+
 	void **args = assemble_args_list(7, &mem_attr_0, &count, &obj_id_0, &source_rank, &my_tag, &obj_id_1, &obj_id_2);
 	int sizes[] = { sizeof(MemPtrAttr), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(7, sizes, args, -1);
@@ -5449,6 +5464,10 @@ extern void mpi_get_library_version_(char* version, int* resultlen, MPI_Fint *ie
 extern void mpi_get_library_version__(char* version, int* resultlen, MPI_Fint *ierr){ imp_MPI_Get_library_version(version, resultlen);}
 int imp_MPI_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)
 {
+    // CHEN
+    //if(g_mpi_rank == 9)
+    //    printf("MPI_Isend (%d->%d, %d)\n", g_mpi_rank, dest, count);
+
 	PILGRIM_TRACING_1(int, MPI_Isend, (buf, count, datatype, dest, tag, comm, request));
 	MemPtrAttr mem_attr_0;
 	addr2id(buf, &mem_attr_0);

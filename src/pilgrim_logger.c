@@ -33,6 +33,7 @@ char FUNCS_OUTPUT_PATH[256];
 char METADATA_OUTPUT_PATH[256];
 
 static int current_terminal_id = 0;
+static double cfg_ts = 0;
 
 typedef struct OffsetNode_t {
     MPI_Offset offset;              // could be offset or size.
@@ -351,13 +352,11 @@ void print_cst(RecordHash *cst) {
             printf("[pilgrim] MPI_Send, count: %d, datatype: %d, dest: %d, tag: %d, comm: %d\n",
                     args[0], args[1], args[2], args[3], args[4]);
         }
-        */
         if(func_id == ID_MPI_Recv) {
             memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*4);
             printf("[pilgrim] MPI_Recv my rank: %d, count: %d, datatype: %d, source: %d, tag: %d, comm: %d\n",
                     __logger.rank, args[0], args[1], args[2], args[3], args[4]);
         }
-        /*
         if(func_id == ID_MPI_Irecv) {
             memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*5);
             printf("[pilgrim] MPI_Irecv my rank: %d, count: %d, datatype: %d, source: %d, tag: %d\n",
@@ -509,8 +508,11 @@ void write_record(Record record) {
     } else if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) == 0) {
         int duration_id, interval_id;
         handle_cfg_timing(entry, &record, &duration_id, &interval_id);
+        double t1 = PMPI_Wtime();
         append_terminal(&(__logger.intervals_grammar), interval_id, 1);
         append_terminal(&(__logger.durations_grammar), duration_id, 1);
+        double t2 = PMPI_Wtime();
+        cfg_ts += (t2 - t1);
     } else {
         TimingNode *dur_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
         TimingNode *int_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
@@ -621,7 +623,7 @@ void logger_exit() {
 
     // 3. Write out timing information
     if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) == 0)
-        write_cfg_timings(&(__logger.durations_grammar), &(__logger.intervals_grammar), __logger.rank, __logger.nprocs, total_calls);
+        write_cfg_timings(&(__logger.durations_grammar), &(__logger.intervals_grammar), __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, cfg_ts);
     if(strcmp(__logger.timing_mode, TIMING_MODE_TEXT) == 0)
         write_text_timings(__logger.hash_head, __logger.rank);
     /*

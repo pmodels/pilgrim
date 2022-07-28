@@ -49,7 +49,7 @@ void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_p
 
 void write_hist_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path);
 
-void write_cfg_timings(Grammar* duration_grammar, Grammar* interval_grammar, int mpi_rank, int mpi_size, double total_calls);
+void write_cfg_timings(Grammar* duration_grammar, Grammar* interval_grammar, int mpi_rank, double total_calls, char* dur_path, char* int_path, double cfg_ts);
 
 #ifdef WITH_ZFP
 void write_zfp_timings(RecordHash* cst, int mpi_rank, double total_size, char* dur_path, char* int_path,

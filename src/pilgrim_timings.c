@@ -126,6 +126,13 @@ static inline int get_bin_id_int(int val) {
 }
 
 void dump_timings(void* buf, size_t buf_size, const char* filename) {
+    PMPI_Barrier(MPI_COMM_WORLD);
+    int rank;
+    PMPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if(rank == 0)
+        remove(filename);
+    PMPI_Barrier(MPI_COMM_WORLD);
+
     int size = (int) buf_size;
     int offset;
     // A prefix sum to decide the offset of my write
@@ -172,6 +179,7 @@ void handle_cfg_timing(RecordHash* entry, Record* record, int *duration_id, int*
     /*
      * Code for calculating abs/rel errors
      */
+    /*
     double saved_duration = 0, saved_interval = 0;
     int id;
     if(*duration_id > 0) {
@@ -190,6 +198,7 @@ void handle_cfg_timing(RecordHash* entry, Record* record, int *duration_id, int*
         max_cfg_interval = interval;
     mse_cfg_duration += fabs(saved_duration - duration);
     mse_cfg_interval += fabs(saved_interval - interval);
+    */
 }
 
 
@@ -319,7 +328,7 @@ void write_lossless_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* d
 
 
 
-void report(size_t local_dur_bytes, size_t local_int_bytes, double total_calls, double time, const char* algo_str) {
+void report(size_t local_dur_bytes, size_t local_int_bytes, double total_calls, double compress_time, double io_time, const char* algo_str) {
 
     double dur_kb = 0, int_kb = 0;
     double local_kb;
@@ -333,10 +342,12 @@ void report(size_t local_dur_bytes, size_t local_int_bytes, double total_calls, 
     int mpi_rank;
     PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     if(mpi_rank == 0) {
-        printf("%s Duration CR: %6f, Interval CR: %6f, Throughput: %6fMB/s, Total calls: %6f\n",
+        double total_time = compress_time + io_time;
+        printf("total dur KB: %f, int kb: %f, ... %ld %ld\n", dur_kb, int_kb, local_dur_bytes, local_int_bytes);
+        printf("%-15s Duration CR: %5.2f, Interval CR: %5.2f, Total Calls: %8.6f, Copmression: %10.2f MB/s %7.5f, IO: %7.5f\n",
                 algo_str,
                 total_calls*1e6/dur_kb/1024.0*sizeof(double), total_calls*1e6/int_kb/1024.0*sizeof(double),
-                total_calls*1e6/1024.0/1024.0/time*sizeof(double)*2, total_calls);
+                total_calls, total_calls*1e6/1024.0/1024.0/compress_time*sizeof(double)*2, compress_time, io_time);
     }
 }
 
@@ -489,21 +500,22 @@ void write_hist_timings(RecordHash* cst, int mpi_rank, double total_calls, char*
 
     // compress intervals
     int_buf = write_hist_timings_core(cst, mpi_rank, false, &int_bytes);
+    double t2 = PMPI_Wtime();
 
     // write to files
     dump_timings(dur_buf, dur_bytes, dur_path);
     dump_timings(int_buf, int_bytes, int_path);
 
-    double t2 = PMPI_Wtime();
+    double t3 = PMPI_Wtime();
 
-    report(dur_bytes, int_bytes, total_calls, t2-t1, "HIST");
+    report(dur_bytes, int_bytes, total_calls, t2-t1, t3-t2, "HIST");
 
     free(dur_buf);
     free(int_buf);
 
 }
 
-void write_cfg_timings(Grammar* duration_grammar, Grammar* interval_grammar, int mpi_rank, int mpi_size, double total_calls) {
+void write_cfg_timings(Grammar* duration_grammar, Grammar* interval_grammar, int mpi_rank, double total_calls, char* dur_path, char* int_path, double cfg_ts) {
 
     double t1 = PMPI_Wtime();
 
@@ -525,39 +537,33 @@ void write_cfg_timings(Grammar* duration_grammar, Grammar* interval_grammar, int
     int* compressed_grammar;
 
     size_t zstd_buf_size;
-    size_t duration_compressed_bytes, interval_compressed_bytes;
-    void* zstd_buf;
+    size_t dur_bytes, int_bytes;
+    void   *dur_buf, *int_buf;
 
     /**
      * Simple local ZSTD
      */
     compressed_grammar = serialize_grammar(duration_grammar, &compressed_integers);
     zstd_buf_size = ZSTD_compressBound(sizeof(int)*compressed_integers);
-    zstd_buf = pilgrim_malloc(zstd_buf_size);
-    duration_compressed_bytes = ZSTD_compress(zstd_buf, zstd_buf_size, compressed_grammar, sizeof(int)*compressed_integers, 1);
-    pilgrim_free(zstd_buf, zstd_buf_size);
+    dur_buf = malloc(zstd_buf_size);
+    dur_bytes = ZSTD_compress(dur_buf, zstd_buf_size, compressed_grammar, sizeof(int)*compressed_integers, 1);
     pilgrim_free(compressed_grammar, sizeof(int)*compressed_integers);
 
     compressed_grammar = serialize_grammar(interval_grammar, &compressed_integers);
     zstd_buf_size = ZSTD_compressBound(sizeof(int)*compressed_integers);
-    zstd_buf = pilgrim_malloc(zstd_buf_size);
-    interval_compressed_bytes = ZSTD_compress(zstd_buf, zstd_buf_size, compressed_grammar, sizeof(int)*compressed_integers, 1);
-    pilgrim_free(zstd_buf, zstd_buf_size);
+    int_buf = malloc(zstd_buf_size);
+    int_bytes = ZSTD_compress(int_buf, zstd_buf_size, compressed_grammar, sizeof(int)*compressed_integers, 1);
     pilgrim_free(compressed_grammar, sizeof(int)*compressed_integers);
 
-    double local_dur_kb = duration_compressed_bytes / 1024.0;
-    double local_int_kb = interval_compressed_bytes / 1024.0;
-    double total_dur_kb , total_int_kb;
-    PMPI_Reduce(&local_dur_kb, &total_dur_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    PMPI_Reduce(&local_int_kb, &total_int_kb, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     double t2 = PMPI_Wtime();
-    if(mpi_rank == 0) {
-        printf("CFG (local ZSTD) clustering duration compression ratio: %f, interval compression ratio: %f throughput: %f (%f seconds)\n",
-                total_calls*1e6/total_dur_kb/1024.0*sizeof(double), total_calls*1e6/total_int_kb/1024.0*sizeof(double),
-                total_calls*1e6/1024.0/1024.0/(t2-t1)*sizeof(double)*2, (t2-t1) );
-    }
-    PMPI_Barrier(MPI_COMM_WORLD);
+    dump_timings(dur_buf, dur_bytes, dur_path);
+    dump_timings(int_buf, int_bytes, int_path);
+    double t3 = PMPI_Wtime();
 
+    report(dur_bytes, int_bytes, total_calls, cfg_ts+t2-t1, t3-t2, "CFG");
+
+    free(dur_buf);
+    free(int_buf);
 
     /*
      *
@@ -650,12 +656,13 @@ void write_sz_timings(RecordHash* cst, int mpi_rank, double total_calls, char* d
     void* int_buf = write_sz_timings_core(local_intervals, local_total, &int_bytes);
     pilgrim_free(local_durations, sizeof(double)*local_total);
     pilgrim_free(local_intervals, sizeof(double)*local_total);
+    double t2 = PMPI_Wtime();
 
     dump_timings(dur_buf, dur_bytes, dur_path);
     dump_timings(int_buf, int_bytes, int_path);
 
-    double t2 = PMPI_Wtime();
-    report(dur_bytes, int_bytes, total_calls, t2-t1, clustering?"SZ-clustered":"SZ");
+    double t3 = PMPI_Wtime();
+    report(dur_bytes, int_bytes, total_calls, t2-t1, t3-t2, clustering?"SZ-clustered":"SZ");
 
     free(dur_buf);
     free(int_buf);
@@ -745,12 +752,13 @@ void write_zfp_timings(RecordHash* cst, int mpi_rank, double total_calls, char* 
     void* int_buf = write_zfp_timings_core(local_intervals, local_total, &int_bytes);
     pilgrim_free(local_durations, sizeof(double)*local_total);
     pilgrim_free(local_intervals, sizeof(double)*local_total);
+    double t2 = PMPI_Wtime();
 
     dump_timings(dur_buf, dur_bytes, dur_path);
     dump_timings(int_buf, int_bytes, int_path);
+    double t3 = PMPI_Wtime();
 
-    double t2 = PMPI_Wtime();
-    report(dur_bytes, int_bytes, total_calls, t2-t1, clustering?"ZFP-clustered":"ZFP");
+    report(dur_bytes, int_bytes, total_calls, t2-t1, t3-t2, clustering?"ZFP-clustered":"ZFP");
 
     free(dur_buf);
     free(int_buf);

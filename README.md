@@ -78,3 +78,6 @@ mpirun can be replaced with your job scheduler, e.g., srun.
 **PILGRIM_TRACING_MODE**:
 - DEFAULT:  Tracing is enabled by default. Call `MPI_Info_set(info, "PILGRIM_TRACING", "OFF")` to disable tracing and `MPI_Info_set(info, "PILGRIM_TRACING", "ON")` to enable tracing.
 - ONDEMAND: Tracing is disabled by default. Call `MPI_Info_set(info, "PILGRIM_TRACING", "ON")` to enable tracing and `MPI_Info_set(info, "PILGRIM_TRACING", "OFF")` to disable tracing.
+
+**PILGRIM_DEBUG**: set to 1 to allow debug output.
+

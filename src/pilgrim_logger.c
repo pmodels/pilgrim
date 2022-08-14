@@ -48,7 +48,8 @@ struct Logger {
     int rank;
     int nprocs;
     bool debug;                     // enable debug output
-    bool recording;                 // set to true only after initialization
+    bool initialized;               // initialized after MPI_initxxx()
+    bool recording;                 // set to true after initialization or after MPI_Info_set for on demand mode
     LocalMetadata local_metadata;   // local metadata information
 
     RecordHash *hash_head;          // head of CST hash table
@@ -62,7 +63,8 @@ struct Logger {
     double final_grammar_size;      // compressed grammar size (in KB)
     double final_cst_size;          // compressed cst size (in KB)
 
-    char *timing_mode;              // check pilgrim_timing.h
+    char *timing_mode;              // options defined in pilgrim_timing.h
+    char *tracing_mode;             // options defined in pilgrim_logger.h
 };
 
 // Global object to access the Logger fileds
@@ -77,8 +79,17 @@ void append_offset(MPI_Offset offset) {
     */
 }
 
-bool is_recording() {
-    return __logger.recording;
+
+void logger_recording_on() {
+    __logger.recording = true;
+}
+
+void logger_recording_off() {
+    __logger.recording = false;
+}
+
+bool logger_initialized() {
+    return __logger.initialized;
 }
 
 
@@ -462,7 +473,7 @@ void* compose_call_signature(Record *record, int *key_len) {
 }
 
 void write_record(Record record) {
-    if (!__logger.recording) return;       // have not initialized yet
+    if (!__logger.recording) return;
 
     PILGRIM_REAL_CALL(pthread_mutex_lock)(&g_mutex);
 
@@ -543,17 +554,28 @@ void logger_init() {
     __logger.local_metadata.tstart = g_program_start_time;
     __logger.local_metadata.records_count = 0;
     __logger.local_metadata.rank = g_mpi_rank;
-    __logger.hash_head = NULL;          // Must be NULL initialized
+    __logger.hash_head   = NULL;          // Must be NULL initialized
     __logger.offset_list = NULL;
-    __logger.timing_mode = strdup(TIMING_MODE_AGGREGATED);
+    __logger.initialized = false;
+    __logger.recording   = false;
 
     // Check if users want to store non-aggregated timings
-    char* tm = NULL;
-    tm  = getenv("PILGRIM_TIMING_MODE");
-    if(tm)
-        __logger.timing_mode = strdup(tm);
+    char* timing_mode = NULL;
+    timing_mode = getenv("PILGRIM_TIMING_MODE");
+    if(timing_mode)
+        __logger.timing_mode = strdup(timing_mode);
     else
         __logger.timing_mode = strdup(TIMING_MODE_AGGREGATED);
+
+    // Tracing model
+    // 1. default:  tracing all mpi calls between MPI_Init and MPI_Finalize
+    // 2. ondemand: enable tracing on MPI_Info_set
+    char* tracing_mode = NULL;
+    tracing_mode = getenv("PILGRIM_TRACING_MODE");
+    if(tracing_mode)
+        __logger.tracing_mode = strdup(tracing_mode);
+    else
+        __logger.tracing_mode = strdup(PILGRIM_TRACING_MODE_DEFAULT);
 
 
     if(getenv("PILGRIM_DEBUG"))
@@ -595,13 +617,23 @@ void logger_init() {
     MAP_OR_FAIL(pthread_mutex_lock);
     MAP_OR_FAIL(pthread_mutex_unlock);
     install_mem_hooks();
-    __logger.recording = true;
+
+    __logger.initialized = true;
+
+    // For on demand tracing, set __logger.recording to true on MPI_Info_set("PILGRIM_TRACING", "ON");
+    // set __logger.recording to false on MPI_Info_set("PILGRIM_TRACING", "OFF");
+    if(strcmp(__logger.tracing_mode, PILGRIM_TRACING_MODE_ONDEMAND) == 0) {
+        if(__logger.rank == 0)
+            printf("[pilgrim] On demand tracing mode.\n");
+        logger_recording_off();
+    } else
+        logger_recording_on();
 }
 
 
 void logger_exit() {
     uninstall_mem_hooks();
-    __logger.recording = false;
+    logger_recording_off();
 
     //printf("[pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
     //        HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);

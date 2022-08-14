@@ -75,3 +75,8 @@ mpirun can be replaced with your job scheduler, e.g., srun.
  - HIST: Store lossy timestamps using the HIST compression algorithm.
  - SZ: Store lossy timestamps using the SZ lossy compressor.
  - ZFP: Store lossy timestamps using the ZFP lossy compressor.
+
+**PILGRIM_TRACING_MODE**:
+- DEFAULT:  Tracing is enable. Can call MPI\_Info\_set("PILGRIM\_TRACING", "OFF") to disable tracing and MPI\_Info\_set("PILGRIM\_TRACING", "ON") to enable tracing.
+- ONDEMAND: Tracing is disabled. Call MPI\_Info\_set("PILGRIM\_TRACING", "ON") to enable tracing and MPI\_Info\_set("PILGRIM\_TRACING", "OFF") to disable tracing.
+

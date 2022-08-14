@@ -1084,10 +1084,6 @@ extern void mpi_type_get_envelope_(MPI_Fint* datatype, int* num_integers, int* n
 extern void mpi_type_get_envelope__(MPI_Fint* datatype, int* num_integers, int* num_addresses, int* num_datatypes, int* combiner, MPI_Fint *ierr){ imp_MPI_Type_get_envelope(PMPI_Type_f2c(*datatype), num_integers, num_addresses, num_datatypes, combiner);}
 int imp_MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
 {
-    // CHEN
-    //if(g_mpi_rank == 9)
-    //    printf("MPI_Send (%d->%d, %d)\n", g_mpi_rank, dest, count);
-
 	PILGRIM_TRACING_1(int, MPI_Send, (buf, count, datatype, dest, tag, comm));
 	MemPtrAttr mem_attr_0;
 	addr2id(buf, &mem_attr_0);
@@ -1227,11 +1223,13 @@ int imp_MPI_File_close(MPI_File *fh)
 	PILGRIM_TRACING_1(int, MPI_File_close, (fh));
 	PILGRIM_TRACING_2(1, sizes, args, -1);
 }
+/* CHEN
 int MPI_File_close(MPI_File *fh) { return imp_MPI_File_close(fh); }
 extern void MPI_FILE_CLOSE(MPI_Fint* fh, MPI_Fint *ierr){ imp_MPI_File_close((MPI_File*)fh);}
 extern void mpi_file_close(MPI_Fint* fh, MPI_Fint *ierr){ imp_MPI_File_close((MPI_File*)fh);}
 extern void mpi_file_close_(MPI_Fint* fh, MPI_Fint *ierr){ imp_MPI_File_close((MPI_File*)fh);}
 extern void mpi_file_close__(MPI_Fint* fh, MPI_Fint *ierr){ imp_MPI_File_close((MPI_File*)fh);}
+*/
 int imp_MPI_Comm_call_errhandler(MPI_Comm comm, int errorcode)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_call_errhandler, (comm, errorcode));
@@ -3477,11 +3475,13 @@ int imp_MPI_File_write_all(MPI_File fh, const void *buf, int count, MPI_Datatype
 	int sizes[] = { sizeof(int), sizeof(MemPtrAttr), sizeof(int), sizeof(int), sizeof(int)*2 };
 	PILGRIM_TRACING_2(5, sizes, args, -1);
 }
+/* CHEN
 int MPI_File_write_all(MPI_File fh, const void *buf, int count, MPI_Datatype datatype, MPI_Status *status) { return imp_MPI_File_write_all(fh, buf, count, datatype, status); }
 extern void MPI_FILE_WRITE_ALL(MPI_Fint* fh, const void* buf, int* count, MPI_Fint* datatype, MPI_Fint* status, MPI_Fint *ierr){ imp_MPI_File_write_all(PMPI_File_f2c(*fh), buf, (*count), PMPI_Type_f2c(*datatype), (MPI_Status*)status);}
 extern void mpi_file_write_all(MPI_Fint* fh, const void* buf, int* count, MPI_Fint* datatype, MPI_Fint* status, MPI_Fint *ierr){ imp_MPI_File_write_all(PMPI_File_f2c(*fh), buf, (*count), PMPI_Type_f2c(*datatype), (MPI_Status*)status);}
 extern void mpi_file_write_all_(MPI_Fint* fh, const void* buf, int* count, MPI_Fint* datatype, MPI_Fint* status, MPI_Fint *ierr){ imp_MPI_File_write_all(PMPI_File_f2c(*fh), buf, (*count), PMPI_Type_f2c(*datatype), (MPI_Status*)status);}
 extern void mpi_file_write_all__(MPI_Fint* fh, const void* buf, int* count, MPI_Fint* datatype, MPI_Fint* status, MPI_Fint *ierr){ imp_MPI_File_write_all(PMPI_File_f2c(*fh), buf, (*count), PMPI_Type_f2c(*datatype), (MPI_Status*)status);}
+*/
 int imp_MPI_Comm_connect(const char *port_name, MPI_Info info, int root, MPI_Comm comm, MPI_Comm *newcomm)
 {
 	PILGRIM_TRACING_1(int, MPI_Comm_connect, (port_name, info, root, comm, newcomm));
@@ -4212,11 +4212,13 @@ int imp_MPI_File_read_all(MPI_File fh, void *buf, int count, MPI_Datatype dataty
 	int sizes[] = { sizeof(int), sizeof(MemPtrAttr), sizeof(int), sizeof(int), sizeof(int)*2 };
 	PILGRIM_TRACING_2(5, sizes, args, -1);
 }
+/* CHEN
 int MPI_File_read_all(MPI_File fh, void *buf, int count, MPI_Datatype datatype, MPI_Status *status) { return imp_MPI_File_read_all(fh, buf, count, datatype, status); }
 extern void MPI_FILE_READ_ALL(MPI_Fint* fh, void* buf, int* count, MPI_Fint* datatype, MPI_Fint* status, MPI_Fint *ierr){ imp_MPI_File_read_all(PMPI_File_f2c(*fh), buf, (*count), PMPI_Type_f2c(*datatype), (MPI_Status*)status);}
 extern void mpi_file_read_all(MPI_Fint* fh, void* buf, int* count, MPI_Fint* datatype, MPI_Fint* status, MPI_Fint *ierr){ imp_MPI_File_read_all(PMPI_File_f2c(*fh), buf, (*count), PMPI_Type_f2c(*datatype), (MPI_Status*)status);}
 extern void mpi_file_read_all_(MPI_Fint* fh, void* buf, int* count, MPI_Fint* datatype, MPI_Fint* status, MPI_Fint *ierr){ imp_MPI_File_read_all(PMPI_File_f2c(*fh), buf, (*count), PMPI_Type_f2c(*datatype), (MPI_Status*)status);}
 extern void mpi_file_read_all__(MPI_Fint* fh, void* buf, int* count, MPI_Fint* datatype, MPI_Fint* status, MPI_Fint *ierr){ imp_MPI_File_read_all(PMPI_File_f2c(*fh), buf, (*count), PMPI_Type_f2c(*datatype), (MPI_Status*)status);}
+*/
 int imp_MPI_Group_size(MPI_Group group, int *size)
 {
 	PILGRIM_TRACING_1(int, MPI_Group_size, (group, size));
@@ -4668,11 +4670,6 @@ int imp_MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int ta
 	int status_arg[2] = {0};
 	if(source == MPI_ANY_SOURCE && status && status!=MPI_STATUS_IGNORE) status_arg[0] = status->MPI_SOURCE;
 	if(tag == MPI_ANY_TAG && status && status!=MPI_STATUS_IGNORE) status_arg[1] = status->MPI_TAG;
-
-    // CHEN
-    //if(g_mpi_rank == 4)
-    //    printf("MPI_Recv (%d<-%d, count: %d)\n", g_mpi_rank, source, count);
-
 	void **args = assemble_args_list(7, &mem_attr_0, &count, &obj_id_0, &source_rank, &my_tag, &obj_id_1, status_arg);
 	int sizes[] = { sizeof(MemPtrAttr), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int)*2 };
 	PILGRIM_TRACING_2(7, sizes, args, -1);
@@ -4737,11 +4734,13 @@ int imp_MPI_File_open(MPI_Comm comm, const char *filename, int amode, MPI_Info i
 	int sizes[] = { sizeof(int), strlen(filename)+1, sizeof(int), sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(5, sizes, args, -1);
 }
+/* CHEN
 int MPI_File_open(MPI_Comm comm, const char *filename, int amode, MPI_Info info, MPI_File *fh) { return imp_MPI_File_open(comm, filename, amode, info, fh); }
 extern void MPI_FILE_OPEN(MPI_Fint* comm, const char* filename, int* amode, MPI_Fint* info, MPI_Fint* fh, MPI_Fint *ierr){ imp_MPI_File_open(PMPI_Comm_f2c(*comm), filename, (*amode), PMPI_Info_f2c(*info), (MPI_File*)fh);}
 extern void mpi_file_open(MPI_Fint* comm, const char* filename, int* amode, MPI_Fint* info, MPI_Fint* fh, MPI_Fint *ierr){ imp_MPI_File_open(PMPI_Comm_f2c(*comm), filename, (*amode), PMPI_Info_f2c(*info), (MPI_File*)fh);}
 extern void mpi_file_open_(MPI_Fint* comm, const char* filename, int* amode, MPI_Fint* info, MPI_Fint* fh, MPI_Fint *ierr){ imp_MPI_File_open(PMPI_Comm_f2c(*comm), filename, (*amode), PMPI_Info_f2c(*info), (MPI_File*)fh);}
 extern void mpi_file_open__(MPI_Fint* comm, const char* filename, int* amode, MPI_Fint* info, MPI_Fint* fh, MPI_Fint *ierr){ imp_MPI_File_open(PMPI_Comm_f2c(*comm), filename, (*amode), PMPI_Info_f2c(*info), (MPI_File*)fh);}
+*/
 int imp_MPI_Bsend(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
 {
 	PILGRIM_TRACING_1(int, MPI_Bsend, (buf, count, datatype, dest, tag, comm));
@@ -4791,10 +4790,8 @@ extern void mpi_ireduce_scatter_(const void* sendbuf, void* recvbuf, const int r
 extern void mpi_ireduce_scatter__(const void* sendbuf, void* recvbuf, const int recvcounts[], MPI_Fint* datatype, MPI_Fint* op, MPI_Fint* comm, MPI_Fint* request, MPI_Fint *ierr){ imp_MPI_Ireduce_scatter(sendbuf, recvbuf, recvcounts, PMPI_Type_f2c(*datatype), PMPI_Op_f2c(*op), PMPI_Comm_f2c(*comm), (MPI_Request*)request);}
 int imp_MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request)
 {
-    // CHEN
-    //if(g_mpi_rank == 9) {
-    //    printf("MPI_Irecv (9 <- %d), count: %d, tag: %d\n", source, count, tag);
-    //}
+    //if(g_mpi_rank == 0)
+    //    printf("irecv here\n");
 
 	PILGRIM_TRACING_1(int, MPI_Irecv, (buf, count, datatype, source, tag, comm, request));
 	MemPtrAttr mem_attr_0;
@@ -4809,7 +4806,6 @@ int imp_MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int t
 	MPI_Comm obj_1 = comm;
 	int obj_id_1 = MPI_OBJ_ID(MPI_Comm, &obj_1);
 	int obj_id_2 = create_request_id(request, false, ID_MPI_Irecv, source, tag, obj_id_1);
-
 	void **args = assemble_args_list(7, &mem_attr_0, &count, &obj_id_0, &source_rank, &my_tag, &obj_id_1, &obj_id_2);
 	int sizes[] = { sizeof(MemPtrAttr), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int), sizeof(int) };
 	PILGRIM_TRACING_2(7, sizes, args, -1);
@@ -5344,20 +5340,6 @@ extern void MPI_GET_PROCESSOR_NAME(char* name, int* resultlen, MPI_Fint *ierr){ 
 extern void mpi_get_processor_name(char* name, int* resultlen, MPI_Fint *ierr){ imp_MPI_Get_processor_name(name, resultlen);}
 extern void mpi_get_processor_name_(char* name, int* resultlen, MPI_Fint *ierr){ imp_MPI_Get_processor_name(name, resultlen);}
 extern void mpi_get_processor_name__(char* name, int* resultlen, MPI_Fint *ierr){ imp_MPI_Get_processor_name(name, resultlen);}
-int imp_MPI_Info_set(MPI_Info info, const char *key, const char *value)
-{
-	PILGRIM_TRACING_1(int, MPI_Info_set, (info, key, value));
-	MPI_Info obj_0 = info;
-	int obj_id_0 = MPI_OBJ_ID(MPI_Info, &obj_0);
-	void **args = assemble_args_list(3, &obj_id_0, key, value);
-	int sizes[] = { sizeof(int), strlen(key)+1, strlen(value)+1 };
-	PILGRIM_TRACING_2(3, sizes, args, -1);
-}
-int MPI_Info_set(MPI_Info info, const char *key, const char *value) { return imp_MPI_Info_set(info, key, value); }
-extern void MPI_INFO_SET(MPI_Fint* info, const char* key, const char* value, MPI_Fint *ierr){ imp_MPI_Info_set(PMPI_Info_f2c(*info), key, value);}
-extern void mpi_info_set(MPI_Fint* info, const char* key, const char* value, MPI_Fint *ierr){ imp_MPI_Info_set(PMPI_Info_f2c(*info), key, value);}
-extern void mpi_info_set_(MPI_Fint* info, const char* key, const char* value, MPI_Fint *ierr){ imp_MPI_Info_set(PMPI_Info_f2c(*info), key, value);}
-extern void mpi_info_set__(MPI_Fint* info, const char* key, const char* value, MPI_Fint *ierr){ imp_MPI_Info_set(PMPI_Info_f2c(*info), key, value);}
 int imp_MPI_Ineighbor_allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm, MPI_Request *request)
 {
 	PILGRIM_TRACING_1(int, MPI_Ineighbor_allgather, (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request));
@@ -5464,10 +5446,6 @@ extern void mpi_get_library_version_(char* version, int* resultlen, MPI_Fint *ie
 extern void mpi_get_library_version__(char* version, int* resultlen, MPI_Fint *ierr){ imp_MPI_Get_library_version(version, resultlen);}
 int imp_MPI_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)
 {
-    // CHEN
-    //if(g_mpi_rank == 9)
-    //    printf("MPI_Isend (%d->%d, %d)\n", g_mpi_rank, dest, count);
-
 	PILGRIM_TRACING_1(int, MPI_Isend, (buf, count, datatype, dest, tag, comm, request));
 	MemPtrAttr mem_attr_0;
 	addr2id(buf, &mem_attr_0);
@@ -5656,11 +5634,13 @@ int imp_MPI_File_set_view(MPI_File fh, MPI_Offset disp, MPI_Datatype etype, MPI_
 	int sizes[] = { sizeof(int), sizeof(int), sizeof(int), strlen(datarep)+1, sizeof(int) };
 	PILGRIM_TRACING_2(5, sizes, args, -1);
 }
+/*CHEN
 int MPI_File_set_view(MPI_File fh, MPI_Offset disp, MPI_Datatype etype, MPI_Datatype filetype, const char *datarep, MPI_Info info) { return imp_MPI_File_set_view(fh, disp, etype, filetype, datarep, info); }
 extern void MPI_FILE_SET_VIEW(MPI_Fint* fh, MPI_Offset disp, MPI_Fint* etype, MPI_Fint* filetype, const char* datarep, MPI_Fint* info, MPI_Fint *ierr){ imp_MPI_File_set_view(PMPI_File_f2c(*fh), disp, PMPI_Type_f2c(*etype), PMPI_Type_f2c(*filetype), datarep, PMPI_Info_f2c(*info));}
 extern void mpi_file_set_view(MPI_Fint* fh, MPI_Offset disp, MPI_Fint* etype, MPI_Fint* filetype, const char* datarep, MPI_Fint* info, MPI_Fint *ierr){ imp_MPI_File_set_view(PMPI_File_f2c(*fh), disp, PMPI_Type_f2c(*etype), PMPI_Type_f2c(*filetype), datarep, PMPI_Info_f2c(*info));}
 extern void mpi_file_set_view_(MPI_Fint* fh, MPI_Offset disp, MPI_Fint* etype, MPI_Fint* filetype, const char* datarep, MPI_Fint* info, MPI_Fint *ierr){ imp_MPI_File_set_view(PMPI_File_f2c(*fh), disp, PMPI_Type_f2c(*etype), PMPI_Type_f2c(*filetype), datarep, PMPI_Info_f2c(*info));}
 extern void mpi_file_set_view__(MPI_Fint* fh, MPI_Offset disp, MPI_Fint* etype, MPI_Fint* filetype, const char* datarep, MPI_Fint* info, MPI_Fint *ierr){ imp_MPI_File_set_view(PMPI_File_f2c(*fh), disp, PMPI_Type_f2c(*etype), PMPI_Type_f2c(*filetype), datarep, PMPI_Info_f2c(*info));}
+*/
 int imp_MPI_Status_set_elements(MPI_Status *status, MPI_Datatype datatype, int count)
 {
 	PILGRIM_TRACING_1(int, MPI_Status_set_elements, (status, datatype, count));

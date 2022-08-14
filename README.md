@@ -64,7 +64,6 @@ mpirun -np N -env LD_PRELOAD /PATH/TO/pilgrim/lib/libpilgrim.so ./your_app
 ```
 mpirun can be replaced with your job scheduler, e.g., srun.
 
-
 ## Environment Variables
 
 **PILGRIM_TIMING_MODE** can be set to one of the options below:
@@ -79,4 +78,3 @@ mpirun can be replaced with your job scheduler, e.g., srun.
 **PILGRIM_TRACING_MODE**:
 - DEFAULT:  Tracing is enabled by default. Call `MPI_Info_set(info, "PILGRIM_TRACING", "OFF")` to disable tracing and `MPI_Info_set(info, "PILGRIM\_TRACING", "ON")` to enable tracing.
 - ONDEMAND: Tracing is disabled by default. Call `MPI_Info_set(info, "PILGRIM_TRACING", "ON")` to enable tracing and `MPI_Info_set(info, "PILGRIM\_TRACING", "OFF")` to disable tracing.
-

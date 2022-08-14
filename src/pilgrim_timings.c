@@ -830,4 +830,3 @@ void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size,
     PMPI_Barrier(MPI_COMM_WORLD);
     printf("ZSTD compression ratio: %f\n", (1.0*local_total/compressed_bytes*sizeof(double)));
 }
-

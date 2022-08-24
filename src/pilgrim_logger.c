@@ -662,11 +662,11 @@ void logger_exit() {
         write_lossless_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
     #ifdef WITH_ZFP
     if(strcmp(__logger.timing_mode, TIMING_MODE_ZFP) == 0)
-        write_zfp_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals);
+        write_zfp_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals, false);
     #endif
     #ifdef WITH_SZ
     if(strcmp(__logger.timing_mode, TIMING_MODE_SZ) == 0)
-        write_sz_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals);
+        write_sz_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals, false);
     #endif
     if(strcmp(__logger.timing_mode, TIMING_MODE_HIST) == 0)
         write_hist_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);

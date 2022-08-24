@@ -10,7 +10,7 @@
 #include "uthash.h"
 
 #define PILGRIM_TRACING_MODE_DEFAULT  "DEFAULT"
-#define PILGRIM_TRACING_MODE_ONDEMAND "ONDEMAND"
+#define PILGRIM_TRACING_MODE_ONDEMAND "DYNAMIC"
 
 
 // Global variables

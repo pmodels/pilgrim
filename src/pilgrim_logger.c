@@ -33,6 +33,7 @@ char FUNCS_OUTPUT_PATH[256];
 char METADATA_OUTPUT_PATH[256];
 
 static int current_terminal_id = 0;
+static double cfg_ts = 0;
 
 typedef struct OffsetNode_t {
     MPI_Offset offset;              // could be offset or size.
@@ -47,7 +48,8 @@ struct Logger {
     int rank;
     int nprocs;
     bool debug;                     // enable debug output
-    bool recording;                 // set to true only after initialization
+    bool initialized;               // initialized after MPI_initxxx()
+    bool recording;                 // set to true after initialization or after MPI_Info_set for on demand mode
     LocalMetadata local_metadata;   // local metadata information
 
     RecordHash *hash_head;          // head of CST hash table
@@ -61,7 +63,8 @@ struct Logger {
     double final_grammar_size;      // compressed grammar size (in KB)
     double final_cst_size;          // compressed cst size (in KB)
 
-    char *timing_mode;              // check pilgrim_timing.h
+    char *timing_mode;              // options defined in pilgrim_timing.h
+    char *tracing_mode;             // options defined in pilgrim_logger.h
 };
 
 // Global object to access the Logger fileds
@@ -76,8 +79,17 @@ void append_offset(MPI_Offset offset) {
     */
 }
 
-bool is_recording() {
-    return __logger.recording;
+
+void logger_recording_on() {
+    __logger.recording = true;
+}
+
+void logger_recording_off() {
+    __logger.recording = false;
+}
+
+bool logger_initialized() {
+    return __logger.initialized;
 }
 
 
@@ -334,7 +346,7 @@ void print_cst(RecordHash *cst) {
         count[func_id] += entry->count;
 
         int args[8];
-        int arg_start = sizeof(short);
+        int arg_start = sizeof(short) + sizeof(int); // func_id and tid
 
         /*
         if(func_id == ID_MPI_Sendrecv) {
@@ -347,19 +359,24 @@ void print_cst(RecordHash *cst) {
 
         }
         if(func_id == ID_MPI_Send) {
+            memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*5);
+            printf("[pilgrim] MPI_Send, count: %d, datatype: %d, dest: %d, tag: %d, comm: %d\n",
+                    args[0], args[1], args[2], args[3], args[4]);
+        }
+        if(func_id == ID_MPI_Recv) {
             memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*4);
-            printf("[pilgrim] MPI_Send, count: %d, datatype: %d, dest: %d, tag: %d\n",
-                    args[0], args[1], args[2], args[3]);
+            printf("[pilgrim] MPI_Recv my rank: %d, count: %d, datatype: %d, source: %d, tag: %d, comm: %d\n",
+                    __logger.rank, args[0], args[1], args[2], args[3], args[4]);
         }
         if(func_id == ID_MPI_Irecv) {
-            memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*4);
-            printf("[pilgrim] MPI_Irecv, count: %d, datatype: %d, source: %d, tag: %d\n",
-                    args[0], args[1], args[2], args[3]);
+            memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(int)*5);
+            printf("[pilgrim] MPI_Irecv my rank: %d, count: %d, datatype: %d, source: %d, tag: %d\n",
+                    __logger.rank, args[0], args[1], args[2], args[3]);
         }
         if(func_id == ID_MPI_Isend) {
-            memcpy(args, entry->key+arg_start, sizeof(args));
-            printf("[pilgrim] buf id: %d, count: %d, datatype: %d, dest: %d, tag: %d, req: %d\n",
-                    args[0], args[1], args[2], args[3], args[4], args[7]);
+            memcpy(args, entry->key+arg_start+sizeof(MemPtrAttr), sizeof(args));
+            printf("[pilgrim] MPI_Isend, count: %d, datatype: %d, dest: %d, tag: %d, comm: %d, req: %d\n",
+                    args[0], args[1], args[2], args[3], args[4], args[5], args[5]);
         }
         if(func_id == ID_MPI_Comm_split) {
             memcpy(args, entry->key+arg_start, sizeof(int)*4);
@@ -384,6 +401,7 @@ void print_cst(RecordHash *cst) {
  *
  */
 int* dump_cst() {
+
     // 1. Inter-process copmression for CSTs
     // Eventually, rank 0 will have the compressed table.
     RecordHash* compressed_cst = compress_csts();
@@ -455,7 +473,7 @@ void* compose_call_signature(Record *record, int *key_len) {
 }
 
 void write_record(Record record) {
-    if (!__logger.recording) return;       // have not initialized yet
+    if (!__logger.recording) return;
 
     PILGRIM_REAL_CALL(pthread_mutex_lock)(&g_mutex);
 
@@ -501,8 +519,11 @@ void write_record(Record record) {
     } else if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) == 0) {
         int duration_id, interval_id;
         handle_cfg_timing(entry, &record, &duration_id, &interval_id);
+        double t1 = PMPI_Wtime();
         append_terminal(&(__logger.intervals_grammar), interval_id, 1);
         append_terminal(&(__logger.durations_grammar), duration_id, 1);
+        double t2 = PMPI_Wtime();
+        cfg_ts += (t2 - t1);
     } else {
         TimingNode *dur_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
         TimingNode *int_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
@@ -533,17 +554,28 @@ void logger_init() {
     __logger.local_metadata.tstart = g_program_start_time;
     __logger.local_metadata.records_count = 0;
     __logger.local_metadata.rank = g_mpi_rank;
-    __logger.hash_head = NULL;          // Must be NULL initialized
+    __logger.hash_head   = NULL;          // Must be NULL initialized
     __logger.offset_list = NULL;
-    __logger.timing_mode = strdup(TIMING_MODE_AGGREGATED);
+    __logger.initialized = false;
+    __logger.recording   = false;
 
     // Check if users want to store non-aggregated timings
-    char* tm = NULL;
-    tm  = getenv("PILGRIM_TIMING_MODE");
-    if(tm)
-        __logger.timing_mode = strdup(tm);
+    char* timing_mode = NULL;
+    timing_mode = getenv("PILGRIM_TIMING_MODE");
+    if(timing_mode)
+        __logger.timing_mode = strdup(timing_mode);
     else
         __logger.timing_mode = strdup(TIMING_MODE_AGGREGATED);
+
+    // Tracing model
+    // 1. default:  tracing all mpi calls between MPI_Init and MPI_Finalize
+    // 2. ondemand: enable tracing on MPI_Info_set
+    char* tracing_mode = NULL;
+    tracing_mode = getenv("PILGRIM_TRACING_MODE");
+    if(tracing_mode)
+        __logger.tracing_mode = strdup(tracing_mode);
+    else
+        __logger.tracing_mode = strdup(PILGRIM_TRACING_MODE_DEFAULT);
 
 
     if(getenv("PILGRIM_DEBUG"))
@@ -585,18 +617,28 @@ void logger_init() {
     MAP_OR_FAIL(pthread_mutex_lock);
     MAP_OR_FAIL(pthread_mutex_unlock);
     install_mem_hooks();
-    __logger.recording = true;
+
+    __logger.initialized = true;
+
+    // For on demand tracing, set __logger.recording to true on MPI_Info_set("PILGRIM_TRACING", "ON");
+    // set __logger.recording to false on MPI_Info_set("PILGRIM_TRACING", "OFF");
+    if(strcmp(__logger.tracing_mode, PILGRIM_TRACING_MODE_ONDEMAND) == 0) {
+        if(__logger.rank == 0)
+            printf("[pilgrim] On demand tracing mode.\n");
+        logger_recording_off();
+    } else
+        logger_recording_on();
 }
 
 
 void logger_exit() {
     uninstall_mem_hooks();
-    __logger.recording = false;
+    logger_recording_off();
 
     //printf("[pilgrim] Rank: %d, Hash: %d, Number of records: %d\n", __logger.rank,
     //        HASH_COUNT(__logger.hash_head), __logger.local_metadata.records_count);
     double local_calls = __logger.local_metadata.records_count/1000.0/1000.0;
-    double total_calls;
+    double total_calls = 0;
     PMPI_Reduce(&local_calls, &total_calls, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
     // 1. Inter-process compression of CSTs
@@ -613,18 +655,18 @@ void logger_exit() {
 
     // 3. Write out timing information
     if(strcmp(__logger.timing_mode, TIMING_MODE_CFG) == 0)
-        write_cfg_timings(&(__logger.durations_grammar), &(__logger.intervals_grammar), __logger.rank, __logger.nprocs, total_calls);
+        write_cfg_timings(&(__logger.durations_grammar), &(__logger.intervals_grammar), __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, cfg_ts);
     if(strcmp(__logger.timing_mode, TIMING_MODE_TEXT) == 0)
         write_text_timings(__logger.hash_head, __logger.rank);
     if(strcmp(__logger.timing_mode, TIMING_MODE_LOSSLESS) == 0)
         write_lossless_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
     #ifdef WITH_ZFP
     if(strcmp(__logger.timing_mode, TIMING_MODE_ZFP) == 0)
-        write_zfp_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals);
+        write_zfp_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals, false);
     #endif
     #ifdef WITH_SZ
     if(strcmp(__logger.timing_mode, TIMING_MODE_SZ) == 0)
-        write_sz_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals);
+        write_sz_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals, false);
     #endif
     if(strcmp(__logger.timing_mode, TIMING_MODE_HIST) == 0)
         write_hist_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
@@ -636,14 +678,13 @@ void logger_exit() {
        strcmp(__logger.timing_mode, TIMING_MODE_AGGREGATED) != 0) {
         //write_zstd_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations);
 
-        write_zfp_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals);
-        write_zfp_clustering_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
+        write_zfp_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals, false);
+        write_zfp_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals, true);
 
-        write_sz_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals);
-        write_sz_clustering_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
+        write_sz_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals, false);
+        write_sz_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals, true);
 
         write_hist_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
-        write_vitter_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
     }
     */
 

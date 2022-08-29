@@ -9,6 +9,10 @@
 #include "mpi.h"
 #include "uthash.h"
 
+#define PILGRIM_TRACING_MODE_DEFAULT  "DEFAULT"
+#define PILGRIM_TRACING_MODE_ONDEMAND "DYNAMIC"
+
+
 // Global variables
 int g_mpi_rank;
 int g_mpi_size;
@@ -77,11 +81,14 @@ typedef struct _GlobalMetadata {
 
 void logger_init();
 void logger_exit();
+bool logger_initialized();
+void logger_recording_on();
+void logger_recording_off();
+
 void* compose_call_signature(Record *record, int *key_len);
 void write_record(Record record);
 
 
-bool is_recording();
 void append_offset(MPI_Offset offset);
 
 

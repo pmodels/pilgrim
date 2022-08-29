@@ -409,3 +409,32 @@ int MPI_Comm_idup(MPI_Comm comm, MPI_Comm *newcomm, MPI_Request *request)
 }
 */
 
+int imp_MPI_Info_set(MPI_Info info, const char *key, const char *value)
+{
+    if(strcmp(key, "PILGRIM_TRACING") == 0) {
+        if(strcmp(value, "ON") == 0) {
+            if(g_mpi_rank == 0)
+                printf("[pilgrim] pilgrim tracing on.\n");
+            logger_recording_on();
+        }
+        if(strcmp(value, "OFF") == 0) {
+            if(g_mpi_rank == 0)
+                printf("[pilgrim] pilgrim tracing off.\n");
+            logger_recording_off();
+        }
+        return 0;
+    }
+
+    PILGRIM_TRACING_1(int, MPI_Info_set, (info, key, value));
+    MPI_Info obj_0 = info;
+    int obj_id_0 = MPI_OBJ_ID(MPI_Info, &obj_0);
+    void **args = assemble_args_list(3, &obj_id_0, key, value);
+    int sizes[] = { sizeof(int), strlen(key)+1, strlen(value)+1 };
+    PILGRIM_TRACING_2(3, sizes, args, -1);
+}
+int MPI_Info_set(MPI_Info info, const char *key, const char *value) { return imp_MPI_Info_set(info, key, value); }
+extern void MPI_INFO_SET(MPI_Fint* info, const char* key, const char* value, MPI_Fint *ierr){ imp_MPI_Info_set(PMPI_Info_f2c(*info), key, value);}
+extern void mpi_info_set(MPI_Fint* info, const char* key, const char* value, MPI_Fint *ierr){ imp_MPI_Info_set(PMPI_Info_f2c(*info), key, value);}
+extern void mpi_info_set_(MPI_Fint* info, const char* key, const char* value, MPI_Fint *ierr){ imp_MPI_Info_set(PMPI_Info_f2c(*info), key, value);}
+extern void mpi_info_set__(MPI_Fint* info, const char* key, const char* value, MPI_Fint *ierr){ imp_MPI_Info_set(PMPI_Info_f2c(*info), key, value);}
+

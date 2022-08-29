@@ -64,7 +64,6 @@ mpirun -np N -env LD_PRELOAD /PATH/TO/pilgrim/lib/libpilgrim.so ./your_app
 ```
 mpirun can be replaced with your job scheduler, e.g., srun.
 
-
 ## Environment Variables
 
 **PILGRIM_TIMING_MODE** can be set to one of the options below:
@@ -75,3 +74,10 @@ mpirun can be replaced with your job scheduler, e.g., srun.
  - HIST: Store lossy timestamps using the HIST compression algorithm.
  - SZ: Store lossy timestamps using the SZ lossy compressor.
  - ZFP: Store lossy timestamps using the ZFP lossy compressor.
+
+**PILGRIM_TRACING_MODE**:
+- DEFAULT:  Tracing is enabled by default. Call `MPI_Info_set(info, "PILGRIM_TRACING", "OFF")` to disable tracing and `MPI_Info_set(info, "PILGRIM_TRACING", "ON")` to enable tracing.
+- DYNAMIC: Tracing is disabled by default. Call `MPI_Info_set(info, "PILGRIM_TRACING", "ON")` to enable tracing and `MPI_Info_set(info, "PILGRIM_TRACING", "OFF")` to disable tracing.
+
+**PILGRIM_DEBUG**: set to 1 to allow debug output.
+

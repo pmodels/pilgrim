@@ -19,7 +19,7 @@
 // First call the original function and stores the elapsed time, func id, etc
 // Need to call the function first so the output arguments have the correct value
 #define PILGRIM_TRACING_1(ret_type, func, func_args)                                    \
-    if(!is_recording()) {                                                               \
+    if(!logger_initialized()) {                                                         \
         ret_type res = P##func func_args;                                               \
         return res;                                                                     \
     }                                                                                   \

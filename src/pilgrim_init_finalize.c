@@ -69,3 +69,4 @@ extern void MPI_FINAZLIE(MPI_Fint * ierr) { pilgrim_exit(); PMPI_Finalize(); }
 extern void mpi_FINALIZE(MPI_Fint * ierr) { pilgrim_exit(); PMPI_Finalize(); }
 extern void mpi_finalize_(MPI_Fint * ierr) { pilgrim_exit(); PMPI_Finalize(); }
 extern void mpi_finalize__(MPI_Fint * ierr) { pilgrim_exit(); PMPI_Finalize(); }
+

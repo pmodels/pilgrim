@@ -14,13 +14,4 @@ libpilgrim_la_SOURCES += \
 	src/pilgrim_mem_hooks.c src/dlmalloc.c	src/pilgrim_addr_avl.c \
 	src/pilgrim_mpi_objects.c src/pilgrim_timings.c \
 	src/pilgrim_pthread_hooks.c
-	
 	##src/pilgrim_interval_tree.c
-
-
-
-# Add vitter algorithm code
-AM_CPPFLAGS += -I$(top_srcdir)/src/vitter
-libpilgrim_la_SOURCES += 		\
-	src/vitter/bitstream.c   	\
-	src/vitter/vitter.c

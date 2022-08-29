@@ -30,7 +30,7 @@ def handle_special_apis(func):
 
     # These are handled in pilgrim_init_pilgrim_wrappers_special.c
     ignored = ["MPI_Wait", "MPI_Waitany", "MPI_Waitsome", "MPI_Waitall", "MPI_Request_free", "MPI_Startall",
-               "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
+               "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol", "MPI_Info_set"]
 
     if func.name in ignored:
         return True

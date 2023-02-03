@@ -3,7 +3,7 @@
 ##     See COPYRIGHT in top-level directory
 ##
 
-AM_CPPFLAGS += -I$(top_srcdir)/src
+AM_CPPFLAGS += -I$(top_srcdir)/include
 
 pilgrim_app_generator_SOURCES += \
 	src/decoder/pilgrim_app_generator.c \

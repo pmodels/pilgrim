@@ -105,6 +105,12 @@ dnl ----------------------------------------------------------------------------
 # strict
 PAC_ARG_STRICT
 
+#PAC_APPEND_FLAG([-fno-common], [CFLAGS])
+AX_CHECK_COMPILE_FLAG([-fcommon],
+    [AX_APPEND_FLAG([-fcommon])],
+    [AC_MSG_WARN([-fcommon not supported, you may have to set CFLAGS to avoid multiple definitions error.])
+])
+
 AC_ARG_WITH(zfp,
 	AS_HELP_STRING([--with-zfp=DIR], [Specify the install location of ZFP]),,
 	with_zfp=)
@@ -163,6 +169,17 @@ if test "$have_pthreads" = "yes" ; then
     PAC_PREPEND_FLAG([-lpthread],[LIBS])
 else
     AC_ERROR([pthreads not found on the system])
+fi
+
+# look for zstd
+AC_CHECK_HEADERS(zstd.h)
+AC_CHECK_LIB([zstd],[ZSTD_compressBound],have_zstd=yes)
+if test "$have_zstd" = "yes" ; then
+    PAC_PREPEND_FLAG([-lzstd],[LIBS])
+else
+    if test "${with_sz}" == "" ; then
+        AC_ERROR([zstd not found on the system, please install libzstd-dev])
+    fi
 fi
 
 

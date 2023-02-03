@@ -3,7 +3,7 @@
 ##     See COPYRIGHT in top-level directory
 ##
 
-AM_CPPFLAGS += -I$(top_srcdir)/src -I$(ZFP_DIR)/include -I$(SZ_DIR)/include -I$(SZ_DIR)/include/sz 
+AM_CPPFLAGS += -I$(top_srcdir)/include -I$(ZFP_DIR)/include -I$(SZ_DIR)/include -I$(SZ_DIR)/include/sz 
 
 libpilgrim_la_SOURCES += \
 	src/pilgrim_wrappers.c src/pilgrim_utils.c src/pilgrim_logger.c \

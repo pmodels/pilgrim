@@ -11,10 +11,10 @@ from codegen import MPIFunction, MPIArgument
 def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
-    #os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
+    os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /usr/tce/packages/impi/impi-2018.0-intel-19.1.0/include/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
-    os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
+    #os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
     for line in f.readlines():
         if "#define" in line or "MPI_Fint" in line:
@@ -147,6 +147,7 @@ def codegen_assemble_args(func):
         elif '*' in arg.type or '[' in arg.type:
             arg_name = arg.name      # its already the adress
         elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for src or dest ranks
+            #line += "\tPMPI_Comm_rank(comm, &g_local_rank);\n"
             line += "\tint %s_rank = g_mpi_rank - %s;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = PILGRIM_MPI_ANY_SOURCE;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_PROC_NULL) %s_rank = PILGRIM_MPI_PROC_NULL;\n" %(arg.name, arg.name)
@@ -229,7 +230,7 @@ def handle_special_apis(func):
 
     # These are handled in pilgrim_wrappers_special.c
     ignored = ["MPI_Wait", "MPI_Waitany", "MPI_Waitsome", "MPI_Waitall", "MPI_Request_free", "MPI_Startall",
-               "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
+               "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol", "MPI_Info_set", "MPI_Comm_split"]
 
     # These two do not required by the standard to have their PMPI counterpart
     # So we don't trace them
@@ -329,6 +330,7 @@ def generate_wrapper_file(funcs):
                     arg_names.append("(%s*)%s" %(t, arg.name))
                 else:
                     if "MPI_Status" == t:
+                        # Actually never got here
                         before_call = "PMPI_Status_f2c(%s, &g_c_status);" %(arg.name)
                         arg_names.append("&g_c_status")
                     elif "MPI_Datatype" == t:
@@ -368,6 +370,7 @@ def generate_wrapper_file(funcs):
     f.write('#include "pilgrim.h"\n')
     f.write('#include "pilgrim_consts.h"\n')
     f.write('static int placeholder = 0;\n')
+    f.write('static int g_local_rank;\n')
     f.write('MPI_Status g_c_status;\n')
 
     for name in funcs:

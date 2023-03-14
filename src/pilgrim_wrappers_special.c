@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pilgrim.h"
+#include "pilgrim_consts.h"
 
 static int invalid_request_id = -1;
 
@@ -438,3 +439,130 @@ extern void mpi_info_set(MPI_Fint* info, const char* key, const char* value, MPI
 extern void mpi_info_set_(MPI_Fint* info, const char* key, const char* value, MPI_Fint *ierr){ imp_MPI_Info_set(PMPI_Info_f2c(*info), key, value);}
 extern void mpi_info_set__(MPI_Fint* info, const char* key, const char* value, MPI_Fint *ierr){ imp_MPI_Info_set(PMPI_Info_f2c(*info), key, value);}
 
+
+
+void check_color_key_pattern(int* recvbuf, int size, int* color_pattern, int* key_pattern) {
+
+    *color_pattern = PILGRIM_NO_PATTERN;
+    *key_pattern   = PILGRIM_NO_PATTERN;
+
+    int col = 0;
+    for(int i = 0; i < size; i++) {
+        if(col < recvbuf[i*3+1])
+            col = recvbuf[i*3+1];
+        if(col < recvbuf[i*3+2])
+            col = recvbuf[i*3+2];
+    }
+    col = col + 1;
+
+    int mod_color = 1, mod_key = 1;
+    for(int i = 0; i < size; i++) {
+        int rank  = recvbuf[i*3+0];
+        int color = recvbuf[i*3+1];
+        int key   = recvbuf[i*3+2];
+        if(color == rank%col && key == rank/col)
+            continue;
+        else
+            mod_color = 0;
+
+        if(color == rank/col && key == rank%col)
+            continue;
+        else
+            mod_key = 0;
+
+        if(!mod_color && !mod_key)
+            break;
+    }
+
+    if(mod_color) {
+        *color_pattern = PILGRIM_RANK_MOD_COL;
+        *key_pattern   = PILGRIM_RANK_DIV_COL;
+        return;
+    }
+    if(mod_key) {
+        *color_pattern = PILGRIM_RANK_DIV_COL;
+        *key_pattern   = PILGRIM_RANK_MOD_COL;
+        return;
+    }
+
+
+    int color_rank_encoded = 1, key_rank_encoded = 1;
+    int encoded_color = recvbuf[1] - recvbuf[0];
+    int encoded_key   = recvbuf[2] - recvbuf[0];
+    for(int i = 0; i < size; i++) {
+        int rank  = recvbuf[i*3+0];
+        int color = recvbuf[i*3+1];
+        int key   = recvbuf[i*3+2];
+        if(color-rank != encoded_color) {
+            color_rank_encoded = 0;
+            break;
+        }
+        if(key - rank != encoded_key) {
+            key_rank_encoded = 0;
+            break;
+        }
+    }
+
+    if(color_rank_encoded)
+        *color_pattern = PILGRIM_RANK_ENCODED_1D;
+    if(key_rank_encoded)
+        *color_pattern = PILGRIM_RANK_ENCODED_1D;
+}
+
+int imp_MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
+{
+	PILGRIM_TRACING_1(int, MPI_Comm_split, (comm, color, key, newcomm));
+	generate_intracomm_id(newcomm);
+	MPI_Comm obj_0 = comm;
+	int obj_id_0 = MPI_OBJ_ID(MPI_Comm, &obj_0);
+	int obj_id_1 = MPI_OBJ_ID(MPI_Comm, newcomm);
+
+    int old_comm_size, old_comm_rank;
+    PMPI_Comm_size(comm, &old_comm_size);
+    PMPI_Comm_rank(comm, &old_comm_rank);
+
+    int sendbuf[3] = {old_comm_rank, color, key};
+    int *recvbuf   = NULL;
+    int color_pattern, key_pattern;
+
+    if(old_comm_rank == 0)
+        recvbuf = malloc(sizeof(int)*3*old_comm_size);
+    PMPI_Gather(sendbuf, 3, MPI_INT, recvbuf, 3, MPI_INT, 0, comm);
+    if( old_comm_rank == 0 ) {
+        check_color_key_pattern(recvbuf, old_comm_size, &color_pattern, &key_pattern);
+        free(recvbuf);
+    }
+
+    // Need to check if the old communicator is an inter-communicator
+    // if so, we can not use MPI_Bcast on it, we need to first create
+    // an intra-communicator from it.
+    int is_inter;
+    PMPI_Comm_test_inter(comm, &is_inter);
+    if(is_inter) {
+        MPI_Comm tmpcomm;
+        PMPI_Intercomm_merge(comm, 0, &tmpcomm);
+        PMPI_Bcast(&color_pattern, 1, MPI_INT, 0, tmpcomm);
+        PMPI_Bcast(&key_pattern,   1, MPI_INT, 0, tmpcomm);
+        PMPI_Comm_free(&tmpcomm);
+    } else {
+        PMPI_Bcast(&color_pattern, 1, MPI_INT, 0, comm);
+        PMPI_Bcast(&key_pattern,   1, MPI_INT, 0, comm);
+    }
+
+
+    if(color_pattern == PILGRIM_NO_PATTERN)
+        color_pattern = color;
+    if(key_pattern == PILGRIM_NO_PATTERN)
+        key = key;
+
+    //printf("MPI_Comm_split %d, color: %d, key: %d\n", old_comm_rank, color, key);
+
+	void **args = assemble_args_list(4, &obj_id_0, &color_pattern, &key_pattern, &obj_id_1);
+	int sizes[] = { sizeof(int), sizeof(int), sizeof(int), sizeof(int) };
+	PILGRIM_TRACING_2(4, sizes, args, -1);
+}
+int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm) { return imp_MPI_Comm_split(comm, color, key, newcomm); }
+extern void MPI_COMM_SPLIT(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr){ imp_MPI_Comm_split(PMPI_Comm_f2c(*comm), (*color), (*key), (MPI_Comm*)newcomm);}
+extern void mpi_comm_split(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr){ imp_MPI_Comm_split(PMPI_Comm_f2c(*comm), (*color), (*key), (MPI_Comm*)newcomm);}
+extern void mpi_comm_split_(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr){ imp_MPI_Comm_split(PMPI_Comm_f2c(*comm), (*color), (*key), (MPI_Comm*)newcomm);}
+extern void mpi_comm_split__(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr){ imp_MPI_Comm_split(PMPI_Comm_f2c(*comm), (*color), (*key), (MPI_Comm*)newcomm);}

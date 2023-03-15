@@ -270,10 +270,10 @@ extern void mpi_waitall_(int *count, MPI_Fint* array_of_requests, MPI_Fint* arra
     MPI_Request c_handle_0[*count];
     MPI_Status  c_handle_1[*count];
     for(int i = 0; i < *count; i++) c_handle_0[i] = PMPI_Request_f2c(array_of_requests[i]);
-    for(int i = 0; i < *count; i++) PMPI_Status_f2c(&array_of_statuses[i], &c_handle_1[i]);
-    imp_MPI_Waitall(*count, (MPI_Request*)array_of_requests, (MPI_Status*)array_of_statuses);
+    for(int i = 0; i < *count; i++) PMPI_Status_f2c(&(array_of_statuses[i]), &c_handle_1[i]);
+    imp_MPI_Waitall(*count, c_handle_0, c_handle_1);
     for(int i = 0; i < *count; i++) array_of_requests[i] = PMPI_Request_c2f(c_handle_0[i]);
-    for(int i = 0; i < *count; i++) PMPI_Status_c2f(&c_handle_1[i], &array_of_statuses[i]);
+    for(int i = 0; i < *count; i++) PMPI_Status_c2f(&(c_handle_1[i]), &(array_of_statuses[i]));
 }
 
 

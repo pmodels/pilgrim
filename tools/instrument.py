@@ -236,6 +236,10 @@ def handle_special_apis(func):
     # So we don't trace them
     ignored += ["MPI_Wtime", "MPI_Wtick"]
 
+    # TODO
+    # These two cause compiler issues for openmpi, ignore them for now
+    ignored += ["MPI_Aint_add", "MPI_Aint_diff"]
+
     if func.name in ignored:
         return True
 
@@ -260,7 +264,7 @@ def generate_wrapper_file(funcs):
     import re
 
     def signature(func, f):
-        line = func.ret_type + " imp_" + func.name + func.signature + "\n"
+        line = func.ret_type + " c_" + func.name + func.signature + "\n"
         f.write(line + '{\n')
 
     def phase_one(func, f):
@@ -276,7 +280,7 @@ def generate_wrapper_file(funcs):
         arg_names = []
         for arg in func.arguments:
             arg_names.append(arg.name)
-        actual_call = "imp_" + func.name + "(" + ", ".join(arg_names)+");"
+        actual_call = "c_" + func.name + "(" + ", ".join(arg_names)+");"
 
         # C wrapper
         line = func.ret_type + " " + func.name + func.signature
@@ -292,9 +296,6 @@ def generate_wrapper_file(funcs):
             type_str = arg.type
             name_str = arg.name
 
-            if is_fortran_mpi_object(arg.type):
-                type_str = "MPI_Fint*"
-                name_str = name_str.replace("[]", "")
             if "int" == arg.type:
                 type_str = "int*"
             elif "[][]" in arg.type:      # [][3]
@@ -303,6 +304,10 @@ def generate_wrapper_file(funcs):
             elif "[]" in arg.type:
                 type_str = type_str.replace("[]", "")
                 name_str = name_str + "[]"
+
+            if is_fortran_mpi_object(arg.type):
+                type_str = "MPI_Fint*"
+                name_str = name_str.replace("[]", "")
 
             fortran_sig += type_str + " " +  name_str + ", "
 
@@ -324,13 +329,16 @@ def generate_wrapper_file(funcs):
         before_call = ""
         after_call = ""
         arg_names = []
+        arg_org_names = []
         handle_idx = 0
 
         if func.need_comm_size:
             before_call += "\n\tint comm_size;"
             before_call += "\n\tPMPI_Comm_size(PMPI_Comm_f2c(*comm), &comm_size);"
 
+
         for arg in func.arguments:
+
             t = arg.type.replace("*", "").replace(" ","").replace("[]","").replace("const", "")
             if is_fortran_mpi_object(arg.type):
 
@@ -346,20 +354,20 @@ def generate_wrapper_file(funcs):
                     before_call += "\n\t%s c_handle_%d[%s];" %(t, handle_idx, n)
                     print "here", arg.direction, func.name, arg.type, arg.name, "length:", arg.length, n
                     if "MPI_Status" == t:
-                        before_call += "\n\tfor(int i = 0; i < %s; i++) PMPI_Status_f2c(%s[i], &c_handle_%d[i]);" %(n, arg.name, handle_idx)
+                        before_call += "\n\tfor(int i = 0; i < %s; i++) PMPI_Status_f2c(&(%s[i]), &c_handle_%d[i]);" %(n, arg.name, handle_idx)
                         arg_names.append("c_handle_%d" %handle_idx)
                         if arg.direction == "INOUT" or arg.direction == "OUT":
-                            after_call += "\n\tfor(int i = 0; i < %s; i++) PMPI_Status_c2f(&c_handle_%d[i], *(%s[i]));" %(n, handle_idx, arg.name)
+                            after_call += "\n\tfor(int i = 0; i < %s; i++) PMPI_Status_c2f(&c_handle_%d[i], &(%s[i]));" %(n, handle_idx, arg.name)
                     elif "MPI_Datatype" == t:
-                        before_call += "\n\tfor(int i = 0; i < %s; i++) c_handle_%d[i] = PMPI_Type_f2c(*(%s[i]));" %(n, handle_idx, arg.name)
+                        before_call += "\n\tfor(int i = 0; i < %s; i++) c_handle_%d[i] = PMPI_Type_f2c(%s[i]);" %(n, handle_idx, arg.name)
                         arg_names.append("c_handle_%d" %handle_idx)
                         if arg.direction == "INOUT" or arg.direction == "OUT":
-                            after_call += "\n\tfor(int i = 0; i < %s; i++) *(%s[i]) = PMPI_Type_c2f(c_handle_%d[i]);" %(n, arg.name, handle_idx)
+                            after_call += "\n\tfor(int i = 0; i < %s; i++) %s[i] = PMPI_Type_c2f(c_handle_%d[i]);" %(n, arg.name, handle_idx)
                     else:
-                        before_call += "\n\tfor(int i = 0; i < %s; i++) c_handle_%d[i] = P%s_f2c(*%s[i]);" %(n, handle_idx, t, arg.name)
+                        before_call += "\n\tfor(int i = 0; i < %s; i++) c_handle_%d[i] = P%s_f2c(%s[i]);" %(n, handle_idx, t, arg.name)
                         arg_names.append("c_handle_%d" %handle_idx)
                         if arg.direction == "INOUT" or arg.direction == "OUT":
-                            after_call += "\n\tfor(int i = 0; i < %s; i++) *(%s[i]) = P%s_c2f(c_handle_%d[i]);" %(n, arg.name, t, handle_idx)
+                            after_call += "\n\tfor(int i = 0; i < %s; i++) %s[i] = P%s_c2f(c_handle_%d[i]);" %(n, arg.name, t, handle_idx)
                 else:
                     before_call += "\n\t%s c_handle_%d;" %(t, handle_idx)
                     if "MPI_Status" == t:
@@ -384,17 +392,21 @@ def generate_wrapper_file(funcs):
                     arg_names.append("(*%s)" %arg.name)
                 else:
                     arg_names.append(arg.name)
+            arg_org_names.append(arg.name)
 
-        actual_call = "\n\timp_" + func.name + "(" + ", ".join(arg_names)+");"
+        c_actual_call = "\n\tc_" + func.name + "(" + ", ".join(arg_names)+");"
+        f_actual_call = "\n\tf_" + func.name.lower() + "(" + ", ".join(arg_org_names) + ", ierr);"
 
         if fortran_sig == "()":
             fortran_sig = "(MPI_Fint *ierr)"
         else:
             fortran_sig = fortran_sig.replace(")", ", MPI_Fint *ierr)")
-        f.write("extern void " + func.name.upper() + fortran_sig + "{ " + before_call+actual_call+after_call +"\n}\n")
-        f.write("extern void " + func.name.lower() + fortran_sig + "{ " + before_call+actual_call+after_call +"\n}\n")
-        f.write("extern void " + func.name.lower() + "_" + fortran_sig + "{ "+before_call+actual_call+after_call +"\n}\n")
-        f.write("extern void " + func.name.lower() + "__" + fortran_sig + "{ "+before_call+actual_call+after_call +"\n}\n")
+
+        f.write("extern void f_" + func.name.lower()+fortran_sig+ " {" + before_call+c_actual_call+after_call+"\n}\n")
+        f.write("extern void " + func.name.upper() + fortran_sig + " {" + f_actual_call +"\n}\n")
+        f.write("extern void " + func.name.lower() + fortran_sig + " {" + f_actual_call +"\n}\n")
+        f.write("extern void " + func.name.lower() + "_" + fortran_sig + " {"+f_actual_call+"\n}\n")
+        f.write("extern void " + func.name.lower() + "__" + fortran_sig + " {"+f_actual_call+"\n}\n")
 
 
     def logging(func, f):

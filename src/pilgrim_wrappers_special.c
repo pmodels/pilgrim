@@ -186,9 +186,14 @@ int MPI_Wait(MPI_Request *request, MPI_Status *status) {
     imp_MPI_Wait(request, status);
     return MPI_SUCCESS;
 }
-int mpi_wait_(MPI_Fint* request, MPI_Fint* status) {
-    imp_MPI_Wait((MPI_Request*)request, (MPI_Status*)status);
-    return MPI_SUCCESS;
+extern void mpi_wait_(MPI_Fint* request, MPI_Fint* status, MPI_Fint* ierr) {
+    MPI_Request c_handle_0;
+    MPI_Status  c_handle_1;
+    c_handle_0 = PMPI_Request_f2c(*request);
+    PMPI_Status_f2c(status, &c_handle_1);
+    imp_MPI_Wait(&c_handle_0, &c_handle_1);
+    *request = PMPI_Request_c2f(c_handle_0);
+    PMPI_Status_c2f(&c_handle_1, status);
 }
 
 
@@ -261,12 +266,15 @@ int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status array_of_
     return MPI_SUCCESS;
 }
 
-int mpi_waitall_(int *count, MPI_Fint* array_of_requests, MPI_Fint* array_of_statuses) {
+extern void mpi_waitall_(int *count, MPI_Fint* array_of_requests, MPI_Fint* array_of_statuses, MPI_Fint* ierr) {
+    MPI_Request c_handle_0[*count];
+    MPI_Status  c_handle_1[*count];
+    for(int i = 0; i < *count; i++) c_handle_0[i] = PMPI_Request_f2c(array_of_requests[i]);
+    for(int i = 0; i < *count; i++) PMPI_Status_f2c(&array_of_statuses[i], &c_handle_1[i]);
     imp_MPI_Waitall(*count, (MPI_Request*)array_of_requests, (MPI_Status*)array_of_statuses);
-    return MPI_SUCCESS;
+    for(int i = 0; i < *count; i++) array_of_requests[i] = PMPI_Request_c2f(c_handle_0[i]);
+    for(int i = 0; i < *count; i++) PMPI_Status_c2f(&c_handle_1[i], &array_of_statuses[i]);
 }
-
-
 
 
 int MPI_Test(MPI_Request *request, int *flag, MPI_Status *status)
@@ -562,7 +570,20 @@ int imp_MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
 	PILGRIM_TRACING_2(4, sizes, args, -1);
 }
 int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm) { return imp_MPI_Comm_split(comm, color, key, newcomm); }
-extern void MPI_COMM_SPLIT(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr){ imp_MPI_Comm_split(PMPI_Comm_f2c(*comm), (*color), (*key), (MPI_Comm*)newcomm);}
-extern void mpi_comm_split(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr){ imp_MPI_Comm_split(PMPI_Comm_f2c(*comm), (*color), (*key), (MPI_Comm*)newcomm);}
-extern void mpi_comm_split_(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr){ imp_MPI_Comm_split(PMPI_Comm_f2c(*comm), (*color), (*key), (MPI_Comm*)newcomm);}
-extern void mpi_comm_split__(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr){ imp_MPI_Comm_split(PMPI_Comm_f2c(*comm), (*color), (*key), (MPI_Comm*)newcomm);}
+extern void f_mpi_comm_split(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr) { 
+    MPI_Comm c_comm;
+    imp_MPI_Comm_split(PMPI_Comm_f2c(*comm), (*color), (*key), &c_comm);
+    *newcomm = PMPI_Comm_c2f(c_comm);
+}
+extern void MPI_COMM_SPLIT(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr) {
+    f_mpi_comm_split(comm, color, key, newcomm, ierr);
+}
+extern void mpi_comm_split(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr) { 
+    f_mpi_comm_split(comm, color, key, newcomm, ierr);
+}
+extern void mpi_comm_split_(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr) {
+    f_mpi_comm_split(comm, color, key, newcomm, ierr);
+}
+extern void mpi_comm_split__(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr) {
+    f_mpi_comm_split(comm, color, key, newcomm, ierr);
+}

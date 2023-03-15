@@ -316,6 +316,7 @@ extern void mpi_buffer_detach_(void* buffer_addr, int* size, MPI_Fint *ierr){
 extern void mpi_buffer_detach__(void* buffer_addr, int* size, MPI_Fint *ierr){ 
 	imp_MPI_Buffer_detach(buffer_addr, size);
 }
+/*
 MPI_Aint imp_MPI_Aint_add(MPI_Aint base, MPI_Aint disp)
 {
 	PILGRIM_TRACING_1(MPI_Aint, MPI_Aint_add, (base, disp));
@@ -336,6 +337,7 @@ extern void mpi_aint_add_(MPI_Aint base, MPI_Aint disp, MPI_Fint *ierr){
 extern void mpi_aint_add__(MPI_Aint base, MPI_Aint disp, MPI_Fint *ierr){ 
 	imp_MPI_Aint_add(base, disp);
 }
+*/
 int imp_MPI_Win_flush_local_all(MPI_Win win)
 {
 	PILGRIM_TRACING_1(int, MPI_Win_flush_local_all, (win));
@@ -14556,6 +14558,7 @@ extern void mpi_comm_set_errhandler__(MPI_Fint* comm, MPI_Fint* errhandler, MPI_
 	imp_MPI_Comm_set_errhandler(c_handle_0, c_handle_1);
 	*comm = PMPI_Comm_c2f(c_handle_0);
 }
+/*
 MPI_Aint imp_MPI_Aint_diff(MPI_Aint addr1, MPI_Aint addr2)
 {
 	PILGRIM_TRACING_1(MPI_Aint, MPI_Aint_diff, (addr1, addr2));
@@ -14576,6 +14579,7 @@ extern void mpi_aint_diff_(MPI_Aint addr1, MPI_Aint addr2, MPI_Fint *ierr){
 extern void mpi_aint_diff__(MPI_Aint addr1, MPI_Aint addr2, MPI_Fint *ierr){ 
 	imp_MPI_Aint_diff(addr1, addr2);
 }
+*/
 int imp_MPI_File_write_ordered_begin(MPI_File fh, const void *buf, int count, MPI_Datatype datatype)
 {
 	PILGRIM_TRACING_1(int, MPI_File_write_ordered_begin, (fh, buf, count, datatype));

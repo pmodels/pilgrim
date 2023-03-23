@@ -12,6 +12,10 @@ int main(int argc, char* argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     MPI_Comm_split(MPI_COMM_WORLD, rank%2, rank, &newcomm);
+
+    int size;
+    MPI_Comm_size(newcomm, &size);
+
     MPI_Finalize();
     return 0;
 }

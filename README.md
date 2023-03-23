@@ -5,6 +5,12 @@ It is lossless for MPI functionality but lossy for non-MPI metadata.
 Pilgrim captures the complete set of MPI calls and all their parameters.
 To ensure completeness, the interception codes are generated automatically from the MPI standard.
 
+To cite:
+
+[Chen Wang, Pavan Balaji, and Marc Snir. "Pilgrim: Scalable and (near) Lossless MPI Tracing", SC, 2021](https://dl.acm.org/doi/abs/10.1145/3458817.3476151)
+
+[Chen Wang, Yanfei Guo, Pavan Balaji, and Marc Snir. "Near-Lossless MPI Tracing and Proxy Application Autogeneration", IEEE TPDS, 2022](https://ieeexplore.ieee.org/document/9925630)
+
 
 ## Building Pilgrim
 ```bash

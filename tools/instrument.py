@@ -11,10 +11,10 @@ from codegen import MPIFunction, MPIArgument
 def filter_with_local_mpi_functions(funcs):
     cleaned = {}
 
-    #os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
+    os.system('grep -E "PMPI" /usr/include/mpich/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /usr/tce/packages/impi/impi-2018.0-intel-19.1.0/include/*.h > /tmp/local_funcs.tmp')
     #os.system('grep -E "PMPI" /opt/pkgs/software/MPICH/3.3-GCC-7.2.0-2.29/include/*.h > /tmp/local_funcs.tmp')
-    os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
+    #os.system('grep -E "PMPI" /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include/*.h > /tmp/local_funcs.tmp')
     f = open('/tmp/local_funcs.tmp', 'r')
     for line in f.readlines():
         if "#define" in line or "MPI_Fint" in line:
@@ -63,7 +63,7 @@ def is_mpi_object_arg(arg_type):
 
 def is_fortran_mpi_object(arg_type):
     if "MPI_" in arg_type and "MPI_Offset" not in arg_type \
-        and "MPI_Aint" not in arg_type and "MPI_Count" not in arg_type:
+        and "MPI_Aint" not in arg_type and "MPI_Count" not in arg_type and "function" not in arg_type:
             return True
     return False
 
@@ -147,6 +147,7 @@ def codegen_assemble_args(func):
         elif '*' in arg.type or '[' in arg.type:
             arg_name = arg.name      # its already the adress
         elif 'int' in arg.type and ('source' in arg.name or 'dest' in arg.name):    # pattern recognization for src or dest ranks
+            #line += "\tPMPI_Comm_rank(comm, &g_local_rank);\n"
             line += "\tint %s_rank = g_mpi_rank - %s;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_ANY_SOURCE) %s_rank = PILGRIM_MPI_ANY_SOURCE;\n" %(arg.name, arg.name)
             line += "\tif(%s == MPI_PROC_NULL) %s_rank = PILGRIM_MPI_PROC_NULL;\n" %(arg.name, arg.name)
@@ -229,11 +230,15 @@ def handle_special_apis(func):
 
     # These are handled in pilgrim_wrappers_special.c
     ignored = ["MPI_Wait", "MPI_Waitany", "MPI_Waitsome", "MPI_Waitall", "MPI_Request_free", "MPI_Startall",
-               "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol"]
+               "MPI_Test", "MPI_Testany", "MPI_Testsome", "MPI_Testall", "MPI_Pcontrol", "MPI_Info_set", "MPI_Comm_split"]
 
     # These two do not required by the standard to have their PMPI counterpart
     # So we don't trace them
     ignored += ["MPI_Wtime", "MPI_Wtick"]
+
+    # TODO
+    # These two cause compiler issues for openmpi, ignore them for now
+    ignored += ["MPI_Aint_add", "MPI_Aint_diff"]
 
     if func.name in ignored:
         return True
@@ -259,7 +264,7 @@ def generate_wrapper_file(funcs):
     import re
 
     def signature(func, f):
-        line = func.ret_type + " imp_" + func.name + func.signature + "\n"
+        line = func.ret_type + " c_" + func.name + func.signature + "\n"
         f.write(line + '{\n')
 
     def phase_one(func, f):
@@ -275,7 +280,7 @@ def generate_wrapper_file(funcs):
         arg_names = []
         for arg in func.arguments:
             arg_names.append(arg.name)
-        actual_call = "imp_" + func.name + "(" + ", ".join(arg_names)+");"
+        actual_call = "c_" + func.name + "(" + ", ".join(arg_names)+");"
 
         # C wrapper
         line = func.ret_type + " " + func.name + func.signature
@@ -291,9 +296,6 @@ def generate_wrapper_file(funcs):
             type_str = arg.type
             name_str = arg.name
 
-            if is_fortran_mpi_object(arg.type):
-                type_str = "MPI_Fint*"
-                name_str = name_str.replace("[]", "")
             if "int" == arg.type:
                 type_str = "int*"
             elif "[][]" in arg.type:      # [][3]
@@ -302,6 +304,10 @@ def generate_wrapper_file(funcs):
             elif "[]" in arg.type:
                 type_str = type_str.replace("[]", "")
                 name_str = name_str + "[]"
+
+            if is_fortran_mpi_object(arg.type):
+                type_str = "MPI_Fint*"
+                name_str = name_str.replace("[]", "")
 
             fortran_sig += type_str + " " +  name_str + ", "
 
@@ -321,36 +327,86 @@ def generate_wrapper_file(funcs):
         '''
 
         before_call = ""
+        after_call = ""
         arg_names = []
+        arg_org_names = []
+        handle_idx = 0
+
+        if func.need_comm_size:
+            before_call += "\n\tint comm_size;"
+            before_call += "\n\tPMPI_Comm_size(PMPI_Comm_f2c(*comm), &comm_size);"
+
+
         for arg in func.arguments:
+
             t = arg.type.replace("*", "").replace(" ","").replace("[]","").replace("const", "")
             if is_fortran_mpi_object(arg.type):
+
+                n = "1"
                 if "*" in arg.type or "[]" in arg.type:
-                    arg_names.append("(%s*)%s" %(t, arg.name))
-                else:
-                    if "MPI_Status" == t:
-                        before_call = "PMPI_Status_f2c(%s, &g_c_status);" %(arg.name)
-                        arg_names.append("&g_c_status")
-                    elif "MPI_Datatype" == t:
-                        arg_names.append("PMPI_Type_f2c(*%s)" %arg.name)
+                    if not arg.length:
+                        if func.need_comm_size and arg.direction == "IN":
+                            n = "comm_size"
                     else:
-                        arg_names.append("P%s_f2c(*%s)" %(t, arg.name))
+                        n = arg.length if arg.length.isdigit() else "*"+arg.length
+
+                if n != "1":
+                    before_call += "\n\t%s c_handle_%d[%s];" %(t, handle_idx, n)
+                    print "here", arg.direction, func.name, arg.type, arg.name, "length:", arg.length, n
+                    if "MPI_Status" == t:
+                        before_call += "\n\tfor(int i = 0; i < %s; i++) PMPI_Status_f2c(&(%s[i]), &c_handle_%d[i]);" %(n, arg.name, handle_idx)
+                        arg_names.append("c_handle_%d" %handle_idx)
+                        if arg.direction == "INOUT" or arg.direction == "OUT":
+                            after_call += "\n\tfor(int i = 0; i < %s; i++) PMPI_Status_c2f(&c_handle_%d[i], &(%s[i]));" %(n, handle_idx, arg.name)
+                    elif "MPI_Datatype" == t:
+                        before_call += "\n\tfor(int i = 0; i < %s; i++) c_handle_%d[i] = PMPI_Type_f2c(%s[i]);" %(n, handle_idx, arg.name)
+                        arg_names.append("c_handle_%d" %handle_idx)
+                        if arg.direction == "INOUT" or arg.direction == "OUT":
+                            after_call += "\n\tfor(int i = 0; i < %s; i++) %s[i] = PMPI_Type_c2f(c_handle_%d[i]);" %(n, arg.name, handle_idx)
+                    else:
+                        before_call += "\n\tfor(int i = 0; i < %s; i++) c_handle_%d[i] = P%s_f2c(%s[i]);" %(n, handle_idx, t, arg.name)
+                        arg_names.append("c_handle_%d" %handle_idx)
+                        if arg.direction == "INOUT" or arg.direction == "OUT":
+                            after_call += "\n\tfor(int i = 0; i < %s; i++) %s[i] = P%s_c2f(c_handle_%d[i]);" %(n, arg.name, t, handle_idx)
+                else:
+                    before_call += "\n\t%s c_handle_%d;" %(t, handle_idx)
+                    if "MPI_Status" == t:
+                        before_call += "\n\tPMPI_Status_f2c(%s, &c_handle_%d);" %(arg.name, handle_idx)
+                        arg_names.append("%sc_handle_%d" %("&" if "*" in arg.type else "", handle_idx))
+                        if arg.direction == "INOUT" or arg.direction == "OUT":
+                            after_call += "\n\tPMPI_Status_c2f(&c_handle_%d, %s);" %(handle_idx, arg.name)
+                    elif "MPI_Datatype" == t:
+                        before_call += "\n\tc_handle_%d = PMPI_Type_f2c(*%s);" %(handle_idx, arg.name)
+                        arg_names.append("%sc_handle_%d" %("&" if "*" in arg.type else "", handle_idx))
+                        if arg.direction == "INOUT" or arg.direction == "OUT":
+                            after_call += "\n\t*%s = PMPI_Type_c2f(c_handle_%d);" %(arg.name, handle_idx)
+                    else:
+                        before_call += "\n\tc_handle_%d = P%s_f2c(*%s);" %(handle_idx, t, arg.name)
+                        arg_names.append("%sc_handle_%d" %("&" if "*" in arg.type else "", handle_idx))
+                        if arg.direction == "INOUT" or arg.direction == "OUT":
+                            after_call += "\n\t*%s = P%s_c2f(c_handle_%d);" %(arg.name, t, handle_idx)
+                handle_idx += 1
+            # else of if is_fortran_mpi_object
             else:
                 if "int" == arg.type:
                     arg_names.append("(*%s)" %arg.name)
                 else:
                     arg_names.append(arg.name)
+            arg_org_names.append(arg.name)
 
-        actual_call = "imp_" + func.name + "(" + ", ".join(arg_names)+");"
+        c_actual_call = "\n\tc_" + func.name + "(" + ", ".join(arg_names)+");"
+        f_actual_call = "\n\tf_" + func.name.lower() + "(" + ", ".join(arg_org_names) + ", ierr);"
 
         if fortran_sig == "()":
             fortran_sig = "(MPI_Fint *ierr)"
         else:
             fortran_sig = fortran_sig.replace(")", ", MPI_Fint *ierr)")
-        f.write("extern void " + func.name.upper() + fortran_sig + "{ " + before_call+actual_call + "}\n")
-        f.write("extern void " + func.name.lower() + fortran_sig + "{ " + before_call+actual_call + "}\n")
-        f.write("extern void " + func.name.lower() + "_" + fortran_sig + "{ "+before_call+actual_call + "}\n")
-        f.write("extern void " + func.name.lower() + "__" + fortran_sig + "{ "+before_call+actual_call + "}\n")
+
+        f.write("extern void f_" + func.name.lower()+fortran_sig+ " {" + before_call+c_actual_call+after_call+"\n}\n")
+        f.write("extern void " + func.name.upper() + fortran_sig + " {" + f_actual_call +"\n}\n")
+        f.write("extern void " + func.name.lower() + fortran_sig + " {" + f_actual_call +"\n}\n")
+        f.write("extern void " + func.name.lower() + "_" + fortran_sig + " {"+f_actual_call+"\n}\n")
+        f.write("extern void " + func.name.lower() + "__" + fortran_sig + " {"+f_actual_call+"\n}\n")
 
 
     def logging(func, f):
@@ -368,6 +424,7 @@ def generate_wrapper_file(funcs):
     f.write('#include "pilgrim.h"\n')
     f.write('#include "pilgrim_consts.h"\n')
     f.write('static int placeholder = 0;\n')
+    f.write('static int g_local_rank;\n')
     f.write('MPI_Status g_c_status;\n')
 
     for name in funcs:

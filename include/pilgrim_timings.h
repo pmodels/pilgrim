@@ -38,16 +38,11 @@
 
 void handle_aggregated_timing(RecordHash* entry, Record* record);
 void handle_cfg_timing(RecordHash* entry, Record* record, int* duration_id, int* interval_id);
-void handle_lossless_timing(RecordHash* entry, Record* record, double* duration, double* interval);
 
 void write_text_timings(RecordHash* cst, int mpi_rank);
-
-void write_lossless_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path);
-
+void write_lossless_timings(TimingNode* tstart_nodes, TimingNode* tend_nodes, int mpi_rank, int mpi_size, char* dur_path, char* int_path);
 void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path, TimingNode* g_durations);
-
 void write_hist_timings(RecordHash* cst, int mpi_rank, double total_calls, char* dur_path, char* int_path);
-
 void write_cfg_timings(Grammar* duration_grammar, Grammar* interval_grammar, int mpi_rank, double total_calls, char* dur_path, char* int_path, double cfg_ts);
 
 #ifdef WITH_ZFP

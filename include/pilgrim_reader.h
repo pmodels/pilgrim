@@ -20,6 +20,11 @@ typedef struct CallSignature_t {
 
 } CallSignature;
 
+typedef struct CST_t {
+    int num_css;            // number of unique call signatures, i.e.,g length of cs_list
+    CallSignature* cs_list;
+} CST;
+
 
 /**
  * A hash table to represent a CFG
@@ -33,7 +38,7 @@ typedef struct RuleHash_t {
     UT_hash_handle hh;
 } RuleHash;
 
-typedef struct DecodedGrammars_t {
+typedef struct CFG_t {
     int num_grammars;               // number of unique grammars
 
     RuleHash** intra_cfgs;          // size of nprocs. for each unique grammar
@@ -41,10 +46,9 @@ typedef struct DecodedGrammars_t {
 
     int *num_symbols;               // number of symbols of each unique grammar
     int *grammar_ids;               // size of nprocs. each rank's grammar id
-} DecodedGrammars;
+} CFG;
 
 
-void free_decoded_grammars(DecodedGrammars *dg);
 
 #define TYPE_NON_MPI                    0
 #define TYPE_MPI_Info                   1
@@ -183,9 +187,19 @@ static char* TYPE_VAR_STR[] = {
     memset(cs->arg_lengths, -1, count*sizeof(int));
 
 
-DecodedGrammars* read_cfg(char* cfg_path, int nprocs);
-CallSignature* read_cst(char* cst_path, int *num_sigs);
-void read_metadata(char* metadata_path, GlobalMetadata *gm);
+GlobalMetadata* read_metadata(const char* trace_dir);
+void free_metadata(GlobalMetadata* gm);
+
+CST* read_cst(GlobalMetadata* gm);
+CFG* read_cfg(GlobalMetadata* gm);
+void free_cfg(CFG* dg);
+void free_cst(CST* cst);
+
+double* read_tstarts(GlobalMetadata* gm);
+double* read_tends(GlobalMetadata* gm);
+// free them directly use free()
+
+
 
 void read_record_args(int func_id, void* buff, CallSignature *cs);
 void read_record_args_special(int func_id, void* buff, CallSignature *cs);

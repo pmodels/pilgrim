@@ -97,7 +97,7 @@ void write_vars_declaration_core(FILE* f, int type, int id_or_val) {
     }
 }
 
-void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
+void write_vars_declaration(FILE* f, Grammar *grammar, CST *cst) {
     CallSignature* cs;
     Symbol *rule, *sym;
 
@@ -107,7 +107,7 @@ void write_vars_declaration(FILE* f, Grammar *grammar, CallSignature *cst) {
         DL_FOREACH(rule->rule_body, sym) {
             if(sym->val < 0 || sym->val >= grammar_splitter)
                 continue;
-            cs = &(cst[sym->val]);
+            cs = &(cst->cs_list[sym->val]);
 
             for(int j = 0; j < cs->arg_count; j++) {
                 int type = cs->arg_types[j];
@@ -335,7 +335,7 @@ void write_call(FILE* f, CallSignature *cs) {
     }
 }
 
-void write_prologue(FILE* f, Grammar* grammar, CallSignature* cst) {
+void write_prologue(FILE* f, Grammar* grammar, CST* cst) {
     fprintf(f, "#include <stdio.h>\n");
     fprintf(f, "#include <stdlib.h>\n");
     fprintf(f, "#include <mpi.h>\n\n");
@@ -362,7 +362,7 @@ void write_prologue(FILE* f, Grammar* grammar, CallSignature* cst) {
 }
 
 
-void write_epilogue(FILE* f, int nprocs, DecodedGrammars *dg) {
+void write_epilogue(FILE* f, int nprocs, CFG *cfg) {
     fprintf(f, "int main(int argc, char* argv[]) {\n");
     fprintf(f, "\tMPI_Init(&argc, &argv);\n");
     fprintf(f, "\tPMPI_Comm_size(MPI_COMM_WORLD, &g_mpi_size);\n");
@@ -373,7 +373,7 @@ void write_epilogue(FILE* f, int nprocs, DecodedGrammars *dg) {
     fprintf(f, "\tint grammar_ids[] = {");
 
     for(int rank = 0; rank < nprocs; rank++) {
-        int ugi = dg->grammar_ids[rank];
+        int ugi = cfg->grammar_ids[rank];
         if(rank == nprocs-1)
             fprintf(f, "%d};\n", ugi);
         else
@@ -387,14 +387,14 @@ void write_epilogue(FILE* f, int nprocs, DecodedGrammars *dg) {
 }
 
 
-Grammar* final_sequitur(DecodedGrammars* dg, int *final_splitter) {
+Grammar* final_sequitur(CFG* cfg, int *final_splitter) {
     int splitter = grammar_splitter;
     Grammar *grammar = malloc(sizeof(Grammar));
     sequitur_init(grammar);
-    for(int ugi = 0; ugi < dg->num_grammars; ugi++) {
-        for(int i = 0; i < dg->num_symbols[ugi]; i+=2) {
-            int sym = dg->unique_grammars[ugi][i];
-            int exp = dg->unique_grammars[ugi][i+1];
+    for(int ugi = 0; ugi < cfg->num_grammars; ugi++) {
+        for(int i = 0; i < cfg->num_symbols[ugi]; i+=2) {
+            int sym = cfg->unique_grammars[ugi][i];
+            int exp = cfg->unique_grammars[ugi][i+1];
             append_terminal(grammar, sym, exp);
         }
         append_terminal(grammar, splitter++, 1);
@@ -407,12 +407,12 @@ Grammar* final_sequitur(DecodedGrammars* dg, int *final_splitter) {
 
 
 
-void handle_one_symbol(FILE* f, Symbol* sym, CallSignature* cst) {
+void handle_one_symbol(FILE* f, Symbol* sym, CST* cst) {
     if(sym->exp > 1)
         fprintf(f, "\tfor(int i = 0; i < %d; i++)\n", sym->exp);
 
     if(sym->val >= 0) {
-        CallSignature *cs = &cst[sym->val];
+        CallSignature *cs = &(cst->cs_list[sym->val]);
         write_vars_initialization(f, cs);
         write_call(f, cs);
     } else {
@@ -432,11 +432,11 @@ typedef struct WTHanddledSym_t {
 } WTHandledSym;
 static WTHandledSym *wt_handled_syms = NULL;
 
-bool enter_wt_loop(Symbol* sym, CallSignature* cst, int *reqs) {
+bool enter_wt_loop(Symbol* sym, CST* cst, int *reqs) {
 
     if(sym->val >=0) {
 
-        CallSignature* cs = &cst[sym->val];
+        CallSignature* cs = &(cst->cs_list[sym->val]);
         int id = cs->func_id;
 
         // Here we need to check how many reqeusts are valid.
@@ -483,9 +483,9 @@ int get_wt_completed_reqs(CallSignature *cs) {
     return completed;
 }
 
-void init_wt_loop(FILE* f, Symbol* sym, CallSignature *cst, int n_reqs) {
+void init_wt_loop(FILE* f, Symbol* sym, CST *cst, int n_reqs) {
 
-    CallSignature *cs = &cst[sym->val];
+    CallSignature *cs = &(cst->cs_list[sym->val]);
     int id = cs->func_id;
 
     wt_loop = true;
@@ -523,14 +523,14 @@ void init_wt_loop(FILE* f, Symbol* sym, CallSignature *cst, int n_reqs) {
     wt_loop_count -= get_wt_completed_reqs(cs);
 }
 
-void handle_one_symbol_pre(FILE* f, Symbol *sym, CallSignature *cst) {
+void handle_one_symbol_pre(FILE* f, Symbol *sym, CST *cst) {
 
     if(wt_loop) {
 
         if(sym->val >= 0)
-            wt_loop_count -= get_wt_completed_reqs(&cst[sym->val]);
+            wt_loop_count -= get_wt_completed_reqs(&(cst->cs_list[sym->val]));
 
-        if(cst[sym->val].func_id != wt_loop_call_id) {
+        if(cst->cs_list[sym->val].func_id != wt_loop_call_id) {
             WTHandledSym *entry = NULL;
             HASH_FIND_INT(wt_handled_syms, &sym->val, entry);
             if(entry == NULL) {
@@ -572,7 +572,7 @@ void handle_one_symbol_pre(FILE* f, Symbol *sym, CallSignature *cst) {
     }
 }
 
-void one_func_per_rule(FILE* f, Grammar* grammar, CallSignature *cst, int final_splitter) {
+void one_func_per_rule(FILE* f, Grammar* grammar, CST *cst, int final_splitter) {
 
     Symbol *rule, *sym;
     DL_FOREACH(grammar->rules, rule) {
@@ -616,19 +616,17 @@ int main(int argc, char** argv) {
     sprintf(metadata_path, "%s/pilgrim.mt", directory);
 
     // 0. Read metadata
-    GlobalMetadata gm;
-    read_metadata(metadata_path, &gm);
+    GlobalMetadata* gm = read_metadata(metadata_path);
 
     // 1. Read CST and CFG
-    int num_sigs;
-    CallSignature *cst = read_cst(cst_path, &num_sigs);
-    DecodedGrammars* dg = read_cfg(cfg_path, gm.ranks);
+    CST* cst = read_cst(gm);
+    CFG* cfg = read_cfg(gm);
 
     // 2. Sequitur
     int final_splitter;
-    Grammar *grammar = final_sequitur(dg, &final_splitter);
+    Grammar *grammar = final_sequitur(cfg, &final_splitter);
     int c; Symbol *rule; DL_COUNT(grammar->rules, rule,c);
-    printf("Unique grammars: %d, Total rules: %d\n", dg->num_grammars, c);
+    printf("Unique grammars: %d, Total rules: %d\n", cfg->num_grammars, c);
 
     // 3. Generate an proxy MPI program
     char source_file_path[256];
@@ -639,15 +637,16 @@ int main(int argc, char** argv) {
 
     one_func_per_rule(f, grammar, cst, final_splitter);
 
-    write_epilogue(f, gm.ranks, dg);
+    write_epilogue(f, gm->ranks, cfg);
 
     free_vars_pool();
 
     sequitur_cleanup(grammar);
     fclose(f);
 
-    free_decoded_grammars(dg);
-    // TODO free cst?
+    free_metadata(gm);
+    free_cfg(cfg);
+    free_cst(cst);
 
     return 0;
 }

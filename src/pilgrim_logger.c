@@ -524,18 +524,29 @@ void write_record(Record record) {
         append_terminal(&(__logger.durations_grammar), duration_id, 1);
         double t2 = PMPI_Wtime();
         cfg_ts += (t2 - t1);
+    } else if(strcmp(__logger.timing_mode, TIMING_MODE_LOSSLESS) == 0) {
+        // For lossless mode, we directly store tstart in interval
+        // and tend in duration for easier postprocessing
+        TimingNode *tstart_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
+        TimingNode *tend_node   = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
+        tstart_node->val = record.tstart;
+        tend_node->val   = record.tend;
+        LL_PREPEND(g_intervals, tstart_node);
+        LL_PREPEND(g_durations, tend_node);
     } else {
+        // For SZ, ZFP, HIST
         TimingNode *dur_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
         TimingNode *int_node = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
-        handle_lossless_timing(entry, &record, &(dur_node->val), &(int_node->val));
+        dur_node->val = record.tend - record.tstart;
+        int_node->val = record.tstart - entry->tstart;
+        entry->tstart = record.tstart;
+
         LL_PREPEND(entry->durations, dur_node);
         LL_PREPEND(entry->intervals, int_node);
 
-        // TODO remeber to delete global durations
         TimingNode *dur_node2 = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
         dur_node2->val = dur_node->val;
         LL_PREPEND(g_durations, dur_node2);
-
         TimingNode *int_node2 = (TimingNode*) pilgrim_malloc(sizeof(TimingNode));
         int_node2->val = int_node->val;
         LL_PREPEND(g_intervals, int_node2);
@@ -602,8 +613,8 @@ void logger_init() {
         GlobalMetadata global_metadata= {
             .time_resolution = TIME_RESOLUTION,
             .ranks = g_mpi_size,
-            .timing_mode = 0, // TODO need to store the actual mode
         };
+        strcpy(global_metadata.timing_mode, __logger.timing_mode);
         fwrite(&global_metadata, sizeof(GlobalMetadata), 1, global_metafh);
         fclose(global_metafh);
     }
@@ -659,7 +670,9 @@ void logger_exit() {
     if(strcmp(__logger.timing_mode, TIMING_MODE_TEXT) == 0)
         write_text_timings(__logger.hash_head, __logger.rank);
     if(strcmp(__logger.timing_mode, TIMING_MODE_LOSSLESS) == 0)
-        write_lossless_timings(__logger.hash_head, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
+        // Again, for lossless mode, we store tstarts in g_intervals
+        // and tends in g_durations
+        write_lossless_timings(g_intervals, g_durations, __logger.rank, __logger.nprocs, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH);
     #ifdef WITH_ZFP
     if(strcmp(__logger.timing_mode, TIMING_MODE_ZFP) == 0)
         write_zfp_timings(__logger.hash_head, __logger.rank, total_calls, DURATIONS_OUTPUT_PATH, INTERVALS_OUTPUT_PATH, g_durations, g_intervals, false);

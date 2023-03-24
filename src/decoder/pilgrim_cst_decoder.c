@@ -10,23 +10,25 @@
 #include "pilgrim.h"
 #include "pilgrim_reader.h"
 #include "uthash.h"
-#include "dlmalloc-2.8.6.h"
 
 #define BUF_LEN (20*1024)
 
 
 static char buff[BUF_LEN];
 
-CallSignature* read_cst(char *path, int *num_funcs) {
+CST* read_cst(GlobalMetadata* gm) {
+    char path[1024];
+    sprintf(path, "%s/funcs.dat", gm->trace_dir);
     FILE* f = fopen(path, "rb");
 
     short func_id;
     unsigned count;
     int tid, entries, key_len, terminal, rank, duration, interval;
     fread(&entries, sizeof(int), 1, f);
-    *num_funcs = entries;
 
-    CallSignature *call_sigs = malloc(sizeof(CallSignature) * entries);
+    CST *cst = malloc(sizeof(CST));
+    cst->num_css = entries;
+    cst->cs_list = malloc(sizeof(CallSignature) * entries);
 
     for(int i = 0; i < entries; i++) {
         fread(&terminal, sizeof(int), 1, f);
@@ -41,10 +43,15 @@ CallSignature* read_cst(char *path, int *num_funcs) {
         assert(func_id >= 0);
 
         assert(terminal < entries);
-        call_sigs[terminal].func_id = func_id;
-        read_record_args(func_id, buff, &(call_sigs[terminal]));
+        cst->cs_list[terminal].func_id = func_id;
+        read_record_args(func_id, buff, &(cst->cs_list[terminal]));
     }
 
     fclose(f);
-    return call_sigs;
+    return cst;
+}
+
+void free_cst(CST* cst) {
+    assert(cst);
+    free(cst);
 }

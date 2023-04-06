@@ -4,6 +4,12 @@
 #include <mpi.h>
 #include "pilgrim_reader.h"
 
+#if MPI_VERSION >= 3
+#define MPI_LB MPI_DATATYPE_NULL
+#define MPI_UB MPI_DATATYPE_NULL
+#endif
+
+
 // Some constant integers for parameters are have pre-defined values
 #define PILGRIM_MPI_ANY_SOURCE -99999
 #define PILGRIM_MPI_ANY_TAG    -99998

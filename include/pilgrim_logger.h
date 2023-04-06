@@ -75,7 +75,8 @@ typedef struct _LocalMetadata {
 typedef struct _GlobalMetadata {
     double time_resolution;
     int ranks;
-    int timing_mode;
+    char timing_mode[20];
+    char* trace_dir;     // trace dir, only used during post-processing
 } GlobalMetadata;
 
 

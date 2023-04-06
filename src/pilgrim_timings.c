@@ -211,7 +211,6 @@ void handle_cfg_timing(RecordHash* entry, Record* record, int *duration_id, int*
 void handle_lossless_timing(RecordHash *entry, Record* record, double *duration, double *interval) {
     *duration = record->tend - record->tstart;        // in seconds
     *interval = record->tstart - entry->tstart;
-
     entry->tstart = record->tstart;
 }
 
@@ -273,30 +272,29 @@ void write_text_timings(RecordHash* cst, int mpi_rank) {
 /**
  * Save the lossless timings into files
  */
-void write_lossless_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* dur_path, char* int_path) {
-    RecordHash *entry, *tmp;
-    TimingNode *elt, *tmp2;
+void write_lossless_timings(TimingNode* tstart_nodes, TimingNode* tend_nodes, int mpi_rank, int mpi_size, char* dur_path, char* int_path) {
 
-    int local_total = 0;
-    HASH_ITER(hh, cst, entry, tmp) {
-        int count = 0;
-        LL_COUNT(entry->intervals, elt, count);
-        local_total += count;
-    }
+    TimingNode *elt, *tmp;
 
-    double *local_durations = pilgrim_malloc(sizeof(double) * local_total);
-    double *local_intervals = pilgrim_malloc(sizeof(double) * local_total);
-    double *global_durations, *global_intervals;
+    int local_total;
+    LL_COUNT(tstart_nodes, elt, local_total);
 
+    double *local_tstarts = pilgrim_malloc(sizeof(double) * local_total);
+    double *local_tends   = pilgrim_malloc(sizeof(double) * local_total);
+
+    // Combine all timestamps to form a 1D array
+    // need to store in reverse order (as we prepend not append into the list)
     int i = 0, j = 0;
-    HASH_ITER(hh, cst, entry, tmp) {
-        LL_FOREACH_SAFE(entry->durations, elt, tmp2) {
-            local_durations[i++] = elt->val;
-        }
-        LL_FOREACH_SAFE(entry->intervals, elt, tmp2) {
-            local_intervals[j++] = elt->val;
-        }
+    LL_FOREACH_SAFE(tstart_nodes, elt, tmp) {
+        local_tstarts[local_total-i-1] = elt->val;
+        i++;
     }
+    LL_FOREACH_SAFE(tend_nodes, elt, tmp) {
+        local_tends[local_total-j-1] = elt->val;
+        j++;
+    }
+
+    double *global_tstarts, *global_tends;
 
     int recv_counts[mpi_size], displs[mpi_size];
     PMPI_Gather(&local_total, 1, MPI_INT, recv_counts, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -308,23 +306,22 @@ void write_lossless_timings(RecordHash* cst, int mpi_rank, int mpi_size, char* d
         displs[i] = displs[i-1] + recv_counts[i-1];
     }
 
-
     if(mpi_rank == 0) {
-        global_durations = pilgrim_malloc(sizeof(double)*global_total);
-        global_intervals = pilgrim_malloc(sizeof(double)*global_total);
+        global_tstarts = pilgrim_malloc(sizeof(double)*global_total);
+        global_tends   = pilgrim_malloc(sizeof(double)*global_total);
     }
 
-    PMPI_Gatherv(local_durations, local_total, MPI_DOUBLE, global_durations, recv_counts, displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    PMPI_Gatherv(local_intervals, local_total, MPI_DOUBLE, global_intervals, recv_counts, displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    PMPI_Gatherv(local_tstarts, local_total, MPI_DOUBLE, global_tstarts, recv_counts, displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    PMPI_Gatherv(local_tends, local_total, MPI_DOUBLE, global_tends, recv_counts, displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-    pilgrim_free(local_durations, sizeof(double)*local_total);
-    pilgrim_free(local_intervals, sizeof(double)*local_total);
+    pilgrim_free(local_tstarts, sizeof(double)*local_total);
+    pilgrim_free(local_tends, sizeof(double)*local_total);
 
     PMPI_Barrier(MPI_COMM_WORLD);
     if(mpi_rank == 0) {
-        write_to_file(dur_path, int_path, global_durations, global_intervals, global_total);
-        pilgrim_free(global_durations, sizeof(double)*global_total);
-        pilgrim_free(global_intervals, sizeof(double)*global_total);
+        write_to_file(dur_path, int_path, global_tends, global_tstarts, global_total);
+        pilgrim_free(global_tstarts, sizeof(double)*global_total);
+        pilgrim_free(global_tends, sizeof(double)*global_total);
     }
 }
 

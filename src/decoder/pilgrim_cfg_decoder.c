@@ -70,15 +70,16 @@ void clean_rules(RuleHash* rules_table) {
     rules_table = NULL;
 }
 
-void free_decoded_grammars(DecodedGrammars* dg) {
-    free(dg->num_symbols);
-    free(dg->grammar_ids);
-    for(int i = 0; i < dg->num_grammars; i++) {
-        free(dg->unique_grammars[i]);
-        clean_rules(dg->intra_cfgs[i]);
+void free_cfg(CFG* cfg) {
+    assert(cfg);
+    free(cfg->num_symbols);
+    free(cfg->grammar_ids);
+    for(int i = 0; i < cfg->num_grammars; i++) {
+        free(cfg->unique_grammars[i]);
+        clean_rules(cfg->intra_cfgs[i]);
     }
-    free(dg->unique_grammars);
-    free(dg);
+    free(cfg->unique_grammars);
+    free(cfg);
 }
 
 
@@ -88,14 +89,14 @@ void free_decoded_grammars(DecodedGrammars* dg) {
  * It will be later used for decopmression.
  *
  * in: path, nprocs
- * out: original_integers, start_rule_id, dg
+ * out: original_integers, start_rule_id, cfg
  */
-RuleHash* read_inter_compressed_grammar(char* path, int nprocs, size_t* original_integers, int* start_rule_id, DecodedGrammars* dg) {
+RuleHash* read_inter_compressed_grammar(const char* path, int nprocs, size_t* original_integers, int* start_rule_id, CFG* cfg) {
 
     FILE* f = fopen(path, "rb");
 
-    fread(dg->grammar_ids, sizeof(int), nprocs, f);
-    fread(&dg->num_grammars, sizeof(int), 1, f);
+    fread(cfg->grammar_ids, sizeof(int), nprocs, f);
+    fread(&cfg->num_grammars, sizeof(int), 1, f);
 
     // Read the inter-process compressed grammar
     // The header has three values:
@@ -118,7 +119,7 @@ RuleHash* read_inter_compressed_grammar(char* path, int nprocs, size_t* original
         HASH_ADD_INT(rules_table, rule_id, rule);
     }
     //printf("Unique Grammars: %d, Start_rule_id: %d, Rules: %d, Uncompressed integers: %ld\n",
-    //        dg->num_grammars, *start_rule_id, rules, *original_integers);
+    //        cfg->num_grammars, *start_rule_id, rules, *original_integers);
 
     return rules_table;
 }
@@ -163,16 +164,21 @@ RuleHash* read_one_unique_grammar(int* grammar, int *size, bool last_grammar) {
  * The grammar is read by read_compressed_grammar()
  *
  */
-DecodedGrammars* read_cfg(char* path, int nprocs) {
+CFG* read_cfg(GlobalMetadata* gm) {
 
-    DecodedGrammars *dg = malloc(sizeof(DecodedGrammars));
-    dg->grammar_ids = malloc(sizeof(int) * nprocs);
+    char path[1024];
+    sprintf(path, "%s/grammars.dat", gm->trace_dir);
+    
+    int nprocs = gm->ranks;
+
+    CFG *cfg = malloc(sizeof(CFG));
+    cfg->grammar_ids = malloc(sizeof(int) * nprocs);
 
     // 1. Read and decompress inter-process compressed grammar
     size_t original_integers;
     int start_rule_id;
     int pos = 0;
-    RuleHash* inter_cfg = read_inter_compressed_grammar(path, nprocs, &original_integers, &start_rule_id, dg);
+    RuleHash* inter_cfg = read_inter_compressed_grammar(path, nprocs, &original_integers, &start_rule_id, cfg);
     //print_grammar(inter_cfg);
     int* inter_decompressed_t = malloc(sizeof(int)*original_integers);
     int* inter_decompressed = inter_decompressed_t;
@@ -181,28 +187,28 @@ DecodedGrammars* read_cfg(char* path, int nprocs) {
     //printf("Finsihed decopmressing inter-process compressed grammar\n");
 
     // 2. Read and decompress each rank's grammar
-    dg->unique_grammars = malloc(sizeof(int*)*dg->num_grammars);
-    dg->num_symbols = malloc(sizeof(int)*dg->num_grammars);
-    dg->intra_cfgs = malloc(sizeof(RuleHash*) * dg->num_grammars);
+    cfg->unique_grammars = malloc(sizeof(int*)*cfg->num_grammars);
+    cfg->num_symbols = malloc(sizeof(int)*cfg->num_grammars);
+    cfg->intra_cfgs = malloc(sizeof(RuleHash*) * cfg->num_grammars);
 
-    for(int ugi = 0; ugi < dg->num_grammars; ugi++) {
+    for(int ugi = 0; ugi < cfg->num_grammars; ugi++) {
         int advance = 0;
-        bool last_grammar = (ugi == dg->num_grammars-1);
-        dg->intra_cfgs[ugi] = read_one_unique_grammar(inter_decompressed, &advance, last_grammar);
+        bool last_grammar = (ugi == cfg->num_grammars-1);
+        cfg->intra_cfgs[ugi] = read_one_unique_grammar(inter_decompressed, &advance, last_grammar);
 
         // First pass to copmute the number of symbols after decompression
-        dg->num_symbols[ugi] = 0;
-        rule_application(dg->intra_cfgs[ugi], -1, -1, NULL, &dg->num_symbols[ugi]);
+        cfg->num_symbols[ugi] = 0;
+        rule_application(cfg->intra_cfgs[ugi], -1, -1, NULL, &cfg->num_symbols[ugi]);
 
         // Second pass to fill in the symbols
-        dg->unique_grammars[ugi] = malloc(sizeof(int) * dg->num_symbols[ugi]);
-        dg->num_symbols[ugi] = 0;
-        rule_application(dg->intra_cfgs[ugi], -1, -1, dg->unique_grammars[ugi], &dg->num_symbols[ugi]);
+        cfg->unique_grammars[ugi] = malloc(sizeof(int) * cfg->num_symbols[ugi]);
+        cfg->num_symbols[ugi] = 0;
+        rule_application(cfg->intra_cfgs[ugi], -1, -1, cfg->unique_grammars[ugi], &cfg->num_symbols[ugi]);
 
         inter_decompressed += advance;
     }
 
     free(inter_decompressed_t);
-    return dg;
+    return cfg;
 }
 

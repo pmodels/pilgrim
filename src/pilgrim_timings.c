@@ -818,6 +818,8 @@ void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size,
 
     size_t compressed_bytes = ZSTD_compress(buff, buff_size, local_durations, local_total*sizeof(double), 1);
 
+	// write to files
+	dump_timings(buff, compressed_bytes, dur_path);
     pilgrim_free(buff, buff_size);
     pilgrim_free(local_durations, sizeof(double)*local_total);
 

@@ -807,7 +807,6 @@ void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size,
     LL_COUNT(g_durations, elt, local_total);
 
     double *local_durations = pilgrim_malloc(sizeof(double) * local_total);
-    double *local_intervals = pilgrim_malloc(sizeof(double) * local_total);
 
     int i = 0;
     LL_FOREACH_SAFE(g_durations, elt, tmp2) {
@@ -820,9 +819,7 @@ void write_zstd_timings(RecordHash* cst, int mpi_rank, int mpi_size,
     size_t compressed_bytes = ZSTD_compress(buff, buff_size, local_durations, local_total*sizeof(double), 1);
 
     pilgrim_free(buff, buff_size);
-
     pilgrim_free(local_durations, sizeof(double)*local_total);
-    pilgrim_free(local_intervals, sizeof(double)*local_total);
 
     PMPI_Barrier(MPI_COMM_WORLD);
     printf("ZSTD compression ratio: %f\n", (1.0*local_total/compressed_bytes*sizeof(double)));

@@ -4,13 +4,14 @@
 #include <mpi.h>
 #include "pilgrim_reader.h"
 
+// MPI_LB and MPI_UB are deprecated with MPI 3.0 and above.
+// OpenMPI define them to report errors. Here, we override
+// them to avoid the compile time error.
 #if MPI_VERSION >= 3
-#ifndef MPI_LB
+#undef MPI_LB
+#undef MPI_UB
 #define MPI_LB MPI_DATATYPE_NULL
-#endif
-#ifndef MPI_UB
 #define MPI_UB MPI_DATATYPE_NULL
-#endif
 #endif
 
 

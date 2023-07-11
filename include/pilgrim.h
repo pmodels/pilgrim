@@ -24,11 +24,11 @@
         return res;                                                                     \
     }                                                                                   \
     short func_id = ID_##func;                                                          \
-    double tstart = pilgrim_wtime() - g_program_start_time;                             \
+    double tstart = pilgrim_wtime() - logger_get_program_start_time();                  \
     set_inside_mpi();                                                                   \
     ret_type res = P##func func_args;                                                   \
     unset_inside_mpi();                                                                 \
-    double tend = pilgrim_wtime() - g_program_start_time;
+    double tend = pilgrim_wtime() - logger_get_program_start_time();
 
 
 // Then in a Record structure and write it to log

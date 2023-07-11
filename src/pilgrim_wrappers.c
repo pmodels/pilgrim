@@ -46,10 +46,10 @@ int c_MPI_Sendrecv_replace(void *buf, int count, MPI_Datatype datatype, int dest
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
-	int source_rank = g_mpi_rank - source;
+	int source_rank = logger_get_mpi_rank() - source;
 	if(source == MPI_ANY_SOURCE) source_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(source == MPI_PROC_NULL) source_rank = PILGRIM_MPI_PROC_NULL;
 	MPI_Comm obj_1 = comm;
@@ -764,7 +764,7 @@ int c_MPI_Rsend(const void *buf, int count, MPI_Datatype datatype, int dest, int
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -1112,7 +1112,7 @@ int c_MPI_Irsend(const void *buf, int count, MPI_Datatype datatype, int dest, in
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -1405,7 +1405,7 @@ int c_MPI_Ssend_init(const void *buf, int count, MPI_Datatype datatype, int dest
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -1446,7 +1446,7 @@ int c_MPI_Rsend_init(const void *buf, int count, MPI_Datatype datatype, int dest
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -1990,7 +1990,7 @@ int c_MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int 
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -2590,7 +2590,7 @@ extern void mpi_type_get_extent_x__(MPI_Fint* datatype, MPI_Count* lb, MPI_Count
 int c_MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status)
 {
 	PILGRIM_TRACING_1(int, MPI_Probe, (source, tag, comm, status));
-	int source_rank = g_mpi_rank - source;
+	int source_rank = logger_get_mpi_rank() - source;
 	if(source == MPI_ANY_SOURCE) source_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(source == MPI_PROC_NULL) source_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -2860,7 +2860,7 @@ int c_MPI_Recv_init(void *buf, int count, MPI_Datatype datatype, int source, int
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int source_rank = g_mpi_rank - source;
+	int source_rank = logger_get_mpi_rank() - source;
 	if(source == MPI_ANY_SOURCE) source_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(source == MPI_PROC_NULL) source_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -3975,7 +3975,7 @@ int c_MPI_Ibsend(const void *buf, int count, MPI_Datatype datatype, int dest, in
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -4518,7 +4518,7 @@ int c_MPI_Send_init(const void *buf, int count, MPI_Datatype datatype, int dest,
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -7031,7 +7031,7 @@ extern void mpi_comm_get_errhandler__(MPI_Fint* comm, MPI_Fint* errhandler, MPI_
 int c_MPI_Mprobe(int source, int tag, MPI_Comm comm, MPI_Message *message, MPI_Status *status)
 {
 	PILGRIM_TRACING_1(int, MPI_Mprobe, (source, tag, comm, message, status));
-	int source_rank = g_mpi_rank - source;
+	int source_rank = logger_get_mpi_rank() - source;
 	if(source == MPI_ANY_SOURCE) source_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(source == MPI_PROC_NULL) source_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -8478,7 +8478,7 @@ int c_MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag,
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int source_rank = g_mpi_rank - source;
+	int source_rank = logger_get_mpi_rank() - source;
 	if(source == MPI_ANY_SOURCE) source_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(source == MPI_PROC_NULL) source_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -8627,7 +8627,7 @@ int c_MPI_Bsend(const void *buf, int count, MPI_Datatype datatype, int dest, int
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -8711,7 +8711,7 @@ int c_MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int source_rank = g_mpi_rank - source;
+	int source_rank = logger_get_mpi_rank() - source;
 	if(source == MPI_ANY_SOURCE) source_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(source == MPI_PROC_NULL) source_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -8753,7 +8753,7 @@ int c_MPI_Issend(const void *buf, int count, MPI_Datatype datatype, int dest, in
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -9501,14 +9501,14 @@ int c_MPI_Sendrecv(const void *sendbuf, int sendcount, MPI_Datatype sendtype, in
 	addr2id(sendbuf, &mem_attr_0);
 	MPI_Datatype obj_0 = sendtype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	MemPtrAttr mem_attr_1;
 	addr2id(recvbuf, &mem_attr_1);
 	MPI_Datatype obj_1 = recvtype;
 	int obj_id_1 = MPI_OBJ_ID(MPI_Datatype, &obj_1);
-	int source_rank = g_mpi_rank - source;
+	int source_rank = logger_get_mpi_rank() - source;
 	if(source == MPI_ANY_SOURCE) source_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(source == MPI_PROC_NULL) source_rank = PILGRIM_MPI_PROC_NULL;
 	MPI_Comm obj_2 = comm;
@@ -9934,7 +9934,7 @@ int c_MPI_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -10396,7 +10396,7 @@ extern void mpi_get__(void* origin_addr, int* origin_count, MPI_Fint* origin_dat
 int c_MPI_Iprobe(int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status)
 {
 	PILGRIM_TRACING_1(int, MPI_Iprobe, (source, tag, comm, flag, status));
-	int source_rank = g_mpi_rank - source;
+	int source_rank = logger_get_mpi_rank() - source;
 	if(source == MPI_ANY_SOURCE) source_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(source == MPI_PROC_NULL) source_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -10528,7 +10528,7 @@ extern void mpi_win_detach__(MPI_Fint* win, const void* base, MPI_Fint *ierr) {
 int c_MPI_Improbe(int source, int tag, MPI_Comm comm, int *flag, MPI_Message *message, MPI_Status *status)
 {
 	PILGRIM_TRACING_1(int, MPI_Improbe, (source, tag, comm, flag, message, status));
-	int source_rank = g_mpi_rank - source;
+	int source_rank = logger_get_mpi_rank() - source;
 	if(source == MPI_ANY_SOURCE) source_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(source == MPI_PROC_NULL) source_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -10574,7 +10574,7 @@ int c_MPI_Ssend(const void *buf, int count, MPI_Datatype datatype, int dest, int
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;
@@ -10840,7 +10840,7 @@ int c_MPI_Bsend_init(const void *buf, int count, MPI_Datatype datatype, int dest
 	addr2id(buf, &mem_attr_0);
 	MPI_Datatype obj_0 = datatype;
 	int obj_id_0 = MPI_OBJ_ID(MPI_Datatype, &obj_0);
-	int dest_rank = g_mpi_rank - dest;
+	int dest_rank = logger_get_mpi_rank() - dest;
 	if(dest == MPI_ANY_SOURCE) dest_rank = PILGRIM_MPI_ANY_SOURCE;
 	if(dest == MPI_PROC_NULL) dest_rank = PILGRIM_MPI_PROC_NULL;
 	int my_tag = tag;

@@ -13,12 +13,6 @@
 #define PILGRIM_TRACING_MODE_ONDEMAND "DYNAMIC"
 
 
-// Global variables
-static int g_mpi_rank;
-static int g_mpi_size;
-static double g_program_start_time;
-
-
 // Store a list of lossless duration or interval
 typedef struct TimingNode_t {
     double val;
@@ -80,11 +74,15 @@ typedef struct _GlobalMetadata {
 } GlobalMetadata;
 
 
-void logger_init();
+void logger_init(int mpi_rank, int mpi_size);
 void logger_exit();
 bool logger_initialized();
 void logger_recording_on();
 void logger_recording_off();
+
+int  logger_get_mpi_rank();
+int  logger_get_mpi_size();
+double logger_get_program_start_time();
 
 void* compose_call_signature(Record *record, int *key_len);
 void write_record(Record record);

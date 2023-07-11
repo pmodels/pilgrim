@@ -107,9 +107,9 @@ bool is_completed_idup_request(MPI_Request *req) {
     if(flag) {                                                      \
         if(entry && status && status != MPI_STATUS_IGNORE) {        \
             if(entry->any_source)                                   \
-                status_info[0] = g_mpi_rank - status->MPI_SOURCE;   \
+                status_info[0] = logger_get_mpi_rank() - status->MPI_SOURCE;   \
             if(entry->any_tag)                                      \
-                status_info[1] = g_mpi_rank - status->MPI_TAG;      \
+                status_info[1] = logger_get_mpi_rank() - status->MPI_TAG;      \
         }                                                           \
         /* Only when new request is set to NULL */                  \
         /* we can free the object. This is necessary */             \
@@ -133,9 +133,9 @@ bool is_completed_idup_request(MPI_Request *req) {
             entry = request_hash_entry(&old_reqs[iidx]);                                            \
             if(entry && statuses && statuses != MPI_STATUSES_IGNORE) {                              \
                 if(entry->any_source)                                                               \
-                    statuses_info[idx*2+0] = g_mpi_rank-statuses[idx].MPI_SOURCE;                   \
+                    statuses_info[idx*2+0] = logger_get_mpi_rank()-statuses[idx].MPI_SOURCE;                   \
                 if(entry->any_tag)                                                                  \
-                    statuses_info[idx*2+1] = g_mpi_rank-statuses[idx].MPI_TAG;                      \
+                    statuses_info[idx*2+1] = logger_get_mpi_rank()-statuses[idx].MPI_TAG;                      \
             }                                                                                       \
             MPI_OBJ_RELEASE(MPI_Request, &(old_reqs[iidx]));                                        \
         }                                                                                           \
@@ -422,12 +422,12 @@ int imp_MPI_Info_set(MPI_Info info, const char *key, const char *value)
 {
     if(strcmp(key, "PILGRIM_TRACING") == 0) {
         if(strcmp(value, "ON") == 0) {
-            if(g_mpi_rank == 0)
+            if(logger_get_mpi_rank() == 0)
                 printf("[pilgrim] pilgrim tracing on.\n");
             logger_recording_on();
         }
         if(strcmp(value, "OFF") == 0) {
-            if(g_mpi_rank == 0)
+            if(logger_get_mpi_rank() == 0)
                 printf("[pilgrim] pilgrim tracing off.\n");
             logger_recording_off();
         }
@@ -570,7 +570,7 @@ int imp_MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
 	PILGRIM_TRACING_2(4, sizes, args, -1);
 }
 int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm) { return imp_MPI_Comm_split(comm, color, key, newcomm); }
-extern void f_mpi_comm_split(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr) { 
+extern void f_mpi_comm_split(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr) {
     MPI_Comm c_comm;
     imp_MPI_Comm_split(PMPI_Comm_f2c(*comm), (*color), (*key), &c_comm);
     *newcomm = PMPI_Comm_c2f(c_comm);
@@ -578,7 +578,7 @@ extern void f_mpi_comm_split(MPI_Fint* comm, int* color, int* key, MPI_Fint* new
 extern void MPI_COMM_SPLIT(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr) {
     f_mpi_comm_split(comm, color, key, newcomm, ierr);
 }
-extern void mpi_comm_split(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr) { 
+extern void mpi_comm_split(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr) {
     f_mpi_comm_split(comm, color, key, newcomm, ierr);
 }
 extern void mpi_comm_split_(MPI_Fint* comm, int* color, int* key, MPI_Fint* newcomm, MPI_Fint *ierr) {

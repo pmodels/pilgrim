@@ -15,18 +15,11 @@ typedef struct MemPtrAttr_t {
 } MemPtrAttr;
 
 
-static int g_inside_mpi;
-
 void install_mem_hooks();
 void uninstall_mem_hooks();
 void addr2id(const void *buffer, MemPtrAttr *mem_attr);
 
-
-static void set_inside_mpi() {
-    g_inside_mpi = 1;
-}
-static void unset_inside_mpi() {
-    g_inside_mpi = 0;
-}
+void set_inside_mpi();
+void unset_inside_mpi();
 
 #endif

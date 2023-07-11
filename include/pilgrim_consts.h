@@ -5,8 +5,12 @@
 #include "pilgrim_reader.h"
 
 #if MPI_VERSION >= 3
+#ifndef MPI_LB
 #define MPI_LB MPI_DATATYPE_NULL
+#endif
+#ifndef MPI_UB
 #define MPI_UB MPI_DATATYPE_NULL
+#endif
 #endif
 
 

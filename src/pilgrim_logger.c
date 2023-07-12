@@ -475,7 +475,7 @@ void* compose_call_signature(Record *record, int *key_len) {
 void write_record(Record record) {
     if (!__logger.recording) return;
 
-    PILGRIM_REAL_CALL(pthread_mutex_lock)(&g_mutex);
+    pthread_mutex_lock(&g_mutex);
 
     /*
     if(__logger.rank == 0)
@@ -555,16 +555,15 @@ void write_record(Record record) {
     // Grow the MPI call grammar
     append_terminal(&(__logger.grammar), entry->terminal_id, 1);
 
-    PILGRIM_REAL_CALL(pthread_mutex_unlock)(&g_mutex);
+    pthread_mutex_unlock(&g_mutex);
 }
 
-void logger_init() {
-    g_program_start_time = pilgrim_wtime();
-    __logger.rank = g_mpi_rank;
-    __logger.nprocs = g_mpi_size;
-    __logger.local_metadata.tstart = g_program_start_time;
+void logger_init(int mpi_rank, int mpi_size) {
+    __logger.rank = mpi_rank;
+    __logger.nprocs = mpi_size;
+    __logger.local_metadata.tstart = pilgrim_wtime();
     __logger.local_metadata.records_count = 0;
-    __logger.local_metadata.rank = g_mpi_rank;
+    __logger.local_metadata.rank = mpi_rank;
     __logger.hash_head   = NULL;          // Must be NULL initialized
     __logger.offset_list = NULL;
     __logger.initialized = false;
@@ -612,7 +611,7 @@ void logger_init() {
         FILE* global_metafh = fopen(METADATA_OUTPUT_PATH, "wb");
         GlobalMetadata global_metadata= {
             .time_resolution = TIME_RESOLUTION,
-            .ranks = g_mpi_size,
+            .ranks = __logger.nprocs,
         };
         strcpy(global_metadata.timing_mode, __logger.timing_mode);
         fwrite(&global_metadata, sizeof(GlobalMetadata), 1, global_metafh);
@@ -625,8 +624,6 @@ void logger_init() {
         sequitur_init(&(__logger.durations_grammar));
     }
 
-    MAP_OR_FAIL(pthread_mutex_lock);
-    MAP_OR_FAIL(pthread_mutex_unlock);
     install_mem_hooks();
 
     __logger.initialized = true;
@@ -724,4 +721,16 @@ void logger_exit() {
     }
 
     free(__logger.timing_mode);
+}
+
+int logger_get_mpi_rank() {
+    return __logger.rank;
+}
+
+int logger_get_mpi_size() {
+    return __logger.nprocs;
+}
+
+double logger_get_program_start_time() {
+    __logger.local_metadata.tstart;
 }

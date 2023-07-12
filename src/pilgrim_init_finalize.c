@@ -12,10 +12,11 @@ double tstart, tend, tmin, tmax;
 double elapsed_time;
 
 void pilgrim_init(int *argc, char ***argv) {
-    PMPI_Comm_size(MPI_COMM_WORLD, &g_mpi_size);
-    PMPI_Comm_rank(MPI_COMM_WORLD, &g_mpi_rank);
+    int mpi_rank, mpi_size;
+    PMPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    PMPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    logger_init();
+    logger_init(mpi_rank, mpi_size);
     elapsed_time = pilgrim_wtime();
     tstart = pilgrim_wtime();
 }
